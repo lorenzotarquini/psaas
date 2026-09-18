@@ -4,4 +4,8 @@
 
 /src/PSAAS.AppHost/.vs
 /src/PSAAS.AppHost/obj
+/src/PSAAS.AppHost/bin
 /src/PSAAS.Auth/obj
+/src/PSAAS.Auth/bin
+/src/tests/PSAAS.Auth.Tests/bin
+/src/tests/PSAAS.Auth.Tests/obj 

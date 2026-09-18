@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="../PSAAS.Auth/PSAAS.Auth.csproj" />
+  <Project Path="PSAAS.AppHost.csproj" />
+</Solution>

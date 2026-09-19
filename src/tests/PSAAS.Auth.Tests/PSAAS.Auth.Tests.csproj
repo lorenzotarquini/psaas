@@ -15,7 +15,8 @@
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <ProjectReference Include="..\..\src\PSAAS.Auth\PSAAS.Auth.csproj" />
+    <ProjectReference Include="..\..\PSAAS.Auth\PSAAS.Auth.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\PSAAS.Domain\PSAAS.Domain.csproj" />
   </ItemGroup>
 
 </Project>

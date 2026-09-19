@@ -10,3 +10,5 @@
 /src/tests/PSAAS.Auth.Tests/bin
 /src/tests/PSAAS.Auth.Tests/obj 
 /src/Infrastructure/PSAAS.Domain/obj
+/src/PSAAS.AdminPortal/obj
+/src/PSAAS.AdminPortal/bin

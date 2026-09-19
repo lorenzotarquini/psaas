@@ -9,4 +9,8 @@
     <UserSecretsId>83187a67-29b5-4274-94cf-cc585acda602</UserSecretsId>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\PSAAS.AdminPortal\PSAAS.AdminPortal.csproj" />
+  </ItemGroup>
+
 </Project>

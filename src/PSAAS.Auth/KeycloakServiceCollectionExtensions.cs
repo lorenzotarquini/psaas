@@ -233,7 +233,7 @@ public static class KeycloakServiceCollectionExtensions
     private static string[] DefaultPolicySchemes(KeycloakOptions options) => options.Mode switch
     {
         KeycloakAuthenticationMode.Api => [options.JwtBearerScheme],
-        KeycloakAuthenticationMode.Web => [options.CookieScheme],
+        KeycloakAuthenticationMode.Web => [],
         KeycloakAuthenticationMode.ApiAndWeb => [options.JwtBearerScheme, options.CookieScheme],
         _ => []
     };

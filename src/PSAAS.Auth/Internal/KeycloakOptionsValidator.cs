@@ -16,12 +16,6 @@ internal static class KeycloakOptionsValidator
             throw new InvalidOperationException("Keycloak ClientId is required.");
         }
 
-        if ((options.Mode is KeycloakAuthenticationMode.Web or KeycloakAuthenticationMode.ApiAndWeb) &&
-            string.IsNullOrWhiteSpace(options.ClientSecret))
-        {
-            throw new InvalidOperationException("Keycloak ClientSecret is required for web/OpenID Connect authentication.");
-        }
-
         if (options.Mode == KeycloakAuthenticationMode.MachineToMachine)
         {
             ValidateClientCredentials(options);

@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Infrastructure/">
+    <Project Path="../Infrastructure/PSAAS.Domain/PSAAS.Domain.csproj" />
+  </Folder>
   <Project Path="../PSAAS.Auth/PSAAS.Auth.csproj" />
   <Project Path="PSAAS.AppHost.csproj" />
 </Solution>

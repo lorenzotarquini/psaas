@@ -1,6 +1,13 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
+var postgres = builder.AddPostgres("postgres")
+    .WithDataBindMount("../postgres_data");
+
+var psaasDb = postgres.AddDatabase("psaas-db", "psaas_db");
+
 builder.AddProject<Projects.PSAAS_AdminPortal>("adminportal")
+    .WithReference(psaasDb, "psaas_db")
+    .WaitFor(psaasDb)
     .WithEnvironment("Keycloak__Authority", GetRequiredConfigurationValue("Keycloak:Authority"))
     .WithEnvironment("Keycloak__ClientId", GetRequiredConfigurationValue("Keycloak:ClientId"))
     .WithEnvironment("Keycloak__Mode", GetRequiredConfigurationValue("Keycloak:Mode"))

@@ -13,4 +13,8 @@
     <ProjectReference Include="..\PSAAS.AdminPortal\PSAAS.AdminPortal.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="13.5.4" />
+  </ItemGroup>
+
 </Project>

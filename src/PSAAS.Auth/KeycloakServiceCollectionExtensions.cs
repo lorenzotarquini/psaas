@@ -71,6 +71,7 @@ public static class KeycloakServiceCollectionExtensions
 
         if (options.Mode is KeycloakAuthenticationMode.Web or KeycloakAuthenticationMode.ApiAndWeb)
         {
+            services.AddAntiforgery();
             builder.AddCookie(options.CookieScheme, _ => { });
             builder.AddOpenIdConnect(options.OpenIdConnectScheme, _ => { });
             ConfigureCookieOptions(services, options.CookieScheme);

@@ -11,24 +11,34 @@
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="nav-menu">
         <MudNavMenu Dense="true" Class="nav-links">
-            <MudNavLink Href="/societa" Icon="fas fa-building" Match="NavLinkMatch.Prefix">
-                @L["Nav.Companies"]
+            <MudNavLink Href="/societa" Match="NavLinkMatch.Prefix">
+                <span class="nav-item-content">
+                    <i class="fas fa-building nav-item-icon" aria-hidden="true"></i>
+                    <span>@L["Nav.Companies"]</span>
+                </span>
             </MudNavLink>
-            <MudNavLink Href="/utenti" Icon="fas fa-users" Match="NavLinkMatch.Prefix">
-                @L["Nav.Users"]
+            <MudNavLink Href="/utenti" Match="NavLinkMatch.Prefix">
+                <span class="nav-item-content">
+                    <i class="fas fa-users nav-item-icon" aria-hidden="true"></i>
+                    <span>@L["Nav.Users"]</span>
+                </span>
             </MudNavLink>
         </MudNavMenu>
 
-        <div class="nav-footer px-3">
+        <div class="nav-footer">
             <MudDivider Class="nav-divider" />
-            <MudButton Variant="Variant.Text"
-                       Color="Color.Inherit"
-                       FullWidth="true"
-                       StartIcon="fas fa-sign-out-alt"
-                       Disabled="true">
-                @L["Nav.Logout"]
-            </MudButton>
+            <form method="post" action="/authentication/logout">
+                <AntiforgeryToken />
+                <MudButton ButtonType="ButtonType.Submit"
+                           Variant="Variant.Text"
+                           Color="Color.Inherit"
+                           FullWidth="true">
+                    <span class="nav-item-content">
+                        <i class="fas fa-sign-out-alt nav-item-icon" aria-hidden="true"></i>
+                        <span>@L["Nav.Logout"]</span>
+                    </span>
+                </MudButton>
+            </form>
         </div>
     </nav>
 </div>
-

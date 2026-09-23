@@ -68,6 +68,8 @@ try
     app.UseAuthorization();
     app.UseAntiforgery();
 
+    app.MapKeycloakLogout();
+
     app.MapStaticAssets();
     app.MapRazorComponents<App>()
         .AddInteractiveServerRenderMode()

@@ -3,7 +3,7 @@
     cursor: pointer;
     width: 3.5rem;
     height: 2.5rem;
-    color: white;
+    color: var(--sidebar-text-color);
     position: absolute;
     top: 0.5rem;
     right: 1rem;
@@ -17,7 +17,8 @@
 
 .top-row {
     min-height: 3.5rem;
-    background-color: #151515;
+    background-color: var(--sidebar-background);
+    color: var(--sidebar-text-color);
 }
 
 .navbar-brand {
@@ -37,22 +38,40 @@
 }
 
 .nav-links {
-    padding: 0 0.75rem;
+    padding: 0;
 }
 
 ::deep .mud-nav-link {
     border-radius: 4px;
-    color: #d7d7d7;
+    color: var(--sidebar-text-color);
+    margin: 0.125rem 0.75rem;
+    width: auto;
 }
 
 ::deep .mud-nav-link.active:not(.mud-nav-link-disabled) {
-    background-color: rgba(255, 255, 255, 0.18);
-    color: white;
+    background-color: var(--sidebar-item-on-hover-background);
+    color: var(--sidebar-item-on-hover-text-color);
 }
 
 ::deep .mud-nav-link:not(.mud-nav-link-disabled):hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: white;
+    background-color: var(--sidebar-item-on-hover-background);
+    color: var(--sidebar-item-on-hover-text-color);
+}
+
+.nav-item-content {
+    align-items: center;
+    display: inline-flex;
+    font-size: 1.05rem;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.nav-item-icon {
+    color: inherit;
+    flex: 0 0 1.35rem;
+    font-size: 1.15rem;
+    text-align: center;
+    width: 1.35rem;
 }
 
 ::deep .mud-nav-link .mud-icon-root,
@@ -61,7 +80,7 @@
 }
 
 .nav-footer {
-    padding-top: 1rem;
+    padding: 1rem 0.75rem 0;
 }
 
 ::deep .nav-divider {
@@ -70,14 +89,15 @@
 }
 
 ::deep .nav-footer .mud-button-root {
-    justify-content: flex-start;
-    color: #d7d7d7;
-    padding-left: 1rem;
+    justify-content: center;
+    color: var(--sidebar-text-color);
+    border-radius: 4px;
+    text-transform: none;
 }
 
 ::deep .nav-footer .mud-button-root:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: white;
+    background-color: var(--sidebar-item-on-hover-background);
+    color: var(--sidebar-item-on-hover-text-color);
 }
 
 .navbar-toggler:checked ~ .nav-scrollable {

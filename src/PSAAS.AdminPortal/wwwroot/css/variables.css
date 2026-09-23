@@ -1,0 +1,11 @@
+/* Palette CSS semantica dell'Admin Portal. Altre variabili verranno aggiunte in seguito. */
+
+:root {
+    --sidebar-background: #1d2d44;
+    --sidebar-text-color: #f0ebd8;
+    --sidebar-item-on-hover-background: #f9f7f0;
+    --sidebar-item-on-hover-text-color: #1d2d44;
+    --content-background: #edf2f4;
+    --topbar-background: #3e5c76;
+    --topbar-text-color: #edf2f4;
+}

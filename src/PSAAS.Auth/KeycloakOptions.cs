@@ -32,6 +32,8 @@ public sealed class KeycloakOptions
 
     public string RemoteSignOutPath { get; set; } = "/signout-oidc";
 
+    public string LogoutRedirectPath { get; set; } = "/";
+
     public bool SaveTokens { get; set; } = true;
 
     public string CookieScheme { get; set; } = "Cookies";

@@ -1,7 +1,11 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
@@ -57,6 +61,7 @@ public sealed class AddKeycloakTests
 
         Assert.Equal("psaas-web", oidcOptions.ClientId);
         Assert.Null(oidcOptions.ClientSecret);
+        Assert.NotNull(provider.GetService<IAntiforgery>());
     }
 
     [Fact]
@@ -87,6 +92,33 @@ public sealed class AddKeycloakTests
         Assert.Equal(OpenIdConnectDefaults.AuthenticationScheme, authenticationOptions.DefaultChallengeScheme);
         Assert.NotNull(policy);
         Assert.Empty(policy.AuthenticationSchemes);
+    }
+
+    [Fact]
+    public void MapKeycloakLogout_MapsStablePostEndpointRequiringAuthorization()
+    {
+        var builder = WebApplication.CreateBuilder();
+        builder.Services.AddLogging();
+        builder.Services.AddSingleton<IHostEnvironment>(new TestHostEnvironment());
+        builder.Services.AddKeycloak(options =>
+        {
+            options.Authority = "https://keycloak.example/realms/psaas";
+            options.ClientId = "psaas-web";
+            options.Mode = KeycloakAuthenticationMode.Web;
+        });
+
+        using var app = builder.Build();
+        app.MapKeycloakLogout();
+
+        var endpoint = ((IEndpointRouteBuilder)app).DataSources
+            .SelectMany(dataSource => dataSource.Endpoints)
+            .OfType<RouteEndpoint>()
+            .Single(routeEndpoint => routeEndpoint.RoutePattern.RawText == KeycloakDefaults.LogoutPath);
+
+        var httpMethods = endpoint.Metadata.GetRequiredMetadata<IHttpMethodMetadata>();
+
+        Assert.Equal([HttpMethods.Post], httpMethods.HttpMethods);
+        Assert.Contains(endpoint.Metadata, metadata => metadata is IAuthorizeData);
     }
 
     private sealed class TestHostEnvironment : IHostEnvironment

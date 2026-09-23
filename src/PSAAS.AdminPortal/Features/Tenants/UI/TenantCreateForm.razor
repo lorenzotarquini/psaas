@@ -1,0 +1,90 @@
+@page "/organizations/add"
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.Extensions.Localization
+@using MudBlazor
+@using PSAAS.AdminPortal
+@using PSAAS.AdminPortal.Components
+@using PSAAS.AdminPortal.Features.Tenants.ViewModels
+@inherits MvvmComponentBase<TenantCreateFormViewModel>
+@inject IStringLocalizer<SharedResource> L
+
+<PageTitle>@L["Tenants.Create.Title"]</PageTitle>
+
+<MudStack Spacing="3">
+    <MudText Typo="Typo.h4" HtmlTag="h1">@L["Tenants.Create.Title"]</MudText>
+
+    <MudPaper Elevation="1" Class="pa-4">
+        <MudForm>
+            <MudStack Spacing="4">
+                <MudGrid Spacing="3">
+                    <MudItem xs="12" md="6">
+                        <MudTextField T="string"
+                                      Label="@L["Tenants.Create.Field.CompanyName"]"
+                                      Variant="Variant.Outlined"
+                                      FullWidth="true" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudTextField T="string"
+                                      Label="@L["Tenants.Create.Field.VatNumber"]"
+                                      Variant="Variant.Outlined"
+                                      FullWidth="true" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudTextField T="string"
+                                      Label="@L["Tenants.Create.Field.CertifiedEmail"]"
+                                      Variant="Variant.Outlined"
+                                      FullWidth="true" />
+                    </MudItem>
+                </MudGrid>
+
+                <MudStack Spacing="2">
+                    <MudText Typo="Typo.subtitle1" HtmlTag="h2">@L["Tenants.Create.Section.Address"]</MudText>
+                    <MudGrid Spacing="3">
+                        <MudItem xs="12" md="6">
+                            <MudTextField T="string"
+                                          Label="@L["Tenants.Create.Field.Street"]"
+                                          Variant="Variant.Outlined"
+                                          FullWidth="true" />
+                        </MudItem>
+                        <MudItem xs="12" md="6">
+                            <MudTextField T="string"
+                                          Label="@L["Tenants.Create.Field.City"]"
+                                          Variant="Variant.Outlined"
+                                          FullWidth="true" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudTextField T="string"
+                                          Label="@L["Tenants.Create.Field.PostalCode"]"
+                                          Variant="Variant.Outlined"
+                                          FullWidth="true" />
+                        </MudItem>
+                        <MudItem xs="12" md="8">
+                            <MudSelect T="string"
+                                       Label="@L["Tenants.Create.Field.Country"]"
+                                       Value="@("Italia")"
+                                       Variant="Variant.Outlined"
+                                       FullWidth="true">
+                                <MudSelectItem T="string" Value="@("Italia")">@L["Tenants.Create.Country.Italy"]</MudSelectItem>
+                            </MudSelect>
+                        </MudItem>
+                    </MudGrid>
+                </MudStack>
+
+                <MudStack Row="true" Justify="Justify.FlexEnd" Spacing="2">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Secondary"
+                               StartIcon="@Icons.Material.Filled.Close"
+                               Href="/organizations">
+                        @L["Tenants.Create.Action.Cancel"]
+                    </MudButton>
+                    <MudButton ButtonType="ButtonType.Submit"
+                               Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Save">
+                        @L["Tenants.Create.Action.Save"]
+                    </MudButton>
+                </MudStack>
+            </MudStack>
+        </MudForm>
+    </MudPaper>
+</MudStack>

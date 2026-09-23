@@ -57,6 +57,48 @@
   <data name="Tenants.Subtitle" xml:space="preserve">
     <value>Gestione delle società tenant abilitate sulla piattaforma.</value>
   </data>
+  <data name="Tenants.Action.Add" xml:space="preserve">
+    <value>Aggiungi società</value>
+  </data>
+  <data name="Tenants.Create.Title" xml:space="preserve">
+    <value>Aggiungi società</value>
+  </data>
+  <data name="Tenants.Create.Placeholder" xml:space="preserve">
+    <value>Placeholder per il form di creazione società.</value>
+  </data>
+  <data name="Tenants.Create.Field.CompanyName" xml:space="preserve">
+    <value>Nome società</value>
+  </data>
+  <data name="Tenants.Create.Field.VatNumber" xml:space="preserve">
+    <value>Partita IVA</value>
+  </data>
+  <data name="Tenants.Create.Field.CertifiedEmail" xml:space="preserve">
+    <value>PEC</value>
+  </data>
+  <data name="Tenants.Create.Section.Address" xml:space="preserve">
+    <value>Indirizzo</value>
+  </data>
+  <data name="Tenants.Create.Field.Street" xml:space="preserve">
+    <value>Via</value>
+  </data>
+  <data name="Tenants.Create.Field.City" xml:space="preserve">
+    <value>Città</value>
+  </data>
+  <data name="Tenants.Create.Field.PostalCode" xml:space="preserve">
+    <value>CAP</value>
+  </data>
+  <data name="Tenants.Create.Field.Country" xml:space="preserve">
+    <value>Paese</value>
+  </data>
+  <data name="Tenants.Create.Country.Italy" xml:space="preserve">
+    <value>Italia</value>
+  </data>
+  <data name="Tenants.Create.Action.Save" xml:space="preserve">
+    <value>Salva</value>
+  </data>
+  <data name="Tenants.Create.Action.Cancel" xml:space="preserve">
+    <value>Annulla</value>
+  </data>
   <data name="Tenants.Column.CompanyName" xml:space="preserve">
     <value>Ragione sociale</value>
   </data>

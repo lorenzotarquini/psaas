@@ -17,6 +17,12 @@
             <MudText Typo="Typo.h4" HtmlTag="h1">@L["Tenants.Title"]</MudText>
             <MudText Typo="Typo.body2" Color="Color.Secondary">@L["Tenants.Subtitle"]</MudText>
         </div>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Add"
+                   Href="/organizations/add">
+            @L["Tenants.Action.Add"]
+        </MudButton>
     </MudStack>
 
     <MudTable T="Tenant"

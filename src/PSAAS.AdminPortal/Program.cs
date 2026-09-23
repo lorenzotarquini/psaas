@@ -27,6 +27,7 @@ try
     builder.Services.AddPsaasInfrastructure(builder.Configuration);
     builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
     builder.Services.AddMudServices();
+    builder.Services.AddTransient<TenantCreateFormViewModel>();
     builder.Services.AddTransient<TenantGridViewModel>();
     builder.Services.AddCascadingAuthenticationState();
     builder.Services.Configure<ForwardedHeadersOptions>(options =>

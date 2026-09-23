@@ -11,10 +11,10 @@
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="nav-menu">
         <MudNavMenu Dense="true" Class="nav-links">
-            <MudNavLink Href="/societa" Icon="@Icons.Material.Filled.Business" Match="NavLinkMatch.Prefix">
+            <MudNavLink Href="/societa" Icon="fas fa-building" Match="NavLinkMatch.Prefix">
                 @L["Nav.Companies"]
             </MudNavLink>
-            <MudNavLink Href="/utenti" Icon="@Icons.Material.Filled.Group" Match="NavLinkMatch.Prefix">
+            <MudNavLink Href="/utenti" Icon="fas fa-users" Match="NavLinkMatch.Prefix">
                 @L["Nav.Users"]
             </MudNavLink>
         </MudNavMenu>
@@ -24,7 +24,7 @@
             <MudButton Variant="Variant.Text"
                        Color="Color.Inherit"
                        FullWidth="true"
-                       StartIcon="@Icons.Material.Filled.Logout"
+                       StartIcon="fas fa-sign-out-alt"
                        Disabled="true">
                 @L["Nav.Logout"]
             </MudButton>

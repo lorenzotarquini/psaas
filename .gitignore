@@ -16,3 +16,7 @@
 /src/Infrastructure/PSAAS.Domain/bin/
 /src/Infrastructure/PSAAS.Infrastructure/bin
 /src/Infrastructure/PSAAS.Infrastructure/obj
+/src/PSAAS.MVVM/bin
+/src/PSAAS.MVVM/obj
+/src/tests/PSAAS.MVVM.Tests/bin/
+/src/tests/PSAAS.MVVM.Tests/obj/

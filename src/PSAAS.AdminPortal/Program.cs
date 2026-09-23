@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.HttpOverrides;
 using PSAAS.AdminPortal.Components;
 using PSAAS.Auth;
+using PSAAS.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddKeycloak(builder.Configuration);
+builder.Services.AddPsaasInfrastructure(builder.Configuration);
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {

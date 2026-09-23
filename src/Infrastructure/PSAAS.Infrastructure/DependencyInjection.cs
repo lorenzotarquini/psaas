@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using PSAAS.Application.Features.Tenants;
 using PSAAS.Infrastructure.Data.DbContexts;
+using PSAAS.Infrastructure.Features.Tenants.Data;
 
 namespace PSAAS.Infrastructure;
 
@@ -21,6 +23,8 @@ public static class DependencyInjection
         {
             options.UseNpgsql(connectionString);
         });
+
+        services.AddScoped<ITenantReadRepository, TenantReadRepository>();
 
         return services;
     }

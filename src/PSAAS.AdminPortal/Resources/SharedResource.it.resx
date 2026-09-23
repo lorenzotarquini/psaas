@@ -51,4 +51,25 @@
   <data name="Auth.AdminRoleRequired" xml:space="preserve">
     <value>Per accedere all'Admin Portal è richiesto il ruolo Administrator.</value>
   </data>
+  <data name="Tenants.Title" xml:space="preserve">
+    <value>Società</value>
+  </data>
+  <data name="Tenants.Subtitle" xml:space="preserve">
+    <value>Gestione delle società tenant abilitate sulla piattaforma.</value>
+  </data>
+  <data name="Tenants.Column.CompanyName" xml:space="preserve">
+    <value>Ragione sociale</value>
+  </data>
+  <data name="Tenants.Column.VatNumber" xml:space="preserve">
+    <value>Partita IVA</value>
+  </data>
+  <data name="Tenants.Column.CertifiedEmail" xml:space="preserve">
+    <value>PEC</value>
+  </data>
+  <data name="Tenants.Empty.Title" xml:space="preserve">
+    <value>Nessuna società disponibile</value>
+  </data>
+  <data name="Tenants.Empty.Description" xml:space="preserve">
+    <value>La griglia è pronta per l'integrazione dati. Nessun dato persistente viene caricato in questa slice.</value>
+  </data>
 </root>

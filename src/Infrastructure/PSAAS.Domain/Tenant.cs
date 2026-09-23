@@ -12,10 +12,15 @@
             Address = new Address(string.Empty, string.Empty, string.Empty, string.Empty);
         }
 
-        private Tenant(string companyName, string vatNumber, string completeVatNumber, string certifiedEmail,
+        private Tenant(Guid id, string companyName, string vatNumber, string completeVatNumber, string certifiedEmail,
             Address address)
         {
-            Id = Guid.NewGuid();
+            if (id == Guid.Empty)
+            {
+                throw new ArgumentException("Tenant id cannot be empty.", nameof(id));
+            }
+
+            Id = id;
             CompanyName = companyName;
             VatNumber = vatNumber;
             CompleteVatNumber = completeVatNumber;
@@ -38,7 +43,13 @@
         public static Tenant Create(string companyName, string vatNumber, string completeVatNumber,
             string certifiedEmail, Address address)
         {
-            return new Tenant(companyName, vatNumber, completeVatNumber, certifiedEmail, address);
+            return new Tenant(Guid.NewGuid(), companyName, vatNumber, completeVatNumber, certifiedEmail, address);
+        }
+
+        public static Tenant Rehydrate(Guid id, string companyName, string vatNumber, string completeVatNumber,
+            string certifiedEmail, Address address)
+        {
+            return new Tenant(id, companyName, vatNumber, completeVatNumber, certifiedEmail, address);
         }
 
         public bool IsValidVat()

@@ -20,3 +20,7 @@
 /src/PSAAS.MVVM/obj
 /src/tests/PSAAS.MVVM.Tests/bin/
 /src/tests/PSAAS.MVVM.Tests/obj/
+/src/PSAAS.Application/obj
+/src/PSAAS.Application/bin
+/src/tests/PSAAS.Infrastructure.Tests/bin/
+/src/tests/PSAAS.Infrastructure.Tests/obj/

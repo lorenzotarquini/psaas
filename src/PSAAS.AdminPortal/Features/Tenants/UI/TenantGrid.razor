@@ -1,0 +1,46 @@
+@page "/organizations"
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.Extensions.Localization
+@using MudBlazor
+@using PSAAS.AdminPortal
+@using PSAAS.AdminPortal.Components
+@using PSAAS.AdminPortal.Features.Tenants.ViewModels
+@using PSAAS.Domain
+@inherits MvvmComponentBase<TenantGridViewModel>
+@inject IStringLocalizer<SharedResource> L
+
+<PageTitle>@L["Tenants.Title"]</PageTitle>
+
+<MudStack Spacing="3">
+    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+        <div>
+            <MudText Typo="Typo.h4" HtmlTag="h1">@L["Tenants.Title"]</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Secondary">@L["Tenants.Subtitle"]</MudText>
+        </div>
+    </MudStack>
+
+    <MudTable T="Tenant"
+              Items="ViewModel.Tenants"
+              Loading="ViewModel.IsLoading"
+              Dense="true"
+              Hover="true"
+              Elevation="1">
+        <HeaderContent>
+            <MudTh>@L["Tenants.Column.CompanyName"]</MudTh>
+            <MudTh>@L["Tenants.Column.VatNumber"]</MudTh>
+            <MudTh>@L["Tenants.Column.CertifiedEmail"]</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="@L["Tenants.Column.CompanyName"]">@context.CompanyName</MudTd>
+            <MudTd DataLabel="@L["Tenants.Column.VatNumber"]">@context.VatNumber</MudTd>
+            <MudTd DataLabel="@L["Tenants.Column.CertifiedEmail"]">@context.CertifiedEmail</MudTd>
+        </RowTemplate>
+        <NoRecordsContent>
+            <MudStack AlignItems="AlignItems.Center" Class="pa-6" Spacing="1">
+                <MudIcon Icon="@Icons.Material.Filled.Business" Color="Color.Secondary" Size="Size.Large" />
+                <MudText Typo="Typo.subtitle1">@L["Tenants.Empty.Title"]</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">@L["Tenants.Empty.Description"]</MudText>
+            </MudStack>
+        </NoRecordsContent>
+    </MudTable>
+</MudStack>

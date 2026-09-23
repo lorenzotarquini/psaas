@@ -8,9 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\PSAAS.Application\PSAAS.Application.csproj" />
     <ProjectReference Include="..\Infrastructure\PSAAS.Domain\PSAAS.Domain.csproj" />
     <ProjectReference Include="..\Infrastructure\PSAAS.Infrastructure\PSAAS.Infrastructure.csproj" />
     <ProjectReference Include="..\PSAAS.Auth\PSAAS.Auth.csproj" />
+    <ProjectReference Include="..\PSAAS.MVVM\PSAAS.MVVM.csproj" />
   </ItemGroup>
 
   <ItemGroup>

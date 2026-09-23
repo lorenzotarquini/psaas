@@ -1,29 +1,33 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@inject IStringLocalizer<SharedResource> L
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">PSAAS.AdminPortal</a>
+        <a class="navbar-brand" href="">@L["App.Brand"]</a>
     </div>
 </div>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+<input type="checkbox" title="@L["Nav.MenuToggleTitle"]" class="navbar-toggler" />
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
+    <nav class="nav-menu">
+        <MudNavMenu Dense="true" Class="nav-links">
+            <MudNavLink Href="/societa" Icon="@Icons.Material.Filled.Business" Match="NavLinkMatch.Prefix">
+                @L["Nav.Companies"]
+            </MudNavLink>
+            <MudNavLink Href="/utenti" Icon="@Icons.Material.Filled.Group" Match="NavLinkMatch.Prefix">
+                @L["Nav.Users"]
+            </MudNavLink>
+        </MudNavMenu>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
+        <div class="nav-footer px-3">
+            <MudDivider Class="nav-divider" />
+            <MudButton Variant="Variant.Text"
+                       Color="Color.Inherit"
+                       FullWidth="true"
+                       StartIcon="@Icons.Material.Filled.Logout"
+                       Disabled="true">
+                @L["Nav.Logout"]
+            </MudButton>
         </div>
     </nav>
 </div>

@@ -1,10 +1,12 @@
-﻿<Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(Pages.NotFound)">
+﻿@inject IStringLocalizer<SharedResource> L
+
+<Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(Pages.NotFound)">
     <Found Context="routeData">
         <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
             <NotAuthorized>
                 <LayoutView Layout="typeof(Layout.MainLayout)">
-                    <h1>Accesso non autorizzato</h1>
-                    <p>Per accedere all'Admin Portal è richiesto il ruolo Administrator.</p>
+                    <h1>@L["Auth.AccessDeniedTitle"]</h1>
+                    <p>@L["Auth.AdminRoleRequired"]</p>
                 </LayoutView>
             </NotAuthorized>
         </AuthorizeRouteView>

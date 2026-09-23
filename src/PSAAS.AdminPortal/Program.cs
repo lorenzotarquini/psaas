@@ -1,57 +1,97 @@
+using System.Globalization;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
+using MudBlazor.Services;
+using NLog;
+using NLog.Web;
 using PSAAS.AdminPortal.Components;
 using PSAAS.Auth;
 using PSAAS.Infrastructure;
 using PSAAS.Infrastructure.Data.DbContexts;
 
-var builder = WebApplication.CreateBuilder(args);
+var logger = LogManager.Setup()
+    .LoadConfigurationFromAppSettings()
+    .GetCurrentClassLogger();
 
-// Add services to the container.
-builder.Services.AddKeycloak(builder.Configuration);
-builder.Services.AddPsaasInfrastructure(builder.Configuration);
-builder.Services.AddCascadingAuthenticationState();
-builder.Services.Configure<ForwardedHeadersOptions>(options =>
+try
 {
-    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor
-        | ForwardedHeaders.XForwardedHost
-        | ForwardedHeaders.XForwardedProto;
-});
+    var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+    builder.Logging.ClearProviders();
+    builder.Host.UseNLog();
 
-var app = builder.Build();
+    // Add services to the container.
+    builder.Services.AddKeycloak(builder.Configuration);
+    builder.Services.AddPsaasInfrastructure(builder.Configuration);
+    builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+    builder.Services.AddMudServices();
+    builder.Services.AddCascadingAuthenticationState();
+    builder.Services.Configure<ForwardedHeadersOptions>(options =>
+    {
+        options.ForwardedHeaders = ForwardedHeaders.XForwardedFor
+            | ForwardedHeaders.XForwardedHost
+            | ForwardedHeaders.XForwardedProto;
+    });
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    builder.Services.AddRazorComponents()
+        .AddInteractiveServerComponents();
+
+    var supportedCultures = new[]
+    {
+        new CultureInfo("it-IT"),
+        new CultureInfo("en-US")
+    };
+
+    builder.Services.Configure<RequestLocalizationOptions>(options =>
+    {
+        options.DefaultRequestCulture = new RequestCulture("it-IT");
+        options.SupportedCultures = supportedCultures;
+        options.SupportedUICultures = supportedCultures;
+    });
+
+    var app = builder.Build();
+
+    // Configure the HTTP request pipeline.
+    if (!app.Environment.IsDevelopment())
+    {
+        app.UseExceptionHandler("/Error", createScopeForErrors: true);
+        // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+        app.UseHsts();
+    }
+    app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
+    app.UseForwardedHeaders();
+    app.UseRequestLocalization();
+    app.UseHttpsRedirection();
+
+    app.UseAuthentication();
+    app.UseAuthorization();
+    app.UseAntiforgery();
+
+    app.MapStaticAssets();
+    app.MapRazorComponents<App>()
+        .AddInteractiveServerRenderMode()
+        // The endpoint requires an authenticated user so unauthenticated requests use
+        // the PSAAS.Auth OIDC challenge. The Administrator role is enforced by
+        // AuthorizeRouteView through the component-level policy, allowing authenticated
+        // users without the role to see the in-app access denied message instead of a
+        // cookie access-denied redirect to a non-existent placeholder endpoint.
+        .RequireAuthorization();
+
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<PsaasDbContext>();
+        dbContext.Database.Migrate();
+    }
+
+    app.Run();
 }
-app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
-app.UseForwardedHeaders();
-app.UseHttpsRedirection();
-
-app.UseAuthentication();
-app.UseAuthorization();
-app.UseAntiforgery();
-
-app.MapStaticAssets();
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode()
-    // The endpoint requires an authenticated user so unauthenticated requests use
-    // the PSAAS.Auth OIDC challenge. The Administrator role is enforced by
-    // AuthorizeRouteView through the component-level policy, allowing authenticated
-    // users without the role to see the in-app access denied message instead of a
-    // cookie access-denied redirect to a non-existent placeholder endpoint.
-    .RequireAuthorization();
-
-using (var scope = app.Services.CreateScope())
+catch (Exception exception)
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<PsaasDbContext>();
-    dbContext.Database.Migrate();
+    logger.Error(exception, "Application stopped because of an unhandled exception.");
+    throw;
 }
-
-app.Run();
+finally
+{
+    LogManager.Shutdown();
+}

@@ -13,3 +13,4 @@
 /src/PSAAS.AdminPortal/obj
 /src/PSAAS.AdminPortal/bin
 /src/Infrastructure/PSAAS.Domain/bin/Debug/net10.0
+/src/Infrastructure/PSAAS.Infrastructure/obj

@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/Infrastructure/">
     <Project Path="../Infrastructure/PSAAS.Domain/PSAAS.Domain.csproj" />
+    <Project Path="../Infrastructure/PSAAS.Infrastructure/PSAAS.Infrastructure.csproj" Id="d8cbb29a-5575-4818-b833-f6f6718e24f5" />
   </Folder>
   <Project Path="../PSAAS.AdminPortal/PSAAS.AdminPortal.csproj" Id="71b037b7-a1c2-4192-8f83-b6188cc3d605" />
   <Project Path="../PSAAS.Auth/PSAAS.Auth.csproj" />

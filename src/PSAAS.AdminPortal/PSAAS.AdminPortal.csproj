@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -8,6 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Infrastructure\PSAAS.Domain\PSAAS.Domain.csproj" />
+    <ProjectReference Include="..\Infrastructure\PSAAS.Infrastructure\PSAAS.Infrastructure.csproj" />
     <ProjectReference Include="..\PSAAS.Auth\PSAAS.Auth.csproj" />
   </ItemGroup>
 

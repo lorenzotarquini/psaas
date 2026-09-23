@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.EntityFrameworkCore;
 using PSAAS.AdminPortal.Components;
 using PSAAS.Auth;
 using PSAAS.Infrastructure;
+using PSAAS.Infrastructure.Data.DbContexts;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,5 +47,11 @@ app.MapRazorComponents<App>()
     // users without the role to see the in-app access denied message instead of a
     // cookie access-denied redirect to a non-existent placeholder endpoint.
     .RequireAuthorization();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<PsaasDbContext>();
+    dbContext.Database.Migrate();
+}
 
 app.Run();

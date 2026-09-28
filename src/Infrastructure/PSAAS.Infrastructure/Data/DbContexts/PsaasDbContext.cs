@@ -20,15 +20,17 @@ public sealed class PsaasDbContext(DbContextOptions<PsaasDbContext> options) : D
             entityBuilder.HasKey(tenant => tenant.Id);
 
             entityBuilder.HasIndex(tenant => tenant.Id).IsUnique();
-            entityBuilder.HasIndex(tenant => tenant.VatNumber).IsUnique();
+            entityBuilder.HasIndex(tenant => tenant.NormalizedCompanyName).IsUnique();
             entityBuilder.HasIndex(tenant => tenant.CompleteVatNumber).IsUnique();
-            entityBuilder.HasIndex(tenant => tenant.CertifiedEmail).IsUnique();
+            entityBuilder.HasIndex(tenant => tenant.NormalizedCertifiedEmail).IsUnique();
 
             entityBuilder.Property(tenant => tenant.Id).IsRequired();
             entityBuilder.Property(tenant => tenant.CompanyName).IsRequired();
+            entityBuilder.Property(tenant => tenant.NormalizedCompanyName).IsRequired();
             entityBuilder.Property(tenant => tenant.VatNumber).IsRequired();
             entityBuilder.Property(tenant => tenant.CompleteVatNumber).IsRequired();
             entityBuilder.Property(tenant => tenant.CertifiedEmail).IsRequired();
+            entityBuilder.Property(tenant => tenant.NormalizedCertifiedEmail).IsRequired();
 
             entityBuilder.OwnsOne(tenant => tenant.Address, addressBuilder =>
             {

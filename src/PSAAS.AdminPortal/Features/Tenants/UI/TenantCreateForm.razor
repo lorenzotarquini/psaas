@@ -5,6 +5,7 @@
 @using PSAAS.AdminPortal
 @using PSAAS.AdminPortal.Components
 @using PSAAS.AdminPortal.Features.Tenants.ViewModels
+@using PSAAS.Application.Contracts.Tenants
 @inherits MvvmComponentBase<TenantCreateFormViewModel>
 @inject IStringLocalizer<SharedResource> L
 
@@ -19,21 +20,45 @@
                 <MudGrid Spacing="3">
                     <MudItem xs="12" md="6">
                         <MudTextField T="string"
-                                      Label="@L["Tenants.Create.Field.CompanyName"]"
-                                      Variant="Variant.Outlined"
-                                      FullWidth="true" />
+                                       Label="@L["Tenants.Create.Field.CompanyName"]"
+                                       Value="@ViewModel.CompanyName"
+                                       ValueChanged="@(value => ViewModel.CompanyName = value)"
+                                       Immediate="true"
+                                       DebounceInterval="2000"
+                                       OnDebounceIntervalElapsed="@(_ => ViewModel.ValidateCompanyNameAsync())"
+                                       OnBlur="@(_ => ViewModel.ValidateCompanyNameAsync())"
+                                       Error="@(ViewModel.CompanyNameErrorCode is not null)"
+                                       ErrorText="@ValidationMessage(ViewModel.CompanyNameErrorCode)"
+                                       Variant="Variant.Outlined"
+                                       FullWidth="true" />
                     </MudItem>
                     <MudItem xs="12" md="6">
                         <MudTextField T="string"
-                                      Label="@L["Tenants.Create.Field.VatNumber"]"
-                                      Variant="Variant.Outlined"
-                                      FullWidth="true" />
+                                       Label="@L["Tenants.Create.Field.VatNumber"]"
+                                       Value="@ViewModel.VatNumber"
+                                       ValueChanged="@(value => ViewModel.VatNumber = value)"
+                                       Immediate="true"
+                                       DebounceInterval="2000"
+                                       OnDebounceIntervalElapsed="@(_ => ViewModel.ValidateVatNumberAsync())"
+                                       OnBlur="@(_ => ViewModel.ValidateVatNumberAsync())"
+                                       Error="@(ViewModel.VatNumberErrorCode is not null)"
+                                       ErrorText="@ValidationMessage(ViewModel.VatNumberErrorCode)"
+                                       Variant="Variant.Outlined"
+                                       FullWidth="true" />
                     </MudItem>
                     <MudItem xs="12" md="6">
                         <MudTextField T="string"
-                                      Label="@L["Tenants.Create.Field.CertifiedEmail"]"
-                                      Variant="Variant.Outlined"
-                                      FullWidth="true" />
+                                       Label="@L["Tenants.Create.Field.CertifiedEmail"]"
+                                       Value="@ViewModel.CertifiedEmail"
+                                       ValueChanged="@(value => ViewModel.CertifiedEmail = value)"
+                                       Immediate="true"
+                                       DebounceInterval="2000"
+                                       OnDebounceIntervalElapsed="@(_ => ViewModel.ValidateCertifiedEmailAsync())"
+                                       OnBlur="@(_ => ViewModel.ValidateCertifiedEmailAsync())"
+                                       Error="@(ViewModel.CertifiedEmailErrorCode is not null)"
+                                       ErrorText="@ValidationMessage(ViewModel.CertifiedEmailErrorCode)"
+                                       Variant="Variant.Outlined"
+                                       FullWidth="true" />
                     </MudItem>
                 </MudGrid>
 
@@ -42,26 +67,48 @@
                     <MudGrid Spacing="3">
                         <MudItem xs="12" md="6">
                             <MudTextField T="string"
-                                          Label="@L["Tenants.Create.Field.Street"]"
-                                          Variant="Variant.Outlined"
-                                          FullWidth="true" />
+                                           Label="@L["Tenants.Create.Field.Street"]"
+                                           Value="@ViewModel.Street"
+                                           ValueChanged="@(value => ViewModel.Street = value)"
+                                           Immediate="true"
+                                           OnBlur="@(_ => ViewModel.ValidateStreet())"
+                                           Error="@(ViewModel.StreetErrorCode is not null)"
+                                           ErrorText="@ValidationMessage(ViewModel.StreetErrorCode)"
+                                           Variant="Variant.Outlined"
+                                           FullWidth="true" />
                         </MudItem>
                         <MudItem xs="12" md="6">
                             <MudTextField T="string"
-                                          Label="@L["Tenants.Create.Field.City"]"
-                                          Variant="Variant.Outlined"
-                                          FullWidth="true" />
+                                           Label="@L["Tenants.Create.Field.City"]"
+                                           Value="@ViewModel.City"
+                                           ValueChanged="@(value => ViewModel.City = value)"
+                                           Immediate="true"
+                                           OnBlur="@(_ => ViewModel.ValidateCity())"
+                                           Error="@(ViewModel.CityErrorCode is not null)"
+                                           ErrorText="@ValidationMessage(ViewModel.CityErrorCode)"
+                                           Variant="Variant.Outlined"
+                                           FullWidth="true" />
                         </MudItem>
                         <MudItem xs="12" md="4">
                             <MudTextField T="string"
-                                          Label="@L["Tenants.Create.Field.PostalCode"]"
-                                          Variant="Variant.Outlined"
-                                          FullWidth="true" />
+                                           Label="@L["Tenants.Create.Field.PostalCode"]"
+                                           Value="@ViewModel.PostalCode"
+                                           ValueChanged="@(value => ViewModel.PostalCode = value)"
+                                           Immediate="true"
+                                           OnBlur="@(_ => ViewModel.ValidatePostalCode())"
+                                           Error="@(ViewModel.PostalCodeErrorCode is not null)"
+                                           ErrorText="@ValidationMessage(ViewModel.PostalCodeErrorCode)"
+                                           Variant="Variant.Outlined"
+                                           FullWidth="true" />
                         </MudItem>
                         <MudItem xs="12" md="8">
                             <MudSelect T="string"
                                        Label="@L["Tenants.Create.Field.Country"]"
-                                       Value="@("Italia")"
+                                       Value="@ViewModel.Country"
+                                       ValueChanged="@(value => ViewModel.Country = value)"
+                                       OnBlur="@(_ => ViewModel.ValidateCountry())"
+                                       Error="@(ViewModel.CountryErrorCode is not null)"
+                                       ErrorText="@ValidationMessage(ViewModel.CountryErrorCode)"
                                        Variant="Variant.Outlined"
                                        FullWidth="true">
                                 <MudSelectItem T="string" Value="@("Italia")">@L["Tenants.Create.Country.Italy"]</MudSelectItem>
@@ -88,3 +135,14 @@
         </MudForm>
     </MudPaper>
 </MudStack>
+
+@code {
+    private string? ValidationMessage(string? errorCode) => errorCode switch
+    {
+        null => null,
+        TenantFieldValidationErrorCodes.Required => L["Validation.Required"].Value,
+        TenantFieldValidationErrorCodes.InvalidFormat => L["Validation.InvalidFormat"].Value,
+        TenantFieldValidationErrorCodes.NotUnique => L["Validation.NotUnique"].Value,
+        _ => L["Validation.Invalid"].Value
+    };
+}

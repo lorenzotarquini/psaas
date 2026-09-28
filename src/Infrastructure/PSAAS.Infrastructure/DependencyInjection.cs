@@ -1,9 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using PSAAS.Application.Features.Tenants;
+using PSAAS.Application.Abstractions.Tenants;
+using PSAAS.Application.Validators.Tenants;
 using PSAAS.Infrastructure.Data.DbContexts;
-using PSAAS.Infrastructure.Features.Tenants.Data;
+using PSAAS.Infrastructure.Repositories.Tenants;
 
 namespace PSAAS.Infrastructure;
 
@@ -25,6 +26,8 @@ public static class DependencyInjection
         });
 
         services.AddScoped<ITenantReadRepository, TenantReadRepository>();
+        services.AddScoped<ITenantUniquenessChecker, TenantUniquenessChecker>();
+        services.AddScoped<TenantCreateValidator>();
 
         return services;
     }

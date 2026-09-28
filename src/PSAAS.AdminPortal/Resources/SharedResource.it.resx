@@ -114,4 +114,16 @@
   <data name="Tenants.Empty.Description" xml:space="preserve">
     <value>La griglia è pronta per l'integrazione dati. Nessun dato persistente viene caricato in questa slice.</value>
   </data>
+  <data name="Validation.Required" xml:space="preserve">
+    <value>Campo obbligatorio.</value>
+  </data>
+  <data name="Validation.InvalidFormat" xml:space="preserve">
+    <value>Formato non valido.</value>
+  </data>
+  <data name="Validation.NotUnique" xml:space="preserve">
+    <value>Valore già presente.</value>
+  </data>
+  <data name="Validation.Invalid" xml:space="preserve">
+    <value>Valore non valido.</value>
+  </data>
 </root>

@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using PSAAS.Application.Features.Tenants;
+using PSAAS.Application.Abstractions.Tenants;
 using PSAAS.Domain;
 using PSAAS.Infrastructure.Converters;
 using PSAAS.Infrastructure.Data.DbContexts;
 
-namespace PSAAS.Infrastructure.Features.Tenants.Data;
+namespace PSAAS.Infrastructure.Repositories.Tenants;
 
 public sealed class TenantReadRepository(PsaasDbContext dbContext) : ITenantReadRepository
 {

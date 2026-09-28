@@ -114,4 +114,16 @@
   <data name="Tenants.Empty.Description" xml:space="preserve">
     <value>The grid is ready for data integration. No persistent data is loaded in this slice.</value>
   </data>
+  <data name="Validation.Required" xml:space="preserve">
+    <value>Required field.</value>
+  </data>
+  <data name="Validation.InvalidFormat" xml:space="preserve">
+    <value>Invalid format.</value>
+  </data>
+  <data name="Validation.NotUnique" xml:space="preserve">
+    <value>Value already exists.</value>
+  </data>
+  <data name="Validation.Invalid" xml:space="preserve">
+    <value>Invalid value.</value>
+  </data>
 </root>

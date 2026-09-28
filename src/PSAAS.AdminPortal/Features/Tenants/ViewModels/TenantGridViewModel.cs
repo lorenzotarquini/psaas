@@ -1,4 +1,4 @@
-using PSAAS.Application.Features.Tenants;
+using PSAAS.Application.Abstractions.Tenants;
 using PSAAS.Domain;
 using PSAAS.MVVM;
 

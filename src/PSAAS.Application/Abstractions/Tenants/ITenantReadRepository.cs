@@ -1,6 +1,6 @@
 using PSAAS.Domain;
 
-namespace PSAAS.Application.Features.Tenants;
+namespace PSAAS.Application.Abstractions.Tenants;
 
 public interface ITenantReadRepository
 {

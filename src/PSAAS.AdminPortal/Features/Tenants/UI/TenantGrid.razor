@@ -4,8 +4,8 @@
 @using MudBlazor
 @using PSAAS.AdminPortal
 @using PSAAS.AdminPortal.Components
+@using PSAAS.AdminPortal.Features.Tenants.Services
 @using PSAAS.AdminPortal.Features.Tenants.ViewModels
-@using PSAAS.Domain
 @inherits MvvmComponentBase<TenantGridViewModel>
 @inject IStringLocalizer<SharedResource> L
 
@@ -25,7 +25,7 @@
         </MudButton>
     </MudStack>
 
-    <MudTable T="Tenant"
+    <MudTable T="TenantListItem"
               Items="ViewModel.Tenants"
               Loading="ViewModel.IsLoading"
               Dense="true"

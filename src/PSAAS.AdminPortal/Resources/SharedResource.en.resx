@@ -99,6 +99,9 @@
   <data name="Tenants.Create.Action.Cancel" xml:space="preserve">
     <value>Cancel</value>
   </data>
+  <data name="Tenants.Create.SaveFailed" xml:space="preserve">
+    <value>Unable to save the company. Please try again later.</value>
+  </data>
   <data name="Tenants.Column.CompanyName" xml:space="preserve">
     <value>Company name</value>
   </data>
@@ -119,6 +122,9 @@
   </data>
   <data name="Validation.InvalidFormat" xml:space="preserve">
     <value>Invalid format.</value>
+  </data>
+  <data name="Validation.MaxLengthExceeded" xml:space="preserve">
+    <value>Maximum length exceeded.</value>
   </data>
   <data name="Validation.NotUnique" xml:space="preserve">
     <value>Value already exists.</value>

@@ -6,6 +6,7 @@ using MudBlazor.Services;
 using NLog;
 using NLog.Web;
 using PSAAS.AdminPortal.Components;
+using PSAAS.AdminPortal.Features.Tenants.Services;
 using PSAAS.AdminPortal.Features.Tenants.ViewModels;
 using PSAAS.Auth;
 using PSAAS.Infrastructure;
@@ -27,6 +28,8 @@ try
     builder.Services.AddPsaasInfrastructure(builder.Configuration);
     builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
     builder.Services.AddMudServices();
+    builder.Services.AddScoped<ITenantService, TenantService>();
+    builder.Services.AddScoped<ITenantCreateService, TenantCreateService>();
     builder.Services.AddTransient<TenantCreateFormViewModel>();
     builder.Services.AddTransient<TenantGridViewModel>();
     builder.Services.AddCascadingAuthenticationState();

@@ -1,15 +1,14 @@
-using PSAAS.Application.Abstractions.Tenants;
-using PSAAS.Domain;
+using PSAAS.AdminPortal.Features.Tenants.Services;
 using PSAAS.MVVM;
 
 namespace PSAAS.AdminPortal.Features.Tenants.ViewModels;
 
-public sealed class TenantGridViewModel(ITenantReadRepository tenantReadRepository) : InjectedViewModel
+public sealed class TenantGridViewModel(ITenantService tenantService) : InjectedViewModel
 {
-    private IReadOnlyList<Tenant> _tenants = Array.Empty<Tenant>();
+    private IReadOnlyList<TenantListItem> _tenants = Array.Empty<TenantListItem>();
     private bool _isLoading;
 
-    public IReadOnlyList<Tenant> Tenants
+    public IReadOnlyList<TenantListItem> Tenants
     {
         get => _tenants;
         private set => SetProperty(ref _tenants, value);
@@ -29,7 +28,7 @@ public sealed class TenantGridViewModel(ITenantReadRepository tenantReadReposito
 
         try
         {
-            Tenants = await tenantReadRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
+            Tenants = await tenantService.GetTenantListAsync(cancellationToken).ConfigureAwait(false);
         }
         finally
         {

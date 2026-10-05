@@ -26,6 +26,7 @@ public static class DependencyInjection
         });
 
         services.AddScoped<ITenantReadRepository, TenantReadRepository>();
+        services.AddScoped<ITenantWriteRepository, TenantWriteRepository>();
         services.AddScoped<ITenantUniquenessChecker, TenantUniquenessChecker>();
         services.AddScoped<TenantCreateValidator>();
 

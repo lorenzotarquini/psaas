@@ -4,10 +4,12 @@
 @using MudBlazor
 @using PSAAS.AdminPortal
 @using PSAAS.AdminPortal.Components
+@using PSAAS.AdminPortal.Features.Tenants.Services
 @using PSAAS.AdminPortal.Features.Tenants.ViewModels
 @using PSAAS.Application.Contracts.Tenants
 @inherits MvvmComponentBase<TenantCreateFormViewModel>
 @inject IStringLocalizer<SharedResource> L
+@inject NavigationManager NavigationManager
 
 <PageTitle>@L["Tenants.Create.Title"]</PageTitle>
 
@@ -15,6 +17,9 @@
     <MudText Typo="Typo.h4" HtmlTag="h1">@L["Tenants.Create.Title"]</MudText>
 
     <MudPaper Elevation="1" Class="pa-4">
+        @* MudForm in MudBlazor 9 has no submit handler and a native submit button would
+           reload the page, so the save button is a plain button invoking the submit
+           logic; field validation runs inside it before any save. *@
         <MudForm>
             <MudStack Spacing="4">
                 <MudGrid Spacing="3">
@@ -117,6 +122,13 @@
                     </MudGrid>
                 </MudStack>
 
+                @if (ViewModel.SaveErrorCode is not null)
+                {
+                    <MudAlert Severity="Severity.Error" Dense="true">
+                        @SaveMessage
+                    </MudAlert>
+                }
+
                 <MudStack Row="true" Justify="Justify.FlexEnd" Spacing="2">
                     <MudButton Variant="Variant.Outlined"
                                Color="Color.Secondary"
@@ -124,9 +136,11 @@
                                Href="/organizations">
                         @L["Tenants.Create.Action.Cancel"]
                     </MudButton>
-                    <MudButton ButtonType="ButtonType.Submit"
+                    <MudButton ButtonType="ButtonType.Button"
                                Variant="Variant.Filled"
                                Color="Color.Primary"
+                               Disabled="@(ViewModel.IsSaving)"
+                               OnClick="HandleSaveAsync"
                                StartIcon="@Icons.Material.Filled.Save">
                         @L["Tenants.Create.Action.Save"]
                     </MudButton>
@@ -137,12 +151,27 @@
 </MudStack>
 
 @code {
+    private async Task HandleSaveAsync()
+    {
+        if (await ViewModel.SubmitAsync())
+        {
+            NavigationManager.NavigateTo("/organizations");
+        }
+    }
+
     private string? ValidationMessage(string? errorCode) => errorCode switch
     {
         null => null,
         TenantFieldValidationErrorCodes.Required => L["Validation.Required"].Value,
         TenantFieldValidationErrorCodes.InvalidFormat => L["Validation.InvalidFormat"].Value,
+        TenantFieldValidationErrorCodes.MaxLengthExceeded => L["Validation.MaxLengthExceeded"].Value,
         TenantFieldValidationErrorCodes.NotUnique => L["Validation.NotUnique"].Value,
         _ => L["Validation.Invalid"].Value
+    };
+
+    private string SaveMessage => ViewModel.SaveErrorCode switch
+    {
+        TenantCreateErrorCodes.SaveFailed => L["Tenants.Create.SaveFailed"].Value,
+        _ => L["Error.Unhandled"].Value
     };
 }

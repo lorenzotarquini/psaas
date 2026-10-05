@@ -1,3 +1,4 @@
+using System.Net.Mail;
 using System.Text.RegularExpressions;
 using PSAAS.Application.Abstractions.Tenants;
 using PSAAS.Application.Contracts.Tenants;
@@ -6,14 +7,24 @@ namespace PSAAS.Application.Validators.Tenants;
 
 public sealed partial class TenantCreateValidator(ITenantUniquenessChecker uniquenessChecker)
 {
+    private const int CompanyNameMaxLength = 20;
+
     public async Task<TenantFieldValidationResult> ValidateCompanyNameAsync(
         string? companyName,
         CancellationToken cancellationToken = default)
     {
+        var displayCompanyName = companyName?.Trim() ?? string.Empty;
         var normalizedCompanyName = TenantFieldNormalizer.NormalizeCompanyName(companyName);
-        if (normalizedCompanyName.Length == 0)
+        if (displayCompanyName.Length == 0 || normalizedCompanyName.Length == 0)
         {
             return TenantFieldValidationResult.Invalid(TenantFieldValidationErrorCodes.Required);
+        }
+
+        if (displayCompanyName.Length > CompanyNameMaxLength)
+        {
+            return TenantFieldValidationResult.Invalid(
+                TenantFieldValidationErrorCodes.MaxLengthExceeded,
+                normalizedCompanyName);
         }
 
         var isUnique = await uniquenessChecker
@@ -61,6 +72,13 @@ public sealed partial class TenantCreateValidator(ITenantUniquenessChecker uniqu
             return TenantFieldValidationResult.Invalid(TenantFieldValidationErrorCodes.Required);
         }
 
+        if (!IsValidEmailAddress(normalizedCertifiedEmail))
+        {
+            return TenantFieldValidationResult.Invalid(
+                TenantFieldValidationErrorCodes.InvalidFormat,
+                normalizedCertifiedEmail);
+        }
+
         var isUnique = await uniquenessChecker
             .IsCertifiedEmailUniqueAsync(normalizedCertifiedEmail, cancellationToken)
             .ConfigureAwait(false);
@@ -72,4 +90,17 @@ public sealed partial class TenantCreateValidator(ITenantUniquenessChecker uniqu
 
     [GeneratedRegex("^[A-Z]{2}[0-9]{11}$", RegexOptions.CultureInvariant)]
     private static partial Regex CompleteVatNumberRegex();
+
+    private static bool IsValidEmailAddress(string email)
+    {
+        try
+        {
+            var parsed = new MailAddress(email);
+            return parsed.Address.Equals(email, StringComparison.OrdinalIgnoreCase);
+        }
+        catch (FormatException)
+        {
+            return false;
+        }
+    }
 }

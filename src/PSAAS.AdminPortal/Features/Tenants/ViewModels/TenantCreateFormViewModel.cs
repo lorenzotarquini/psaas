@@ -1,10 +1,13 @@
+using PSAAS.AdminPortal.Features.Tenants.Services;
 using PSAAS.Application.Contracts.Tenants;
 using PSAAS.Application.Validators.Tenants;
 using PSAAS.MVVM;
 
 namespace PSAAS.AdminPortal.Features.Tenants.ViewModels;
 
-public sealed class TenantCreateFormViewModel(TenantCreateValidator tenantCreateValidator) : InjectedViewModel
+public sealed class TenantCreateFormViewModel(
+    TenantCreateValidator tenantCreateValidator,
+    ITenantCreateService tenantCreateService) : InjectedViewModel
 {
     private string? _companyName;
     private string? _vatNumber;
@@ -21,6 +24,9 @@ public sealed class TenantCreateFormViewModel(TenantCreateValidator tenantCreate
     private string? _cityErrorCode;
     private string? _postalCodeErrorCode;
     private string? _countryErrorCode;
+
+    private bool _isSaving;
+    private string? _saveErrorCode;
 
     private CancellationTokenSource? _companyNameValidationCancellation;
     private CancellationTokenSource? _vatNumberValidationCancellation;
@@ -155,6 +161,111 @@ public sealed class TenantCreateFormViewModel(TenantCreateValidator tenantCreate
         get => _countryErrorCode;
         private set => SetProperty(ref _countryErrorCode, value);
     }
+
+    /// <summary>
+    /// Gets a value indicating whether a save is currently in progress,
+    /// used to prevent concurrent submits.
+    /// </summary>
+    public bool IsSaving
+    {
+        get => _isSaving;
+        private set => SetProperty(ref _isSaving, value);
+    }
+
+    /// <summary>
+    /// Gets the error code of a failed save that is not tied to a single field,
+    /// or null when the last submit did not fail generically.
+    /// </summary>
+    public string? SaveErrorCode
+    {
+        get => _saveErrorCode;
+        private set => SetProperty(ref _saveErrorCode, value);
+    }
+
+    /// <summary>
+    /// Validates every field, then submits the tenant to the creation service.
+    /// Returns true when the tenant was created; false when validation failed,
+    /// the service reported errors or the submit was skipped because another
+    /// one is already in progress.
+    /// </summary>
+    public async Task<bool> SubmitAsync()
+    {
+        if (IsSaving)
+        {
+            return false;
+        }
+
+        IsSaving = true;
+        SaveErrorCode = null;
+
+        try
+        {
+            await ValidateCompanyNameAsync().ConfigureAwait(false);
+            await ValidateVatNumberAsync().ConfigureAwait(false);
+            await ValidateCertifiedEmailAsync().ConfigureAwait(false);
+            ValidateStreet();
+            ValidateCity();
+            ValidatePostalCode();
+            ValidateCountry();
+
+            if (HasFieldErrors)
+            {
+                return false;
+            }
+
+            // The form has a single VAT field that carries the complete VAT
+            // number; the service derives the 11-digit VatNumber from it.
+            var request = new TenantCreateRequest(
+                CompanyName,
+                VatNumber,
+                CertifiedEmail,
+                Street,
+                City,
+                PostalCode,
+                Country);
+
+            var result = await tenantCreateService
+                .CreateTenantAsync(request, DisposalToken)
+                .ConfigureAwait(false);
+
+            if (!result.Succeeded)
+            {
+                CompanyNameErrorCode = result.CompanyNameErrorCode;
+                VatNumberErrorCode = result.CompleteVatNumberErrorCode;
+                CertifiedEmailErrorCode = result.CertifiedEmailErrorCode;
+                StreetErrorCode = result.StreetErrorCode;
+                CityErrorCode = result.CityErrorCode;
+                PostalCodeErrorCode = result.PostalCodeErrorCode;
+                CountryErrorCode = result.CountryErrorCode;
+                SaveErrorCode = result.ErrorCode;
+                return false;
+            }
+
+            return true;
+        }
+        catch (OperationCanceledException) when (DisposalToken.IsCancellationRequested)
+        {
+            return false;
+        }
+        catch (Exception)
+        {
+            SaveErrorCode = TenantCreateErrorCodes.SaveFailed;
+            return false;
+        }
+        finally
+        {
+            IsSaving = false;
+        }
+    }
+
+    private bool HasFieldErrors =>
+        CompanyNameErrorCode is not null
+        || VatNumberErrorCode is not null
+        || CertifiedEmailErrorCode is not null
+        || StreetErrorCode is not null
+        || CityErrorCode is not null
+        || PostalCodeErrorCode is not null
+        || CountryErrorCode is not null;
 
     public async Task ValidateCompanyNameAsync()
     {

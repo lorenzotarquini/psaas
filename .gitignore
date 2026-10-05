@@ -24,3 +24,5 @@
 /src/PSAAS.Application/bin
 /src/tests/PSAAS.Infrastructure.Tests/bin/
 /src/tests/PSAAS.Infrastructure.Tests/obj/
+/src/tests/PSAAS.AdminPortal.Tests/obj/
+/src/tests/PSAAS.AdminPortal.Tests/bin/

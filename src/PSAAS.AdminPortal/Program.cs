@@ -30,7 +30,9 @@ try
     builder.Services.AddMudServices();
     builder.Services.AddScoped<ITenantService, TenantService>();
     builder.Services.AddScoped<ITenantCreateService, TenantCreateService>();
+    builder.Services.AddScoped<ITenantEditService, TenantEditService>();
     builder.Services.AddTransient<TenantCreateFormViewModel>();
+    builder.Services.AddTransient<TenantEditFormViewModel>();
     builder.Services.AddTransient<TenantGridViewModel>();
     builder.Services.AddCascadingAuthenticationState();
     builder.Services.Configure<ForwardedHeadersOptions>(options =>

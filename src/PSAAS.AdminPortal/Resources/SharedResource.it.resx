@@ -60,6 +60,9 @@
   <data name="Tenants.Action.Add" xml:space="preserve">
     <value>Aggiungi società</value>
   </data>
+  <data name="Tenants.Action.Edit" xml:space="preserve">
+    <value>Modifica</value>
+  </data>
   <data name="Tenants.Create.Title" xml:space="preserve">
     <value>Aggiungi società</value>
   </data>
@@ -102,6 +105,18 @@
   <data name="Tenants.Create.SaveFailed" xml:space="preserve">
     <value>Impossibile salvare la società. Riprovare più tardi.</value>
   </data>
+  <data name="Tenants.Edit.Title" xml:space="preserve">
+    <value>Modifica società</value>
+  </data>
+  <data name="Tenants.Edit.NotFound" xml:space="preserve">
+    <value>Società non trovata.</value>
+  </data>
+  <data name="Tenants.Edit.LoadFailed" xml:space="preserve">
+    <value>Impossibile caricare la società. Riprovare più tardi.</value>
+  </data>
+  <data name="Tenants.Edit.SaveFailed" xml:space="preserve">
+    <value>Impossibile aggiornare la società. Riprovare più tardi.</value>
+  </data>
   <data name="Tenants.Column.CompanyName" xml:space="preserve">
     <value>Ragione sociale</value>
   </data>
@@ -110,6 +125,9 @@
   </data>
   <data name="Tenants.Column.CertifiedEmail" xml:space="preserve">
     <value>PEC</value>
+  </data>
+  <data name="Tenants.Column.Actions" xml:space="preserve">
+    <value>Azioni</value>
   </data>
   <data name="Tenants.Empty.Title" xml:space="preserve">
     <value>Nessuna società disponibile</value>

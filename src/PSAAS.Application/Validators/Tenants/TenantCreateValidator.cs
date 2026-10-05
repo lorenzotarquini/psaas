@@ -13,6 +13,15 @@ public sealed partial class TenantCreateValidator(ITenantUniquenessChecker uniqu
         string? companyName,
         CancellationToken cancellationToken = default)
     {
+        return await ValidateCompanyNameAsync(companyName, excludedTenantId: null, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    public async Task<TenantFieldValidationResult> ValidateCompanyNameAsync(
+        string? companyName,
+        Guid? excludedTenantId,
+        CancellationToken cancellationToken = default)
+    {
         var displayCompanyName = companyName?.Trim() ?? string.Empty;
         var normalizedCompanyName = TenantFieldNormalizer.NormalizeCompanyName(companyName);
         if (displayCompanyName.Length == 0 || normalizedCompanyName.Length == 0)
@@ -27,9 +36,13 @@ public sealed partial class TenantCreateValidator(ITenantUniquenessChecker uniqu
                 normalizedCompanyName);
         }
 
-        var isUnique = await uniquenessChecker
-            .IsCompanyNameUniqueAsync(normalizedCompanyName, cancellationToken)
-            .ConfigureAwait(false);
+        var isUnique = excludedTenantId.HasValue
+            ? await uniquenessChecker
+                .IsCompanyNameUniqueAsync(normalizedCompanyName, excludedTenantId.Value, cancellationToken)
+                .ConfigureAwait(false)
+            : await uniquenessChecker
+                .IsCompanyNameUniqueAsync(normalizedCompanyName, cancellationToken)
+                .ConfigureAwait(false);
 
         return isUnique
             ? TenantFieldValidationResult.Valid(normalizedCompanyName)
@@ -38,6 +51,15 @@ public sealed partial class TenantCreateValidator(ITenantUniquenessChecker uniqu
 
     public async Task<TenantFieldValidationResult> ValidateCompleteVatNumberAsync(
         string? completeVatNumber,
+        CancellationToken cancellationToken = default)
+    {
+        return await ValidateCompleteVatNumberAsync(completeVatNumber, excludedTenantId: null, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    public async Task<TenantFieldValidationResult> ValidateCompleteVatNumberAsync(
+        string? completeVatNumber,
+        Guid? excludedTenantId,
         CancellationToken cancellationToken = default)
     {
         var normalizedCompleteVatNumber = TenantFieldNormalizer.NormalizeCompleteVatNumber(completeVatNumber);
@@ -53,9 +75,13 @@ public sealed partial class TenantCreateValidator(ITenantUniquenessChecker uniqu
                 normalizedCompleteVatNumber);
         }
 
-        var isUnique = await uniquenessChecker
-            .IsCompleteVatNumberUniqueAsync(normalizedCompleteVatNumber, cancellationToken)
-            .ConfigureAwait(false);
+        var isUnique = excludedTenantId.HasValue
+            ? await uniquenessChecker
+                .IsCompleteVatNumberUniqueAsync(normalizedCompleteVatNumber, excludedTenantId.Value, cancellationToken)
+                .ConfigureAwait(false)
+            : await uniquenessChecker
+                .IsCompleteVatNumberUniqueAsync(normalizedCompleteVatNumber, cancellationToken)
+                .ConfigureAwait(false);
 
         return isUnique
             ? TenantFieldValidationResult.Valid(normalizedCompleteVatNumber)
@@ -64,6 +90,15 @@ public sealed partial class TenantCreateValidator(ITenantUniquenessChecker uniqu
 
     public async Task<TenantFieldValidationResult> ValidateCertifiedEmailAsync(
         string? certifiedEmail,
+        CancellationToken cancellationToken = default)
+    {
+        return await ValidateCertifiedEmailAsync(certifiedEmail, excludedTenantId: null, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    public async Task<TenantFieldValidationResult> ValidateCertifiedEmailAsync(
+        string? certifiedEmail,
+        Guid? excludedTenantId,
         CancellationToken cancellationToken = default)
     {
         var normalizedCertifiedEmail = TenantFieldNormalizer.NormalizeCertifiedEmail(certifiedEmail);
@@ -79,9 +114,13 @@ public sealed partial class TenantCreateValidator(ITenantUniquenessChecker uniqu
                 normalizedCertifiedEmail);
         }
 
-        var isUnique = await uniquenessChecker
-            .IsCertifiedEmailUniqueAsync(normalizedCertifiedEmail, cancellationToken)
-            .ConfigureAwait(false);
+        var isUnique = excludedTenantId.HasValue
+            ? await uniquenessChecker
+                .IsCertifiedEmailUniqueAsync(normalizedCertifiedEmail, excludedTenantId.Value, cancellationToken)
+                .ConfigureAwait(false)
+            : await uniquenessChecker
+                .IsCertifiedEmailUniqueAsync(normalizedCertifiedEmail, cancellationToken)
+                .ConfigureAwait(false);
 
         return isUnique
             ? TenantFieldValidationResult.Valid(normalizedCertifiedEmail)

@@ -18,6 +18,20 @@ public sealed class TenantUniquenessChecker(PsaasDbContext dbContext) : ITenantU
             .ConfigureAwait(false);
     }
 
+    public async Task<bool> IsCompanyNameUniqueAsync(
+        string normalizedCompanyName,
+        Guid excludedTenantId,
+        CancellationToken cancellationToken = default)
+    {
+        return !await dbContext.Tenants
+            .AsNoTracking()
+            .AnyAsync(
+                tenant => tenant.NormalizedCompanyName == normalizedCompanyName
+                    && tenant.Id != excludedTenantId.ToString(),
+                cancellationToken)
+            .ConfigureAwait(false);
+    }
+
     public async Task<bool> IsCompleteVatNumberUniqueAsync(
         string normalizedCompleteVatNumber,
         CancellationToken cancellationToken = default)
@@ -30,6 +44,20 @@ public sealed class TenantUniquenessChecker(PsaasDbContext dbContext) : ITenantU
             .ConfigureAwait(false);
     }
 
+    public async Task<bool> IsCompleteVatNumberUniqueAsync(
+        string normalizedCompleteVatNumber,
+        Guid excludedTenantId,
+        CancellationToken cancellationToken = default)
+    {
+        return !await dbContext.Tenants
+            .AsNoTracking()
+            .AnyAsync(
+                tenant => tenant.CompleteVatNumber == normalizedCompleteVatNumber
+                    && tenant.Id != excludedTenantId.ToString(),
+                cancellationToken)
+            .ConfigureAwait(false);
+    }
+
     public async Task<bool> IsCertifiedEmailUniqueAsync(
         string normalizedCertifiedEmail,
         CancellationToken cancellationToken = default)
@@ -38,6 +66,20 @@ public sealed class TenantUniquenessChecker(PsaasDbContext dbContext) : ITenantU
             .AsNoTracking()
             .AnyAsync(
                 tenant => tenant.NormalizedCertifiedEmail == normalizedCertifiedEmail,
+                cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    public async Task<bool> IsCertifiedEmailUniqueAsync(
+        string normalizedCertifiedEmail,
+        Guid excludedTenantId,
+        CancellationToken cancellationToken = default)
+    {
+        return !await dbContext.Tenants
+            .AsNoTracking()
+            .AnyAsync(
+                tenant => tenant.NormalizedCertifiedEmail == normalizedCertifiedEmail
+                    && tenant.Id != excludedTenantId.ToString(),
                 cancellationToken)
             .ConfigureAwait(false);
     }

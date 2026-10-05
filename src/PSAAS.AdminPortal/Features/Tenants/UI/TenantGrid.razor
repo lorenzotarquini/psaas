@@ -35,11 +35,21 @@
             <MudTh>@L["Tenants.Column.CompanyName"]</MudTh>
             <MudTh>@L["Tenants.Column.VatNumber"]</MudTh>
             <MudTh>@L["Tenants.Column.CertifiedEmail"]</MudTh>
+            <MudTh>@L["Tenants.Column.Actions"]</MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="@L["Tenants.Column.CompanyName"]">@context.CompanyName</MudTd>
             <MudTd DataLabel="@L["Tenants.Column.VatNumber"]">@context.VatNumber</MudTd>
             <MudTd DataLabel="@L["Tenants.Column.CertifiedEmail"]">@context.CertifiedEmail</MudTd>
+            <MudTd DataLabel="@L["Tenants.Column.Actions"]">
+                <MudButton Variant="Variant.Text"
+                           Color="Color.Primary"
+                           Size="Size.Small"
+                           StartIcon="@Icons.Material.Filled.Edit"
+                           Href="@($"/organizations/{context.Id}/edit")">
+                    @L["Tenants.Action.Edit"]
+                </MudButton>
+            </MudTd>
         </RowTemplate>
         <NoRecordsContent>
             <MudStack AlignItems="AlignItems.Center" Class="pa-6" Spacing="1">

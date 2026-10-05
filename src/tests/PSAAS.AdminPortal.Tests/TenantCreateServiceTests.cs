@@ -192,6 +192,9 @@ public sealed class TenantCreateServiceTests
 
             return Task.CompletedTask;
         }
+
+        public Task<bool> UpdateAsync(Tenant tenant, CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
     }
 
     private sealed class ConfigurableTenantUniquenessChecker : ITenantUniquenessChecker

@@ -4,8 +4,13 @@
     <Project Path="../Infrastructure/PSAAS.Infrastructure/PSAAS.Infrastructure.csproj" Id="d8cbb29a-5575-4818-b833-f6f6718e24f5" />
     <Project Path="../PSAAS.Application/PSAAS.Application.csproj" Id="116d56ec-1300-4081-b3e2-3ccd2db50e22" />
   </Folder>
+  <Folder Name="/Orchestration/">
+    <Project Path="PSAAS.AppHost.csproj" />
+  </Folder>
+  <Folder Name="/Third_Party_Services/">
+    <Project Path="../PSAAS.Auth/PSAAS.Auth.csproj" />
+    <Project Path="../PSAAS.MVVM/PSAAS.MVVM.csproj" />
+  </Folder>
   <Project Path="../PSAAS.AdminPortal/PSAAS.AdminPortal.csproj" Id="71b037b7-a1c2-4192-8f83-b6188cc3d605" />
-  <Project Path="../PSAAS.Auth/PSAAS.Auth.csproj" />
-  <Project Path="../PSAAS.MVVM/PSAAS.MVVM.csproj" />
-  <Project Path="PSAAS.AppHost.csproj" />
+  <Project Path="../tests/PSAAS.AdminPortal.Tests/PSAAS.AdminPortal.Tests.csproj" />
 </Solution>

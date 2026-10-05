@@ -19,4 +19,16 @@ public sealed class TenantReadRepository(PsaasDbContext dbContext) : ITenantRead
             .Select(TenantDbModelConverter.ToDomain)
             .ToArray();
     }
+
+    public async Task<Tenant?> GetByIdAsync(Guid tenantId, CancellationToken cancellationToken = default)
+    {
+        var tenant = await dbContext.Tenants
+            .AsNoTracking()
+            .SingleOrDefaultAsync(
+                tenant => tenant.Id == tenantId.ToString(),
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        return tenant is null ? null : TenantDbModelConverter.ToDomain(tenant);
+    }
 }

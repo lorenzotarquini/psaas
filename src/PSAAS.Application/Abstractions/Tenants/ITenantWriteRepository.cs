@@ -18,4 +18,14 @@ public interface ITenantWriteRepository
     /// (normalized company name, complete VAT number, normalized certified email).
     /// </exception>
     Task AddAsync(Tenant tenant, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Persists changes for an existing tenant.
+    /// </summary>
+    /// <returns><see langword="true" /> when the tenant exists and was updated; otherwise <see langword="false" />.</returns>
+    /// <exception cref="TenantUniquenessConflictException">
+    /// A concurrent tenant already occupies one of the unique values
+    /// (normalized company name, complete VAT number, normalized certified email).
+    /// </exception>
+    Task<bool> UpdateAsync(Tenant tenant, CancellationToken cancellationToken = default);
 }

@@ -60,6 +60,9 @@
   <data name="Tenants.Action.Add" xml:space="preserve">
     <value>Add company</value>
   </data>
+  <data name="Tenants.Action.Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
   <data name="Tenants.Create.Title" xml:space="preserve">
     <value>Add company</value>
   </data>
@@ -102,6 +105,18 @@
   <data name="Tenants.Create.SaveFailed" xml:space="preserve">
     <value>Unable to save the company. Please try again later.</value>
   </data>
+  <data name="Tenants.Edit.Title" xml:space="preserve">
+    <value>Edit company</value>
+  </data>
+  <data name="Tenants.Edit.NotFound" xml:space="preserve">
+    <value>Company not found.</value>
+  </data>
+  <data name="Tenants.Edit.LoadFailed" xml:space="preserve">
+    <value>Unable to load the company. Please try again later.</value>
+  </data>
+  <data name="Tenants.Edit.SaveFailed" xml:space="preserve">
+    <value>Unable to update the company. Please try again later.</value>
+  </data>
   <data name="Tenants.Column.CompanyName" xml:space="preserve">
     <value>Company name</value>
   </data>
@@ -110,6 +125,9 @@
   </data>
   <data name="Tenants.Column.CertifiedEmail" xml:space="preserve">
     <value>Certified email</value>
+  </data>
+  <data name="Tenants.Column.Actions" xml:space="preserve">
+    <value>Actions</value>
   </data>
   <data name="Tenants.Empty.Title" xml:space="preserve">
     <value>No companies available</value>

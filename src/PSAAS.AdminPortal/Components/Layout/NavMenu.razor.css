@@ -42,15 +42,18 @@
 }
 
 ::deep .mud-nav-link {
+    border: 1px solid transparent;
     border-radius: 4px;
+    box-sizing: border-box;
     color: var(--sidebar-text-color);
     margin: 0.125rem 0.75rem;
     width: auto;
 }
 
 ::deep .mud-nav-link.active:not(.mud-nav-link-disabled) {
-    background-color: var(--sidebar-item-on-hover-background);
-    color: var(--sidebar-item-on-hover-text-color);
+    background-color: #ffffff;
+    border-color: #ffffff;
+    color: var(--sidebar-background);
 }
 
 ::deep .mud-nav-link:not(.mud-nav-link-disabled):hover {

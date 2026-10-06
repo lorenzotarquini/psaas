@@ -15,7 +15,7 @@
     <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
         <div>
             <MudText Typo="Typo.h4" HtmlTag="h1">@L["Tenants.Title"]</MudText>
-            <MudText Typo="Typo.body2" Color="Color.Secondary">@L["Tenants.Subtitle"]</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-2">@L["Tenants.Subtitle"]</MudText>
         </div>
         <MudButton Variant="Variant.Filled"
                    Color="Color.Primary"
@@ -30,6 +30,7 @@
               Loading="ViewModel.IsLoading"
               Dense="true"
               Hover="true"
+              RowsPerPage="10"
               Elevation="1">
         <HeaderContent>
             <MudTh>@L["Tenants.Column.CompanyName"]</MudTh>
@@ -42,13 +43,11 @@
             <MudTd DataLabel="@L["Tenants.Column.VatNumber"]">@context.VatNumber</MudTd>
             <MudTd DataLabel="@L["Tenants.Column.CertifiedEmail"]">@context.CertifiedEmail</MudTd>
             <MudTd DataLabel="@L["Tenants.Column.Actions"]">
-                <MudButton Variant="Variant.Text"
-                           Color="Color.Primary"
-                           Size="Size.Small"
-                           StartIcon="@Icons.Material.Filled.Edit"
-                           Href="@($"/organizations/{context.Id}/edit")">
-                    @L["Tenants.Action.Edit"]
-                </MudButton>
+                <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                               Color="Color.Primary"
+                               Size="Size.Small"
+                               Href="@($"/organizations/{context.Id}/edit")"
+                               aria-label="@L["Tenants.Action.Edit"]" />
             </MudTd>
         </RowTemplate>
         <NoRecordsContent>
@@ -58,5 +57,11 @@
                 <MudText Typo="Typo.body2" Color="Color.Secondary">@L["Tenants.Empty.Description"]</MudText>
             </MudStack>
         </NoRecordsContent>
+        <PagerContent>
+            <MudTablePager PageSizeOptions="new int[] { 10, 25, 50 }"
+                           RowsPerPageString="@L["Tenants.Pager.RowsPerPage"]"
+                           InfoFormat="@L["Tenants.Pager.InfoFormat"]"
+                           AllItemsText="@L["Tenants.Pager.AllItems"]" />
+        </PagerContent>
     </MudTable>
 </MudStack>

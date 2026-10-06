@@ -135,6 +135,15 @@
   <data name="Tenants.Empty.Description" xml:space="preserve">
     <value>The grid is ready for data integration. No persistent data is loaded in this slice.</value>
   </data>
+  <data name="Tenants.Pager.RowsPerPage" xml:space="preserve">
+    <value>Rows per page:</value>
+  </data>
+  <data name="Tenants.Pager.InfoFormat" xml:space="preserve">
+    <value>{first_item}-{last_item} of {all_items}</value>
+  </data>
+  <data name="Tenants.Pager.AllItems" xml:space="preserve">
+    <value>All</value>
+  </data>
   <data name="Validation.Required" xml:space="preserve">
     <value>Required field.</value>
   </data>

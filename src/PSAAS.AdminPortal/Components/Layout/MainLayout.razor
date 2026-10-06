@@ -1,7 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @inject IStringLocalizer<SharedResource> L
 
-<MudThemeProvider />
+<MudThemeProvider Theme="_theme" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
@@ -27,3 +27,51 @@
     <a href="." class="reload">@L["Common.Reload"]</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code {
+    private bool _isDarkMode;
+
+    private readonly MudTheme _theme = new()
+    {
+        PaletteLight = new PaletteLight
+        {
+            Primary = "#8498b1",
+            Secondary = "#3e5c76",
+            Background = "#1d2d44",
+            Surface = "#FFFFFF",
+            AppbarBackground = "#1d2d44",
+            AppbarText = "#FFFFFF",
+            TextPrimary = "#2B2B2B"
+        },
+        PaletteDark = new PaletteDark
+        {
+            Primary = "#D98BA6",
+            Secondary = "#C9A57B",
+            Background = "#1A1A1F",
+            Surface = "#25252B",
+            AppbarBackground = "#25252B"
+        },
+        Typography = new Typography
+        {
+            Default = new DefaultTypography
+            {
+                FontFamily = new[] { "Montserrat", "Helvetica", "Arial", "sans-serif" }
+            },
+            H1 = new H1Typography
+            {
+                FontFamily = new[] { "Cormorant Garamond", "serif" },
+                FontSize = "3rem",
+                FontWeight = "600"
+            },
+            Button = new ButtonTypography
+            {
+                TextTransform = "none" // niente maiuscolo forzato
+            }
+        },
+        LayoutProperties = new LayoutProperties
+        {
+            DefaultBorderRadius = "8px",
+            DrawerWidthLeft = "260px"
+        }
+    };
+}

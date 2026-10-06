@@ -10,7 +10,7 @@ namespace PSAAS.Infrastructure;
 
 public static class DependencyInjection
 {
-    private const string PsaasDbConnectionStringName = "psaas_db";
+    private const string PsaasDbConnectionStringName = "psaas-db";
 
     public static IServiceCollection AddPsaasInfrastructure(
         this IServiceCollection services,

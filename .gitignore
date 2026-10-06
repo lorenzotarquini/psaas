@@ -26,3 +26,4 @@
 /src/tests/PSAAS.Infrastructure.Tests/obj/
 /src/tests/PSAAS.AdminPortal.Tests/obj/
 /src/tests/PSAAS.AdminPortal.Tests/bin/
+/src/postgres_data/

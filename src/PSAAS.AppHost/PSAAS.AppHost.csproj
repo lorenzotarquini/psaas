@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\PSAAS.AdminPortal\PSAAS.AdminPortal.Backend\PSAAS.AdminPortal.Backend.csproj" />
   </ItemGroup>
 
   <ItemGroup>

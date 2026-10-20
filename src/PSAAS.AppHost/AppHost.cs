@@ -8,4 +8,8 @@ var postgres = builder.AddPostgres("postgres", postgresUsername, postgresPasswor
 
 var psaasDb = postgres.AddDatabase("psaas-db", "psaas-db");
 
+builder.AddProject<Projects.PSAAS_AdminPortal_Backend>("adminportal-backend")
+    .WithReference(psaasDb)
+    .WaitFor(psaasDb);
+
 builder.Build().Run();

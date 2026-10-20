@@ -1,0 +1,12 @@
+@PSAAS.AdminPortal.Backend_HostAddress = http://localhost:5192
+@token = <access token Keycloak>
+
+GET {{PSAAS.AdminPortal.Backend_HostAddress}}/health
+
+###
+
+GET {{PSAAS.AdminPortal.Backend_HostAddress}}/api/me
+Authorization: Bearer {{token}}
+Accept: application/json
+
+###

@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using PSAAS.Auth.Internal;
 
@@ -100,7 +101,14 @@ public static class KeycloakServiceCollectionExtensions
                 {
                     OnTokenValidated = context =>
                     {
-                        if (context.Principal?.Identity is ClaimsIdentity identity && context.SecurityToken is JwtSecurityToken token)
+                        // Since .NET 8 JwtBearer validates with JsonWebTokenHandler, so the token is usually a JsonWebToken.
+                        var token = context.SecurityToken switch
+                        {
+                            JwtSecurityToken jwt => jwt,
+                            JsonWebToken json => new JwtSecurityToken(json.EncodedToken),
+                            _ => null
+                        };
+                        if (context.Principal?.Identity is ClaimsIdentity identity && token is not null)
                         {
                             KeycloakRoleClaims.AddRoleClaims(identity, token, keycloakOptions);
                         }

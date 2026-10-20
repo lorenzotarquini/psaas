@@ -9,6 +9,5 @@
   </Folder>
   <Folder Name="/Third_Party_Services/">
     <Project Path="../PSAAS.Auth/PSAAS.Auth.csproj" />
-    <Project Path="../PSAAS.MVVM/PSAAS.MVVM.csproj" />
   </Folder>
 </Solution>

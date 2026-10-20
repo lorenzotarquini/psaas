@@ -35,24 +35,31 @@ namespace PSAAS.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("ProfileId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("TenantId")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
+                    b.HasIndex("TenantId", "Name")
                         .IsUnique();
+
+                    b.ToTable("ProductiveUnits", (string)null);
+                });
+
+            modelBuilder.Entity("PSAAS.Infrastructure.Data.DbModels.ProductiveUnitProfileDbModel", b =>
+                {
+                    b.Property<Guid>("ProductiveUnitId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ProfileId")
+                        .HasColumnType("text");
+
+                    b.HasKey("ProductiveUnitId", "ProfileId");
 
                     b.HasIndex("ProfileId");
 
-                    b.HasIndex("TenantId");
-
-                    b.ToTable("ProductiveUnits", (string)null);
+                    b.ToTable("ProductiveUnitProfiles", (string)null);
                 });
 
             modelBuilder.Entity("PSAAS.Infrastructure.Data.DbModels.ProfileDbModel", b =>
@@ -67,12 +74,16 @@ namespace PSAAS.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("TenantId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Id")
                         .IsUnique();
 
-                    b.HasIndex("Name")
+                    b.HasIndex("TenantId", "Name")
                         .IsUnique();
 
                     b.ToTable("Profiles", (string)null);
@@ -126,21 +137,41 @@ namespace PSAAS.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("PSAAS.Infrastructure.Data.DbModels.ProductiveUnitDbModel", b =>
                 {
-                    b.HasOne("PSAAS.Infrastructure.Data.DbModels.ProfileDbModel", "Profile")
-                        .WithMany("ProductiveUnits")
-                        .HasForeignKey("ProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("PSAAS.Infrastructure.Data.DbModels.TenantDbModel", "Tenant")
                         .WithMany()
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Profile");
-
                     b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("PSAAS.Infrastructure.Data.DbModels.ProductiveUnitProfileDbModel", b =>
+                {
+                    b.HasOne("PSAAS.Infrastructure.Data.DbModels.ProductiveUnitDbModel", "ProductiveUnit")
+                        .WithMany("ProductiveUnitProfiles")
+                        .HasForeignKey("ProductiveUnitId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PSAAS.Infrastructure.Data.DbModels.ProfileDbModel", "Profile")
+                        .WithMany("ProductiveUnitProfiles")
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ProductiveUnit");
+
+                    b.Navigation("Profile");
+                });
+
+            modelBuilder.Entity("PSAAS.Infrastructure.Data.DbModels.ProfileDbModel", b =>
+                {
+                    b.HasOne("PSAAS.Infrastructure.Data.DbModels.TenantDbModel", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("PSAAS.Infrastructure.Data.DbModels.TenantDbModel", b =>
@@ -177,9 +208,14 @@ namespace PSAAS.Infrastructure.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("PSAAS.Infrastructure.Data.DbModels.ProductiveUnitDbModel", b =>
+                {
+                    b.Navigation("ProductiveUnitProfiles");
+                });
+
             modelBuilder.Entity("PSAAS.Infrastructure.Data.DbModels.ProfileDbModel", b =>
                 {
-                    b.Navigation("ProductiveUnits");
+                    b.Navigation("ProductiveUnitProfiles");
                 });
 #pragma warning restore 612, 618
         }

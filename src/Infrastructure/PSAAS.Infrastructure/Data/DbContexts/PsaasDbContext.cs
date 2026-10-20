@@ -11,6 +11,8 @@ public sealed class PsaasDbContext(DbContextOptions<PsaasDbContext> options) : D
 
     public DbSet<ProfileDbModel> Profiles => Set<ProfileDbModel>();
 
+    public DbSet<ProductiveUnitProfileDbModel> ProductiveUnitProfiles => Set<ProductiveUnitProfileDbModel>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<TenantDbModel>(entityBuilder =>
@@ -44,24 +46,38 @@ public sealed class PsaasDbContext(DbContextOptions<PsaasDbContext> options) : D
 
             entityBuilder.HasKey(productiveUnit => productiveUnit.Id);
 
-            entityBuilder.HasIndex(productiveUnit => productiveUnit.Name).IsUnique();
+            entityBuilder.HasIndex(productiveUnit => new { productiveUnit.TenantId, productiveUnit.Name }).IsUnique();
 
             entityBuilder.Property(productiveUnit => productiveUnit.Id).IsRequired();
             entityBuilder.Property(productiveUnit => productiveUnit.Name).IsRequired();
             entityBuilder.Property(productiveUnit => productiveUnit.Description).IsRequired(false);
             entityBuilder.Property(productiveUnit => productiveUnit.TenantId).IsRequired();
-            entityBuilder.Property(productiveUnit => productiveUnit.ProfileId).IsRequired();
-
             entityBuilder
                 .HasOne(productiveUnit => productiveUnit.Tenant)
                 .WithMany()
                 .HasForeignKey(productiveUnit => productiveUnit.TenantId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<ProductiveUnitProfileDbModel>(entityBuilder =>
+        {
+            entityBuilder.ToTable("ProductiveUnitProfiles");
+
+            entityBuilder.HasKey(link => new { link.ProductiveUnitId, link.ProfileId });
+
+            entityBuilder.Property(link => link.ProductiveUnitId).IsRequired();
+            entityBuilder.Property(link => link.ProfileId).IsRequired();
 
             entityBuilder
-                .HasOne(productiveUnit => productiveUnit.Profile)
-                .WithMany(profile => profile.ProductiveUnits)
-                .HasForeignKey(productiveUnit => productiveUnit.ProfileId)
+                .HasOne(link => link.ProductiveUnit)
+                .WithMany(productiveUnit => productiveUnit.ProductiveUnitProfiles)
+                .HasForeignKey(link => link.ProductiveUnitId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entityBuilder
+                .HasOne(link => link.Profile)
+                .WithMany(profile => profile.ProductiveUnitProfiles)
+                .HasForeignKey(link => link.ProfileId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
@@ -72,11 +88,17 @@ public sealed class PsaasDbContext(DbContextOptions<PsaasDbContext> options) : D
             entityBuilder.HasKey(profile => profile.Id);
 
             entityBuilder.HasIndex(profile => profile.Id).IsUnique();
-            entityBuilder.HasIndex(profile => profile.Name).IsUnique();
+            entityBuilder.HasIndex(profile => new { profile.TenantId, profile.Name }).IsUnique();
 
             entityBuilder.Property(profile => profile.Id).IsRequired();
             entityBuilder.Property(profile => profile.Name).IsRequired();
             entityBuilder.Property(profile => profile.Description).IsRequired(false);
+            entityBuilder.Property(profile => profile.TenantId).IsRequired();
+            entityBuilder
+                .HasOne<TenantDbModel>()
+                .WithMany()
+                .HasForeignKey(profile => profile.TenantId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         base.OnModelCreating(modelBuilder);

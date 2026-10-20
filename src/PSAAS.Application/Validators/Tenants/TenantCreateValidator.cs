@@ -8,6 +8,47 @@ namespace PSAAS.Application.Validators.Tenants;
 public sealed partial class TenantCreateValidator(ITenantUniquenessChecker uniquenessChecker)
 {
     private const int CompanyNameMaxLength = 20;
+    // Synchronous format/required rules only (no uniqueness check).
+    public TenantFieldValidationResult ValidateCompanyNameFormat(string? companyName)
+    {
+        var displayCompanyName = companyName?.Trim() ?? string.Empty;
+        var normalizedCompanyName = TenantFieldNormalizer.NormalizeCompanyName(companyName);
+        if (displayCompanyName.Length == 0 || normalizedCompanyName.Length == 0)
+        {
+            return TenantFieldValidationResult.Invalid(TenantFieldValidationErrorCodes.Required);
+        }
+
+        return displayCompanyName.Length > CompanyNameMaxLength
+            ? TenantFieldValidationResult.Invalid(TenantFieldValidationErrorCodes.MaxLengthExceeded, normalizedCompanyName)
+            : TenantFieldValidationResult.Valid(normalizedCompanyName);
+    }
+
+    public TenantFieldValidationResult ValidateCompleteVatNumberFormat(string? completeVatNumber)
+    {
+        var normalized = TenantFieldNormalizer.NormalizeCompleteVatNumber(completeVatNumber);
+        if (normalized.Length == 0)
+        {
+            return TenantFieldValidationResult.Invalid(TenantFieldValidationErrorCodes.Required);
+        }
+
+        return CompleteVatNumberRegex().IsMatch(normalized)
+            ? TenantFieldValidationResult.Valid(normalized)
+            : TenantFieldValidationResult.Invalid(TenantFieldValidationErrorCodes.InvalidFormat, normalized);
+    }
+
+    public TenantFieldValidationResult ValidateCertifiedEmailFormat(string? certifiedEmail)
+    {
+        var normalized = TenantFieldNormalizer.NormalizeCertifiedEmail(certifiedEmail);
+        if (normalized.Length == 0)
+        {
+            return TenantFieldValidationResult.Invalid(TenantFieldValidationErrorCodes.Required);
+        }
+
+        return IsValidEmailAddress(normalized)
+            ? TenantFieldValidationResult.Valid(normalized)
+            : TenantFieldValidationResult.Invalid(TenantFieldValidationErrorCodes.InvalidFormat, normalized);
+    }
+
 
     public async Task<TenantFieldValidationResult> ValidateCompanyNameAsync(
         string? companyName,
@@ -22,19 +63,9 @@ public sealed partial class TenantCreateValidator(ITenantUniquenessChecker uniqu
         Guid? excludedTenantId,
         CancellationToken cancellationToken = default)
     {
-        var displayCompanyName = companyName?.Trim() ?? string.Empty;
+        var format = ValidateCompanyNameFormat(companyName);
+        if (!format.IsValid) return format;
         var normalizedCompanyName = TenantFieldNormalizer.NormalizeCompanyName(companyName);
-        if (displayCompanyName.Length == 0 || normalizedCompanyName.Length == 0)
-        {
-            return TenantFieldValidationResult.Invalid(TenantFieldValidationErrorCodes.Required);
-        }
-
-        if (displayCompanyName.Length > CompanyNameMaxLength)
-        {
-            return TenantFieldValidationResult.Invalid(
-                TenantFieldValidationErrorCodes.MaxLengthExceeded,
-                normalizedCompanyName);
-        }
 
         var isUnique = excludedTenantId.HasValue
             ? await uniquenessChecker
@@ -62,18 +93,9 @@ public sealed partial class TenantCreateValidator(ITenantUniquenessChecker uniqu
         Guid? excludedTenantId,
         CancellationToken cancellationToken = default)
     {
+        var format = ValidateCompleteVatNumberFormat(completeVatNumber);
+        if (!format.IsValid) return format;
         var normalizedCompleteVatNumber = TenantFieldNormalizer.NormalizeCompleteVatNumber(completeVatNumber);
-        if (normalizedCompleteVatNumber.Length == 0)
-        {
-            return TenantFieldValidationResult.Invalid(TenantFieldValidationErrorCodes.Required);
-        }
-
-        if (!CompleteVatNumberRegex().IsMatch(normalizedCompleteVatNumber))
-        {
-            return TenantFieldValidationResult.Invalid(
-                TenantFieldValidationErrorCodes.InvalidFormat,
-                normalizedCompleteVatNumber);
-        }
 
         var isUnique = excludedTenantId.HasValue
             ? await uniquenessChecker
@@ -101,18 +123,9 @@ public sealed partial class TenantCreateValidator(ITenantUniquenessChecker uniqu
         Guid? excludedTenantId,
         CancellationToken cancellationToken = default)
     {
+        var format = ValidateCertifiedEmailFormat(certifiedEmail);
+        if (!format.IsValid) return format;
         var normalizedCertifiedEmail = TenantFieldNormalizer.NormalizeCertifiedEmail(certifiedEmail);
-        if (normalizedCertifiedEmail.Length == 0)
-        {
-            return TenantFieldValidationResult.Invalid(TenantFieldValidationErrorCodes.Required);
-        }
-
-        if (!IsValidEmailAddress(normalizedCertifiedEmail))
-        {
-            return TenantFieldValidationResult.Invalid(
-                TenantFieldValidationErrorCodes.InvalidFormat,
-                normalizedCertifiedEmail);
-        }
 
         var isUnique = excludedTenantId.HasValue
             ? await uniquenessChecker

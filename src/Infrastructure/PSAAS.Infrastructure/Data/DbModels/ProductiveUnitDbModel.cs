@@ -12,7 +12,5 @@ public sealed class ProductiveUnitDbModel
 
     public TenantDbModel? Tenant { get; set; }
 
-    public string ProfileId { get; set; } = string.Empty;
-
-    public ProfileDbModel? Profile { get; set; }
+    public ICollection<ProductiveUnitProfileDbModel> ProductiveUnitProfiles { get; set; } = [];
 }

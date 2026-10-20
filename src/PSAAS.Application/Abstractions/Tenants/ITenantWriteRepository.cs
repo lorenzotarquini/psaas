@@ -20,6 +20,23 @@ public interface ITenantWriteRepository
     Task AddAsync(Tenant tenant, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Persists a new tenant and its productive units atomically.
+    /// </summary>
+    Task AddWithProductiveUnitsAsync(
+        Tenant tenant,
+        IReadOnlyCollection<TenantProductiveUnitCreateModel> productiveUnits,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Persists a new tenant, new organization profiles and productive units atomically.
+    /// </summary>
+    Task AddWithProfilesAndProductiveUnitsAsync(
+        Tenant tenant,
+        IReadOnlyCollection<TenantProfileCreateModel> profiles,
+        IReadOnlyCollection<TenantProductiveUnitCreateModel> productiveUnits,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Persists changes for an existing tenant.
     /// </summary>
     /// <returns><see langword="true" /> when the tenant exists and was updated; otherwise <see langword="false" />.</returns>
@@ -28,4 +45,14 @@ public interface ITenantWriteRepository
     /// (normalized company name, complete VAT number, normalized certified email).
     /// </exception>
     Task<bool> UpdateAsync(Tenant tenant, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Updates a tenant together with its profiles and productive units in one transaction.
+    /// </summary>
+    /// <returns><see langword="false" /> when the tenant does not exist.</returns>
+    Task<bool> UpdateWithStructureAsync(
+        Tenant tenant,
+        IReadOnlyCollection<TenantProfileEditModel> profiles,
+        IReadOnlyCollection<TenantProductiveUnitEditModel> productiveUnits,
+        CancellationToken cancellationToken = default);
 }

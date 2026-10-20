@@ -1,24 +1,27 @@
-﻿namespace PSAAS.Domain;
+namespace PSAAS.Domain;
 
 public class Profile
 {
     public Profile()
     {
         Id = Guid.Empty;
+        TenantId = Guid.Empty;
         Name = string.Empty;
         Description = string.Empty;
         ProductiveUnitIds = Array.Empty<Guid>();
     }
 
-    public Profile(string name, string description)
+    public Profile(Guid tenantId, string name, string description)
     {
         Id = Guid.NewGuid();
+        TenantId = tenantId;
         Name = name;
         Description = description;
         ProductiveUnitIds = Array.Empty<Guid>();
     }
 
     public Guid Id { get; }
+    public Guid TenantId { get; }
     public string Name { get; }
     public string Description { get; }
     public Guid[] ProductiveUnitIds { get; private set; }
@@ -28,9 +31,9 @@ public class Profile
         return new Profile();
     }
 
-    public static Profile Create(string name, string description)
+    public static Profile Create(Guid tenantId, string name, string description)
     {
-        return new Profile(name, description);
+        return new Profile(tenantId, name, description);
     }
 
     public bool Equals(Profile other)

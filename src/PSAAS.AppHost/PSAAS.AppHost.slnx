@@ -11,6 +11,4 @@
     <Project Path="../PSAAS.Auth/PSAAS.Auth.csproj" />
     <Project Path="../PSAAS.MVVM/PSAAS.MVVM.csproj" />
   </Folder>
-  <Project Path="../PSAAS.AdminPortal/PSAAS.AdminPortal.csproj" Id="71b037b7-a1c2-4192-8f83-b6188cc3d605" />
-  <Project Path="../tests/PSAAS.AdminPortal.Tests/PSAAS.AdminPortal.Tests.csproj" />
 </Solution>

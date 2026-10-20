@@ -1,10 +1,8 @@
 using PSAAS.Application.Abstractions.Geography;
 using PSAAS.Application.Abstractions.Profiles;
 using PSAAS.Application.Abstractions.Tenants;
-using PSAAS.Application.Abstractions.Users;
 using PSAAS.Application.Contracts;
 using PSAAS.Application.Contracts.Profiles;
-using PSAAS.Application.Contracts.Users;
 using PSAAS.Domain;
 
 namespace PSAAS.AdminPortal.Backend.Tests;
@@ -39,20 +37,6 @@ public sealed class FakeProfileReadRepository : IProfileReadRepository
 
     public Task<IReadOnlySet<string>> GetExistingIdsAsync(IReadOnlyCollection<string> profileIds, CancellationToken cancellationToken = default) =>
         Task.FromResult<IReadOnlySet<string>>(Profiles.Select(profile => profile.Id).Intersect(profileIds).ToHashSet());
-}
-
-public sealed class FakeUserReadRepository : IUserReadRepository
-{
-    public List<UserReadModel> Users { get; } = [];
-
-    public Task<IReadOnlyList<UserReadModel>> GetByTenantAsync(string tenantId, CancellationToken cancellationToken = default) =>
-        Task.FromResult<IReadOnlyList<UserReadModel>>(Users.Where(user => user.TenantId == tenantId).ToArray());
-
-    public Task<UserReadModel?> GetByIdAsync(string tenantId, Guid userId, CancellationToken cancellationToken = default) =>
-        Task.FromResult(Users.SingleOrDefault(user => user.TenantId == tenantId && user.Id == userId));
-
-    public Task<UserReadModel?> GetByKeycloakIdAsync(string keycloakId, CancellationToken cancellationToken = default) =>
-        Task.FromResult(Users.SingleOrDefault(user => user.KeycloakId == keycloakId));
 }
 
 public sealed class FakeItalianCityProvider : IItalianCityProvider

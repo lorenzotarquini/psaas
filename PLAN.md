@@ -81,3 +81,10 @@ Decisioni: tutti i dati del tenant obbligatori, duplicati controllati nel server
 - [x] Log anche nel backend: ogni controller ha un `ILogger<T>` obbligatorio e registra l'esito di ogni operazione (Info; ricerca comuni a Debug perché chiamata a ogni tasto, 503 a Warning).
 - [x] Tornano visibili i log utili del framework: avvio (`Microsoft.Hosting.Lifetime`) e una riga per inizio/fine di ogni richiesta HTTP con stato e durata (`Microsoft.AspNetCore.Hosting.Diagnostics`). Il resto di `Microsoft.*`/`System.*` solo da Warning. Override di Development ora su `rules:4` (gli override JSON di NLog vanno per indice: se si aggiunge una regola va aggiornato).
 - [x] **Decisione: NLog ovunque, niente Microsoft.Extensions.Logging nel codice.** Ogni classe usa `private static readonly Logger Logger = LogManager.GetCurrentClassLogger();` (pacchetto `NLog` in Application, Infrastructure e Auth; nel backend tramite `NLog.Web.AspNetCore`). Il logger non passa più dal costruttore, quindi non esiste un caso "logger mancante". Convertiti backend (5 controller), Application (`TenantCreateService`), Infrastructure (5 repository + `ItalianCityProvider`) e Auth (`KeycloakClientCredentialsHandler`, guard TLS). I log del framework ASP.NET passano comunque da Microsoft.Extensions.Logging e arrivano a NLog tramite `UseNLog()`.
+
+## Decisione: utenti solo in Keycloak
+
+Tutto ciò che riguarda l'utente sta in Keycloak: niente tabella `Users` nel DB.
+- [x] Rimossi migration `Users` (mai applicata), `UserDbModel`, `UserReadRepository`, `IUserReadRepository`, `UserReadModel`, `TenantUsersController` (`GET /api/tenants/{id}/users[/{userId}]`).
+- [x] `GET /api/me` legge solo il token: `keycloakId` (`sub`), `name`, `email`, `roles`.
+- [ ] Se servono gli utenti di un tenant: leggerli dall'API di amministrazione di Keycloak (client M2M, `PSAAS.Auth` modalità MachineToMachine) con tenant/profilo come attributi o gruppi Keycloak. Da decidere.

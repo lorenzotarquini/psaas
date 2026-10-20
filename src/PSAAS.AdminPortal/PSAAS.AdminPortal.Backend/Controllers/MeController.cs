@@ -2,30 +2,25 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using NLog;
 using PSAAS.AdminPortal.Backend.Contracts;
-using PSAAS.Application.Abstractions.Users;
 
 namespace PSAAS.AdminPortal.Backend.Controllers;
 
 [ApiController]
 [Route("api/me")]
-public sealed class MeController(IUserReadRepository users) : ControllerBase
+public sealed class MeController : ControllerBase
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     [HttpGet]
-    public async Task<MeDto> Get(CancellationToken cancellationToken)
+    public MeDto Get()
     {
-        var keycloakId = User.FindFirstValue("sub");
-        var user = keycloakId is null ? null : await users.GetByKeycloakIdAsync(keycloakId, cancellationToken);
-        Logger.Info(
-            "Resolved current user {KeycloakId}: registered {IsRegistered}, tenant {TenantId}",
-            keycloakId,
-            user is not null,
-            user?.TenantId);
-
-        return new MeDto(
+        // Everything about the user lives in Keycloak: the token is the only source.
+        var dto = new MeDto(
+            User.FindFirstValue("sub"),
             User.Identity?.Name,
-            User.FindAll(ClaimTypes.Role).Select(claim => claim.Value).Distinct().ToArray(),
-            user);
+            User.FindFirstValue("email"),
+            User.FindAll(ClaimTypes.Role).Select(claim => claim.Value).Distinct().ToArray());
+        Logger.Info("Resolved current user {KeycloakId} with roles {Roles}", dto.KeycloakId, dto.Roles);
+        return dto;
     }
 }

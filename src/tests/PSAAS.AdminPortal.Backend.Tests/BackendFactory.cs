@@ -12,7 +12,6 @@ using Microsoft.IdentityModel.Tokens;
 using PSAAS.Application.Abstractions.Geography;
 using PSAAS.Application.Abstractions.Profiles;
 using PSAAS.Application.Abstractions.Tenants;
-using PSAAS.Application.Abstractions.Users;
 
 namespace PSAAS.AdminPortal.Backend.Tests;
 
@@ -30,7 +29,6 @@ public sealed class BackendFactory : WebApplicationFactory<Program>
 
     public FakeTenantReadRepository Tenants { get; } = new();
     public FakeProfileReadRepository Profiles { get; } = new();
-    public FakeUserReadRepository Users { get; } = new();
     public FakeItalianCityProvider Cities { get; } = new();
     public FakeTenantUniquenessChecker Uniqueness { get; } = new();
     public FakeTenantWriteRepository TenantWrites => _tenantWrites ??= new(Tenants);
@@ -50,7 +48,6 @@ public sealed class BackendFactory : WebApplicationFactory<Program>
             });
             services.AddSingleton<ITenantReadRepository>(Tenants);
             services.AddSingleton<IProfileReadRepository>(Profiles);
-            services.AddSingleton<IUserReadRepository>(Users);
             services.AddSingleton<IItalianCityProvider>(Cities);
             services.AddSingleton<ITenantUniquenessChecker>(Uniqueness);
             services.AddSingleton<ITenantWriteRepository>(TenantWrites);

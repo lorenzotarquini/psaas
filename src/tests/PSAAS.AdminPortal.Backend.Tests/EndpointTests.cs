@@ -3,7 +3,6 @@ using System.Text.Json;
 using PSAAS.Application.Abstractions.Geography;
 using PSAAS.Application.Abstractions.Tenants;
 using PSAAS.Application.Contracts.Profiles;
-using PSAAS.Application.Contracts.Users;
 using PSAAS.Domain;
 using Xunit;
 
@@ -62,8 +61,6 @@ public sealed class EndpointTests
 
     [Theory]
     [InlineData("/api/tenants/{0}")]
-    [InlineData("/api/tenants/{0}/users")]
-    [InlineData("/api/tenants/{0}/users/{0}")]
     public async Task UnknownIds_Return404(string url)
     {
         using var factory = new BackendFactory();
@@ -71,21 +68,6 @@ public sealed class EndpointTests
         var response = await factory.CreateAdministratorClient().GetAsync(string.Format(url, Guid.NewGuid()));
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-    }
-
-    [Fact]
-    public async Task TenantUsers_ReturnsOnlyUsersOfThatTenant()
-    {
-        using var factory = new BackendFactory();
-        factory.Tenants.Tenants.Add(Acme);
-        var user = NewUser(Acme.Id.ToString());
-        factory.Users.Users.AddRange([user, NewUser(Guid.NewGuid().ToString())]);
-
-        var list = await GetJsonAsync(factory, $"/api/tenants/{Acme.Id}/users");
-        var detail = await GetJsonAsync(factory, $"/api/tenants/{Acme.Id}/users/{user.Id}");
-
-        Assert.Equal(user.Id, list.EnumerateArray().Single().GetProperty("id").GetGuid());
-        Assert.Equal("Operatore", detail.GetProperty("profileName").GetString());
     }
 
     [Fact]
@@ -114,21 +96,16 @@ public sealed class EndpointTests
     }
 
     [Fact]
-    public async Task Me_ReturnsRegisteredUserOrNull()
+    public async Task Me_ReturnsIdentityFromToken()
     {
         using var factory = new BackendFactory();
 
-        var unregistered = await GetJsonAsync(factory, "/api/me");
-        factory.Users.Users.Add(NewUser(Acme.Id.ToString()) with { KeycloakId = BackendFactory.Subject });
-        var registered = await GetJsonAsync(factory, "/api/me");
+        var json = await GetJsonAsync(factory, "/api/me");
 
-        Assert.Equal(JsonValueKind.Null, unregistered.GetProperty("user").ValueKind);
-        Assert.Equal("Administrator", registered.GetProperty("roles")[0].GetString());
-        Assert.Equal(Acme.Id.ToString(), registered.GetProperty("user").GetProperty("tenantId").GetString());
+        Assert.Equal(BackendFactory.Subject, json.GetProperty("keycloakId").GetString());
+        Assert.Equal("test.user", json.GetProperty("name").GetString());
+        Assert.Equal("Administrator", json.GetProperty("roles")[0].GetString());
     }
-
-    private static UserReadModel NewUser(string tenantId) => new(
-        Guid.NewGuid(), Guid.NewGuid().ToString(), "mario", "mario@acme.test", "Mario", "Rossi", tenantId, "p1", "Operatore");
 
     private static async Task<JsonElement> GetJsonAsync(BackendFactory factory, string url)
     {

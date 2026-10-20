@@ -21,11 +21,6 @@ Authorization: Bearer {{token}}
 
 ###
 
-GET {{PSAAS.AdminPortal.Backend_HostAddress}}/api/tenants/{{tenantId}}/users
-Authorization: Bearer {{token}}
-
-###
-
 GET {{PSAAS.AdminPortal.Backend_HostAddress}}/api/profiles
 Authorization: Bearer {{token}}
 

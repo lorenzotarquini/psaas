@@ -4,12 +4,10 @@ using Microsoft.Extensions.DependencyInjection;
 using PSAAS.Application.Abstractions.Geography;
 using PSAAS.Application.Abstractions.Profiles;
 using PSAAS.Application.Abstractions.Tenants;
-using PSAAS.Application.Abstractions.Users;
 using PSAAS.Infrastructure.Data.DbContexts;
 using PSAAS.Infrastructure.Geography;
 using PSAAS.Infrastructure.Repositories.Profiles;
 using PSAAS.Infrastructure.Repositories.Tenants;
-using PSAAS.Infrastructure.Repositories.Users;
 
 namespace PSAAS.Infrastructure;
 
@@ -34,7 +32,6 @@ public static class DependencyInjection
         services.AddScoped<ITenantWriteRepository, TenantWriteRepository>();
         services.AddScoped<ITenantUniquenessChecker, TenantUniquenessChecker>();
         services.AddScoped<IProfileReadRepository, ProfileReadRepository>();
-        services.AddScoped<IUserReadRepository, UserReadRepository>();
 
         services.AddMemoryCache();
         // Singleton HttpClient: avoids the Microsoft.Extensions.Http package.

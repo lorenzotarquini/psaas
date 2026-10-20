@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Infrastructure\PSAAS.Domain\PSAAS.Domain.csproj" />
+    <ProjectReference Include="..\PSAAS.Domain\PSAAS.Domain.csproj" />
   </ItemGroup>
 
 </Project>

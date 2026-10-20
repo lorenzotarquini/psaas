@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Infrastructure\PSAAS.Infrastructure\PSAAS.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\PSAAS.Infrastructure\PSAAS.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

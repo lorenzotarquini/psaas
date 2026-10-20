@@ -1,16 +1,16 @@
 using System.Net.Http.Headers;
 using System.Text.Json;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NLog;
 using PSAAS.Auth.Internal;
 
 namespace PSAAS.Auth;
 
 public sealed class KeycloakClientCredentialsHandler : DelegatingHandler
 {
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
     private static readonly TimeSpan ExpirationMargin = TimeSpan.FromSeconds(30);
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly ILogger<KeycloakClientCredentialsHandler> _logger;
     private readonly KeycloakOptions _options;
     private readonly SemaphoreSlim _tokenLock = new(1, 1);
     private string? _cachedToken;
@@ -18,12 +18,10 @@ public sealed class KeycloakClientCredentialsHandler : DelegatingHandler
 
     public KeycloakClientCredentialsHandler(
         IOptions<KeycloakOptions> options,
-        IHttpClientFactory httpClientFactory,
-        ILogger<KeycloakClientCredentialsHandler> logger)
+        IHttpClientFactory httpClientFactory)
     {
         _options = options.Value;
         _httpClientFactory = httpClientFactory;
-        _logger = logger;
     }
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -79,7 +77,7 @@ public sealed class KeycloakClientCredentialsHandler : DelegatingHandler
                 using var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false);
                 if (!response.IsSuccessStatusCode)
                 {
-                    _logger.LogError("Keycloak token endpoint returned status code {StatusCode}.", (int)response.StatusCode);
+                    Logger.Error("Keycloak token endpoint returned status code {StatusCode}.", (int)response.StatusCode);
                     response.EnsureSuccessStatusCode();
                 }
 
@@ -88,7 +86,7 @@ public sealed class KeycloakClientCredentialsHandler : DelegatingHandler
             }
             catch (Exception ex) when (attempt < _options.ClientCredentials.RetryCount)
             {
-                _logger.LogWarning(ex, "Keycloak token acquisition attempt {Attempt} failed. Retrying.", attempt + 1);
+                Logger.Warn(ex, "Keycloak token acquisition attempt {Attempt} failed. Retrying.", attempt + 1);
             }
         }
     }
@@ -130,6 +128,6 @@ public sealed class KeycloakClientCredentialsHandler : DelegatingHandler
 
         _cachedToken = token;
         _expiresAt = DateTimeOffset.UtcNow.AddSeconds(expiresIn).Subtract(ExpirationMargin);
-        _logger.LogDebug("Keycloak client credentials token acquired. Expires in {ExpiresInSeconds} seconds.", expiresIn);
+        Logger.Debug("Keycloak client credentials token acquired. Expires in {ExpiresInSeconds} seconds.", expiresIn);
     }
 }

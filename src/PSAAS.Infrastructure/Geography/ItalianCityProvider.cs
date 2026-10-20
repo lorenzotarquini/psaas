@@ -1,16 +1,17 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
+using NLog;
 using PSAAS.Application.Abstractions.Geography;
 
 namespace PSAAS.Infrastructure.Geography;
 
 public sealed class ItalianCityProvider(
     HttpClient http,
-    IMemoryCache cache,
-    ILogger<ItalianCityProvider> logger) : IItalianCityProvider
+    IMemoryCache cache) : IItalianCityProvider
 {
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
     private const string CacheKey = "italian-cities";
 
     public async Task<IReadOnlyList<ItalianCity>?> SearchAsync(string term, CancellationToken ct)
@@ -39,7 +40,7 @@ public sealed class ItalianCityProvider(
         catch (Exception ex) when (ex is HttpRequestException or JsonException or TaskCanceledException or OperationCanceledException)
         {
             if (ct.IsCancellationRequested) throw;
-            logger.LogWarning(ex, "Italian city list unavailable");
+            Logger.Warn(ex, "Italian city list unavailable");
             return null;
         }
     }

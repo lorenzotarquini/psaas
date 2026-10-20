@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
+using NLog;
 using Npgsql;
 using PSAAS.Application.Abstractions.Tenants;
 using PSAAS.Domain;
@@ -13,16 +12,14 @@ namespace PSAAS.Infrastructure.Repositories.Tenants;
 /// <summary>
 /// Write-side repository persisting tenants through PsaasDbContext.
 /// </summary>
-public sealed class TenantWriteRepository(
-    PsaasDbContext dbContext,
-    ILogger<TenantWriteRepository>? logger = null) : ITenantWriteRepository
+public sealed class TenantWriteRepository(PsaasDbContext dbContext) : ITenantWriteRepository
 {
-    private readonly ILogger<TenantWriteRepository> _logger = logger ?? NullLogger<TenantWriteRepository>.Instance;
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     public async Task AddAsync(Tenant tenant, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(tenant);
-        _logger.LogDebug("Persisting tenant {TenantId}", tenant.Id);
+        Logger.Debug("Persisting tenant {TenantId}", tenant.Id);
 
         var dbModel = TenantDbModelConverter.ToDbModel(tenant);
         dbContext.Tenants.Add(dbModel);
@@ -42,7 +39,7 @@ public sealed class TenantWriteRepository(
 
             if (IsUniqueViolation(exception))
             {
-                _logger.LogWarning("Tenant unique violation while saving tenant {TenantId}", tenant.Id);
+                Logger.Warn("Tenant unique violation while saving tenant {TenantId}", tenant.Id);
                 throw new TenantUniquenessConflictException(
                     "A tenant with the same company name, complete VAT number or certified email already exists.",
                     exception);
@@ -58,7 +55,7 @@ public sealed class TenantWriteRepository(
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(tenant);
-        _logger.LogDebug("Persisting tenant {TenantId}", tenant.Id);
+        Logger.Debug("Persisting tenant {TenantId}", tenant.Id);
         ArgumentNullException.ThrowIfNull(productiveUnits);
 
         var tenantDbModel = TenantDbModelConverter.ToDbModel(tenant);
@@ -108,7 +105,7 @@ public sealed class TenantWriteRepository(
 
             if (IsProductiveUnitNameUniqueViolation(exception))
             {
-                _logger.LogWarning("Productive unit name unique violation while saving tenant {TenantId}", tenant.Id);
+                Logger.Warn("Productive unit name unique violation while saving tenant {TenantId}", tenant.Id);
                 throw new ProductiveUnitNameConflictException(
                     "A productive unit with the same name already exists.",
                     exception);
@@ -116,7 +113,7 @@ public sealed class TenantWriteRepository(
 
             if (IsUniqueViolation(exception))
             {
-                _logger.LogWarning("Tenant unique violation while saving tenant {TenantId}", tenant.Id);
+                Logger.Warn("Tenant unique violation while saving tenant {TenantId}", tenant.Id);
                 throw new TenantUniquenessConflictException(
                     "A tenant with the same company name, complete VAT number or certified email already exists.",
                     exception);
@@ -133,7 +130,7 @@ public sealed class TenantWriteRepository(
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(tenant);
-        _logger.LogDebug("Persisting tenant {TenantId}", tenant.Id);
+        Logger.Debug("Persisting tenant {TenantId}", tenant.Id);
         ArgumentNullException.ThrowIfNull(profiles);
         ArgumentNullException.ThrowIfNull(productiveUnits);
 
@@ -200,7 +197,7 @@ public sealed class TenantWriteRepository(
 
             if (IsProductiveUnitNameUniqueViolation(exception))
             {
-                _logger.LogWarning("Productive unit name unique violation while saving tenant {TenantId}", tenant.Id);
+                Logger.Warn("Productive unit name unique violation while saving tenant {TenantId}", tenant.Id);
                 throw new ProductiveUnitNameConflictException(
                     "A productive unit with the same name already exists.",
                     exception);
@@ -208,7 +205,7 @@ public sealed class TenantWriteRepository(
 
             if (IsUniqueViolation(exception))
             {
-                _logger.LogWarning("Tenant unique violation while saving tenant {TenantId}", tenant.Id);
+                Logger.Warn("Tenant unique violation while saving tenant {TenantId}", tenant.Id);
                 throw new TenantUniquenessConflictException(
                     "A tenant, profile or productive unit with the same unique value already exists.",
                     exception);
@@ -231,7 +228,7 @@ public sealed class TenantWriteRepository(
     public async Task<bool> UpdateAsync(Tenant tenant, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(tenant);
-        _logger.LogDebug("Persisting tenant {TenantId}", tenant.Id);
+        Logger.Debug("Persisting tenant {TenantId}", tenant.Id);
 
         var existing = await dbContext.Tenants
             .SingleOrDefaultAsync(
@@ -241,7 +238,7 @@ public sealed class TenantWriteRepository(
 
         if (existing is null)
         {
-            _logger.LogWarning("Tenant {TenantId} not found for update", tenant.Id);
+            Logger.Warn("Tenant {TenantId} not found for update", tenant.Id);
             return false;
         }
 
@@ -270,7 +267,7 @@ public sealed class TenantWriteRepository(
 
             if (IsUniqueViolation(exception))
             {
-                _logger.LogWarning("Tenant unique violation while saving tenant {TenantId}", tenant.Id);
+                Logger.Warn("Tenant unique violation while saving tenant {TenantId}", tenant.Id);
                 throw new TenantUniquenessConflictException(
                     "A tenant with the same company name, complete VAT number or certified email already exists.",
                     exception);
@@ -289,7 +286,7 @@ public sealed class TenantWriteRepository(
         ArgumentNullException.ThrowIfNull(tenant);
         ArgumentNullException.ThrowIfNull(profiles);
         ArgumentNullException.ThrowIfNull(productiveUnits);
-        _logger.LogDebug("Persisting tenant {TenantId} with structure", tenant.Id);
+        Logger.Debug("Persisting tenant {TenantId} with structure", tenant.Id);
 
         var tenantId = tenant.Id.ToString();
         var existing = await dbContext.Tenants
@@ -297,7 +294,7 @@ public sealed class TenantWriteRepository(
             .ConfigureAwait(false);
         if (existing is null)
         {
-            _logger.LogWarning("Tenant {TenantId} not found for update", tenant.Id);
+            Logger.Warn("Tenant {TenantId} not found for update", tenant.Id);
             return false;
         }
 
@@ -406,13 +403,13 @@ public sealed class TenantWriteRepository(
 
             if (exception is DbUpdateException dbUpdate && IsProductiveUnitNameUniqueViolation(dbUpdate))
             {
-                _logger.LogWarning("Productive unit name unique violation while updating tenant {TenantId}", tenant.Id);
+                Logger.Warn("Productive unit name unique violation while updating tenant {TenantId}", tenant.Id);
                 throw new ProductiveUnitNameConflictException("A productive unit with the same name already exists.", dbUpdate);
             }
 
             if (exception is DbUpdateException unique && IsUniqueViolation(unique))
             {
-                _logger.LogWarning("Unique violation while updating tenant {TenantId}", tenant.Id);
+                Logger.Warn("Unique violation while updating tenant {TenantId}", tenant.Id);
                 throw new TenantUniquenessConflictException(
                     "A tenant, profile or productive unit with the same unique value already exists.",
                     unique);

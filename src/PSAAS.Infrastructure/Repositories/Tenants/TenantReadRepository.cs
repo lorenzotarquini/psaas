@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
+using NLog;
 using PSAAS.Application.Abstractions.Tenants;
 using PSAAS.Application.Contracts;
 using PSAAS.Application.Validators.Tenants;
@@ -10,11 +9,9 @@ using PSAAS.Infrastructure.Data.DbContexts;
 
 namespace PSAAS.Infrastructure.Repositories.Tenants;
 
-public sealed class TenantReadRepository(
-    PsaasDbContext dbContext,
-    ILogger<TenantReadRepository>? logger = null) : ITenantReadRepository
+public sealed class TenantReadRepository(PsaasDbContext dbContext) : ITenantReadRepository
 {
-    private readonly ILogger<TenantReadRepository> _logger = logger ?? NullLogger<TenantReadRepository>.Instance;
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     public async Task<PagedResult<Tenant>> GetPageAsync(
         string? search,
@@ -22,7 +19,7 @@ public sealed class TenantReadRepository(
         int pageSize,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogDebug("Querying tenants page {Page} (size {PageSize}, search {Search})", page, pageSize, search);
+        Logger.Debug("Querying tenants page {Page} (size {PageSize}, search {Search})", page, pageSize, search);
         var query = dbContext.Tenants.AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(search))
@@ -44,7 +41,7 @@ public sealed class TenantReadRepository(
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
 
-        _logger.LogDebug("Queried {TenantCount} of {TotalCount} tenants", tenants.Count, totalCount);
+        Logger.Debug("Queried {TenantCount} of {TotalCount} tenants", tenants.Count, totalCount);
 
         return new PagedResult<Tenant>(
             tenants.Select(TenantDbModelConverter.ToDomain).ToArray(),
@@ -55,7 +52,7 @@ public sealed class TenantReadRepository(
 
     public async Task<Tenant?> GetByIdAsync(Guid tenantId, CancellationToken cancellationToken = default)
     {
-        _logger.LogDebug("Querying tenant {TenantId}", tenantId);
+        Logger.Debug("Querying tenant {TenantId}", tenantId);
         var tenant = await dbContext.Tenants
             .AsNoTracking()
             .SingleOrDefaultAsync(
@@ -70,7 +67,7 @@ public sealed class TenantReadRepository(
         string tenantId,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogDebug("Querying structure of tenant {TenantId}", tenantId);
+        Logger.Debug("Querying structure of tenant {TenantId}", tenantId);
         var profiles = await dbContext.Profiles
             .AsNoTracking()
             .Where(profile => profile.TenantId == tenantId)

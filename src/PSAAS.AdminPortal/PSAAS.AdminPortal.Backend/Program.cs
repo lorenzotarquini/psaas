@@ -1,5 +1,7 @@
 using NLog;
+using NLog.Extensions.Logging;
 using NLog.Web;
+using PSAAS.Application;
 using PSAAS.Application.Abstractions.Tenants;
 using PSAAS.Auth;
 using PSAAS.Infrastructure;
@@ -12,10 +14,14 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
 
+    // The early load above only knows the process environment; reload from the host configuration
+    // so environment files (appsettings.Development.json) and other sources apply as well.
+    LogManager.Configuration = new NLogLoggingConfiguration(builder.Configuration.GetSection("NLog"));
     builder.Logging.ClearProviders();
     builder.Host.UseNLog();
 
     builder.Services.AddKeycloak(builder.Configuration);
+    builder.Services.AddPsaasApplication();
     builder.Services.AddPsaasInfrastructure(builder.Configuration);
     builder.Services.AddControllers();
     builder.Services.AddProblemDetails();

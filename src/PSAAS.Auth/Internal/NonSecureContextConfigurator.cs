@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace PSAAS.Auth.Internal;
@@ -18,10 +17,10 @@ internal static class NonSecureContextConfigurator
         options.Cookie.Path = "/";
     }
 
-    public static void ConfigureOpenIdConnect(OpenIdConnectOptions options, IHostEnvironment environment, ILogger logger)
+    public static void ConfigureOpenIdConnect(OpenIdConnectOptions options, IHostEnvironment environment)
     {
         var handler = new HttpClientHandler();
-        if (ServerCertificateValidationGuard.TryApplyDangerousServerCertificateValidation(handler, false, environment, logger, "OIDC backchannel"))
+        if (ServerCertificateValidationGuard.TryApplyDangerousServerCertificateValidation(handler, false, environment, "OIDC backchannel"))
         {
             options.BackchannelHttpHandler = handler;
         }
@@ -33,10 +32,10 @@ internal static class NonSecureContextConfigurator
         options.CorrelationCookie.SameSite = SameSiteMode.Lax;
     }
 
-    public static void ConfigureJwtBearer(JwtBearerOptions options, IHostEnvironment environment, ILogger logger)
+    public static void ConfigureJwtBearer(JwtBearerOptions options, IHostEnvironment environment)
     {
         var handler = new HttpClientHandler();
-        if (ServerCertificateValidationGuard.TryApplyDangerousServerCertificateValidation(handler, false, environment, logger, "JWT bearer backchannel"))
+        if (ServerCertificateValidationGuard.TryApplyDangerousServerCertificateValidation(handler, false, environment, "JWT bearer backchannel"))
         {
             options.BackchannelHttpHandler = handler;
         }

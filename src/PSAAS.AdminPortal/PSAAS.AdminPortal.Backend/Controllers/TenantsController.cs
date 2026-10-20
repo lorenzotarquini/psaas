@@ -1,8 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
+using NLog;
+using PSAAS.AdminPortal.Backend.Contracts;
 using PSAAS.Application.Abstractions.Tenants;
 using PSAAS.Application.Contracts;
-using PSAAS.Domain;
+using PSAAS.Application.Contracts.Tenants;
+using PSAAS.Application.Services.Tenants;
 
 namespace PSAAS.AdminPortal.Backend.Controllers;
 
@@ -10,6 +13,8 @@ namespace PSAAS.AdminPortal.Backend.Controllers;
 [Route("api/tenants")]
 public sealed class TenantsController(ITenantReadRepository tenants) : ControllerBase
 {
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
     [HttpGet]
     public async Task<PagedResult<TenantSummaryDto>> GetPage(
         [FromQuery] string? search,
@@ -18,6 +23,13 @@ public sealed class TenantsController(ITenantReadRepository tenants) : Controlle
         CancellationToken cancellationToken = default)
     {
         var result = await tenants.GetPageAsync(search, page, pageSize, cancellationToken);
+        Logger.Info(
+            "Listed {TenantCount} of {TotalCount} tenants (page {Page}, size {PageSize}, search {Search})",
+            result.Items.Count,
+            result.TotalCount,
+            page,
+            pageSize,
+            search);
         return new PagedResult<TenantSummaryDto>(
             result.Items.Select(TenantSummaryDto.From).ToArray(),
             result.TotalCount,
@@ -31,10 +43,16 @@ public sealed class TenantsController(ITenantReadRepository tenants) : Controlle
         var tenant = await tenants.GetByIdAsync(id, cancellationToken);
         if (tenant is null)
         {
+            Logger.Info("Tenant {TenantId} not found", id);
             return NotFound();
         }
 
         var structure = await tenants.GetProfilesAndProductiveUnitsAsync(id.ToString(), cancellationToken);
+        Logger.Info(
+            "Returned tenant {TenantId} with {ProfileCount} profiles and {ProductiveUnitCount} productive units",
+            id,
+            structure.Profiles.Count,
+            structure.ProductiveUnits.Count);
         return new TenantDetailDto(
             tenant.Id,
             tenant.CompanyName,
@@ -45,37 +63,23 @@ public sealed class TenantsController(ITenantReadRepository tenants) : Controlle
             structure.Profiles,
             structure.ProductiveUnits);
     }
-}
 
-public sealed record TenantSummaryDto(
-    Guid Id,
-    string CompanyName,
-    string VatNumber,
-    string CompleteVatNumber,
-    string CertifiedEmail,
-    string City)
-{
-    public static TenantSummaryDto From(Tenant tenant) => new(
-        tenant.Id,
-        tenant.CompanyName,
-        tenant.VatNumber,
-        tenant.CompleteVatNumber,
-        tenant.CertifiedEmail,
-        tenant.Address.city);
-}
+    [HttpPost]
+    public async Task<ActionResult<TenantDetailDto>> Create(
+        TenantCreateRequest request,
+        [FromServices] TenantCreateService createService,
+        CancellationToken cancellationToken)
+    {
+        var result = await createService.CreateAsync(request, cancellationToken);
+        if (!result.Succeeded)
+        {
+            // Field details are logged by TenantCreateService.
+            Logger.Info("Tenant creation answered 400 with {InvalidFieldCount} invalid fields", result.Errors.Count);
+            return ValidationProblem(new ValidationProblemDetails(
+                result.Errors.ToDictionary(error => error.Key, error => new[] { error.Value })));
+        }
 
-public sealed record TenantDetailDto(
-    Guid Id,
-    string CompanyName,
-    string VatNumber,
-    string CompleteVatNumber,
-    string CertifiedEmail,
-    AddressDto Address,
-    IReadOnlyList<TenantProfileReadModel> Profiles,
-    IReadOnlyList<TenantProductiveUnitReadModel> ProductiveUnits);
-
-public sealed record AddressDto(string Street, string City, string PostalCode, string Country)
-{
-    public static AddressDto From(Address address) =>
-        new(address.street, address.city, address.postalCode, address.country);
+        var id = result.TenantId!.Value;
+        return CreatedAtAction(nameof(GetById), new { id }, (await GetById(id, cancellationToken)).Value);
+    }
 }

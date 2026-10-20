@@ -1,7 +1,6 @@
 using System.Net;
 using System.Reflection;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 namespace PSAAS.Infrastructure.Tests;
@@ -27,8 +26,7 @@ public sealed class ItalianCityProviderTests
         var type = infra.GetType("PSAAS.Infrastructure.Geography.ItalianCityProvider");
         Assert.NotNull(type);
         var http = new HttpClient(h) { BaseAddress = new Uri("http://test.local/comuni.json") };
-        var logger = Activator.CreateInstance(typeof(NullLogger<>).MakeGenericType(type!));
-        var sut = Activator.CreateInstance(type!, http, new MemoryCache(new MemoryCacheOptions()), logger)!;
+        var sut = Activator.CreateInstance(type!, http, new MemoryCache(new MemoryCacheOptions()))!;
         var m = type!.GetMethod("SearchAsync")!;
         // Return type is Task<IReadOnlyList<ItalianCity>?>: read the result through reflection.
         IReadOnlyList<object>? last = null;
@@ -117,8 +115,7 @@ public sealed class ItalianCityProviderTests
         var h = new GateHandler();
         var type = typeof(PSAAS.Infrastructure.DependencyInjection).Assembly.GetType("PSAAS.Infrastructure.Geography.ItalianCityProvider")!;
         var http = new HttpClient(h) { BaseAddress = new Uri("http://test.local/comuni.json") };
-        var logger = Activator.CreateInstance(typeof(NullLogger<>).MakeGenericType(type));
-        var sut = Activator.CreateInstance(type, http, new MemoryCache(new MemoryCacheOptions()), logger)!;
+        var sut = Activator.CreateInstance(type, http, new MemoryCache(new MemoryCacheOptions()))!;
         var m = type.GetMethod("SearchAsync")!;
 
         using var cts = new CancellationTokenSource();

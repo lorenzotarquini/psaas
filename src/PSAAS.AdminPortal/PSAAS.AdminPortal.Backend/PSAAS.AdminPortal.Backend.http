@@ -35,3 +35,19 @@ GET {{PSAAS.AdminPortal.Backend_HostAddress}}/api/geography/cities?term=ro
 Authorization: Bearer {{token}}
 
 ###
+POST {{PSAAS.AdminPortal.Backend_HostAddress}}/api/tenants
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "companyName": "Acme Srl",
+  "completeVatNumber": "IT12345678901",
+  "certifiedEmail": "acme@pec.it",
+  "street": "Via Roma 1",
+  "city": "Roma",
+  "postalCode": "00118",
+  "profiles": [ { "key": "op", "name": "Operatore" } ],
+  "productiveUnits": [ { "name": "Stabilimento", "profileKeys": [ "op" ] } ]
+}
+
+###

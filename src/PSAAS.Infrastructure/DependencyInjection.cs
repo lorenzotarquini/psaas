@@ -1,12 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using PSAAS.Application.Abstractions.Geography;
 using PSAAS.Application.Abstractions.Profiles;
 using PSAAS.Application.Abstractions.Tenants;
 using PSAAS.Application.Abstractions.Users;
-using PSAAS.Application.Validators.Tenants;
 using PSAAS.Infrastructure.Data.DbContexts;
 using PSAAS.Infrastructure.Geography;
 using PSAAS.Infrastructure.Repositories.Profiles;
@@ -37,7 +35,6 @@ public static class DependencyInjection
         services.AddScoped<ITenantUniquenessChecker, TenantUniquenessChecker>();
         services.AddScoped<IProfileReadRepository, ProfileReadRepository>();
         services.AddScoped<IUserReadRepository, UserReadRepository>();
-        services.AddScoped<TenantCreateValidator>();
 
         services.AddMemoryCache();
         // Singleton HttpClient: avoids the Microsoft.Extensions.Http package.
@@ -48,8 +45,7 @@ public static class DependencyInjection
                     ?? throw new InvalidOperationException("Missing required setting 'ItalianCities:BaseUrl'.")),
                 Timeout = TimeSpan.FromSeconds(10),
             },
-            sp.GetRequiredService<Microsoft.Extensions.Caching.Memory.IMemoryCache>(),
-            sp.GetRequiredService<ILogger<ItalianCityProvider>>()));
+            sp.GetRequiredService<Microsoft.Extensions.Caching.Memory.IMemoryCache>()));
 
         return services;
     }

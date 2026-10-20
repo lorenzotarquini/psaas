@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
+using NLog;
 using PSAAS.Application.Abstractions.Users;
 using PSAAS.Application.Contracts.Users;
 using PSAAS.Infrastructure.Data.DbContexts;
@@ -8,17 +7,15 @@ using PSAAS.Infrastructure.Data.DbModels;
 
 namespace PSAAS.Infrastructure.Repositories.Users;
 
-public sealed class UserReadRepository(
-    PsaasDbContext dbContext,
-    ILogger<UserReadRepository>? logger = null) : IUserReadRepository
+public sealed class UserReadRepository(PsaasDbContext dbContext) : IUserReadRepository
 {
-    private readonly ILogger<UserReadRepository> _logger = logger ?? NullLogger<UserReadRepository>.Instance;
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     public async Task<IReadOnlyList<UserReadModel>> GetByTenantAsync(
         string tenantId,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogDebug("Querying users of tenant {TenantId}", tenantId);
+        Logger.Debug("Querying users of tenant {TenantId}", tenantId);
         return await Project(dbContext.Users.Where(user => user.TenantId == tenantId))
             .OrderBy(user => user.LastName)
             .ThenBy(user => user.FirstName)
@@ -31,14 +28,14 @@ public sealed class UserReadRepository(
         Guid userId,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogDebug("Querying user {UserId} of tenant {TenantId}", userId, tenantId);
+        Logger.Debug("Querying user {UserId} of tenant {TenantId}", userId, tenantId);
         return Project(dbContext.Users.Where(user => user.TenantId == tenantId && user.Id == userId))
             .SingleOrDefaultAsync(cancellationToken);
     }
 
     public Task<UserReadModel?> GetByKeycloakIdAsync(string keycloakId, CancellationToken cancellationToken = default)
     {
-        _logger.LogDebug("Querying user by Keycloak id {KeycloakId}", keycloakId);
+        Logger.Debug("Querying user by Keycloak id {KeycloakId}", keycloakId);
         return Project(dbContext.Users.Where(user => user.KeycloakId == keycloakId))
             .SingleOrDefaultAsync(cancellationToken);
     }

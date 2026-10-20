@@ -61,3 +61,54 @@ public sealed class FakeItalianCityProvider : IItalianCityProvider
 
     public Task<IReadOnlyList<ItalianCity>?> SearchAsync(string term, CancellationToken ct) => Task.FromResult(Result);
 }
+
+/// <summary>Stores created tenants in the read fake so the detail returned after creation is real.</summary>
+public sealed class FakeTenantWriteRepository(FakeTenantReadRepository readRepository) : ITenantWriteRepository
+{
+    public IReadOnlyCollection<TenantProfileCreateModel> LastProfiles { get; private set; } = [];
+
+    public IReadOnlyCollection<TenantProductiveUnitCreateModel> LastProductiveUnits { get; private set; } = [];
+
+    /// <summary>Simulates a concurrent insert that wins the unique-index race.</summary>
+    public Action? BeforeSave { get; set; }
+
+    public Task AddWithProfilesAndProductiveUnitsAsync(
+        Tenant tenant,
+        IReadOnlyCollection<TenantProfileCreateModel> profiles,
+        IReadOnlyCollection<TenantProductiveUnitCreateModel> productiveUnits,
+        CancellationToken cancellationToken = default)
+    {
+        BeforeSave?.Invoke();
+        LastProfiles = profiles;
+        LastProductiveUnits = productiveUnits;
+        readRepository.Tenants.Add(tenant);
+        return Task.CompletedTask;
+    }
+
+    public Task AddAsync(Tenant tenant, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+
+    public Task AddWithProductiveUnitsAsync(Tenant tenant, IReadOnlyCollection<TenantProductiveUnitCreateModel> productiveUnits, CancellationToken cancellationToken = default) =>
+        throw new NotSupportedException();
+
+    public Task<bool> UpdateAsync(Tenant tenant, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+
+    public Task<bool> UpdateWithStructureAsync(
+        Tenant tenant,
+        IReadOnlyCollection<TenantProfileEditModel> profiles,
+        IReadOnlyCollection<TenantProductiveUnitEditModel> productiveUnits,
+        CancellationToken cancellationToken = default) => throw new NotSupportedException();
+}
+
+public sealed class FakeTenantUniquenessChecker : ITenantUniquenessChecker
+{
+    public HashSet<string> TakenValues { get; } = [];
+
+    public Task<bool> IsCompanyNameUniqueAsync(string normalizedCompanyName, CancellationToken cancellationToken = default) =>
+        Task.FromResult(!TakenValues.Contains(normalizedCompanyName));
+
+    public Task<bool> IsCompleteVatNumberUniqueAsync(string normalizedCompleteVatNumber, CancellationToken cancellationToken = default) =>
+        Task.FromResult(!TakenValues.Contains(normalizedCompleteVatNumber));
+
+    public Task<bool> IsCertifiedEmailUniqueAsync(string normalizedCertifiedEmail, CancellationToken cancellationToken = default) =>
+        Task.FromResult(!TakenValues.Contains(normalizedCertifiedEmail));
+}

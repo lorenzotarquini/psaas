@@ -1,16 +1,13 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
+using NLog;
 using PSAAS.Application.Abstractions.Tenants;
 using PSAAS.Infrastructure.Data.DbContexts;
 
 namespace PSAAS.Infrastructure.Repositories.Tenants;
 
-public sealed class TenantUniquenessChecker(
-    PsaasDbContext dbContext,
-    ILogger<TenantUniquenessChecker>? logger = null) : ITenantUniquenessChecker
+public sealed class TenantUniquenessChecker(PsaasDbContext dbContext) : ITenantUniquenessChecker
 {
-    private readonly ILogger<TenantUniquenessChecker> _logger = logger ?? NullLogger<TenantUniquenessChecker>.Instance;
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     public async Task<bool> IsCompanyNameUniqueAsync(
         string normalizedCompanyName,
@@ -24,7 +21,7 @@ public sealed class TenantUniquenessChecker(
             .ConfigureAwait(false);
         if (exists)
         {
-            _logger.LogWarning("Duplicate detected: IsCompanyName");
+            Logger.Warn("Duplicate detected: IsCompanyName");
         }
 
         return !exists;
@@ -44,7 +41,7 @@ public sealed class TenantUniquenessChecker(
             .ConfigureAwait(false);
         if (exists)
         {
-            _logger.LogWarning("Duplicate detected: IsCompanyName");
+            Logger.Warn("Duplicate detected: IsCompanyName");
         }
 
         return !exists;
@@ -62,7 +59,7 @@ public sealed class TenantUniquenessChecker(
             .ConfigureAwait(false);
         if (exists)
         {
-            _logger.LogWarning("Duplicate detected: IsCompleteVatNumber");
+            Logger.Warn("Duplicate detected: IsCompleteVatNumber");
         }
 
         return !exists;
@@ -82,7 +79,7 @@ public sealed class TenantUniquenessChecker(
             .ConfigureAwait(false);
         if (exists)
         {
-            _logger.LogWarning("Duplicate detected: IsCompleteVatNumber");
+            Logger.Warn("Duplicate detected: IsCompleteVatNumber");
         }
 
         return !exists;
@@ -100,7 +97,7 @@ public sealed class TenantUniquenessChecker(
             .ConfigureAwait(false);
         if (exists)
         {
-            _logger.LogWarning("Duplicate detected: IsCertifiedEmail");
+            Logger.Warn("Duplicate detected: IsCertifiedEmail");
         }
 
         return !exists;
@@ -120,7 +117,7 @@ public sealed class TenantUniquenessChecker(
             .ConfigureAwait(false);
         if (exists)
         {
-            _logger.LogWarning("Duplicate detected: IsCertifiedEmail");
+            Logger.Warn("Duplicate detected: IsCertifiedEmail");
         }
 
         return !exists;

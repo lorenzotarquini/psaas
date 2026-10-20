@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -85,7 +84,7 @@ public static class KeycloakServiceCollectionExtensions
     private static void ConfigureJwtBearerOptions(IServiceCollection services, string scheme)
     {
         services.AddOptions<JwtBearerOptions>(scheme)
-            .Configure<IOptions<KeycloakOptions>, IHostEnvironment, ILoggerFactory>((jwtOptions, keycloakOptionsAccessor, environment, loggerFactory) =>
+            .Configure<IOptions<KeycloakOptions>, IHostEnvironment>((jwtOptions, keycloakOptionsAccessor, environment) =>
             {
                 var keycloakOptions = keycloakOptionsAccessor.Value;
                 jwtOptions.Authority = keycloakOptions.Authority.TrimEnd('/');
@@ -120,7 +119,7 @@ public static class KeycloakServiceCollectionExtensions
 
                 if (!keycloakOptions.RequireHttpsMetadata)
                 {
-                    NonSecureContextConfigurator.ConfigureJwtBearer(jwtOptions, environment, loggerFactory.CreateLogger("PSAAS.Auth"));
+                    NonSecureContextConfigurator.ConfigureJwtBearer(jwtOptions, environment);
                 }
             });
     }
@@ -140,7 +139,7 @@ public static class KeycloakServiceCollectionExtensions
     private static void ConfigureOpenIdConnectOptions(IServiceCollection services, string scheme)
     {
         services.AddOptions<OpenIdConnectOptions>(scheme)
-            .Configure<IOptions<KeycloakOptions>, IHostEnvironment, ILoggerFactory>((oidcOptions, keycloakOptionsAccessor, environment, loggerFactory) =>
+            .Configure<IOptions<KeycloakOptions>, IHostEnvironment>((oidcOptions, keycloakOptionsAccessor, environment) =>
             {
                 var keycloakOptions = keycloakOptionsAccessor.Value;
                 var authority = keycloakOptions.Authority.TrimEnd('/');
@@ -184,7 +183,7 @@ public static class KeycloakServiceCollectionExtensions
 
                 if (!keycloakOptions.RequireHttpsMetadata)
                 {
-                    NonSecureContextConfigurator.ConfigureOpenIdConnect(oidcOptions, environment, loggerFactory.CreateLogger("PSAAS.Auth"));
+                    NonSecureContextConfigurator.ConfigureOpenIdConnect(oidcOptions, environment);
                 }
             });
     }
@@ -229,9 +228,8 @@ public static class KeycloakServiceCollectionExtensions
             {
                 var keycloakOptions = serviceProvider.GetRequiredService<IOptions<KeycloakOptions>>().Value;
                 var environment = serviceProvider.GetRequiredService<IHostEnvironment>();
-                var logger = serviceProvider.GetRequiredService<ILogger<KeycloakClientCredentialsHandler>>();
                 var handler = new HttpClientHandler();
-                ServerCertificateValidationGuard.TryApplyDangerousServerCertificateValidation(handler, keycloakOptions.RequireHttpsMetadata, environment, logger, "client credentials token acquisition");
+                ServerCertificateValidationGuard.TryApplyDangerousServerCertificateValidation(handler, keycloakOptions.RequireHttpsMetadata, environment, "client credentials token acquisition");
                 return handler;
             });
 

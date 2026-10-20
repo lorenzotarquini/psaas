@@ -1,28 +1,25 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
+using NLog;
 using PSAAS.Application.Abstractions.Profiles;
 using PSAAS.Application.Contracts.Profiles;
 using PSAAS.Infrastructure.Data.DbContexts;
 
 namespace PSAAS.Infrastructure.Repositories.Profiles;
 
-public sealed class ProfileReadRepository(
-    PsaasDbContext dbContext,
-    ILogger<ProfileReadRepository>? logger = null) : IProfileReadRepository
+public sealed class ProfileReadRepository(PsaasDbContext dbContext) : IProfileReadRepository
 {
-    private readonly ILogger<ProfileReadRepository> _logger = logger ?? NullLogger<ProfileReadRepository>.Instance;
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     public async Task<IReadOnlyList<ProfileReadModel>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        _logger.LogDebug("Querying all profiles");
+        Logger.Debug("Querying all profiles");
         var profiles = await dbContext.Profiles
             .AsNoTracking()
             .OrderBy(profile => profile.Name)
             .Select(profile => new ProfileReadModel(profile.Id, profile.TenantId, profile.Name, profile.Description))
             .ToArrayAsync(cancellationToken)
             .ConfigureAwait(false);
-        _logger.LogDebug("Queried {ProfileCount} profiles", profiles.Length);
+        Logger.Debug("Queried {ProfileCount} profiles", profiles.Length);
 
         return profiles;
     }
@@ -51,7 +48,7 @@ public sealed class ProfileReadRepository(
             .ToArrayAsync(cancellationToken)
             .ConfigureAwait(false);
 
-        _logger.LogDebug("Found {ExistingCount} of {RequestedCount} profile ids", existingIds.Length, normalizedIds.Length);
+        Logger.Debug("Found {ExistingCount} of {RequestedCount} profile ids", existingIds.Length, normalizedIds.Length);
 
         return existingIds.ToHashSet(StringComparer.Ordinal);
     }

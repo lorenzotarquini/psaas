@@ -32,6 +32,10 @@ public sealed class BackendFactory : WebApplicationFactory<Program>
     public FakeProfileReadRepository Profiles { get; } = new();
     public FakeUserReadRepository Users { get; } = new();
     public FakeItalianCityProvider Cities { get; } = new();
+    public FakeTenantUniquenessChecker Uniqueness { get; } = new();
+    public FakeTenantWriteRepository TenantWrites => _tenantWrites ??= new(Tenants);
+
+    private FakeTenantWriteRepository? _tenantWrites;
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -48,6 +52,8 @@ public sealed class BackendFactory : WebApplicationFactory<Program>
             services.AddSingleton<IProfileReadRepository>(Profiles);
             services.AddSingleton<IUserReadRepository>(Users);
             services.AddSingleton<IItalianCityProvider>(Cities);
+            services.AddSingleton<ITenantUniquenessChecker>(Uniqueness);
+            services.AddSingleton<ITenantWriteRepository>(TenantWrites);
         });
     }
 

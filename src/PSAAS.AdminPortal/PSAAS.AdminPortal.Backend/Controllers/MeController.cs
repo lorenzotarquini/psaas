@@ -1,7 +1,8 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
+using NLog;
+using PSAAS.AdminPortal.Backend.Contracts;
 using PSAAS.Application.Abstractions.Users;
-using PSAAS.Application.Contracts.Users;
 
 namespace PSAAS.AdminPortal.Backend.Controllers;
 
@@ -9,11 +10,18 @@ namespace PSAAS.AdminPortal.Backend.Controllers;
 [Route("api/me")]
 public sealed class MeController(IUserReadRepository users) : ControllerBase
 {
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
     [HttpGet]
     public async Task<MeDto> Get(CancellationToken cancellationToken)
     {
         var keycloakId = User.FindFirstValue("sub");
         var user = keycloakId is null ? null : await users.GetByKeycloakIdAsync(keycloakId, cancellationToken);
+        Logger.Info(
+            "Resolved current user {KeycloakId}: registered {IsRegistered}, tenant {TenantId}",
+            keycloakId,
+            user is not null,
+            user?.TenantId);
 
         return new MeDto(
             User.Identity?.Name,
@@ -21,6 +29,3 @@ public sealed class MeController(IUserReadRepository users) : ControllerBase
             user);
     }
 }
-
-/// <param name="User">Null when the authenticated account is not registered in PSAAS (e.g. a platform administrator).</param>
-public sealed record MeDto(string? Name, IReadOnlyList<string> Roles, UserReadModel? User);

@@ -13,6 +13,8 @@ public sealed class PsaasDbContext(DbContextOptions<PsaasDbContext> options) : D
 
     public DbSet<ProductiveUnitProfileDbModel> ProductiveUnitProfiles => Set<ProductiveUnitProfileDbModel>();
 
+    public DbSet<UserDbModel> Users => Set<UserDbModel>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<TenantDbModel>(entityBuilder =>
@@ -99,6 +101,34 @@ public sealed class PsaasDbContext(DbContextOptions<PsaasDbContext> options) : D
                 .WithMany()
                 .HasForeignKey(profile => profile.TenantId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<UserDbModel>(entityBuilder =>
+        {
+            entityBuilder.ToTable("Users");
+
+            entityBuilder.HasKey(user => user.Id);
+
+            entityBuilder.HasIndex(user => user.KeycloakId).IsUnique();
+
+            entityBuilder.Property(user => user.KeycloakId).IsRequired();
+            entityBuilder.Property(user => user.UserName).IsRequired();
+            entityBuilder.Property(user => user.Email).IsRequired();
+            entityBuilder.Property(user => user.FirstName).IsRequired();
+            entityBuilder.Property(user => user.LastName).IsRequired();
+            // Optional: a platform administrator does not belong to any tenant.
+            entityBuilder
+                .HasOne(user => user.Tenant)
+                .WithMany()
+                .HasForeignKey(user => user.TenantId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Cascade);
+            entityBuilder
+                .HasOne(user => user.Profile)
+                .WithMany()
+                .HasForeignKey(user => user.ProfileId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         base.OnModelCreating(modelBuilder);

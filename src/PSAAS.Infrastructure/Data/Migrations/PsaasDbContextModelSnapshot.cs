@@ -135,6 +135,50 @@ namespace PSAAS.Infrastructure.Data.Migrations
                     b.ToTable("Tenants", (string)null);
                 });
 
+            modelBuilder.Entity("PSAAS.Infrastructure.Data.DbModels.UserDbModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("KeycloakId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProfileId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("TenantId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("KeycloakId")
+                        .IsUnique();
+
+                    b.HasIndex("ProfileId");
+
+                    b.HasIndex("TenantId");
+
+                    b.ToTable("Users", (string)null);
+                });
+
             modelBuilder.Entity("PSAAS.Infrastructure.Data.DbModels.ProductiveUnitDbModel", b =>
                 {
                     b.HasOne("PSAAS.Infrastructure.Data.DbModels.TenantDbModel", "Tenant")
@@ -206,6 +250,23 @@ namespace PSAAS.Infrastructure.Data.Migrations
 
                     b.Navigation("Address")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("PSAAS.Infrastructure.Data.DbModels.UserDbModel", b =>
+                {
+                    b.HasOne("PSAAS.Infrastructure.Data.DbModels.ProfileDbModel", "Profile")
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("PSAAS.Infrastructure.Data.DbModels.TenantDbModel", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Profile");
+
+                    b.Navigation("Tenant");
                 });
 
             modelBuilder.Entity("PSAAS.Infrastructure.Data.DbModels.ProductiveUnitDbModel", b =>

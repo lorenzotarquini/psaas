@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using PSAAS.Application.Abstractions.Tenants;
+using PSAAS.Application.Contracts;
+using PSAAS.Application.Validators.Tenants;
 using PSAAS.Domain;
 using PSAAS.Infrastructure.Converters;
 using PSAAS.Infrastructure.Data.DbContexts;
@@ -14,19 +16,41 @@ public sealed class TenantReadRepository(
 {
     private readonly ILogger<TenantReadRepository> _logger = logger ?? NullLogger<TenantReadRepository>.Instance;
 
-    public async Task<IReadOnlyList<Tenant>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<PagedResult<Tenant>> GetPageAsync(
+        string? search,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
     {
-        _logger.LogDebug("Querying all tenants");
-        var tenants = await dbContext.Tenants
-            .AsNoTracking()
+        _logger.LogDebug("Querying tenants page {Page} (size {PageSize}, search {Search})", page, pageSize, search);
+        var query = dbContext.Tenants.AsNoTracking();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var normalizedName = TenantFieldNormalizer.NormalizeCompanyName(search);
+            var vat = search.Trim().ToUpperInvariant();
+            query = query.Where(tenant =>
+                (normalizedName != "" && tenant.NormalizedCompanyName.Contains(normalizedName))
+                || tenant.VatNumber.Contains(vat)
+                || tenant.CompleteVatNumber.Contains(vat));
+        }
+
+        var totalCount = await query.CountAsync(cancellationToken).ConfigureAwait(false);
+        var tenants = await query
+            .OrderBy(tenant => tenant.CompanyName)
+            .ThenBy(tenant => tenant.Id)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
 
-        _logger.LogDebug("Queried {TenantCount} tenants", tenants.Count);
+        _logger.LogDebug("Queried {TenantCount} of {TotalCount} tenants", tenants.Count, totalCount);
 
-        return tenants
-            .Select(TenantDbModelConverter.ToDomain)
-            .ToArray();
+        return new PagedResult<Tenant>(
+            tenants.Select(TenantDbModelConverter.ToDomain).ToArray(),
+            totalCount,
+            page,
+            pageSize);
     }
 
     public async Task<Tenant?> GetByIdAsync(Guid tenantId, CancellationToken cancellationToken = default)

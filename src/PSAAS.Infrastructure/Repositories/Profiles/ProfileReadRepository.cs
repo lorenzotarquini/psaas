@@ -19,7 +19,7 @@ public sealed class ProfileReadRepository(
         var profiles = await dbContext.Profiles
             .AsNoTracking()
             .OrderBy(profile => profile.Name)
-            .Select(profile => new ProfileReadModel(profile.Id, profile.Name, profile.Description))
+            .Select(profile => new ProfileReadModel(profile.Id, profile.TenantId, profile.Name, profile.Description))
             .ToArrayAsync(cancellationToken)
             .ConfigureAwait(false);
         _logger.LogDebug("Queried {ProfileCount} profiles", profiles.Length);

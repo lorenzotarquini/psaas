@@ -41,3 +41,21 @@ Obiettivo: rendere `PSAAS.AdminPortal.Backend` (Web API .NET 10, presentation de
 - [ ] F7 Rimandata (prime funzionalità).
 - [x] F8 `PSAAS.AdminPortal.Backend.Tests` (5 test: 401 senza token, 401 audience errata, 403 senza ruolo, 200 con ruolo, health anonimo). Suite: Backend 5/5, Auth 8/8, Infra 17/17.
   Avvio reale verificato senza DB e senza Keycloak: /health 200, /api/me 401, OpenAPI 200. Login reale con Keycloak non verificato.
+
+## Funzionalità GET (controller)
+
+Decisioni: niente endpoint dedicati a struttura, unità e profili del tenant (li restituisce il dettaglio); unicità solo dentro creazione/modifica; indirizzi solo italiani per ora; endpoint senza logica leggono direttamente i repository di lettura di Application (CQRS leggero), i casi d'uso arrivano con le scritture.
+
+| Controller | Endpoint |
+|---|---|
+| TenantsController | `GET /api/tenants?search=&page=1&pageSize=20` (ricerca su ragione sociale normalizzata e P.IVA, ordine per ragione sociale, pageSize max 100) · `GET /api/tenants/{id}` (anagrafica, indirizzo, profili, unità produttive) |
+| TenantUsersController | `GET /api/tenants/{tenantId}/users` · `GET /api/tenants/{tenantId}/users/{userId}` |
+| ProfilesController | `GET /api/profiles` (tutti i tenant, con `tenantId`) |
+| GeographyController | `GET /api/geography/cities?term=` (min 2 caratteri, 503 se la fonte non risponde) |
+| MeController | `GET /api/me` (nome, ruoli, utente PSAAS o null) |
+
+- [x] Minimal API sostituite da controller; tutti richiedono la policy `Administrator`.
+- [x] Utenti persistiti: tabella `Users` (migration `Users`, non applicata). `KeycloakId` unico; tenant facoltativo (amministratore di piattaforma); cancellazione tenant → cascata, cancellazione profilo → profilo utente a null.
+- [x] `ITenantReadRepository.GetAllAsync` (senza chiamanti) sostituito da `GetPageAsync`; `ProfileReadModel` ha ora `TenantId`.
+- [x] Test: Backend 17/17 (repository finti), Infra 23/23 (paginazione e utenti su EF InMemory), Auth 8/8.
+- Aperto: gli utenti non hanno ancora un modo per essere creati, quindi le liste saranno vuote finché non arriva la scrittura.

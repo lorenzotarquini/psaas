@@ -6,5 +6,6 @@ namespace PSAAS.Application.Contracts.Profiles;
 /// </summary>
 public sealed record ProfileReadModel(
     string Id,
+    string TenantId,
     string Name,
     string? Description);

@@ -1,5 +1,6 @@
 @PSAAS.AdminPortal.Backend_HostAddress = http://localhost:5192
 @token = <access token Keycloak>
+@tenantId = <guid tenant>
 
 GET {{PSAAS.AdminPortal.Backend_HostAddress}}/health
 
@@ -7,6 +8,30 @@ GET {{PSAAS.AdminPortal.Backend_HostAddress}}/health
 
 GET {{PSAAS.AdminPortal.Backend_HostAddress}}/api/me
 Authorization: Bearer {{token}}
-Accept: application/json
+
+###
+
+GET {{PSAAS.AdminPortal.Backend_HostAddress}}/api/tenants?search=&page=1&pageSize=20
+Authorization: Bearer {{token}}
+
+###
+
+GET {{PSAAS.AdminPortal.Backend_HostAddress}}/api/tenants/{{tenantId}}
+Authorization: Bearer {{token}}
+
+###
+
+GET {{PSAAS.AdminPortal.Backend_HostAddress}}/api/tenants/{{tenantId}}/users
+Authorization: Bearer {{token}}
+
+###
+
+GET {{PSAAS.AdminPortal.Backend_HostAddress}}/api/profiles
+Authorization: Bearer {{token}}
+
+###
+
+GET {{PSAAS.AdminPortal.Backend_HostAddress}}/api/geography/cities?term=ro
+Authorization: Bearer {{token}}
 
 ###

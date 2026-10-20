@@ -1,10 +1,15 @@
+using PSAAS.Application.Contracts;
 using PSAAS.Domain;
 
 namespace PSAAS.Application.Abstractions.Tenants;
 
 public interface ITenantReadRepository
 {
-    Task<IReadOnlyList<Tenant>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<PagedResult<Tenant>> GetPageAsync(
+        string? search,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default);
 
     Task<Tenant?> GetByIdAsync(Guid tenantId, CancellationToken cancellationToken = default);
 

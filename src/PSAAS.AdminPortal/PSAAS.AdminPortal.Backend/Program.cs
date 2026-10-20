@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using NLog;
 using NLog.Web;
 using PSAAS.Application.Abstractions.Tenants;
@@ -18,6 +17,7 @@ try
 
     builder.Services.AddKeycloak(builder.Configuration);
     builder.Services.AddPsaasInfrastructure(builder.Configuration);
+    builder.Services.AddControllers();
     builder.Services.AddProblemDetails();
     builder.Services.AddHealthChecks();
     builder.Services.AddOpenApi();
@@ -50,14 +50,8 @@ try
 
     app.MapHealthChecks("/health");
 
-    // Every API endpoint requires the Administrator policy unless it opts out explicitly.
-    var api = app.MapGroup("/api").RequireAuthorization("Administrator");
-
-    api.MapGet("/me", (ClaimsPrincipal user) => new
-    {
-        Name = user.Identity?.Name,
-        Roles = user.FindAll(ClaimTypes.Role).Select(claim => claim.Value).Distinct()
-    });
+    // Every controller requires the Administrator policy unless it opts out explicitly.
+    app.MapControllers().RequireAuthorization("Administrator");
 
     app.Run();
 }

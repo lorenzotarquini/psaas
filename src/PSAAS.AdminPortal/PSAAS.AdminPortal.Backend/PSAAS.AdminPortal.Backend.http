@@ -46,3 +46,8 @@ Content-Type: application/json
 }
 
 ###
+
+GET {{PSAAS.AdminPortal.Backend_HostAddress}}/api/tenants/field-validation?field=companyName&value=Acme%20Srl
+Authorization: Bearer {{token}}
+
+###

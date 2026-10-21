@@ -25,6 +25,7 @@ Ogni scenario di accettazione (`UCn-Sm`) scende negli strati interni: qui si ved
 | UC3-S8 | Errori dell'organizzazione per posizione | `TenantCreateServiceTests.UC3_S8_*` |
 | UC3 flusso 3b | Duplicato concorrente | `TenantCreateServiceTests.UC3_3b_*` (la conversione dell'errore Postgres nel repository non è testabile con InMemory) |
 | UC4-S2, S3 | Unicità che esclude il cliente stesso | `TenantCreateValidatorTests.ExcludedTenant_*`, `TenantUniquenessCheckerTests.UC4_*` |
+| UC11-S1…S4 | Verifica di un campo con le regole del salvataggio | `TenantCreateValidatorTests` (gli stessi validatori di UC3/UC4); la scelta del campo (S5) è solo accettazione |
 | UC6-S6 | Esistenza dei profili scelti | `ProfileReadRepositoryTests.UC6_S6_*` |
 | UC8-S1…S5 | Identità e ruoli dal token | `PSAAS.Auth.Tests` (lettura dei ruoli Keycloak) |
 | UC9-S1, S2 | Panoramica dei profili | `ProfileReadRepositoryTests.UC9_*` |

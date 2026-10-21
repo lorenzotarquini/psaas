@@ -16,6 +16,7 @@ Errori di validazione: `400` `ValidationProblem` con un codice per campo in `err
 | UC8 | `GET /api/me` | esiste |
 | UC9 | `GET /api/profiles` | esiste |
 | UC10 | `GET /api/geography/cities?term=` | esiste |
+| UC11 | `GET /api/tenants/field-validation?field=&value=&excludeTenantId=` | esiste |
 
 ## Contratti esistenti (sintesi)
 
@@ -55,6 +56,12 @@ Effetto: utente creato in Keycloak (username = email, attributi `birthDate` e `p
 ### UC7 – `GET /api/users?search=`
 Risposta: `[{ id, firstName, lastName, email, birthDate, profiles: [{ id, name, tenantId, tenantCompanyName }] }]` · `503` Keycloak non raggiungibile.
 I profili salvati sull'utente che non esistono più vengono omessi.
+
+### UC11 – `GET /api/tenants/field-validation?field=&value=&excludeTenantId=`
+Verifica un solo campo dell'anagrafica con le regole del salvataggio (UC3/UC4), per controllarlo all'uscita dal campo.
+- `field`: `companyName`, `completeVatNumber` oppure `certifiedEmail`. `value`: il valore scritto. `excludeTenantId` (facoltativo): il cliente in modifica, i cui valori non contano come duplicati.
+- Risposte: `200` `{ "errorCode": null }` se valido, altrimenti `{ "errorCode": "NotUnique" }` (o `Required`, `InvalidFormat`, `MaxLengthExceeded`) · `400` con `errors.field = InvalidValue` se `field` non è verificabile.
+- Non registra nulla: il salvataggio ripete tutti i controlli.
 
 ## Confini dei test di accettazione
 

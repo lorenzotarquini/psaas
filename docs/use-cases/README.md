@@ -39,6 +39,7 @@ L'**Admin Portal** è il pannello di controllo del gestore della piattaforma: se
 | [UC8](UC8-chi-sono.md) | Sapere chi sono | in ambito |
 | [UC9](UC9-panoramica-profili.md) | Consultare la panoramica dei profili | in ambito |
 | [UC10](UC10-cercare-comune.md) | Cercare un comune (di supporto a UC3 e UC4) | in ambito |
+| [UC11](UC11-verificare-campo-cliente.md) | Verificare un campo univoco del cliente (di supporto a UC3 e UC4) | in ambito |
 
 Contratto HTTP: [API.md](API.md). Test unitari derivati dagli scenari: [TEST-UNITARI.md](TEST-UNITARI.md).
 
@@ -79,6 +80,7 @@ Schema dello scenario: Ogni operazione richiede un amministratore autenticato
     | GET /api/me                           |
     | GET /api/profiles                     |
     | GET /api/geography/cities?term=ro     |
+    | GET /api/tenants/field-validation?field=companyName&value=x |
 ```
 
 ### GEN-S2

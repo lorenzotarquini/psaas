@@ -38,3 +38,5 @@ public sealed record UserView(
     string Id, string FirstName, string LastName, string Email, DateOnly BirthDate, List<UserProfileView> Profiles);
 
 public sealed record UserProfileView(string Id, string Name, string TenantId, string TenantCompanyName);
+
+public sealed record FieldValidationView(string? ErrorCode);

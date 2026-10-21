@@ -6,6 +6,7 @@ using PSAAS.Application.Abstractions.Tenants;
 using PSAAS.Application.Contracts;
 using PSAAS.Application.Contracts.Tenants;
 using PSAAS.Application.Services.Tenants;
+using PSAAS.Application.Validators.Tenants;
 
 namespace PSAAS.AdminPortal.Backend.Controllers;
 
@@ -62,6 +63,38 @@ public sealed class TenantsController(ITenantReadRepository tenants) : Controlle
             AddressDto.From(tenant.Address),
             structure.Profiles,
             structure.ProductiveUnits);
+    }
+
+    // UC11: same rules and codes as saving (UC3/UC4), one field at a time, so the form can check on blur.
+    [HttpGet("field-validation")]
+    public async Task<ActionResult<TenantFieldValidationDto>> ValidateField(
+        [FromQuery, Required] string field,
+        [FromQuery] string? value,
+        [FromQuery] Guid? excludeTenantId,
+        [FromServices] TenantCreateValidator validator,
+        CancellationToken cancellationToken)
+    {
+        var result = field switch
+        {
+            "companyName" => await validator.ValidateCompanyNameAsync(value, excludeTenantId, cancellationToken),
+            "completeVatNumber" => await validator.ValidateCompleteVatNumberAsync(value, excludeTenantId, cancellationToken),
+            "certifiedEmail" => await validator.ValidateCertifiedEmailAsync(value, excludeTenantId, cancellationToken),
+            _ => null
+        };
+        if (result is null)
+        {
+            Logger.Info("Field validation requested for unsupported field {Field}", field);
+            return ValidationProblem(new ValidationProblemDetails(
+                new Dictionary<string, string[]> { ["field"] = [TenantFieldValidationErrorCodes.InvalidValue] }));
+        }
+
+        // Debug: the frontend calls this every time one of these fields loses focus.
+        Logger.Debug(
+            "Field {Field} validated with result {ErrorCode} (excluded tenant {ExcludedTenantId})",
+            field,
+            result.ErrorCode ?? "Valid",
+            excludeTenantId);
+        return new TenantFieldValidationDto(result.ErrorCode);
     }
 
     [HttpPost]

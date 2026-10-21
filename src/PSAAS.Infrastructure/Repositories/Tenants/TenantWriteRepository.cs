@@ -213,16 +213,6 @@ public sealed class TenantWriteRepository(PsaasDbContext dbContext) : ITenantWri
 
             throw;
         }
-        catch (KeyNotFoundException exception)
-        {
-            DetachFailedInsert(tenantDbModel);
-            DetachTracked(profileDbModels);
-            DetachTracked(productiveUnitDbModels);
-            DetachTracked(productiveUnitProfileDbModels);
-            throw new InvalidOperationException(
-                "A productive unit references a profile temporary id that was not created in the same request.",
-                exception);
-        }
     }
 
     public async Task<bool> UpdateAsync(Tenant tenant, CancellationToken cancellationToken = default)
@@ -464,7 +454,11 @@ public sealed class TenantWriteRepository(PsaasDbContext dbContext) : ITenantWri
         return productiveUnits
             .Zip(productiveUnitDbModels)
             .SelectMany(pair => pair.First.ProfileIds
-                .Concat(pair.First.TemporaryProfileIds.Select(temporaryProfileId => temporaryProfileIdMap[temporaryProfileId]))
+                .Concat(pair.First.TemporaryProfileIds.Select(temporaryProfileId =>
+                    temporaryProfileIdMap.TryGetValue(temporaryProfileId, out var profileId)
+                        ? profileId
+                        : throw new InvalidOperationException(
+                            "A productive unit references a profile temporary id that was not created in the same request.")))
                 .Distinct(StringComparer.Ordinal)
                 .Select(profileId => new ProductiveUnitProfileDbModel
                 {

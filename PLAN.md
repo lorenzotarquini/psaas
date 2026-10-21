@@ -88,3 +88,18 @@ Tutto ciò che riguarda l'utente sta in Keycloak: niente tabella `Users` nel DB.
 - [x] Rimossi migration `Users` (mai applicata), `UserDbModel`, `UserReadRepository`, `IUserReadRepository`, `UserReadModel`, `TenantUsersController` (`GET /api/tenants/{id}/users[/{userId}]`).
 - [x] `GET /api/me` legge solo il token: `keycloakId` (`sub`), `name`, `email`, `roles`.
 - [ ] Se servono gli utenti di un tenant: leggerli dall'API di amministrazione di Keycloak (client M2M, `PSAAS.Auth` modalità MachineToMachine) con tenant/profilo come attributi o gruppi Keycloak. Da decidere.
+
+## Test di accettazione (outside-in)
+
+Strategia: presentazioni → test di accettazione derivati dagli use case; Application e Infrastructure → test unitari estratti dai test di accettazione.
+
+- [x] Intervista → use case UC1–UC10 in `docs/use-cases/` (indice, glossario, ambito, regole numerate).
+- [x] Analisi delle API: `docs/use-cases/API.md` (contratti esistenti e nuovi: `PUT /api/tenants/{id}`, `PUT /api/tenants/{id}/organization`, `POST /api/users`, `GET /api/users`).
+- [x] Scenari Gherkin in ogni use case (id `UCn-Sm`, scenari comuni `GEN-Sn`) con link al test xUnit.
+- [x] `PSAAS.AdminPortal.Backend.Tests` → `PSAAS.AdminPortal.Backend.Tests`: un file per use case, `[Trait("Scenario", "UCn-Sm")]`. Backend reale + Postgres reale (Testcontainers, `postgres:17-alpine`); simulati solo Keycloak (token firmati dai test, archivio utenti in memoria) e lista comuni.
+- [x] Porta `IUserDirectory` (Application) definita dai test: Keycloak come archivio utenti. Nessuna implementazione ancora.
+- Stato: 81 test, 46 verdi, 35 rossi attesi: UC4, UC5, UC6, UC7 (endpoint mancanti), UC1-S4 (ricerca per PEC), GEN-S1/S2 sugli endpoint mancanti. UC5-S8 è verde per caso (404 perché la rotta non esiste): tornerà significativo quando l'endpoint esisterà.
+- [ ] Implementare UC1-S4, UC4, UC5, UC6, UC7 fino a far diventare verdi gli scenari (UC6/UC7 richiedono il client M2M Keycloak).
+- [x] Test unitari estratti dagli scenari (`docs/use-cases/TEST-UNITARI.md`): nuovi `PSAAS.Domain.Tests` (13, con `UserTests` spostato da Auth.Tests) e `PSAAS.Application.Tests` (38: validatore, normalizzatore, `TenantCreateService`); `PSAAS.Infrastructure.Tests` riorganizzato per cartelle (34: repository su EF InMemory, convertitore, provider comuni). Unico rosso atteso: UC1-S4 (ricerca per PEC).
+- [x] Bugfix trovato dai test: `TenantWriteRepository` lanciava `KeyNotFoundException` per un id temporaneo di profilo sconosciuto (il `catch` che doveva tradurla era irraggiungibile); ora `InvalidOperationException` nel punto della ricerca.
+- Limite: con EF InMemory la conversione degli errori Postgres di unicità in `TenantUniquenessConflictException` / `ProductiveUnitNameConflictException` non è testabile.

@@ -1,7 +1,7 @@
 using PSAAS.Domain;
 using Xunit;
 
-namespace PSAAS.Auth.Tests;
+namespace PSAAS.Domain.Tests;
 
 public sealed class UserTests
 {

@@ -3,7 +3,7 @@ using PSAAS.Infrastructure.Converters;
 using PSAAS.Infrastructure.Data.DbModels;
 using Xunit;
 
-namespace PSAAS.Infrastructure.Tests;
+namespace PSAAS.Infrastructure.Tests.Converters;
 
 public sealed class TenantDbModelConverterTests
 {

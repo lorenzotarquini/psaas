@@ -12,7 +12,9 @@
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="../tests/PSAAS.AdminPortal.Backend.Tests/PSAAS.AdminPortal.Backend.Tests.csproj" />
+    <Project Path="../tests/PSAAS.Application.Tests/PSAAS.Application.Tests.csproj" />
     <Project Path="../tests/PSAAS.Auth.Tests/PSAAS.Auth.Tests.csproj" />
+    <Project Path="../tests/PSAAS.Domain.Tests/PSAAS.Domain.Tests.csproj" />
     <Project Path="../tests/PSAAS.Infrastructure.Tests/PSAAS.Infrastructure.Tests.csproj" />
   </Folder>
   <Project Path="../PSAAS.AdminPortal/PSAAS.AdminPortal.Backend/PSAAS.AdminPortal.Backend.csproj" />

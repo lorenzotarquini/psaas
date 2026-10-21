@@ -3,7 +3,7 @@ using System.Reflection;
 using Microsoft.Extensions.Caching.Memory;
 using Xunit;
 
-namespace PSAAS.Infrastructure.Tests;
+namespace PSAAS.Infrastructure.Tests.Geography;
 
 public sealed class ItalianCityProviderTests
 {

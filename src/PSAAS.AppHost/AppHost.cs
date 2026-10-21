@@ -8,8 +8,15 @@ var postgres = builder.AddPostgres("postgres", postgresUsername, postgresPasswor
 
 var psaasDb = postgres.AddDatabase("psaas-db", "psaas-db");
 
-builder.AddProject<Projects.PSAAS_AdminPortal_Backend>("adminportal-backend")
+var backend = builder.AddProject<Projects.PSAAS_AdminPortal_Backend>("adminportal-backend")
     .WithReference(psaasDb)
     .WaitFor(psaasDb);
+
+// Fixed port: it must match the redirect URIs and web origins of the Keycloak client adminportal-frontend.
+builder.AddViteApp("adminportal-frontend", "../PSAAS.AdminPortal/PSAAS.AdminPortal.Frontend")
+    .WithEndpoint("http", endpoint => endpoint.Port = 5173)
+    .WithEnvironment("BACKEND_URL", backend.GetEndpoint("https"))
+    .WithExternalHttpEndpoints()
+    .WaitFor(backend);
 
 builder.Build().Run();

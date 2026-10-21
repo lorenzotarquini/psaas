@@ -1,0 +1,19 @@
+{
+  "appName": "PSAAS Admin Portal",
+  "loading": "Loading…",
+  "logout": "Log out",
+  "language": "Language",
+  "theme": "Theme",
+  "themes": {
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "me": {
+    "title": "Current user",
+    "keycloakId": "Keycloak ID",
+    "name": "Name",
+    "email": "Email",
+    "roles": "Roles",
+    "error": "Could not read the current user (HTTP {{status}})."
+  }
+}

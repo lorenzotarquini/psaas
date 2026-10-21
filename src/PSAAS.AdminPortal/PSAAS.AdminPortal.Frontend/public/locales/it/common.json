@@ -1,0 +1,19 @@
+{
+  "appName": "PSAAS Admin Portal",
+  "loading": "Caricamento…",
+  "logout": "Esci",
+  "language": "Lingua",
+  "theme": "Tema",
+  "themes": {
+    "light": "Chiaro",
+    "dark": "Scuro"
+  },
+  "me": {
+    "title": "Utente corrente",
+    "keycloakId": "ID Keycloak",
+    "name": "Nome",
+    "email": "Email",
+    "roles": "Ruoli",
+    "error": "Impossibile leggere l'utente corrente (HTTP {{status}})."
+  }
+}

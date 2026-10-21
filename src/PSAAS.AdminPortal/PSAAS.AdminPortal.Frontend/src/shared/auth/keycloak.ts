@@ -1,5 +1,5 @@
 import Keycloak from 'keycloak-js'
-import { getLogger } from './logger'
+import { getLogger } from '@/shared/lib/logger'
 
 const logger = getLogger('auth')
 

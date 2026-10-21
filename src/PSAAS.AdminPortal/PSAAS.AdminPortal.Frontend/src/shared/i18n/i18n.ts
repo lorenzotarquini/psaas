@@ -2,7 +2,7 @@ import i18n from 'i18next'
 import LanguageDetector from 'i18next-browser-languagedetector'
 import HttpBackend from 'i18next-http-backend'
 import { initReactI18next } from 'react-i18next'
-import { getLogger } from './logger'
+import { getLogger } from '@/shared/lib/logger'
 
 const logger = getLogger('i18n')
 

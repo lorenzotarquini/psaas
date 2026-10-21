@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "oxlint",
+    "lint": "oxlint && steiger ./src",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -20,6 +20,7 @@
     "react-i18next": "^17.1.0"
   },
   "devDependencies": {
+    "@feature-sliced/steiger-plugin": "^0.8.0",
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^24.19.2",
     "@types/react": "^19.3.0",
@@ -27,6 +28,7 @@
     "@vitejs/plugin-react": "^6.1.2",
     "daisyui": "^5.7.50",
     "oxlint": "^1.88.0",
+    "steiger": "^0.6.0",
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.3",
     "vite": "^8.3.4"

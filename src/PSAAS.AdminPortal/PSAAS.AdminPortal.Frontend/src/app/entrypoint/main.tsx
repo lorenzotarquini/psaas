@@ -1,10 +1,10 @@
 import { StrictMode, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
-import './index.css'
-import './i18n'
-import App from './App.tsx'
-import { initAuth } from './auth'
-import { getLogger } from './logger'
+import '../styles/index.css'
+import '@/shared/i18n'
+import { HomePage } from '@/pages/home'
+import { initAuth } from '@/shared/auth'
+import { getLogger } from '@/shared/lib/logger'
 
 const logger = getLogger('main')
 const root = createRoot(document.getElementById('root')!)
@@ -15,7 +15,7 @@ initAuth()
     root.render(
       <StrictMode>
         <Suspense fallback={<span className="loading loading-spinner loading-lg m-8" />}>
-          <App />
+          <HomePage />
         </Suspense>
       </StrictMode>,
     ),

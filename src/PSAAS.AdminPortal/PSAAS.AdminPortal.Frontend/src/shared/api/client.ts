@@ -1,5 +1,5 @@
-import { getAccessToken } from './auth'
-import { getLogger } from './logger'
+import { getAccessToken } from '@/shared/auth'
+import { getLogger } from '@/shared/lib/logger'
 
 const logger = getLogger('api')
 
@@ -23,11 +23,4 @@ export async function apiGet<T>(path: string, signal?: AbortSignal): Promise<T> 
     throw new ApiError(response.status, path)
   }
   return (await response.json()) as T
-}
-
-export interface Me {
-  keycloakId: string | null
-  name: string | null
-  email: string | null
-  roles: string[]
 }

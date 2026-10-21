@@ -1,1 +1,1 @@
-export { getAccessToken, initAuth, keycloak, logout } from './keycloak'
+export { getAccessToken, initAuth, keycloak, login, logout } from './keycloak'

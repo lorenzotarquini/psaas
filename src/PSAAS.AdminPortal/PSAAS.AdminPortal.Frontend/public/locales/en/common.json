@@ -15,5 +15,118 @@
     "email": "Email",
     "roles": "Roles",
     "error": "Could not read the current user (HTTP {{status}})."
+  },
+  "menu": "Menu",
+  "nav": {
+    "home": "Home",
+    "tenants": "Customers",
+    "users": "Users",
+    "profiles": "Profiles"
+  },
+  "profile": {
+    "title": "My profile",
+    "settings": "Settings"
+  },
+  "tenants": {
+    "title": "Customers",
+    "searchPlaceholder": "Search by company name, VAT number or PEC",
+    "companyName": "Company name",
+    "vatNumber": "VAT number",
+    "completeVatNumber": "Complete VAT number",
+    "certifiedEmail": "PEC",
+    "city": "City",
+    "empty": "There are no customers yet.",
+    "noResults": "No customer matches \"{{search}}\"."
+  },
+  "pagination": {
+    "pageSize": "Rows per page",
+    "previous": "Previous page",
+    "next": "Next page",
+    "pageOf": "Page {{page}} of {{totalPages}}"
+  },
+  "errors": {
+    "forbidden": "You are not allowed to do this.",
+    "notFound": "Item not found.",
+    "unavailable": "Service temporarily unavailable. Please try again shortly.",
+    "generic": "An unexpected error occurred.",
+    "pageNotFound": "Page not found",
+    "validation": "Some data is not valid: check the highlighted fields."
+  },
+  "tenantDetail": {
+    "backToList": "Back to customers",
+    "notFound": "Customer not found.",
+    "registry": "Registry",
+    "address": "Registered office",
+    "organization": "Organization",
+    "noOrganization": "The customer has no profiles or productive units.",
+    "profiles": "Profiles",
+    "productiveUnits": "Productive units",
+    "noProfiles": "No profiles.",
+    "noProductiveUnits": "No productive units.",
+    "profile": "Profile",
+    "matrixCaption": "Productive units opened by each profile",
+    "opens": "Opens the unit",
+    "doesNotOpen": "Does not open the unit",
+    "editRegistry": "Edit registry",
+    "editOrganization": "Edit organization"
+  },
+  "validation": {
+    "Required": "Required field.",
+    "InvalidFormat": "Invalid format.",
+    "MaxLengthExceeded": "Text too long.",
+    "NotUnique": "Value already in use.",
+    "InvalidValue": "Invalid value."
+  },
+  "tenantForm": {
+    "createTitle": "New customer",
+    "editTitle": "Edit registry of {{name}}",
+    "backToDetail": "Back to customer",
+    "street": "Street",
+    "postalCode": "Postal code",
+    "cityListUnavailable": "City list unavailable: type city and postal code by hand.",
+    "optional": "optional",
+    "create": "Activate customer",
+    "save": "Save"
+  },
+  "organizationEditor": {
+    "title": "Organization of {{name}}",
+    "name": "Name",
+    "description": "Description",
+    "addProfile": "Add profile",
+    "addUnit": "Add productive unit",
+    "removeProfile": "Remove profile",
+    "removeUnit": "Remove productive unit",
+    "openedBy": "Opened by profiles:",
+    "unnamedProfile": "(unnamed profile)",
+    "invalidProfileLink": "Link to an invalid profile.",
+    "confirmRemoveProfiles": "You are removing the profiles: {{names}}. Users who have them will lose them. Continue?"
+  },
+  "users": {
+    "title": "Users",
+    "create": "New user",
+    "created": "User {{email}} created. Keycloak sent them the email to set the password.",
+    "searchPlaceholder": "Search by first name, last name or email",
+    "noResults": "No user matches \"{{search}}\".",
+    "empty": "There are no users.",
+    "name": "Name",
+    "email": "Email",
+    "birthDate": "Birth date",
+    "noProfiles": "No profiles"
+  },
+  "userForm": {
+    "title": "New user",
+    "backToUsers": "Back to users",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "passwordEmail": "The email is also the username. Keycloak will email the person to set the password.",
+    "create": "Create user",
+    "invalidProfile": "One of the chosen profiles no longer exists: reload the page."
+  },
+  "profiles": {
+    "title": "Profiles",
+    "empty": "There are no profiles.",
+    "filterPlaceholder": "Filter by profile, description or customer",
+    "count": "{{count}} of {{total}} profiles",
+    "tenant": "Customer"
   }
 }

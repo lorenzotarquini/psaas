@@ -27,6 +27,10 @@ export async function getAccessToken(): Promise<string> {
   return keycloak.token!
 }
 
+export function login(): Promise<void> {
+  return keycloak.login()
+}
+
 export function logout(): Promise<void> {
   logger.info('User logging out')
   return keycloak.logout({ redirectUri: window.location.origin })

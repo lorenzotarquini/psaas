@@ -15,5 +15,118 @@
     "email": "Email",
     "roles": "Ruoli",
     "error": "Impossibile leggere l'utente corrente (HTTP {{status}})."
+  },
+  "menu": "Menu",
+  "nav": {
+    "home": "Home",
+    "tenants": "Clienti",
+    "users": "Utenti",
+    "profiles": "Profili"
+  },
+  "profile": {
+    "title": "Il mio profilo",
+    "settings": "Impostazioni"
+  },
+  "tenants": {
+    "title": "Clienti",
+    "searchPlaceholder": "Cerca per ragione sociale, P.IVA o PEC",
+    "companyName": "Ragione sociale",
+    "vatNumber": "P.IVA",
+    "completeVatNumber": "P.IVA completa",
+    "certifiedEmail": "PEC",
+    "city": "Città",
+    "empty": "Non ci sono ancora clienti.",
+    "noResults": "Nessun cliente corrisponde a \"{{search}}\"."
+  },
+  "pagination": {
+    "pageSize": "Righe per pagina",
+    "previous": "Pagina precedente",
+    "next": "Pagina successiva",
+    "pageOf": "Pagina {{page}} di {{totalPages}}"
+  },
+  "errors": {
+    "forbidden": "Non hai i permessi per questa operazione.",
+    "notFound": "Elemento non trovato.",
+    "unavailable": "Servizio temporaneamente non disponibile. Riprova tra poco.",
+    "generic": "Si è verificato un errore imprevisto.",
+    "pageNotFound": "Pagina non trovata",
+    "validation": "Alcuni dati non sono validi: controlla i campi evidenziati."
+  },
+  "tenantDetail": {
+    "backToList": "Torna all'elenco clienti",
+    "notFound": "Cliente non trovato.",
+    "registry": "Anagrafica",
+    "address": "Sede",
+    "organization": "Organizzazione",
+    "noOrganization": "Il cliente non ha profili né unità produttive.",
+    "profiles": "Profili",
+    "productiveUnits": "Unità produttive",
+    "noProfiles": "Nessun profilo.",
+    "noProductiveUnits": "Nessuna unità produttiva.",
+    "profile": "Profilo",
+    "matrixCaption": "Unità produttive aperte da ciascun profilo",
+    "opens": "Apre l'unità",
+    "doesNotOpen": "Non apre l'unità",
+    "editRegistry": "Modifica anagrafica",
+    "editOrganization": "Modifica organizzazione"
+  },
+  "validation": {
+    "Required": "Campo obbligatorio.",
+    "InvalidFormat": "Formato non valido.",
+    "MaxLengthExceeded": "Testo troppo lungo.",
+    "NotUnique": "Valore già in uso.",
+    "InvalidValue": "Valore non valido."
+  },
+  "tenantForm": {
+    "createTitle": "Nuovo cliente",
+    "editTitle": "Modifica anagrafica di {{name}}",
+    "backToDetail": "Torna alla scheda cliente",
+    "street": "Via",
+    "postalCode": "CAP",
+    "cityListUnavailable": "Elenco comuni non disponibile: scrivi città e CAP a mano.",
+    "optional": "facoltativo",
+    "create": "Attiva cliente",
+    "save": "Salva"
+  },
+  "organizationEditor": {
+    "title": "Organizzazione di {{name}}",
+    "name": "Nome",
+    "description": "Descrizione",
+    "addProfile": "Aggiungi profilo",
+    "addUnit": "Aggiungi unità produttiva",
+    "removeProfile": "Rimuovi profilo",
+    "removeUnit": "Rimuovi unità produttiva",
+    "openedBy": "Aperta dai profili:",
+    "unnamedProfile": "(profilo senza nome)",
+    "invalidProfileLink": "Collegamento a un profilo non valido.",
+    "confirmRemoveProfiles": "Stai rimuovendo i profili: {{names}}. Gli utenti che li hanno li perderanno. Continuare?"
+  },
+  "users": {
+    "title": "Utenti",
+    "create": "Nuovo utente",
+    "created": "Utente {{email}} creato. Keycloak gli ha inviato l'email per impostare la password.",
+    "searchPlaceholder": "Cerca per nome, cognome o email",
+    "noResults": "Nessun utente corrisponde a \"{{search}}\".",
+    "empty": "Non ci sono utenti.",
+    "name": "Nome",
+    "email": "Email",
+    "birthDate": "Data di nascita",
+    "noProfiles": "Nessun profilo"
+  },
+  "userForm": {
+    "title": "Nuovo utente",
+    "backToUsers": "Torna agli utenti",
+    "firstName": "Nome",
+    "lastName": "Cognome",
+    "passwordEmail": "L'email sarà anche lo username. Keycloak invierà alla persona un'email per impostare la password.",
+    "create": "Crea utente",
+    "invalidProfile": "Uno dei profili scelti non esiste più: ricarica la pagina."
+  },
+  "profiles": {
+    "title": "Profili",
+    "empty": "Non ci sono profili.",
+    "filterPlaceholder": "Filtra per profilo, descrizione o cliente",
+    "count": "{{count}} di {{total}} profili",
+    "tenant": "Cliente"
   }
 }

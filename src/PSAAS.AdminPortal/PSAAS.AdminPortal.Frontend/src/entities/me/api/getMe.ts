@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query'
 import { apiGet } from '@/shared/api'
 
 // Mirrors MeDto in PSAAS.AdminPortal.Backend.
@@ -8,4 +9,5 @@ export interface Me {
   roles: string[]
 }
 
-export const getMe = (signal?: AbortSignal) => apiGet<Me>('/api/me', signal)
+export const useMe = () =>
+  useQuery({ queryKey: ['me'], queryFn: ({ signal }) => apiGet<Me>('/api/me', signal) })

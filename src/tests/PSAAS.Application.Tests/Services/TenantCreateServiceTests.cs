@@ -16,7 +16,7 @@ public sealed class TenantCreateServiceTests
     private readonly FakeCityList _cities = new();
     private readonly FakeTenantWriteRepository _repository = new();
 
-    private TenantCreateService Service => new(new TenantCreateValidator(_uniqueness), new TenantAddressValidator(_cities), _repository, _audit);
+    private TenantCreateService Service => new(new TenantCreateValidator(_uniqueness), new TenantAddressValidator(_cities), _repository, _audit, TimeProvider.System);
 
     private static TenantCreateRequest Valid(
         IReadOnlyList<TenantCreateProfileRequest>? profiles = null,

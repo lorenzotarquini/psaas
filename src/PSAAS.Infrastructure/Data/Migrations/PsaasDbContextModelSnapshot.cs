@@ -142,6 +142,9 @@ namespace PSAAS.Infrastructure.Data.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("text");
 
+                    b.Property<string>("AccountManager")
+                        .HasColumnType("text");
+
                     b.Property<string>("CertifiedEmail")
                         .IsRequired()
                         .HasColumnType("text");
@@ -154,12 +157,36 @@ namespace PSAAS.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("now()");
+
                     b.Property<string>("NormalizedCertifiedEmail")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("NormalizedCompanyName")
                         .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SdiCode")
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("Active");
+
+                    b.Property<DateTimeOffset>("StatusChangedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("StatusReason")
                         .HasColumnType("text");
 
                     b.Property<string>("VatNumber")
@@ -179,6 +206,8 @@ namespace PSAAS.Infrastructure.Data.Migrations
 
                     b.HasIndex("NormalizedCompanyName")
                         .IsUnique();
+
+                    b.HasIndex("Status");
 
                     b.ToTable("Tenants", (string)null);
                 });

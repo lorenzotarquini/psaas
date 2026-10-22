@@ -7,7 +7,12 @@ public sealed record TenantRegistryUpdateRequest(
     string? CertifiedEmail,
     string? Street,
     string? City,
-    string? PostalCode);
+    string? PostalCode,
+    string? SdiCode = null,
+    string? AccountManager = null);
+
+/// <summary>UC13: the status to go to (TenantStatus name) and why.</summary>
+public sealed record TenantStatusChangeRequest(string? Status, string? Reason);
 
 /// <summary>
 /// UC5: replaces the whole organization of a tenant; what is not in the request is removed.
@@ -31,6 +36,8 @@ public sealed record TenantOrganizationUnitRequest(
 public sealed record TenantEditResult(bool Found, IReadOnlyDictionary<string, string> Errors)
 {
     public static readonly TenantEditResult NotFound = new(false, new Dictionary<string, string>());
+
+    public static readonly TenantEditResult Ok = new(true, new Dictionary<string, string>());
 
     public bool Succeeded => Found && Errors.Count == 0;
 }

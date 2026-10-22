@@ -140,6 +140,18 @@ public sealed partial class TenantCreateValidator(ITenantUniquenessChecker uniqu
             : TenantFieldValidationResult.Invalid(TenantFieldValidationErrorCodes.NotUnique, normalizedCertifiedEmail);
     }
 
+    /// <summary>Optional SDI recipient code: 7 characters, 6 for public administrations; stored uppercase.</summary>
+    public static TenantFieldValidationResult ValidateSdiCode(string? sdiCode)
+    {
+        var normalized = sdiCode?.Trim().ToUpperInvariant() ?? string.Empty;
+        return normalized.Length == 0 || SdiCodeRegex().IsMatch(normalized)
+            ? TenantFieldValidationResult.Valid(normalized)
+            : TenantFieldValidationResult.Invalid(TenantFieldValidationErrorCodes.InvalidFormat, normalized);
+    }
+
+    [GeneratedRegex("^[A-Z0-9]{6,7}$", RegexOptions.CultureInvariant)]
+    private static partial Regex SdiCodeRegex();
+
     [GeneratedRegex("^[A-Z]{2}[0-9]{11}$", RegexOptions.CultureInvariant)]
     private static partial Regex CompleteVatNumberRegex();
 

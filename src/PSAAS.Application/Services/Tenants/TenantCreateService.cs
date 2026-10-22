@@ -16,7 +16,8 @@ public sealed class TenantCreateService(
     TenantCreateValidator validator,
     TenantAddressValidator addressValidator,
     ITenantWriteRepository tenants,
-    IAuditLog audit)
+    IAuditLog audit,
+    TimeProvider clock)
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -30,6 +31,11 @@ public sealed class TenantCreateService(
         var completeVatNumber = await ValidateUniqueFieldsAsync(request, errors, cancellationToken);
         var street = Trim(request.Street);
         var city = await addressValidator.ValidateAsync(street, Trim(request.City), Trim(request.PostalCode), errors, cancellationToken);
+        var sdiCode = TenantCreateValidator.ValidateSdiCode(request.SdiCode);
+        if (!sdiCode.IsValid)
+        {
+            errors["sdiCode"] = sdiCode.ErrorCode!;
+        }
 
         var profiles = request.Profiles ?? [];
         var units = request.ProductiveUnits ?? [];
@@ -49,7 +55,10 @@ public sealed class TenantCreateService(
             completeVatNumber[2..],
             completeVatNumber,
             Trim(request.CertifiedEmail),
-            new Address(street, city, Trim(request.PostalCode), Country));
+            new Address(street, city, Trim(request.PostalCode), Country),
+            request.Draft ? TenantStatus.Onboarding : TenantStatus.Active,
+            new TenantCommercialInfo(NullIfEmpty(sdiCode.NormalizedValue), NullIfEmpty(request.AccountManager)),
+            clock.GetUtcNow());
         // Profiles without a key are never referenced, so any unique temporary id works for them.
         var temporaryIds = profiles.Select(profile => NullIfEmpty(profile.Key) ?? Guid.NewGuid().ToString()).ToArray();
 
@@ -82,7 +91,7 @@ public sealed class TenantCreateService(
 
         await audit.RecordAsync(
             new AuditRecord(
-                AuditActions.TenantCreated,
+                request.Draft ? AuditActions.TenantOnboardingStarted : AuditActions.TenantCreated,
                 AuditTargets.Tenant,
                 tenant.Id.ToString(),
                 tenant.CompanyName,

@@ -8,6 +8,9 @@ public static class AuditActions
     public const string TenantCreated = "tenant.created";
     public const string TenantRegistryUpdated = "tenant.registry.updated";
     public const string TenantOrganizationUpdated = "tenant.organization.updated";
+    public const string TenantOnboardingStarted = "tenant.onboarding.started";
+    public const string TenantOnboardingDiscarded = "tenant.onboarding.discarded";
+    public const string TenantStatusChanged = "tenant.status.changed";
     public const string UserCreated = "user.created";
 }
 

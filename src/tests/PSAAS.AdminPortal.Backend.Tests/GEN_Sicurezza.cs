@@ -21,7 +21,9 @@ public sealed class GEN_Sicurezza(PostgresFixture database) : AcceptanceTest(dat
         { "GET", "/api/profiles" },
         { "GET", "/api/geography/cities?term=ro" },
         { "GET", "/api/tenants/field-validation?field=companyName&value=x" },
-        { "GET", "/api/audit" }
+        { "GET", "/api/audit" },
+        { "POST", $"/api/tenants/{Guid.NewGuid()}/status" },
+        { "DELETE", $"/api/tenants/{Guid.NewGuid()}" }
     };
 
     [Theory, Trait("Scenario", "GEN-S1")]

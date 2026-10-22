@@ -5,7 +5,8 @@ namespace PSAAS.AdminPortal.Backend.Tests.Infrastruttura;
 public sealed record PageView<T>(List<T> Items, int TotalCount, int Page, int PageSize);
 
 public sealed record TenantSummary(
-    Guid Id, string CompanyName, string VatNumber, string CompleteVatNumber, string CertifiedEmail, string City);
+    Guid Id, string CompanyName, string VatNumber, string CompleteVatNumber, string CertifiedEmail, string City,
+    string Code = "", string Status = "", DateTimeOffset CreatedAt = default);
 
 public sealed record TenantDetail(
     Guid Id,
@@ -15,7 +16,11 @@ public sealed record TenantDetail(
     string CertifiedEmail,
     AddressView Address,
     List<ProfileView> Profiles,
-    List<ProductiveUnitView> ProductiveUnits)
+    List<ProductiveUnitView> ProductiveUnits,
+    string Code = "",
+    LifecycleView? Lifecycle = null,
+    string? SdiCode = null,
+    string? AccountManager = null)
 {
     public ProfileView Profile(string name) => Profiles.Single(profile => profile.Name == name);
 
@@ -54,3 +59,5 @@ public sealed record AuditEventView(
     string TargetName,
     string? TenantId,
     System.Text.Json.JsonElement? Details);
+
+public sealed record LifecycleView(string Status, string? Reason, DateTimeOffset ChangedAt, DateTimeOffset CreatedAt);

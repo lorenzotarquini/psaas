@@ -104,4 +104,17 @@ public sealed class TenantCreateValidatorTests
         Assert.True((await Validator.ValidateCertifiedEmailAsync("alfa@pec.it", alfa)).IsValid);
         Assert.False((await Validator.ValidateCompanyNameAsync("Alfa Srl", Guid.NewGuid())).IsValid);
     }
+
+    [Theory]
+    [InlineData(null, true, "")]
+    [InlineData(" m5uxcr1 ", true, "M5UXCR1")]
+    [InlineData("UFABC1", true, "UFABC1")]
+    [InlineData("ABC", false, "ABC")]
+    [InlineData("M5UX-R1", false, "M5UX-R1")]
+    public void UC14_S5_SdiCode_IsOptional_SixOrSevenLettersOrDigits(string? value, bool valid, string normalized)
+    {
+        var result = TenantCreateValidator.ValidateSdiCode(value);
+
+        Assert.Equal((valid, normalized), (result.IsValid, result.NormalizedValue));
+    }
 }

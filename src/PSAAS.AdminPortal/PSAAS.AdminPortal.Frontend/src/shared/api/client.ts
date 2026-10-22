@@ -34,7 +34,7 @@ export async function readFieldErrors(response: Response): Promise<FieldErrors> 
   }
 }
 
-type Method = 'GET' | 'POST' | 'PUT'
+type Method = 'GET' | 'POST' | 'PUT' | 'DELETE'
 
 // Relative /api: proxied to the backend by Vite in dev (vite.config.ts).
 async function request<T>(method: Method, path: string, body?: unknown, signal?: AbortSignal): Promise<T> {
@@ -62,3 +62,4 @@ async function request<T>(method: Method, path: string, body?: unknown, signal?:
 export const apiGet = <T>(path: string, signal?: AbortSignal) => request<T>('GET', path, undefined, signal)
 export const apiPost = <T>(path: string, body: unknown) => request<T>('POST', path, body)
 export const apiPut = <T>(path: string, body: unknown) => request<T>('PUT', path, body)
+export const apiDelete = (path: string) => request<void>('DELETE', path)

@@ -14,6 +14,7 @@ public static class DependencyInjection
         services.AddScoped<TenantCreateService>();
         services.AddScoped<TenantRegistryUpdateService>();
         services.AddScoped<TenantOrganizationService>();
+        services.AddScoped<TenantLifecycleService>();
         services.AddScoped<UserCreateService>();
         services.AddScoped<UserSearchService>();
 

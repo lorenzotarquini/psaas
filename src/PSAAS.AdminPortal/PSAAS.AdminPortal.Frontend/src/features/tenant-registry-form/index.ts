@@ -5,4 +5,5 @@ export {
   toRegistryRequest,
   type RegistryValues,
 } from './model/registry'
-export { RegistryFields } from './ui/RegistryFields'
+export { useUniqueFieldCheck } from './model/useUniqueFieldCheck'
+export { RegistryFields, type UniqueFieldCheck } from './ui/RegistryFields'

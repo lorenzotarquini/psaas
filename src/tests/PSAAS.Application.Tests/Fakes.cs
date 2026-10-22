@@ -85,6 +85,22 @@ public sealed class FakeTenantWriteRepository : ITenantWriteRepository
         return Task.FromResult(true);
     }
 
+    public TenantLifecycle? SavedLifecycle { get; private set; }
+
+    public bool Deleted { get; private set; }
+
+    public Task<bool> UpdateLifecycleAsync(Guid tenantId, TenantLifecycle lifecycle, CancellationToken cancellationToken = default)
+    {
+        SavedLifecycle = lifecycle;
+        return Task.FromResult(true);
+    }
+
+    public Task<bool> DeleteAsync(Guid tenantId, CancellationToken cancellationToken = default)
+    {
+        Deleted = true;
+        return Task.FromResult(true);
+    }
+
     public IReadOnlyCollection<TenantProfileEditModel> EditedProfiles { get; private set; } = [];
 
     public IReadOnlyCollection<TenantProductiveUnitEditModel> EditedProductiveUnits { get; private set; } = [];

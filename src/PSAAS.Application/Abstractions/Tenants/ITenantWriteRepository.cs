@@ -55,4 +55,12 @@ public interface ITenantWriteRepository
         IReadOnlyCollection<TenantProfileEditModel> profiles,
         IReadOnlyCollection<TenantProductiveUnitEditModel> productiveUnits,
         CancellationToken cancellationToken = default);
+
+    /// <summary>EXP-04: stores a status change.</summary>
+    /// <returns><see langword="false" /> when the tenant does not exist.</returns>
+    Task<bool> UpdateLifecycleAsync(Guid tenantId, TenantLifecycle lifecycle, CancellationToken cancellationToken = default);
+
+    /// <summary>Hard delete with profiles and units; only for drafts never activated (UC14).</summary>
+    /// <returns><see langword="false" /> when the tenant does not exist.</returns>
+    Task<bool> DeleteAsync(Guid tenantId, CancellationToken cancellationToken = default);
 }

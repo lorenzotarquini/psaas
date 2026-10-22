@@ -1,5 +1,7 @@
 export {
+  useChangeTenantStatus,
   useCreateTenant,
+  useDiscardDraft,
   useTenant,
   useTenants,
   useUpdateTenantOrganization,
@@ -9,9 +11,12 @@ export {
   type OrganizationRequest,
   type TenantCreateRequest,
   type TenantDetail,
+  type TenantLifecycle,
+  type TenantStatus,
   type TenantReference,
   type TenantRegistryRequest,
   type TenantsQuery,
   type TenantSummary,
   type UniqueTenantField,
 } from './api/tenantApi'
+export { TenantStatusBadge, tenantStatusTone } from './ui/TenantStatusBadge'

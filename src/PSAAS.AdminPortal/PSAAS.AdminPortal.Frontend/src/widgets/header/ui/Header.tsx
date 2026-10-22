@@ -1,4 +1,4 @@
-import { faBars, faChevronRight } from '@fortawesome/free-solid-svg-icons'
+import { faBars, faChevronRight, faCloud } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Fragment, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -18,7 +18,7 @@ interface HeaderProps {
 
 export function Header({ drawerId, search, actions }: HeaderProps) {
   const { t } = useTranslation()
-  const crumbs = useCrumbs()
+  const { crumbs, note } = useCrumbs()
   const environment = import.meta.env.VITE_ENVIRONMENT_LABEL
 
   return (
@@ -43,6 +43,12 @@ export function Header({ drawerId, search, actions }: HeaderProps) {
       </nav>
       <div className="hidden flex-1 justify-center md:flex">{search}</div>
       <div className="ml-auto flex items-center gap-1 md:ml-0">
+        {note && (
+          <span className="mr-2 hidden items-center gap-1.5 text-[12px] text-base-content/60 sm:flex">
+            <FontAwesomeIcon icon={faCloud} />
+            {note}
+          </span>
+        )}
         {environment && (
           <span className="badge badge-soft badge-warning badge-sm mr-2 gap-1.5 font-mono font-semibold">
             <span className="size-1.5 rounded-full bg-current" aria-hidden />

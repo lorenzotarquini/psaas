@@ -18,7 +18,9 @@ public static class TenantDbModelConverter
             tenant.VatNumber,
             tenant.CompleteVatNumber,
             tenant.CertifiedEmail,
-            tenant.Address);
+            tenant.Address,
+            new TenantLifecycle(Enum.Parse<TenantStatus>(tenant.Status), tenant.StatusReason, tenant.StatusChangedAt, tenant.CreatedAt),
+            new TenantCommercialInfo(tenant.SdiCode, tenant.AccountManager));
     }
 
     public static TenantDbModel ToDbModel(Tenant tenant)
@@ -37,7 +39,13 @@ public static class TenantDbModelConverter
             CompleteVatNumber = tenant.CompleteVatNumber,
             CertifiedEmail = tenant.CertifiedEmail,
             NormalizedCertifiedEmail = TenantFieldNormalizer.NormalizeCertifiedEmail(tenant.CertifiedEmail),
-            Address = tenant.Address
+            Address = tenant.Address,
+            Status = tenant.Lifecycle.Status.ToString(),
+            StatusReason = tenant.Lifecycle.Reason,
+            StatusChangedAt = tenant.Lifecycle.ChangedAt,
+            CreatedAt = tenant.Lifecycle.CreatedAt,
+            SdiCode = tenant.Commercial.SdiCode,
+            AccountManager = tenant.Commercial.AccountManager,
         };
     }
 }

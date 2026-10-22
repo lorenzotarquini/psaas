@@ -67,7 +67,35 @@ public sealed class TenantsController(ITenantReadRepository tenants, IUserDirect
                 .Select(profile => new TenantProfileDto(
                     profile.Id, profile.Name, profile.Description, userCounts?.GetValueOrDefault(profile.Id)))
                 .ToArray(),
-            structure.ProductiveUnits);
+            structure.ProductiveUnits,
+            tenant.Code,
+            TenantLifecycleDto.From(tenant.Lifecycle),
+            tenant.Commercial.SdiCode,
+            tenant.Commercial.AccountManager);
+    }
+
+    // UC13: status change along the allowed transitions; the response is the updated detail.
+    [HttpPost("{id:guid}/status")]
+    public async Task<ActionResult<TenantDetailDto>> ChangeStatus(
+        Guid id,
+        TenantStatusChangeRequest request,
+        [FromServices] TenantLifecycleService lifecycle,
+        CancellationToken cancellationToken)
+    {
+        var result = await lifecycle.ChangeStatusAsync(id, request, cancellationToken);
+        return await EditResultAsync(id, result, cancellationToken);
+    }
+
+    // UC14: only a draft (Onboarding) can be deleted; any other tenant is ceased instead (UC13).
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> DiscardDraft(Guid id, [FromServices] TenantLifecycleService lifecycle, CancellationToken cancellationToken)
+    {
+        return await lifecycle.DiscardDraftAsync(id, cancellationToken) switch
+        {
+            DiscardResult.Discarded => NoContent(),
+            DiscardResult.NotFound => NotFound(),
+            _ => Conflict(),
+        };
     }
 
     // The detail stays readable without Keycloak: only the counts are missing.

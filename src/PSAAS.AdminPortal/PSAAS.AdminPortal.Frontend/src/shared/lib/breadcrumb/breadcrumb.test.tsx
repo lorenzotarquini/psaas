@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { BreadcrumbProvider, useBreadcrumb, useCrumbs } from './breadcrumb'
 
 function Topbar() {
-  return <p data-testid="crumbs">{useCrumbs().map((crumb) => crumb.label).join(' > ')}</p>
+  return <p data-testid="crumbs">{useCrumbs().crumbs.map((crumb) => crumb.label).join(' > ')}</p>
 }
 
 function Tenant() {

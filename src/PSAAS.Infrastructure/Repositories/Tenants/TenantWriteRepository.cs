@@ -240,6 +240,8 @@ public sealed class TenantWriteRepository(PsaasDbContext dbContext) : ITenantWri
         existing.CertifiedEmail = updated.CertifiedEmail;
         existing.NormalizedCertifiedEmail = updated.NormalizedCertifiedEmail;
         existing.Address = updated.Address;
+        existing.SdiCode = updated.SdiCode;
+        existing.AccountManager = updated.AccountManager;
 
         try
         {
@@ -300,6 +302,8 @@ public sealed class TenantWriteRepository(PsaasDbContext dbContext) : ITenantWri
         existing.CertifiedEmail = updated.CertifiedEmail;
         existing.NormalizedCertifiedEmail = updated.NormalizedCertifiedEmail;
         existing.Address = updated.Address;
+        existing.SdiCode = updated.SdiCode;
+        existing.AccountManager = updated.AccountManager;
 
         try
         {
@@ -407,6 +411,40 @@ public sealed class TenantWriteRepository(PsaasDbContext dbContext) : ITenantWri
 
             throw;
         }
+    }
+
+    public async Task<bool> UpdateLifecycleAsync(Guid tenantId, TenantLifecycle lifecycle, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(lifecycle);
+        var id = tenantId.ToString();
+        var existing = await dbContext.Tenants.SingleOrDefaultAsync(tenant => tenant.Id == id, cancellationToken).ConfigureAwait(false);
+        if (existing is null)
+        {
+            Logger.Warn("Tenant {TenantId} not found for a status change", tenantId);
+            return false;
+        }
+
+        existing.Status = lifecycle.Status.ToString();
+        existing.StatusReason = lifecycle.Reason;
+        existing.StatusChangedAt = lifecycle.ChangedAt;
+        await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        return true;
+    }
+
+    public async Task<bool> DeleteAsync(Guid tenantId, CancellationToken cancellationToken = default)
+    {
+        var id = tenantId.ToString();
+        var existing = await dbContext.Tenants.SingleOrDefaultAsync(tenant => tenant.Id == id, cancellationToken).ConfigureAwait(false);
+        if (existing is null)
+        {
+            return false;
+        }
+
+        // Profiles, units and their links go with it (cascade).
+        dbContext.Tenants.Remove(existing);
+        await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        Logger.Info("Deleted tenant {TenantId}", tenantId);
+        return true;
     }
 
     // The DbContext is scoped to the Blazor circuit, so a failed insert must not

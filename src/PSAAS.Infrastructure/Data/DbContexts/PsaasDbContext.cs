@@ -37,6 +37,12 @@ public sealed class PsaasDbContext(DbContextOptions<PsaasDbContext> options) : D
             entityBuilder.Property(tenant => tenant.CertifiedEmail).IsRequired();
             entityBuilder.Property(tenant => tenant.NormalizedCertifiedEmail).IsRequired();
 
+            entityBuilder.Property(tenant => tenant.Status).IsRequired().HasMaxLength(20).HasDefaultValue("Active");
+            entityBuilder.Property(tenant => tenant.StatusChangedAt).HasDefaultValueSql("now()");
+            entityBuilder.Property(tenant => tenant.CreatedAt).HasDefaultValueSql("now()");
+            entityBuilder.Property(tenant => tenant.SdiCode).HasMaxLength(7);
+            entityBuilder.HasIndex(tenant => tenant.Status);
+
             entityBuilder.OwnsOne(tenant => tenant.Address, addressBuilder =>
             {
                 addressBuilder.ToJson(nameof(TenantDbModel.Address));

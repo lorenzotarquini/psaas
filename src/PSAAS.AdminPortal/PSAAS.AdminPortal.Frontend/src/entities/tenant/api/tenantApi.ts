@@ -1,5 +1,15 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
-import { apiGet, apiPost, apiPut, type PagedResult } from '@/shared/api'
+import { apiDelete, apiGet, apiPost, apiPut, type PagedResult } from '@/shared/api'
+
+/** EXP-04 statuses (UC13). */
+export type TenantStatus = 'Onboarding' | 'Trial' | 'Active' | 'Suspended' | 'Cancelling' | 'Ceased'
+
+export interface TenantLifecycle {
+  status: TenantStatus
+  reason: string | null
+  changedAt: string
+  createdAt: string
+}
 
 // Mirrors TenantSummaryDto in PSAAS.AdminPortal.Backend.
 export interface TenantSummary {
@@ -9,6 +19,9 @@ export interface TenantSummary {
   completeVatNumber: string
   certifiedEmail: string
   city: string
+  code: string
+  status: TenantStatus
+  createdAt: string
 }
 
 export interface TenantsQuery {
@@ -28,9 +41,14 @@ export interface TenantDetail {
   /** userCount: users with the profile (UC2-R2), null when Keycloak could not count them. */
   profiles: { id: string; name: string; description: string | null; userCount: number | null }[]
   productiveUnits: { id: string; name: string; description: string | null; profileIds: string[] }[]
+  /** Short code next to the VAT number, e.g. tn_8f2c41a9. */
+  code: string
+  lifecycle: TenantLifecycle
+  sdiCode: string | null
+  accountManager: string | null
 }
 
-/** UC3/UC4 registry fields. */
+/** UC3/UC4 registry fields; SDI code and account manager are optional (UC14). */
 export interface TenantRegistryRequest {
   companyName: string
   completeVatNumber: string
@@ -38,6 +56,8 @@ export interface TenantRegistryRequest {
   street: string
   city: string
   postalCode: string
+  sdiCode: string | null
+  accountManager: string | null
 }
 
 /** UC5 body: replaces the whole organization. id null = new; key links units to the profiles of this request. */
@@ -50,6 +70,8 @@ export interface OrganizationRequest {
 export type TenantCreateRequest = TenantRegistryRequest & {
   profiles: Omit<OrganizationRequest['profiles'][number], 'id'>[]
   productiveUnits: Omit<OrganizationRequest['productiveUnits'][number], 'id'>[]
+  /** UC14: save as a draft (Onboarding) to complete step by step. */
+  draft?: boolean
 }
 
 /** UC11: the fields that can be checked one at a time. */
@@ -96,8 +118,8 @@ export const useTenants = (query: TenantsQuery) =>
     placeholderData: keepPreviousData,
   })
 
-export const useTenant = (id: string) =>
-  useQuery({ queryKey: keys.detail(id), queryFn: ({ signal }) => getTenant(id, signal) })
+export const useTenant = (id: string, enabled = true) =>
+  useQuery({ queryKey: keys.detail(id), queryFn: ({ signal }) => getTenant(id, signal), enabled: enabled && Boolean(id) })
 
 // Every save returns the updated detail: cache it, and refresh what may show stale names or profiles.
 function onTenantSaved(queryClient: QueryClient, tenant: TenantDetail) {
@@ -130,5 +152,27 @@ export function useUpdateTenantOrganization(id: string) {
     mutationFn: (body: OrganizationRequest) =>
       apiPut<TenantDetail>(`/api/tenants/${encodeURIComponent(id)}/organization`, body),
     onSuccess: (tenant) => onTenantSaved(queryClient, tenant),
+  })
+}
+
+/** UC13: change status (with a reason when suspending, giving notice or ceasing); UC14: activate a draft. */
+export function useChangeTenantStatus(id: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (body: { status: TenantStatus; reason?: string }) =>
+      apiPost<TenantDetail>(`/api/tenants/${encodeURIComponent(id)}/status`, body),
+    onSuccess: (tenant) => onTenantSaved(queryClient, tenant),
+  })
+}
+
+/** UC14: abandon a draft; it disappears with its organization. */
+export function useDiscardDraft() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => apiDelete(`/api/tenants/${encodeURIComponent(id)}`),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: keys.list })
+      void queryClient.invalidateQueries({ queryKey: ['audit'] })
+    },
   })
 }

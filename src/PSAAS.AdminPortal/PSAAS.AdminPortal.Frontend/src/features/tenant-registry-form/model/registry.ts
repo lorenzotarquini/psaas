@@ -12,6 +12,9 @@ export const registrySchema = z.object({
   street: required,
   city: required,
   postalCode: required,
+  // UC14-R3: optional, 7 letters or digits (6 for public administrations).
+  sdiCode: z.string().trim().regex(/^([A-Za-z0-9]{6,7})?$/, 'InvalidFormat'),
+  accountManager: z.string(),
 })
 
 export type RegistryValues = z.input<typeof registrySchema>
@@ -23,6 +26,8 @@ export const emptyRegistry: RegistryValues = {
   street: '',
   city: '',
   postalCode: '',
+  sdiCode: '',
+  accountManager: '',
 }
 
 export const registryFromTenant = (tenant: TenantDetail): RegistryValues => ({
@@ -32,6 +37,12 @@ export const registryFromTenant = (tenant: TenantDetail): RegistryValues => ({
   street: tenant.address.street,
   city: tenant.address.city,
   postalCode: tenant.address.postalCode,
+  sdiCode: tenant.sdiCode ?? '',
+  accountManager: tenant.accountManager ?? '',
 })
 
-export const toRegistryRequest = (values: z.output<typeof registrySchema>): TenantRegistryRequest => values
+export const toRegistryRequest = ({ sdiCode, accountManager, ...registry }: z.output<typeof registrySchema>): TenantRegistryRequest => ({
+  ...registry,
+  sdiCode: sdiCode.toUpperCase() || null,
+  accountManager: accountManager.trim() || null,
+})

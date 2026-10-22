@@ -8,7 +8,10 @@ public sealed record TenantSummaryDto(
     string VatNumber,
     string CompleteVatNumber,
     string CertifiedEmail,
-    string City)
+    string City,
+    string Code,
+    string Status,
+    DateTimeOffset CreatedAt)
 {
     public static TenantSummaryDto From(Tenant tenant) => new(
         tenant.Id,
@@ -16,5 +19,8 @@ public sealed record TenantSummaryDto(
         tenant.VatNumber,
         tenant.CompleteVatNumber,
         tenant.CertifiedEmail,
-        tenant.Address.city);
+        tenant.Address.city,
+        tenant.Code,
+        tenant.Lifecycle.Status.ToString(),
+        tenant.Lifecycle.CreatedAt);
 }

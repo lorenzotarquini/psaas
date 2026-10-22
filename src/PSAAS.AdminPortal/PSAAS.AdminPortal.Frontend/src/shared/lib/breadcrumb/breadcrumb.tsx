@@ -10,6 +10,8 @@ export interface Crumb {
 interface PageCrumbs {
   pathname: string
   crumbs: Crumb[]
+  /** Short status next to the breadcrumb, e.g. "Bozza salvata alle 10:42" (mock 1e). */
+  note?: string
 }
 
 const CrumbsContext = createContext<PageCrumbs>({ pathname: '', crumbs: [] })
@@ -25,18 +27,18 @@ export function BreadcrumbProvider({ children }: { children: ReactNode }) {
   )
 }
 
-/** Crumbs of the current page only: a page that declares none must not show the previous page's. */
+/** Crumbs (and note) of the current page only: a page that declares none must not show the previous page's. */
 export function useCrumbs() {
-  const { pathname, crumbs } = useContext(CrumbsContext)
-  return pathname === useLocation().pathname ? crumbs : []
+  const value = useContext(CrumbsContext)
+  return value.pathname === useLocation().pathname ? value : { pathname: '', crumbs: [] as Crumb[], note: undefined }
 }
 
-export function useBreadcrumb(crumbs: Crumb[]) {
+export function useBreadcrumb(crumbs: Crumb[], note?: string) {
   const setValue = useContext(SetCrumbsContext)
   const { pathname } = useLocation()
   // Compared by content: callers build a new array on every render.
   const key = JSON.stringify(crumbs)
   useEffect(() => {
-    setValue({ pathname, crumbs: JSON.parse(key) as Crumb[] })
-  }, [key, pathname, setValue])
+    setValue({ pathname, crumbs: JSON.parse(key) as Crumb[], note })
+  }, [key, note, pathname, setValue])
 }

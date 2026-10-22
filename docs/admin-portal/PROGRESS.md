@@ -10,7 +10,7 @@ Piano: `C:\Users\ltarq\.claude\plans\voglio-che-prepari-un-abundant-quail.md` ·
 | 1 Design system e shell | ✅ | vedi log |
 | 2 Chiusura perimetro (UC1-S4, UC4, UC5, conteggi, UC11) | ✅ | vedi log |
 | 3 Audit log e storico | ✅ | vedi log |
-| 4 Ciclo di vita e wizard | ⏳ | |
+| 4 Ciclo di vita e wizard | ⏳ backend fatto (UC13, UC14, test verdi 122/122); frontend in corso | WIP |
 | 5 Moduli, piani, sottoscrizioni | | |
 | 6 Gestione utenti completa | | |
 | 7 Elenco clienti avanzato | | |
@@ -19,6 +19,11 @@ Piano: `C:\Users\ltarq\.claude\plans\voglio-che-prepari-un-abundant-quail.md` ·
 | 10 Comunicazioni e notifiche | | |
 | 11 Panoramica, ricerca, impersonificazione | | |
 | 12 Consolidamento | | |
+
+## Punto di ripresa (fase 4)
+
+Fatto: dominio `TenantLifecycle`, migration `TenantLifecycle`, `TenantLifecycleService` (`POST /api/tenants/{id}/status`, `DELETE` della bozza), campi SDI e referente, UC13/UC14 con test; frontend: tipi e API (`useChangeTenantStatus`, `useDiscardDraft`, `TenantStatusBadge`), combobox comuni, campi SDI/referente, nota nella topbar, modello del wizard (`pages/tenant-onboarding/model`) con test, `Stepper`, `StepFooter`, `ChecksPanel`.
+Da fare: passi del wizard (Registry, Plan segnaposto fino alla fase 5, Organization, Users, Summary) e `OnboardingPage`, rotte `/tenants/new` e `/tenants/:id/onboarding` al posto di `TenantCreatePage`; header della scheda con stato, codice, "Cliente dal" e menu azioni di stato (dialog con motivo); frasi audit per `tenant.onboarding.*` e `tenant.status.changed`; testi i18n (`onboarding.*`, `tenantStatus.*`, `tenantForm.sdiCode/accountManager/city/...`); applicare la migration al DB di sviluppo; docs (API.md, README, ADMIN-PORTAL.md, TEST-UNITARI) e Postman della fase 4.
 
 ## Test rossi attesi
 

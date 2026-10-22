@@ -8,13 +8,22 @@ import type { RegistryValues } from '../model/registry'
 import { useUniqueFieldCheck } from '../model/useUniqueFieldCheck'
 import { AddressFields } from './AddressFields'
 
-// Registry fields of UC3 and UC4; must be inside a FormProvider whose values include RegistryValues.
-// excludeTenantId: the tenant being edited, so its own values are not reported as duplicates.
-export function RegistryFields({ excludeTenantId }: { excludeTenantId?: string }) {
+export type UniqueFieldCheck = ReturnType<typeof useUniqueFieldCheck>
+
+interface RegistryFieldsProps {
+  /** The tenant being edited (UC4), whose own values are not duplicates. */
+  excludeTenantId?: string
+  /** A check owned by the page, when something else shows its results (the wizard "Controlli" panel). */
+  check?: UniqueFieldCheck
+}
+
+// Registry fields of UC3, UC4 and UC14; must be inside a FormProvider whose values include RegistryValues.
+export function RegistryFields({ excludeTenantId, check }: RegistryFieldsProps) {
   const { t } = useTranslation()
   const { control } = useFormContext<RegistryValues>()
   const values = useWatch({ control })
-  const { onBlur, statusOf } = useUniqueFieldCheck(excludeTenantId)
+  const ownCheck = useUniqueFieldCheck(excludeTenantId)
+  const { onBlur, statusOf } = check ?? ownCheck
 
   // Mock 1a/1e: green "Disponibile" once the backend confirmed the value; on a duplicate, a link to the tenant using it.
   const uniqueProps = (field: UniqueTenantField) => {
@@ -58,6 +67,16 @@ export function RegistryFields({ excludeTenantId }: { excludeTenantId?: string }
         {...uniqueProps('certifiedEmail')}
       />
       <AddressFields />
+      <TextField
+        name="sdiCode"
+        label={t('tenantForm.sdiCode')}
+        placeholder="M5UXCR1"
+        maxLength={7}
+        autoComplete="off"
+        className="[&_input]:font-mono [&_input]:uppercase"
+        hint={t('tenantForm.optional')}
+      />
+      <TextField name="accountManager" label={t('tenantForm.accountManager')} autoComplete="off" />
     </div>
   )
 }

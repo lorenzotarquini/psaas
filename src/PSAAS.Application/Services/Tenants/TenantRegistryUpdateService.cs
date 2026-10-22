@@ -40,6 +40,11 @@ public sealed class TenantRegistryUpdateService(
         var postalCode = TenantOrganizationRules.Trim(request.PostalCode);
         var city = await addressValidator.ValidateAsync(
             street, TenantOrganizationRules.Trim(request.City), postalCode, errors, cancellationToken);
+        var sdiCode = TenantCreateValidator.ValidateSdiCode(request.SdiCode);
+        if (!sdiCode.IsValid)
+        {
+            errors["sdiCode"] = sdiCode.ErrorCode!;
+        }
         if (errors.Count > 0)
         {
             Logger.Info("Registry update of tenant {TenantId} rejected: {ValidationErrors}", tenantId, errors);
@@ -52,7 +57,11 @@ public sealed class TenantRegistryUpdateService(
             completeVatNumber[2..],
             completeVatNumber,
             TenantOrganizationRules.Trim(request.CertifiedEmail),
-            new Address(street, city, postalCode, TenantCreateService.Country));
+            new Address(street, city, postalCode, TenantCreateService.Country),
+            before.Lifecycle,
+            new TenantCommercialInfo(
+                TenantOrganizationRules.NullIfEmpty(sdiCode.NormalizedValue),
+                TenantOrganizationRules.NullIfEmpty(request.AccountManager)));
         try
         {
             if (!await tenants.UpdateAsync(tenant, cancellationToken))
@@ -107,7 +116,7 @@ public sealed class TenantRegistryUpdateService(
     /// <summary>The fields that really changed, with before and after (EXP-10).</summary>
     private static Dictionary<string, AuditChange> Changes(Tenant before, Tenant after)
     {
-        var pairs = new (string Field, string Before, string After)[]
+        var pairs = new (string Field, string? Before, string? After)[]
         {
             ("companyName", before.CompanyName, after.CompanyName),
             ("completeVatNumber", before.CompleteVatNumber, after.CompleteVatNumber),
@@ -115,6 +124,8 @@ public sealed class TenantRegistryUpdateService(
             ("street", before.Address.street, after.Address.street),
             ("city", before.Address.city, after.Address.city),
             ("postalCode", before.Address.postalCode, after.Address.postalCode),
+            ("sdiCode", before.Commercial.SdiCode, after.Commercial.SdiCode),
+            ("accountManager", before.Commercial.AccountManager, after.Commercial.AccountManager),
         };
         return pairs.Where(pair => pair.Before != pair.After).ToDictionary(pair => pair.Field, pair => new AuditChange(pair.Before, pair.After));
     }

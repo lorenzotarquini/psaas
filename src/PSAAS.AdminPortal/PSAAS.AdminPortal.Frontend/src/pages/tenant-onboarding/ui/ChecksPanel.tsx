@@ -1,5 +1,5 @@
-import { faCircle, faCircleInfo } from '@fortawesome/free-regular-svg-icons'
-import { faCircleCheck, faCircleXmark } from '@fortawesome/free-solid-svg-icons'
+import { faCircle } from '@fortawesome/free-regular-svg-icons'
+import { faCircleCheck, faCircleInfo, faCircleXmark } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useTranslation } from 'react-i18next'
 import type { Check } from '../model/onboarding'

@@ -11,8 +11,8 @@ Errori di validazione: `400` `ValidationProblem` con un codice per campo in `err
 | UC3 | `POST /api/tenants` | esiste |
 | UC4 | `PUT /api/tenants/{id}` | **nuovo** |
 | UC5 | `PUT /api/tenants/{id}/organization` | **nuovo** |
-| UC6 | `POST /api/users` | **nuovo** |
-| UC7 | `GET /api/users?search=` | **nuovo** |
+| UC6 | `POST /api/users` | esiste |
+| UC7 | `GET /api/users?search=` | esiste |
 | UC8 | `GET /api/me` | esiste |
 | UC9 | `GET /api/profiles` | esiste |
 | UC10 | `GET /api/geography/cities?term=` | esiste |
@@ -50,12 +50,24 @@ Sostituisce l'intera organizzazione del cliente: ciò che non compare nel body v
 
 ### UC6 – `POST /api/users`
 Body: `{ firstName, lastName, email, birthDate: "YYYY-MM-DD", profileIds: [] }`.
-Risposte: `201` + utente (vedi UC7) · `400` errori per campo (`email` = `NotUnique` se già usata, `profileIds[i]` = `InvalidValue` se il profilo non esiste) · `503` Keycloak non raggiungibile.
-Effetto: utente creato in Keycloak (username = email, attributi `birthDate` e `profileIds`) e email di impostazione password inviata da Keycloak.
+Risposte: `201` + utente (vedi UC7, senza `Location`: non esiste un endpoint di dettaglio) · `400` errori per campo (`firstName`, `lastName`, `email`, `birthDate` = `Required`; `email` = `InvalidFormat` o `NotUnique` se già usata; `birthDate` = `InvalidFormat` se non è una data `YYYY-MM-DD`; `profileIds[i]` = `InvalidValue` se il profilo non esiste) · `503` Keycloak non raggiungibile.
+Effetto: utente creato in Keycloak (username = email in minuscolo, attributi `birthDate` e `profileIds`) e email di impostazione password (`UPDATE_PASSWORD`) inviata da Keycloak. Se Keycloak non riesce a inviare l'email, l'utente appena creato viene rimosso e la risposta è `503`.
 
 ### UC7 – `GET /api/users?search=`
 Risposta: `[{ id, firstName, lastName, email, birthDate, profiles: [{ id, name, tenantId, tenantCompanyName }] }]` · `503` Keycloak non raggiungibile.
-I profili salvati sull'utente che non esistono più vengono omessi.
+- `search` vuoto restituisce tutti gli utenti; altrimenti cerca il testo all'interno di nome, cognome, username ed email, senza maiuscole.
+- Al massimo 100 utenti (non c'è paginazione).
+- I profili salvati sull'utente che non esistono più vengono omessi.
+- `birthDate` è `null` per gli utenti creati fuori dal portale (ad esempio direttamente in Keycloak).
+
+### Keycloak come archivio utenti (UC6, UC7)
+Il backend chiama l'API di amministrazione di Keycloak (`{Authority}` con `/realms/` → `/admin/realms/`) con il service account del client `adminportal-api`. Configurazione richiesta:
+- client `adminportal-api` con *Client authentication* e *Service accounts* attivi; il segreto va in `Keycloak:ClientSecret` (user secrets o variabile d'ambiente `Keycloak__ClientSecret`, mai in `appsettings.json`);
+- al service account vanno assegnati i ruoli `view-users` e `manage-users` del client `realm-management`;
+- nel *User profile* del realm vanno dichiarati gli attributi `birthDate` e `profileIds` (multivalore), oppure vanno abilitati gli *Unmanaged attributes*: da Keycloak 24 gli attributi non dichiarati vengono scartati senza errore;
+- il realm deve avere l'SMTP configurato, altrimenti la creazione risponde `503`.
+
+Senza segreto o senza ruoli la chiamata fallisce con `500` e l'errore compare nel log.
 
 ### UC11 – `GET /api/tenants/field-validation?field=&value=&excludeTenantId=`
 Verifica un solo campo dell'anagrafica con le regole del salvataggio (UC3/UC4), per controllarlo all'uscita dal campo.

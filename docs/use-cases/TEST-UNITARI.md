@@ -26,7 +26,11 @@ Ogni scenario di accettazione (`UCn-Sm`) scende negli strati interni: qui si ved
 | UC3 flusso 3b | Duplicato concorrente | `TenantCreateServiceTests.UC3_3b_*` (la conversione dell'errore Postgres nel repository non è testabile con InMemory) |
 | UC4-S2, S3 | Unicità che esclude il cliente stesso | `TenantCreateValidatorTests.ExcludedTenant_*`, `TenantUniquenessCheckerTests.UC4_*` |
 | UC11-S1…S4 | Verifica di un campo con le regole del salvataggio | `TenantCreateValidatorTests` (gli stessi validatori di UC3/UC4); la scelta del campo (S5) è solo accettazione |
+| UC6-S1…S7 | Creazione utente: validazione, profili esistenti, email duplicata, Keycloak non raggiungibile | `UserCreateServiceTests.UC6_*` |
 | UC6-S6 | Esistenza dei profili scelti | `ProfileReadRepositoryTests.UC6_S6_*` |
+| UC6-S1, S5, S7, flusso 3d | Chiamate all'API di amministrazione Keycloak: attributi, email di impostazione password, conflitto, errori, rimozione se l'email non parte | `KeycloakUserDirectoryTests.UC6_*` |
+| UC7-S1, S3, S4, S6 | Ricerca utenti: cliente ricavato dal profilo, profili cancellati omessi | `UserSearchServiceTests.UC7_*`, `ProfileReadRepositoryTests.UC7_*` |
+| UC7-S1, S2, S6 | Ricerca in Keycloak: ricerca interna al testo, lettura degli attributi, errori | `KeycloakUserDirectoryTests.UC7_*` |
 | UC8-S1…S5 | Identità e ruoli dal token | `PSAAS.Auth.Tests` (lettura dei ruoli Keycloak) |
 | UC9-S1, S2 | Panoramica dei profili | `ProfileReadRepositoryTests.UC9_*` |
 | UC10-S1…S3 | Ricerca comuni: filtro, ordine, limite di 20, errori | `ItalianCityProviderTests` |
@@ -39,5 +43,3 @@ Gli use case non ancora implementati avranno i loro test unitari scritti prima d
 |---|---|
 | UC4-S1…S6 | caso d'uso di modifica anagrafica (Application); `TenantWriteRepository.UpdateAsync` |
 | UC5-S1…S8 | caso d'uso di modifica organizzazione (nomi unici, id di altri clienti); `TenantWriteRepository.UpdateWithStructureAsync` (aggiunte, rinomine, rimozioni, collegamenti) |
-| UC6-S1…S7 | caso d'uso di creazione utente (validazione, profili esistenti, email duplicata, Keycloak non raggiungibile); implementazione Keycloak di `IUserDirectory` (chiamate HTTP all'API di amministrazione, email di impostazione password) |
-| UC7-S1…S6 | caso d'uso di ricerca utenti (profili cancellati omessi, cliente ricavato dal profilo); ricerca nell'implementazione Keycloak di `IUserDirectory` |

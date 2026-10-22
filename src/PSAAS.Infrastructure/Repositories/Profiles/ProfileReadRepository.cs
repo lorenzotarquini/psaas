@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using NLog;
 using PSAAS.Application.Abstractions.Profiles;
 using PSAAS.Application.Contracts.Profiles;
+using PSAAS.Application.Contracts.Users;
 using PSAAS.Infrastructure.Data.DbContexts;
 
 namespace PSAAS.Infrastructure.Repositories.Profiles;
@@ -24,7 +25,7 @@ public sealed class ProfileReadRepository(PsaasDbContext dbContext) : IProfileRe
         return profiles;
     }
 
-    public async Task<IReadOnlySet<string>> GetExistingIdsAsync(
+    public async Task<IReadOnlyList<UserProfileReadModel>> GetWithTenantAsync(
         IReadOnlyCollection<string> profileIds,
         CancellationToken cancellationToken = default)
     {
@@ -38,18 +39,22 @@ public sealed class ProfileReadRepository(PsaasDbContext dbContext) : IProfileRe
 
         if (normalizedIds.Length == 0)
         {
-            return new HashSet<string>(StringComparer.Ordinal);
+            return [];
         }
 
-        var existingIds = await dbContext.Profiles
+        var profiles = await dbContext.Profiles
             .AsNoTracking()
             .Where(profile => normalizedIds.Contains(profile.Id))
-            .Select(profile => profile.Id)
+            .Join(
+                dbContext.Tenants,
+                profile => profile.TenantId,
+                tenant => tenant.Id,
+                (profile, tenant) => new UserProfileReadModel(profile.Id, profile.Name, tenant.Id, tenant.CompanyName))
             .ToArrayAsync(cancellationToken)
             .ConfigureAwait(false);
 
-        Logger.Debug("Found {ExistingCount} of {RequestedCount} profile ids", existingIds.Length, normalizedIds.Length);
+        Logger.Debug("Found {ExistingCount} of {RequestedCount} profile ids", profiles.Length, normalizedIds.Length);
 
-        return existingIds.ToHashSet(StringComparer.Ordinal);
+        return profiles;
     }
 }

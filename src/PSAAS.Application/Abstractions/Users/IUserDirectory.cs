@@ -25,13 +25,14 @@ public sealed record NewDirectoryUser(
     DateOnly BirthDate,
     IReadOnlyList<string> ProfileIds);
 
+/// <param name="BirthDate">Null for users created outside the portal, which may lack the attribute.</param>
 /// <param name="ProfileIds">As stored on the user: may still contain profiles deleted since.</param>
 public sealed record DirectoryUser(
     string Id,
     string FirstName,
     string LastName,
     string Email,
-    DateOnly BirthDate,
+    DateOnly? BirthDate,
     IReadOnlyList<string> ProfileIds);
 
 public sealed class UserEmailConflictException(string message, Exception? innerException = null)

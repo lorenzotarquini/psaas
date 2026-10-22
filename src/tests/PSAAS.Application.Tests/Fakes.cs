@@ -1,5 +1,9 @@
 using PSAAS.Application.Abstractions.Geography;
+using PSAAS.Application.Abstractions.Profiles;
 using PSAAS.Application.Abstractions.Tenants;
+using PSAAS.Application.Abstractions.Users;
+using PSAAS.Application.Contracts.Profiles;
+using PSAAS.Application.Contracts.Users;
 using PSAAS.Domain;
 
 namespace PSAAS.Application.Tests;
@@ -77,4 +81,41 @@ public sealed class FakeTenantWriteRepository : ITenantWriteRepository
         IReadOnlyCollection<TenantProfileEditModel> profiles,
         IReadOnlyCollection<TenantProductiveUnitEditModel> productiveUnits,
         CancellationToken cancellationToken = default) => throw new NotSupportedException();
+}
+
+/// <summary>Profiles that exist, each with its tenant.</summary>
+public sealed class FakeProfileReadRepository : IProfileReadRepository
+{
+    public List<UserProfileReadModel> Profiles { get; } = [];
+
+    public Task<IReadOnlyList<ProfileReadModel>> GetAllAsync(CancellationToken cancellationToken = default) =>
+        throw new NotSupportedException();
+
+    public Task<IReadOnlyList<UserProfileReadModel>> GetWithTenantAsync(
+        IReadOnlyCollection<string> profileIds,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyList<UserProfileReadModel>>(Profiles.Where(profile => profileIds.Contains(profile.Id)).ToArray());
+}
+
+/// <summary>Records what the use case asked the identity provider to create.</summary>
+public sealed class FakeUserDirectory : IUserDirectory
+{
+    public List<DirectoryUser> Users { get; } = [];
+
+    public NewDirectoryUser? Created { get; private set; }
+
+    public bool EmailTaken { get; set; }
+
+    public bool Unavailable { get; set; }
+
+    public Task<DirectoryUser> CreateAsync(NewDirectoryUser user, CancellationToken cancellationToken = default)
+    {
+        if (Unavailable) throw new UserDirectoryUnavailableException("down");
+        if (EmailTaken) throw new UserEmailConflictException("taken");
+        Created = user;
+        return Task.FromResult(new DirectoryUser("kc-1", user.FirstName, user.LastName, user.Email, user.BirthDate, user.ProfileIds));
+    }
+
+    public Task<IReadOnlyList<DirectoryUser>> SearchAsync(string? search, CancellationToken cancellationToken = default) =>
+        Unavailable ? throw new UserDirectoryUnavailableException("down") : Task.FromResult<IReadOnlyList<DirectoryUser>>(Users);
 }

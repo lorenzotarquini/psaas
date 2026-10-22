@@ -41,7 +41,7 @@ L'**Admin Portal** è il pannello di controllo del gestore della piattaforma: se
 | [UC10](UC10-cercare-comune.md) | Cercare un comune (di supporto a UC3 e UC4) | in ambito |
 | [UC11](UC11-verificare-campo-cliente.md) | Verificare un campo univoco del cliente (di supporto a UC3 e UC4) | in ambito |
 
-Contratto HTTP: [API.md](API.md). Test unitari derivati dagli scenari: [TEST-UNITARI.md](TEST-UNITARI.md).
+Contratto HTTP: [API.md](API.md) (collection Postman: [PSAAS.AdminPortal.postman_collection.json](../postman/PSAAS.AdminPortal.postman_collection.json)). Test unitari derivati dagli scenari: [TEST-UNITARI.md](TEST-UNITARI.md).
 
 Regola comune a tutti gli use case: l'amministratore deve essere autenticato su Keycloak e avere il ruolo `Administrator`; altrimenti nessuna operazione è consentita.
 

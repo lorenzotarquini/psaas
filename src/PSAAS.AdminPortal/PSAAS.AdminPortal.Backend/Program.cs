@@ -3,8 +3,10 @@ using NLog.Extensions.Logging;
 using NLog.Web;
 using PSAAS.Application;
 using PSAAS.Application.Abstractions.Tenants;
+using PSAAS.Application.Abstractions.Users;
 using PSAAS.Auth;
 using PSAAS.Infrastructure;
+using PSAAS.Infrastructure.Users;
 
 var logger = LogManager.Setup()
     .LoadConfigurationFromAppSettings()
@@ -23,6 +25,16 @@ try
     builder.Services.AddKeycloak(builder.Configuration);
     builder.Services.AddPsaasApplication();
     builder.Services.AddPsaasInfrastructure(builder.Configuration);
+    // UC6/UC7: users live in Keycloak, reached through its admin API with this client's service account
+    // (Keycloak:ClientSecret, roles view-users and manage-users of realm-management).
+    builder.Services.AddTransient<KeycloakClientCredentialsHandler>();
+    builder.Services.AddHttpClient<IUserDirectory, KeycloakUserDirectory>(http =>
+        {
+            var authority = builder.Configuration["Keycloak:Authority"]!.TrimEnd('/');
+            http.BaseAddress = new Uri(authority.Replace("/realms/", "/admin/realms/") + "/");
+            http.Timeout = TimeSpan.FromSeconds(10);
+        })
+        .AddHttpMessageHandler<KeycloakClientCredentialsHandler>();
     builder.Services.AddControllers();
     builder.Services.AddProblemDetails();
     builder.Services.AddHealthChecks();
@@ -39,6 +51,7 @@ try
         StatusCodeSelector = exception => exception switch
         {
             TenantUniquenessConflictException or ProductiveUnitNameConflictException => StatusCodes.Status409Conflict,
+            UserDirectoryUnavailableException => StatusCodes.Status503ServiceUnavailable,
             _ => StatusCodes.Status500InternalServerError
         }
     });

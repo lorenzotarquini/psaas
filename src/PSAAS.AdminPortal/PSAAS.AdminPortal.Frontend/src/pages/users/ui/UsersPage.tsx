@@ -78,7 +78,7 @@ export function UsersPage() {
                         {user.firstName} {user.lastName}
                       </td>
                       <td className="break-all">{user.email}</td>
-                      <td>{formatDate(user.birthDate, i18n.language)}</td>
+                      <td>{user.birthDate && formatDate(user.birthDate, i18n.language)}</td>
                       <td>
                         {user.profiles.length === 0 ? (
                           <span className="text-base-content/50">{t('users.noProfiles')}</span>

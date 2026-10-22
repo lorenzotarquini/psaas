@@ -51,3 +51,21 @@ GET {{PSAAS.AdminPortal.Backend_HostAddress}}/api/tenants/field-validation?field
 Authorization: Bearer {{token}}
 
 ###
+
+GET {{PSAAS.AdminPortal.Backend_HostAddress}}/api/users?search=mario
+Authorization: Bearer {{token}}
+
+###
+POST {{PSAAS.AdminPortal.Backend_HostAddress}}/api/users
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "firstName": "Mario",
+  "lastName": "Rossi",
+  "email": "mario.rossi@example.com",
+  "birthDate": "1980-05-17",
+  "profileIds": []
+}
+
+###

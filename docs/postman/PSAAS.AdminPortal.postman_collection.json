@@ -1,0 +1,137 @@
+{
+  "info": {
+    "name": "PSAAS Admin Portal",
+    "description": "Admin Portal backend API (docs/use-cases/API.md). Set `token` to a Keycloak access token with the Administrator role of adminportal-api.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5192" },
+    { "key": "token", "value": "" },
+    { "key": "tenantId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "GET",
+        "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] }
+      }
+    },
+    {
+      "name": "UC8 Me",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{baseUrl}}/api/me", "host": ["{{baseUrl}}"], "path": ["api", "me"] }
+      }
+    },
+    {
+      "name": "Tenants",
+      "item": [
+        {
+          "name": "UC1 Search tenants",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/tenants?search=&page=1&pageSize=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tenants"],
+              "query": [
+                { "key": "search", "value": "" },
+                { "key": "page", "value": "1" },
+                { "key": "pageSize", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "UC2 Get tenant",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/tenants/{{tenantId}}", "host": ["{{baseUrl}}"], "path": ["api", "tenants", "{{tenantId}}"] }
+          }
+        },
+        {
+          "name": "UC3 Create tenant",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"companyName\": \"Acme Srl\",\n  \"completeVatNumber\": \"IT12345678901\",\n  \"certifiedEmail\": \"acme@pec.it\",\n  \"street\": \"Via Roma 1\",\n  \"city\": \"Roma\",\n  \"postalCode\": \"00118\",\n  \"profiles\": [ { \"key\": \"op\", \"name\": \"Operatore\" } ],\n  \"productiveUnits\": [ { \"name\": \"Stabilimento\", \"profileKeys\": [ \"op\" ] } ]\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/tenants", "host": ["{{baseUrl}}"], "path": ["api", "tenants"] }
+          }
+        },
+        {
+          "name": "UC11 Validate tenant field",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/tenants/field-validation?field=companyName&value=Acme Srl",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tenants", "field-validation"],
+              "query": [
+                { "key": "field", "value": "companyName" },
+                { "key": "value", "value": "Acme Srl" },
+                { "key": "excludeTenantId", "value": "{{tenantId}}", "disabled": true }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "UC7 Search users",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/users?search=mario",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users"],
+              "query": [{ "key": "search", "value": "mario" }]
+            }
+          }
+        },
+        {
+          "name": "UC6 Create user",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Mario\",\n  \"lastName\": \"Rossi\",\n  \"email\": \"mario.rossi@example.com\",\n  \"birthDate\": \"1980-05-17\",\n  \"profileIds\": []\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/users", "host": ["{{baseUrl}}"], "path": ["api", "users"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "UC9 Profiles overview",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{baseUrl}}/api/profiles", "host": ["{{baseUrl}}"], "path": ["api", "profiles"] }
+      }
+    },
+    {
+      "name": "UC10 Search city",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/geography/cities?term=ro",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "geography", "cities"],
+          "query": [{ "key": "term", "value": "ro" }]
+        }
+      }
+    }
+  ]
+}

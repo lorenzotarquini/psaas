@@ -143,7 +143,8 @@ public sealed partial class TenantCreateValidator(ITenantUniquenessChecker uniqu
     [GeneratedRegex("^[A-Z]{2}[0-9]{11}$", RegexOptions.CultureInvariant)]
     private static partial Regex CompleteVatNumberRegex();
 
-    private static bool IsValidEmailAddress(string email)
+    // Shared with UserCreateService: one email rule across the portal.
+    internal static bool IsValidEmailAddress(string email)
     {
         try
         {

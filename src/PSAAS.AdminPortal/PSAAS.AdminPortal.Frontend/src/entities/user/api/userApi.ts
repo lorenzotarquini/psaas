@@ -7,7 +7,8 @@ export interface User {
   firstName: string
   lastName: string
   email: string
-  birthDate: string
+  /** null for users created outside the portal (directly in Keycloak). */
+  birthDate: string | null
   profiles: { id: string; name: string; tenantId: string; tenantCompanyName: string }[]
 }
 

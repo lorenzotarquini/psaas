@@ -21,6 +21,8 @@ public static class DependencyInjection
         services.AddScoped<UserCreateService>();
         services.AddScoped<UserSearchService>();
         services.AddScoped<UserRules>();
+        services.AddScoped<TenantListService>();
+        services.AddScoped<Services.Views.SavedViewService>();
         services.AddScoped<UserManagementService>();
         services.AddScoped<UserImportService>();
 

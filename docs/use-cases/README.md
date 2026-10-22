@@ -49,6 +49,8 @@ L'**Admin Portal** è il pannello di controllo del gestore della piattaforma: se
 | [UC18](UC18-provisioning.md) | Seguire il provisioning dei moduli (EXP-03) | in ambito |
 | [UC19](UC19-gestire-utente.md) | Gestire un utente (EXP-06) | in ambito |
 | [UC20](UC20-importare-utenti.md) | Importare utenti da CSV (EXP-06) | in ambito |
+| [UC21](UC21-elenco-clienti.md) | Filtrare, ordinare ed esportare i clienti (mock 1c) | in ambito |
+| [UC22](UC22-viste-salvate.md) | Salvare le viste dell'elenco (mock 1c) | in ambito |
 
 Contratto HTTP: [API.md](API.md) (collection Postman: [PSAAS.AdminPortal.postman_collection.json](../postman/PSAAS.AdminPortal.postman_collection.json)). Test unitari derivati dagli scenari: [TEST-UNITARI.md](TEST-UNITARI.md).
 

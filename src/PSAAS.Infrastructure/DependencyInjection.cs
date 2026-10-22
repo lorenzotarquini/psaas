@@ -33,6 +33,8 @@ public static class DependencyInjection
         });
 
         services.AddScoped<ITenantReadRepository, TenantReadRepository>();
+        services.AddScoped<ITenantListRepository, TenantListRepository>();
+        services.AddScoped<PSAAS.Application.Abstractions.Views.ISavedViewRepository, Repositories.Views.SavedViewRepository>();
         services.AddScoped<ITenantWriteRepository, TenantWriteRepository>();
         services.AddScoped<ITenantUniquenessChecker, TenantUniquenessChecker>();
         services.AddScoped<IProfileReadRepository, ProfileReadRepository>();

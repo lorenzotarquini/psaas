@@ -9,8 +9,8 @@ public sealed class TenantAddressValidator(IItalianCityProvider cities)
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    /// <returns>The official city name when the city list is reachable, otherwise the typed one.</returns>
-    public async Task<string> ValidateAsync(
+    /// <returns>The official city name and its province when the city list is reachable, otherwise the typed name.</returns>
+    public async Task<(string City, string? Province)> ValidateAsync(
         string street,
         string city,
         string postalCode,
@@ -22,7 +22,7 @@ public sealed class TenantAddressValidator(IItalianCityProvider cities)
         AddRequiredError(errors, "postalCode", postalCode);
         if (city.Length == 0)
         {
-            return city;
+            return (city, null);
         }
 
         var matches = await cities.SearchAsync(city, cancellationToken);
@@ -30,7 +30,7 @@ public sealed class TenantAddressValidator(IItalianCityProvider cities)
         {
             Logger.Warn("Italian city list unreachable: address of {City} accepted without checking it", city);
             // shortcut: city list unreachable, the address is accepted unchecked; add a retry/queue if this becomes common.
-            return city;
+            return (city, null);
         }
 
         // Several towns share a name (e.g. Calliano TN/AT): the postal code decides.
@@ -38,7 +38,7 @@ public sealed class TenantAddressValidator(IItalianCityProvider cities)
         if (sameName.Length == 0)
         {
             errors["city"] = TenantFieldValidationErrorCodes.InvalidValue;
-            return city;
+            return (city, null);
         }
 
         var match = sameName.FirstOrDefault(candidate => candidate.PostalCodes.Contains(postalCode));
@@ -47,7 +47,8 @@ public sealed class TenantAddressValidator(IItalianCityProvider cities)
             errors["postalCode"] = TenantFieldValidationErrorCodes.InvalidValue;
         }
 
-        return (match ?? sameName[0]).Name;
+        var found = match ?? sameName[0];
+        return (found.Name, found.ProvinceCode);
     }
 
     private static void AddRequiredError(Dictionary<string, string> errors, string field, string value)

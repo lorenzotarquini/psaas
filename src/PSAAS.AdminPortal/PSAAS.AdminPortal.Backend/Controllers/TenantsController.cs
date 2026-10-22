@@ -17,27 +17,38 @@ public sealed class TenantsController(ITenantReadRepository tenants, IUserDirect
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
+    /// <summary>UC1 + UC21 (mock 1c): search, filters (status and planId repeatable), sort, page.</summary>
     [HttpGet]
-    public async Task<PagedResult<TenantSummaryDto>> GetPage(
-        [FromQuery] string? search,
+    public async Task<ActionResult<PagedResult<TenantListItem>>> GetPage(
+        [FromQuery] TenantListParameters parameters,
+        [FromServices] TenantListService list,
         [FromQuery, Range(1, int.MaxValue)] int page = 1,
         [FromQuery, Range(1, 100)] int pageSize = 20,
         CancellationToken cancellationToken = default)
     {
-        var result = await tenants.GetPageAsync(search, page, pageSize, cancellationToken);
-        Logger.Info(
-            "Listed {TenantCount} of {TotalCount} tenants (page {Page}, size {PageSize}, search {Search})",
-            result.Items.Count,
-            result.TotalCount,
-            page,
-            pageSize,
-            search);
-        return new PagedResult<TenantSummaryDto>(
-            result.Items.Select(TenantSummaryDto.From).ToArray(),
-            result.TotalCount,
-            result.Page,
-            result.PageSize);
+        var query = parameters.ToQuery(page, pageSize);
+        if (TenantListService.InvalidParameter(query) is { } field) return InvalidParameter(field);
+        return await list.GetListAsync(query, cancellationToken);
     }
+
+    /// <summary>UC21-R1: the numbers of the tabs.</summary>
+    [HttpGet("counts")]
+    public Task<TenantCounts> GetCounts([FromServices] TenantListService list, CancellationToken cancellationToken) =>
+        list.GetCountsAsync(cancellationToken);
+
+    /// <summary>UC21-R5: the filtered tenants (or only ids=…) as CSV.</summary>
+    [HttpGet("export")]
+    public async Task<IActionResult> Export([FromQuery] TenantListParameters parameters, [FromServices] TenantListService list, CancellationToken cancellationToken)
+    {
+        var query = parameters.ToQuery(1, TenantListService.MaxExportRows);
+        if (TenantListService.InvalidParameter(query) is { } field) return InvalidParameter(field);
+        var csv = await list.ExportCsvAsync(query, cancellationToken);
+        // BOM: Excel opens the accented names correctly.
+        return File(System.Text.Encoding.UTF8.GetPreamble().Concat(System.Text.Encoding.UTF8.GetBytes(csv)).ToArray(), "text/csv; charset=utf-8", "clienti.csv");
+    }
+
+    private ActionResult InvalidParameter(string field) =>
+        ValidationProblem(new ValidationProblemDetails(new Dictionary<string, string[]> { [field] = [TenantFieldValidationErrorCodes.InvalidValue] }));
 
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<TenantDetailDto>> GetById(Guid id, CancellationToken cancellationToken)

@@ -54,3 +54,6 @@ Ogni scenario di accettazione (`UCn-Sm`) scende negli strati interni: qui si ved
 | UC19-S2, S4…S6 | Modifica con audit solo se cambia, limite solo per clienti nuovi, azioni consentite per stato | `UserManagementServiceTests.UC19_*` |
 | UC19 | Chiamate a Keycloak: lettura di stato/inviti/MFA, aggiornamento con `CONFIGURE_TOTP`, reinvio contato, ultimi accessi dagli eventi (e niente se spenti) | `KeycloakUserDirectoryTests.UC19_*` |
 | UC20 | Profili per nome senza maiuscole, email ripetute, file vuoto o oltre 500 righe | `UserManagementServiceTests.UC20_*` |
+| UC21-S5, S6, S7 | Parametri non validi, utenti contati per la pagina (e niente se Keycloak è giù), CSV con virgolette e formule neutralizzate | `TenantListServiceTests.UC21_*` |
+| UC21-R3 | Provincia salvata con l'indirizzo | `TenantCreateServiceTests.UC3_S1_*`, `TenantRegistryUpdateServiceTests.UC4_S1_*` |
+| UC22 | Nome unico per amministratore senza maiuscole, area valida, lunghezza e numero massimo | `TenantListServiceTests.UC22_*` |

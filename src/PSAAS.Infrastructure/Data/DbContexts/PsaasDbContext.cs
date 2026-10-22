@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using PSAAS.Infrastructure.Audit;
 using PSAAS.Infrastructure.Catalog;
 using PSAAS.Infrastructure.Data.DbModels;
+using PSAAS.Infrastructure.Repositories.Views;
 
 namespace PSAAS.Infrastructure.Data.DbContexts;
 
@@ -24,6 +25,8 @@ public sealed class PsaasDbContext(DbContextOptions<PsaasDbContext> options) : D
     public DbSet<SubscriptionDbModel> Subscriptions => Set<SubscriptionDbModel>();
 
     public DbSet<TenantModuleDbModel> TenantModules => Set<TenantModuleDbModel>();
+
+    public DbSet<SavedViewDbModel> SavedViews => Set<SavedViewDbModel>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -180,6 +183,18 @@ public sealed class PsaasDbContext(DbContextOptions<PsaasDbContext> options) : D
             entityBuilder.HasKey(module => new { module.TenantId, module.ModuleId });
             entityBuilder.HasOne<TenantDbModel>().WithMany().HasForeignKey(m => m.TenantId).OnDelete(DeleteBehavior.Cascade);
             entityBuilder.HasOne<ModuleDbModel>().WithMany().HasForeignKey(m => m.ModuleId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // UC22: personal saved views of the list pages.
+        modelBuilder.Entity<SavedViewDbModel>(entityBuilder =>
+        {
+            entityBuilder.ToTable("SavedViews");
+            entityBuilder.HasKey(view => view.Id);
+            entityBuilder.Property(view => view.OwnerId).IsRequired().HasMaxLength(100);
+            entityBuilder.Property(view => view.Area).IsRequired().HasMaxLength(20);
+            entityBuilder.Property(view => view.Name).IsRequired().HasMaxLength(40);
+            entityBuilder.Property(view => view.Query).IsRequired().HasMaxLength(2000);
+            entityBuilder.HasIndex(view => new { view.OwnerId, view.Area });
         });
 
         base.OnModelCreating(modelBuilder);

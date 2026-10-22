@@ -36,7 +36,7 @@ public sealed class TenantCreateServiceTests
         Assert.Equal(
             ("Alfa Srl", "12345678901", "IT12345678901", "alfa@pec.it"),
             (saved.CompanyName, saved.VatNumber, saved.CompleteVatNumber, saved.CertifiedEmail));
-        Assert.Equal(new Address("Via Roma 1", "Roma", "00118", "IT"), saved.Address);
+        Assert.Equal(new Address("Via Roma 1", "Roma", "00118", "IT", "RM"), saved.Address);
         Assert.Empty(_repository.SavedProfiles);
         Assert.Empty(_repository.SavedProductiveUnits);
     }

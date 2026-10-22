@@ -406,6 +406,42 @@ namespace PSAAS.Infrastructure.Data.Migrations
                     b.ToTable("Tenants", (string)null);
                 });
 
+            modelBuilder.Entity("PSAAS.Infrastructure.Repositories.Views.SavedViewDbModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Area")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Query")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerId", "Area");
+
+                    b.ToTable("SavedViews", (string)null);
+                });
+
             modelBuilder.Entity("PSAAS.Infrastructure.Catalog.SubscriptionDbModel", b =>
                 {
                     b.HasOne("PSAAS.Infrastructure.Data.DbModels.TenantDbModel", null)
@@ -483,6 +519,8 @@ namespace PSAAS.Infrastructure.Data.Migrations
 
                             b1.Property<string>("postalCode")
                                 .IsRequired();
+
+                            b1.Property<string>("province");
 
                             b1.Property<string>("street")
                                 .IsRequired();

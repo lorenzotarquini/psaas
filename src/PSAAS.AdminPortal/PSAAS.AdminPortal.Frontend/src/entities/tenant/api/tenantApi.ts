@@ -11,7 +11,7 @@ export interface TenantLifecycle {
   createdAt: string
 }
 
-// Mirrors TenantSummaryDto in PSAAS.AdminPortal.Backend.
+// Mirrors TenantListItem in PSAAS.Application (UC21, mock 1c).
 export interface TenantSummary {
   id: string
   companyName: string
@@ -19,15 +19,59 @@ export interface TenantSummary {
   completeVatNumber: string
   certifiedEmail: string
   city: string
+  province: string | null
   code: string
   status: TenantStatus
   createdAt: string
+  planId: string | null
+  planName: string | null
+  maxUsers: number | null
+  /** Next renewal, or end of the trial; null without a plan. */
+  renewsAt: string | null
+  modules: { id: string; name: string; icon: string | null; status: string }[]
+  /** null when Keycloak could not count them. */
+  userCount: number | null
 }
 
+export type TenantSort = 'companyName' | 'city' | 'status' | 'plan' | 'renewsAt'
+
+/** UC1 + UC21 filters; sort with a leading "-" is descending. */
 export interface TenantsQuery {
   search: string
+  statuses: TenantStatus[]
+  planIds: string[]
+  moduleId?: string
+  province?: string
+  renewalWithinDays?: number
+  sort: string
   page: number
   pageSize: number
+}
+
+/** UC21-R1: numbers of the tabs. */
+export interface TenantCounts {
+  all: number
+  byStatus: Partial<Record<TenantStatus, number>>
+  renewingSoon: number
+}
+
+/** The API parameters of a query; the list page uses the same names in its URL. */
+export function tenantsParams(query: Omit<TenantsQuery, 'page' | 'pageSize'>) {
+  const params = new URLSearchParams()
+  if (query.search) params.set('search', query.search)
+  for (const status of query.statuses) params.append('status', status)
+  for (const planId of query.planIds) params.append('planId', planId)
+  if (query.moduleId) params.set('moduleId', query.moduleId)
+  if (query.province) params.set('province', query.province)
+  if (query.renewalWithinDays) params.set('renewalWithinDays', String(query.renewalWithinDays))
+  if (query.sort && query.sort !== 'companyName') params.set('sort', query.sort)
+  return params
+}
+
+/** UC21-R5: CSV of the filtered tenants, or of the selected ones only. */
+export function tenantsExportPath(query: TenantsQuery, ids: string[] = []) {
+  const params = ids.length ? new URLSearchParams(ids.map((id) => ['ids', id])) : tenantsParams(query)
+  return `/api/tenants/export?${params}`
 }
 
 // Mirrors TenantDetailDto in PSAAS.AdminPortal.Backend. Profiles and units come ordered by name.
@@ -101,11 +145,15 @@ const keys = {
   detail: (id: string) => ['tenants', 'detail', id] as const,
 }
 
-const getTenants = ({ search, page, pageSize }: TenantsQuery, signal: AbortSignal) => {
-  const query = new URLSearchParams({ page: String(page), pageSize: String(pageSize) })
-  if (search) query.set('search', search)
-  return apiGet<PagedResult<TenantSummary>>(`/api/tenants?${query}`, signal)
+const getTenants = (query: TenantsQuery, signal: AbortSignal) => {
+  const params = tenantsParams(query)
+  params.set('page', String(query.page))
+  params.set('pageSize', String(query.pageSize))
+  return apiGet<PagedResult<TenantSummary>>(`/api/tenants?${params}`, signal)
 }
+
+export const useTenantCounts = () =>
+  useQuery({ queryKey: [...keys.list, 'counts'], queryFn: ({ signal }) => apiGet<TenantCounts>('/api/tenants/counts', signal) })
 
 const getTenant = (id: string, signal: AbortSignal) =>
   apiGet<TenantDetail>(`/api/tenants/${encodeURIComponent(id)}`, signal)

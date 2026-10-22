@@ -38,7 +38,7 @@ public sealed class TenantRegistryUpdateService(
         var completeVatNumber = await ValidateUniqueFieldsAsync(tenantId, request, errors, cancellationToken);
         var street = TenantOrganizationRules.Trim(request.Street);
         var postalCode = TenantOrganizationRules.Trim(request.PostalCode);
-        var city = await addressValidator.ValidateAsync(
+        var (city, province) = await addressValidator.ValidateAsync(
             street, TenantOrganizationRules.Trim(request.City), postalCode, errors, cancellationToken);
         var sdiCode = TenantCreateValidator.ValidateSdiCode(request.SdiCode);
         if (!sdiCode.IsValid)
@@ -57,7 +57,7 @@ public sealed class TenantRegistryUpdateService(
             completeVatNumber[2..],
             completeVatNumber,
             TenantOrganizationRules.Trim(request.CertifiedEmail),
-            new Address(street, city, postalCode, TenantCreateService.Country),
+            new Address(street, city, postalCode, TenantCreateService.Country, province),
             before.Lifecycle,
             new TenantCommercialInfo(
                 TenantOrganizationRules.NullIfEmpty(sdiCode.NormalizedValue),

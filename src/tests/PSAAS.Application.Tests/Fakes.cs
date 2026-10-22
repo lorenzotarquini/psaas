@@ -165,8 +165,11 @@ public sealed class FakeUserDirectory : IUserDirectory
         CancellationToken cancellationToken = default) =>
         Task.FromResult<IReadOnlyDictionary<string, int>>(profileIds.ToDictionary(id => id, id => Users.Count(u => u.ProfileIds.Contains(id))));
 
-    public Task<int> CountUsersWithAnyAsync(IReadOnlyCollection<string> profileIds, CancellationToken cancellationToken = default) =>
-        Task.FromResult(Users.Count(u => u.ProfileIds.Intersect(profileIds).Any()));
+    public Task<int> CountUsersWithAnyAsync(IReadOnlyCollection<string> profileIds, CancellationToken cancellationToken = default)
+    {
+        ThrowIfDown();
+        return Task.FromResult(Users.Count(u => u.ProfileIds.Intersect(profileIds).Any()));
+    }
 
     public Task RemoveProfilesAsync(IReadOnlyCollection<string> profileIds, CancellationToken cancellationToken = default)
     {

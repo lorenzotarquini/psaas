@@ -60,6 +60,19 @@ async function request<T>(method: Method, path: string, body?: unknown, signal?:
 }
 
 export const apiGet = <T>(path: string, signal?: AbortSignal) => request<T>('GET', path, undefined, signal)
+
+/** Downloads a file the API produces (e.g. a CSV export) with the bearer token, saved under fileName. */
+export async function apiDownload(path: string, fileName: string) {
+  const response = await fetch(path, { headers: { Authorization: `Bearer ${await getAccessToken()}` } })
+  if (!response.ok) {
+    logger.error({ path, status: response.status }, 'Download failed')
+    throw new ApiError(response.status, path)
+  }
+  const url = URL.createObjectURL(await response.blob())
+  const link = Object.assign(document.createElement('a'), { href: url, download: fileName })
+  link.click()
+  URL.revokeObjectURL(url)
+}
 export const apiPost = <T>(path: string, body: unknown) => request<T>('POST', path, body)
 export const apiPut = <T>(path: string, body: unknown) => request<T>('PUT', path, body)
 export const apiDelete = (path: string) => request<void>('DELETE', path)

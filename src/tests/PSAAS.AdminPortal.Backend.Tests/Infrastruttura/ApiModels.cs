@@ -6,7 +6,15 @@ public sealed record PageView<T>(List<T> Items, int TotalCount, int Page, int Pa
 
 public sealed record TenantSummary(
     Guid Id, string CompanyName, string VatNumber, string CompleteVatNumber, string CertifiedEmail, string City,
-    string Code = "", string Status = "", DateTimeOffset CreatedAt = default);
+    string Code = "", string Status = "", DateTimeOffset CreatedAt = default,
+    string? Province = null, string? PlanName = null, int? MaxUsers = null, DateTimeOffset? RenewsAt = null,
+    List<TenantListModuleView>? Modules = null, int? UserCount = null);
+
+public sealed record TenantListModuleView(string Id, string Name, string Status);
+
+public sealed record TenantCountsView(int All, Dictionary<string, int> ByStatus, int RenewingSoon);
+
+public sealed record SavedViewView(Guid Id, string Area, string Name, string Query);
 
 public sealed record TenantDetail(
     Guid Id,

@@ -35,7 +35,7 @@ public sealed class TenantRegistryUpdateServiceTests
         Assert.Equal(
             (Alfa.Id, "Alfa Spa", "99999999999", "IT99999999999", "nuova@pec.it"),
             (saved.Id, saved.CompanyName, saved.VatNumber, saved.CompleteVatNumber, saved.CertifiedEmail));
-        Assert.Equal(new Address("Via Nuova 2", "Roma", "00118", "IT"), saved.Address);
+        Assert.Equal(new Address("Via Nuova 2", "Roma", "00118", "IT", "RM"), saved.Address);
     }
 
     [Fact]

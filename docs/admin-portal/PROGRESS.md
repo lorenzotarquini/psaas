@@ -13,7 +13,7 @@ Piano: `C:\Users\ltarq\.claude\plans\voglio-che-prepari-un-abundant-quail.md` ·
 | 4 Ciclo di vita e wizard | ✅ | vedi log |
 | 5 Moduli, piani, sottoscrizioni | ✅ | vedi log |
 | 6 Gestione utenti completa | ✅ | vedi log |
-| 7 Elenco clienti avanzato | | |
+| 7 Elenco clienti avanzato | ✅ | vedi log |
 | 8 Fatturazione interna | | |
 | 9 Uso e stato dei servizi | | |
 | 10 Comunicazioni e notifiche | | |
@@ -22,7 +22,7 @@ Piano: `C:\Users\ltarq\.claude\plans\voglio-che-prepari-un-abundant-quail.md` ·
 
 ## Test rossi attesi
 
-Nessuno: dopo la fase 6 tutta la suite è verde (accettazione 174/174, unitari Application 106 e Infrastructure 55, Vitest 55).
+Nessuno: dopo la fase 7 tutta la suite è verde (accettazione 195/195, unitari Application 114 e Infrastructure 55, Vitest 57).
 
 ## Ambiente di sviluppo autonomo (fuori dal repo, nello scratchpad della sessione)
 
@@ -59,8 +59,15 @@ Per verificare l'interfaccia senza il login reale: provider OIDC locale (`devidp
 26. **Ultimo accesso** dagli eventi `LOGIN` di Keycloak, una richiesta per utente della pagina; se gli eventi sono spenti resta "mai" senza errori.
 27. **Import CSV**: virgola o punto e virgola, profili come `Cliente:Profilo` separati da `|`, intestazioni in italiano o inglese; la conferma crea solo le righe valide.
 28. **Scheda Utenti del cliente**: la riga apre l'utente nella vista Utenti (filtrata sul cliente) invece di un secondo pannello.
+29. **Provincia nella sede**: salvata nell'indirizzo (JSON) dalla lista dei comuni al salvataggio dell'anagrafica; i clienti già esistenti la ricevono al primo salvataggio. In locale è stata riempita ri-salvando le anagrafiche (`e2e/backfill-province.mjs`).
+30. **Conteggi delle schede** su tutti i clienti, non sui filtri correnti (il mock non lo chiarisce).
+31. **"Cambia piano" multiplo** dal frontend, una sottoscrizione (UC17) per cliente con esito per riga; nessun endpoint di massa. Gli add-on dei clienti vengono tolti.
+32. **"Invia comunicazione"** visibile ma disattivato fino alla fase 10.
+33. **Colonne scelte** salvate nel browser (`psaas-tenant-columns`); le viste salvate (UC22) sono invece sul server, per amministratore.
+34. **Export senza conteggio utenti** (eviterebbe migliaia di chiamate a Keycloak); valori che iniziano con `=+-@` neutralizzati contro la formula injection.
+35. **Utenti nell'elenco** contati con Keycloak solo per la pagina visibile (shortcut annotato); niente ordinamento per utenti.
 
 ## Da far vedere al designer
 
 - Tema scuro, vista mobile (sidebar a scomparsa, tabelle con scorrimento orizzontale).
-- Pagine senza mock: Profili, Impostazioni, 404 Moduli, Piani, Sottoscrizioni, Audit log, dialog Importa CSV, scheda Utenti del cliente (e in seguito Fatturazione, Comunicazioni).
+- Pagine senza mock: Profili, Impostazioni, 404 Moduli, Piani, Sottoscrizioni, Audit log, dialog Importa CSV, scheda Utenti del cliente, dialog Cambia piano multiplo, viste salvate (e in seguito Fatturazione, Comunicazioni).

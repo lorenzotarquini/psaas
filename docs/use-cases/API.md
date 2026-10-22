@@ -6,7 +6,7 @@ Errori di validazione: `400` `ValidationProblem` con un codice per campo in `err
 
 | Use case | Endpoint | Stato |
 |---|---|---|
-| UC1 | `GET /api/tenants?search=&page=1&pageSize=20` | esiste |
+| UC1, UC21 | `GET /api/tenants?search=&status=&planId=&moduleId=&province=&renewalWithinDays=&sort=&page=1&pageSize=20` · `GET /api/tenants/counts` · `GET /api/tenants/export` | esiste |
 | UC2 | `GET /api/tenants/{id}` | esiste |
 | UC3 | `POST /api/tenants` | esiste |
 | UC4 | `PUT /api/tenants/{id}` | esiste |
@@ -26,10 +26,11 @@ Errori di validazione: `400` `ValidationProblem` con un codice per campo in `err
 | UC18 | `POST /api/tenants/{id}/modules/{moduleId}/retry` | esiste |
 | UC19 | `GET/PUT /api/users/{id}` · `POST /api/users/{id}/invite|reset-password|disable|enable` | esiste |
 | UC20 | `POST /api/users/import` | esiste |
+| UC22 | `GET /api/saved-views?area=` · `POST /api/saved-views` · `DELETE /api/saved-views/{id}` | esiste |
 
 ## Contratti esistenti (sintesi)
 
-- **UC1** → `{ items: [{ id, companyName, vatNumber, completeVatNumber, certifiedEmail, city }], totalCount, page, pageSize }`.
+- **UC1/UC21** → `{ items: [{ id, companyName, vatNumber, completeVatNumber, certifiedEmail, city, province, code, status, createdAt, planId, planName, subscriptionStatus, maxUsers, renewsAt, modules: [{ id, name, icon, status }], profileIds, userCount }], totalCount, page, pageSize }`. Vedi la sezione UC21.
 - **UC2** → `{ id, companyName, vatNumber, completeVatNumber, certifiedEmail, address: { street, city, postalCode, country }, profiles: [{ id, name, description, userCount }], productiveUnits: [{ id, name, description, profileIds }] }`; `404` se non esiste. `userCount` = utenti con quel profilo (da Keycloak), `null` se Keycloak non risponde: la scheda non fallisce.
 - **UC3** → body `{ companyName, completeVatNumber, certifiedEmail, street, city, postalCode, profiles?: [{ key, name, description }], productiveUnits?: [{ name, description, profileKeys }] }`; `201` + `Location` + scheda (UC2).
 - **UC8** → `{ keycloakId, name, email, roles }`.
@@ -71,6 +72,18 @@ Risposta: `{ items: [utente], totalCount, page, pageSize }` con utente = `{ id, 
 - `lastLoginAt` dall'ultimo evento `LOGIN` di Keycloak, `null` se non c'è o se gli eventi non sono disponibili.
 - I profili salvati sull'utente che non esistono più vengono omessi.
 - `birthDate` è `null` per gli utenti creati fuori dal portale (ad esempio direttamente in Keycloak).
+
+### UC21 – Elenco clienti con filtri, ordinamento, conteggi ed export
+- `GET /api/tenants` accetta, oltre a `search`, `page` e `pageSize`: `status` e `planId` (ripetibili, in OR tra loro), `moduleId`, `province` (sigla, senza maiuscole), `renewalWithinDays` (1–3650: rinnovo o fine prova entro N giorni, scaduti compresi), `sort` (`companyName`, `city`, `status`, `plan`, `renewsAt`, con `-` davanti per l'ordine decrescente). Parametri non validi → `400` con il parametro = `InvalidValue`.
+- `renewsAt` è la fine della prova per i clienti in prova, altrimenti il prossimo rinnovo; `null` senza piano. `userCount` conta gli utenti con un profilo del cliente (Keycloak), `null` se Keycloak non risponde: l'elenco non fallisce.
+- `GET /api/tenants/counts` → `{ all, byStatus: { Active, Trial, … }, renewingSoon }` su tutti i clienti; `renewingSoon` = non cessati con rinnovo entro 30 giorni.
+- `GET /api/tenants/export` con gli stessi filtri (oppure `ids=` ripetuto per la selezione) → `text/csv` UTF-8 con BOM, colonne `ragioneSociale,partitaIva,pec,comune,provincia,stato,piano,rinnovo`, al massimo 5000 righe. I valori che iniziano con `= + - @` sono preceduti da un apice, perché un foglio di calcolo non li esegua come formule.
+- La scheda (UC2) restituisce anche `address.province`: viene dall'elenco dei comuni al salvataggio dell'anagrafica (UC3/UC4).
+
+### UC22 – Viste salvate
+- `GET /api/saved-views?area=tenants` → `[{ id, area, name, query, createdAt }]` dell'amministratore del token.
+- `POST /api/saved-views` `{ area, name, query }` → `201` + vista · `400` (`area` `InvalidValue` se non è `tenants` o `users`; `name` `Required`, `MaxLengthExceeded` oltre 40, `NotUnique` tra le proprie viste senza maiuscole, `LimitExceeded` oltre 20 viste).
+- `DELETE /api/saved-views/{id}` → `204`, `404` se la vista non esiste o è di un altro amministratore.
 
 ### UC19 – Gestire un utente
 - `GET /api/users/{id}` → utente (come in UC7) · `404`.

@@ -30,7 +30,7 @@ public sealed class TenantCreateService(
 
         var completeVatNumber = await ValidateUniqueFieldsAsync(request, errors, cancellationToken);
         var street = Trim(request.Street);
-        var city = await addressValidator.ValidateAsync(street, Trim(request.City), Trim(request.PostalCode), errors, cancellationToken);
+        var (city, province) = await addressValidator.ValidateAsync(street, Trim(request.City), Trim(request.PostalCode), errors, cancellationToken);
         var sdiCode = TenantCreateValidator.ValidateSdiCode(request.SdiCode);
         if (!sdiCode.IsValid)
         {
@@ -55,7 +55,7 @@ public sealed class TenantCreateService(
             completeVatNumber[2..],
             completeVatNumber,
             Trim(request.CertifiedEmail),
-            new Address(street, city, Trim(request.PostalCode), Country),
+            new Address(street, city, Trim(request.PostalCode), Country, province),
             request.Draft ? TenantStatus.Onboarding : TenantStatus.Active,
             new TenantCommercialInfo(NullIfEmpty(sdiCode.NormalizedValue), NullIfEmpty(request.AccountManager)),
             clock.GetUtcNow());

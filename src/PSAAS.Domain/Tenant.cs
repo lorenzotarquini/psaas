@@ -45,7 +45,9 @@
         public TenantCommercialInfo Commercial { get; }
 
         /// <summary>Short code shown next to the VAT number (mock 1d), derived from the identity.</summary>
-        public string Code => $"tn_{Id.ToString("N")[..8]}";
+        public string Code => CodeOf(Id);
+
+        public static string CodeOf(Guid id) => $"tn_{id.ToString("N")[..8]}";
 
         public static Tenant CreateEmpty()
         {

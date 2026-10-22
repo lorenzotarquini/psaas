@@ -1,1 +1,1 @@
-export { ApiError, apiDelete, apiGet, apiPost, apiPut, type FieldErrors, type PagedResult } from './client'
+export { ApiError, apiDelete, apiDownload, apiGet, apiPost, apiPut, type FieldErrors, type PagedResult } from './client'

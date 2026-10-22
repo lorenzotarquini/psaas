@@ -50,3 +50,7 @@ Ogni scenario di accettazione (`UCn-Sm`) scende negli strati interni: qui si ved
 | UC17-S1…S3 | Sottoscrizione: dipendenze transitive, prova solo la prima volta, limite utenti, piano e add-on inesistenti | `SubscriptionServiceTests.UC17_*`, `SubscriptionServiceTests.WithDependencies_*` |
 | UC17-S6 | Nuovo utente oltre il limite del piano | `UserCreateServiceTests.UC17_S6_*` |
 | UC18-S1, S2 | Hook fallito, riprova del job, riprova di un modulo già attivo | `SubscriptionServiceTests.UC18_*` |
+| UC19-R1 | Stato dell'utente da Keycloak e dai clienti dei profili | `UserManagementServiceTests.UC19_R1_*` |
+| UC19-S2, S4…S6 | Modifica con audit solo se cambia, limite solo per clienti nuovi, azioni consentite per stato | `UserManagementServiceTests.UC19_*` |
+| UC19 | Chiamate a Keycloak: lettura di stato/inviti/MFA, aggiornamento con `CONFIGURE_TOTP`, reinvio contato, ultimi accessi dagli eventi (e niente se spenti) | `KeycloakUserDirectoryTests.UC19_*` |
+| UC20 | Profili per nome senza maiuscole, email ripetute, file vuoto o oltre 500 righe | `UserManagementServiceTests.UC20_*` |

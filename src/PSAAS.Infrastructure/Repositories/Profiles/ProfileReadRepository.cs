@@ -55,7 +55,7 @@ public sealed class ProfileReadRepository(PsaasDbContext dbContext) : IProfileRe
                 dbContext.Tenants,
                 profile => profile.TenantId,
                 tenant => tenant.Id,
-                (profile, tenant) => new UserProfileReadModel(profile.Id, profile.Name, tenant.Id, tenant.CompanyName))
+                (profile, tenant) => new UserProfileReadModel(profile.Id, profile.Name, tenant.Id, tenant.CompanyName, tenant.Status))
             .ToArrayAsync(cancellationToken)
             .ConfigureAwait(false);
 

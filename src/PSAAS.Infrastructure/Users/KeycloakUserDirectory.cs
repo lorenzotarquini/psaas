@@ -12,8 +12,9 @@ namespace PSAAS.Infrastructure.Users;
 /// (e.g. https://kc/admin/realms/PSAAS/) as base address and sends the service account token.
 /// </summary>
 /// <remarks>
-/// The realm user profile must declare the attributes birthDate and profileIds (or allow unmanaged
-/// attributes): since Keycloak 24 undeclared attributes are silently dropped.
+/// The realm user profile must declare the attributes birthDate, profileIds, mfaRequired, createdBy, invitesSent and
+/// lastInviteAt (or allow unmanaged attributes): since Keycloak 24 undeclared attributes are silently dropped.
+/// Last logins need user events (LOGIN) saved in the realm and the view-events role.
 /// </remarks>
 public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
 {
@@ -22,9 +23,15 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
     private const string BirthDateAttribute = "birthDate";
     private const string ProfileIdsAttribute = "profileIds";
     private const string BirthDateFormat = "yyyy-MM-dd";
+    private const string MfaRequiredAttribute = "mfaRequired";
+    private const string CreatedByAttribute = "createdBy";
+    private const string InvitesSentAttribute = "invitesSent";
+    private const string LastInviteAtAttribute = "lastInviteAt";
+    private const string UpdatePasswordAction = "UPDATE_PASSWORD";
+    private const string ConfigureTotpAction = "CONFIGURE_TOTP";
 
-    // shortcut: UC7 has no paging, so a search returns at most this many users; add paging when realms grow.
-    private const int MaxSearchResults = 100;
+    // shortcut: UC7 filters and pages in memory over at most this many users; move paging into Keycloak when realms grow.
+    private const int MaxSearchResults = 1000;
 
     // shortcut: users of one profile updated in a single page; page through them if a profile ever has more.
     private const int MaxProfileUsers = 1000;
@@ -41,10 +48,15 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
             FirstName = user.FirstName,
             LastName = user.LastName,
             Enabled = true,
+            // UC19-R1: the open action marks the invitation as pending until the password is set.
+            RequiredActions = [UpdatePasswordAction],
             Attributes = new Dictionary<string, string[]>
             {
                 [BirthDateAttribute] = [user.BirthDate.ToString(BirthDateFormat, CultureInfo.InvariantCulture)],
-                [ProfileIdsAttribute] = user.ProfileIds.ToArray()
+                [ProfileIdsAttribute] = user.ProfileIds.ToArray(),
+                [CreatedByAttribute] = user.CreatedBy is null ? [] : [user.CreatedBy],
+                [InvitesSentAttribute] = ["1"],
+                [LastInviteAtAttribute] = [(user.InvitedAt ?? DateTimeOffset.UtcNow).ToString("O", CultureInfo.InvariantCulture)]
             }
         };
 
@@ -80,7 +92,9 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
         }
 
         Logger.Info("Created Keycloak user {KeycloakUserId} and sent the password setup email", id);
-        return new DirectoryUser(id, user.FirstName, user.LastName, user.Email, user.BirthDate, user.ProfileIds);
+        return new DirectoryUser(
+            id, user.FirstName, user.LastName, user.Email, user.BirthDate, user.ProfileIds,
+            PasswordPending: true, CreatedAt: user.InvitedAt, CreatedBy: user.CreatedBy, InvitesSent: 1, LastInviteAt: user.InvitedAt);
     }
 
     public async Task<IReadOnlyList<DirectoryUser>> SearchAsync(string? search, CancellationToken cancellationToken = default)
@@ -174,6 +188,113 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
         }
     }
 
+    public async Task<DirectoryUser?> GetAsync(string id, CancellationToken cancellationToken = default)
+    {
+        var user = await FindAsync(id, cancellationToken);
+        return user is null ? null : ToDirectoryUser(user);
+    }
+
+    public async Task<bool> UpdateAsync(string id, DirectoryUserUpdate update, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(update);
+        var user = await FindAsync(id, cancellationToken);
+        if (user is null) return false;
+
+        user.FirstName = update.FirstName;
+        user.LastName = update.LastName;
+        var attributes = user.Attributes ?? [];
+        attributes[BirthDateAttribute] = [update.BirthDate.ToString(BirthDateFormat, CultureInfo.InvariantCulture)];
+        attributes[ProfileIdsAttribute] = update.ProfileIds.ToArray();
+        attributes[MfaRequiredAttribute] = [update.MfaRequired ? "true" : "false"];
+        user.Attributes = attributes;
+        // UC19-R4: Keycloak asks for the OTP setup at the next login while MFA is required.
+        var actions = (user.RequiredActions ?? []).Where(action => action != ConfigureTotpAction).ToList();
+        if (update.MfaRequired) actions.Add(ConfigureTotpAction);
+        user.RequiredActions = actions.ToArray();
+        await PutAsync(user, "update a user", cancellationToken);
+        Logger.Info("Updated Keycloak user {KeycloakUserId}", id);
+        return true;
+    }
+
+    public async Task SendInviteAsync(string id, DateTimeOffset sentAt, CancellationToken cancellationToken = default)
+    {
+        await ExecuteActionsEmailAsync(id, cancellationToken);
+        var user = await FindAsync(id, cancellationToken)
+            ?? throw new InvalidOperationException($"Keycloak user {id} disappeared while inviting it");
+        var attributes = user.Attributes ?? [];
+        var sent = int.TryParse(attributes.GetValueOrDefault(InvitesSentAttribute)?.FirstOrDefault(), CultureInfo.InvariantCulture, out var count) ? count : 1;
+        attributes[InvitesSentAttribute] = [(sent + 1).ToString(CultureInfo.InvariantCulture)];
+        attributes[LastInviteAtAttribute] = [sentAt.ToString("O", CultureInfo.InvariantCulture)];
+        user.Attributes = attributes;
+        await PutAsync(user, "count the invitations", cancellationToken);
+    }
+
+    public Task SendPasswordResetAsync(string id, CancellationToken cancellationToken = default) =>
+        ExecuteActionsEmailAsync(id, cancellationToken);
+
+    public async Task SetEnabledAsync(string id, bool enabled, CancellationToken cancellationToken = default)
+    {
+        var user = await FindAsync(id, cancellationToken)
+            ?? throw new InvalidOperationException($"Keycloak user {id} disappeared while changing it");
+        user.Enabled = enabled;
+        await PutAsync(user, enabled ? "enable a user" : "disable a user", cancellationToken);
+    }
+
+    public async Task<IReadOnlyDictionary<string, DateTimeOffset>> GetLastLoginsAsync(
+        IReadOnlyCollection<string> userIds,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(userIds);
+        var result = new Dictionary<string, DateTimeOffset>(StringComparer.Ordinal);
+        // shortcut: one events request per user of the page (at most 200); use the admin events export if pages grow.
+        foreach (var id in userIds.Distinct(StringComparer.Ordinal))
+        {
+            try
+            {
+                using var response = await http.GetAsync($"events?type=LOGIN&user={Uri.EscapeDataString(id)}&max=1", cancellationToken);
+                response.EnsureSuccessStatusCode();
+                var events = await response.Content.ReadFromJsonAsync<EventRepresentation[]>(cancellationToken) ?? [];
+                if (events.Length > 0) result[id] = DateTimeOffset.FromUnixTimeMilliseconds(events[0].Time);
+            }
+            catch (Exception exception) when (exception is HttpRequestException or JsonException or TaskCanceledException && !cancellationToken.IsCancellationRequested)
+            {
+                // UC19-R5: events off or no view-events role: no last login, nothing else breaks.
+                Logger.Warn(exception, "Keycloak login events unavailable");
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    private async Task<UserRepresentation?> FindAsync(string id, CancellationToken cancellationToken) =>
+        await CallAsync(async () =>
+        {
+            using var response = await http.GetAsync($"users/{Uri.EscapeDataString(id)}", cancellationToken);
+            if (response.StatusCode == HttpStatusCode.NotFound) return null;
+            EnsureSuccess(response, "read a user");
+            return await response.Content.ReadFromJsonAsync<UserRepresentation>(cancellationToken);
+        }, cancellationToken);
+
+    // The full representation goes back: Keycloak replaces the attribute map on update.
+    private Task PutAsync(UserRepresentation user, string operation, CancellationToken cancellationToken) =>
+        CallAsync(async () =>
+        {
+            using var response = await http.PutAsJsonAsync($"users/{Uri.EscapeDataString(user.Id!)}", user, cancellationToken);
+            EnsureSuccess(response, operation);
+            return true;
+        }, cancellationToken);
+
+    // UC19-R3: Keycloak emails the link; the password never goes through PSAAS.
+    private Task ExecuteActionsEmailAsync(string id, CancellationToken cancellationToken) =>
+        CallAsync(async () =>
+        {
+            using var response = await http.PutAsJsonAsync(
+                $"users/{Uri.EscapeDataString(id)}/execute-actions-email", PasswordSetupActions, cancellationToken);
+            EnsureSuccess(response, "send the password email");
+            return true;
+        }, cancellationToken);
+
     private static string ProfileQuery(string profileId) => Uri.EscapeDataString($"{ProfileIdsAttribute}:{profileId}");
 
     private static DirectoryUser ToDirectoryUser(UserRepresentation user)
@@ -183,13 +304,21 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
             && DateOnly.TryParseExact(values.FirstOrDefault(), BirthDateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed)
                 ? parsed
                 : (DateOnly?)null;
+        string? First(string name) => attributes.TryGetValue(name, out var v) ? v.FirstOrDefault() : null;
         return new DirectoryUser(
             user.Id ?? string.Empty,
             user.FirstName ?? string.Empty,
             user.LastName ?? string.Empty,
             user.Email ?? user.Username ?? string.Empty,
             birthDate,
-            attributes.TryGetValue(ProfileIdsAttribute, out var profileIds) ? profileIds : []);
+            attributes.TryGetValue(ProfileIdsAttribute, out var profileIds) ? profileIds : [],
+            user.Enabled,
+            (user.RequiredActions ?? []).Contains(UpdatePasswordAction),
+            First(MfaRequiredAttribute) == "true",
+            user.CreatedTimestamp is { } created ? DateTimeOffset.FromUnixTimeMilliseconds(created) : null,
+            First(CreatedByAttribute),
+            int.TryParse(First(InvitesSentAttribute), CultureInfo.InvariantCulture, out var invites) ? invites : 0,
+            DateTimeOffset.TryParse(First(LastInviteAtAttribute), CultureInfo.InvariantCulture, DateTimeStyles.None, out var invitedAt) ? invitedAt : null);
     }
 
     /// <summary>
@@ -254,6 +383,13 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public bool Enabled { get; set; }
+        public long? CreatedTimestamp { get; set; }
+        public string[]? RequiredActions { get; set; }
         public Dictionary<string, string[]>? Attributes { get; set; }
+    }
+
+    private sealed class EventRepresentation
+    {
+        public long Time { get; set; }
     }
 }

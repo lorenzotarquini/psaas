@@ -16,7 +16,9 @@ public sealed class UserCreateServiceTests
 
     private readonly FakeTenantReadRepository _tenants = new();
 
-    private UserCreateService Service => new(_profiles, _directory, _audit, _subscriptions, _tenants);
+    private UserRules Rules => new(_profiles, _directory, _subscriptions, _tenants, _audit);
+
+    private UserCreateService Service => new(Rules, _directory, new FakeCurrentActor(), TimeProvider.System);
 
     private static UserCreateRequest Valid(params string[] profileIds) =>
         new(" Mario ", " Rossi ", " Mario.Rossi@Example.com ", "1980-05-17", profileIds);

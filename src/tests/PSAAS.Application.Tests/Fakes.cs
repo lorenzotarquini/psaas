@@ -123,8 +123,10 @@ public sealed class FakeProfileReadRepository : IProfileReadRepository
 {
     public List<UserProfileReadModel> Profiles { get; } = [];
 
+    public List<ProfileReadModel> All { get; } = [];
+
     public Task<IReadOnlyList<ProfileReadModel>> GetAllAsync(CancellationToken cancellationToken = default) =>
-        throw new NotSupportedException();
+        Task.FromResult<IReadOnlyList<ProfileReadModel>>(All);
 
     public Task<IReadOnlyList<UserProfileReadModel>> GetWithTenantAsync(
         IReadOnlyCollection<string> profileIds,
@@ -148,7 +150,9 @@ public sealed class FakeUserDirectory : IUserDirectory
         if (Unavailable) throw new UserDirectoryUnavailableException("down");
         if (EmailTaken) throw new UserEmailConflictException("taken");
         Created = user;
-        return Task.FromResult(new DirectoryUser("kc-1", user.FirstName, user.LastName, user.Email, user.BirthDate, user.ProfileIds));
+        var created = new DirectoryUser("kc-1", user.FirstName, user.LastName, user.Email, user.BirthDate, user.ProfileIds, PasswordPending: true, CreatedBy: user.CreatedBy, InvitesSent: 1);
+        Users.Add(created);
+        return Task.FromResult(created);
     }
 
     public Task<IReadOnlyList<DirectoryUser>> SearchAsync(string? search, CancellationToken cancellationToken = default) =>
@@ -170,6 +174,72 @@ public sealed class FakeUserDirectory : IUserDirectory
         RemovedProfiles.AddRange(profileIds);
         return Task.CompletedTask;
     }
+
+    /// <summary>Emails asked of Keycloak by UC19: (user id, "invite" or "reset").</summary>
+    public List<(string UserId, string Kind)> ActionEmails { get; } = [];
+
+    public Dictionary<string, DateTimeOffset> LastLogins { get; } = [];
+
+    public Task<DirectoryUser?> GetAsync(string id, CancellationToken cancellationToken = default)
+    {
+        ThrowIfDown();
+        return Task.FromResult(Users.FirstOrDefault(user => user.Id == id));
+    }
+
+    public Task<bool> UpdateAsync(string id, DirectoryUserUpdate update, CancellationToken cancellationToken = default)
+    {
+        ThrowIfDown();
+        var index = Users.FindIndex(user => user.Id == id);
+        if (index < 0) return Task.FromResult(false);
+        Users[index] = Users[index] with
+        {
+            FirstName = update.FirstName,
+            LastName = update.LastName,
+            BirthDate = update.BirthDate,
+            ProfileIds = update.ProfileIds,
+            MfaRequired = update.MfaRequired,
+        };
+        return Task.FromResult(true);
+    }
+
+    public Task SendInviteAsync(string id, DateTimeOffset sentAt, CancellationToken cancellationToken = default)
+    {
+        ThrowIfDown();
+        var index = Users.FindIndex(user => user.Id == id);
+        Users[index] = Users[index] with { InvitesSent = Users[index].InvitesSent + 1, LastInviteAt = sentAt };
+        ActionEmails.Add((id, "invite"));
+        return Task.CompletedTask;
+    }
+
+    public Task SendPasswordResetAsync(string id, CancellationToken cancellationToken = default)
+    {
+        ThrowIfDown();
+        ActionEmails.Add((id, "reset"));
+        return Task.CompletedTask;
+    }
+
+    public Task SetEnabledAsync(string id, bool enabled, CancellationToken cancellationToken = default)
+    {
+        ThrowIfDown();
+        var index = Users.FindIndex(user => user.Id == id);
+        Users[index] = Users[index] with { Enabled = enabled };
+        return Task.CompletedTask;
+    }
+
+    public Task<IReadOnlyDictionary<string, DateTimeOffset>> GetLastLoginsAsync(IReadOnlyCollection<string> userIds, CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyDictionary<string, DateTimeOffset>>(LastLogins.Where(l => userIds.Contains(l.Key)).ToDictionary());
+
+    private void ThrowIfDown()
+    {
+        if (Unavailable) throw new UserDirectoryUnavailableException("down");
+    }
+}
+
+public sealed class FakeCurrentActor : ICurrentActor
+{
+    public string Id => "kc-admin";
+
+    public string Name => "Marta Russo";
 }
 
 /// <summary>One tenant with its organization, as the read side returns it.</summary>

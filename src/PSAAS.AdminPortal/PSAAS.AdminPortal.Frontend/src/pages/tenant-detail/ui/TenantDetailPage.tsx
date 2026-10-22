@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { Link, useParams, useSearchParams } from 'react-router'
 import { useTenantSubscription } from '@/entities/catalog'
 import { TenantStatusBadge, useTenant, type TenantDetail } from '@/entities/tenant'
+import { useUsers } from '@/entities/user'
 import { ApiError } from '@/shared/api'
 import { useBreadcrumb } from '@/shared/lib/breadcrumb'
 import { formatDate } from '@/shared/lib/format'
@@ -19,8 +20,9 @@ import { RegistryCard } from './RegistryCard'
 import { RegistryTab } from './RegistryTab'
 import { StatusActions } from './StatusActions'
 import { SubscriptionTab } from './SubscriptionTab'
+import { UsersTab } from './UsersTab'
 
-const tabs: TenantTab[] = ['overview', 'registry', 'organization', 'subscription', 'history']
+const tabs: TenantTab[] = ['overview', 'registry', 'organization', 'subscription', 'users', 'history']
 
 // UC2 (mock 1d): everything about a tenant, one tab per area; registry (UC4) and organization (UC5) edit in place.
 export function TenantDetailPage() {
@@ -48,6 +50,8 @@ function TenantView({ tenant }: { tenant: TenantDetail }) {
   const requested = searchParams.get('tab') as TenantTab | null
   const active = requested && tabs.includes(requested) ? requested : 'overview'
   const { data: subscription } = useTenantSubscription(tenant.id)
+  // Only the count of the tab: one row is enough.
+  const userCount = useUsers({ search: '', tenantId: tenant.id, page: 1, pageSize: 1 }).data?.totalCount
 
   const content: Record<string, ReactNode> = {
     overview: <OrganizationCard tenant={tenant} />,
@@ -55,6 +59,7 @@ function TenantView({ tenant }: { tenant: TenantDetail }) {
     registry: <RegistryTab key={tenant.completeVatNumber + tenant.companyName} tenant={tenant} />,
     organization: <OrganizationTab tenant={tenant} />,
     subscription: <SubscriptionTab tenantId={tenant.id} subscription={subscription ?? null} />,
+    users: <UsersTab tenantId={tenant.id} />,
     history: <HistoryCard tenantId={tenant.id} full />,
   }
 
@@ -95,7 +100,12 @@ function TenantView({ tenant }: { tenant: TenantDetail }) {
           <Tabs
             label={t('tenantDetail.tabsLabel')}
             active={active}
-            items={tabs.map((key) => ({ key, label: t(`tenantDetail.tabs.${key}`), to: tenantPath(tenant.id, key) }))}
+            items={tabs.map((key) => ({
+              key,
+              label: t(`tenantDetail.tabs.${key}`),
+              to: tenantPath(tenant.id, key),
+              count: key === 'users' ? userCount : undefined,
+            }))}
           />
         </div>
       </div>

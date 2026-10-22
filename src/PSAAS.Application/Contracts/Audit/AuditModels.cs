@@ -12,6 +12,11 @@ public static class AuditActions
     public const string TenantOnboardingDiscarded = "tenant.onboarding.discarded";
     public const string TenantStatusChanged = "tenant.status.changed";
     public const string UserCreated = "user.created";
+    public const string UserUpdated = "user.updated";
+    public const string UserInvited = "user.invited";
+    public const string UserPasswordReset = "user.password.reset";
+    public const string UserDisabled = "user.disabled";
+    public const string UserEnabled = "user.enabled";
     public const string ModuleRegistered = "module.registered";
     public const string ModuleUpdated = "module.updated";
     public const string PlanCreated = "plan.created";

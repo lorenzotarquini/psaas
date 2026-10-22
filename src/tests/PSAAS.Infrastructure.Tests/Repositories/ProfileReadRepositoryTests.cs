@@ -55,8 +55,8 @@ public sealed class ProfileReadRepositoryTests
 
         UserProfileReadModel[] expected =
         [
-            new(operatore.Id, "Operatore", alfa.Id, "Alfa Srl"),
-            new(revisore.Id, "Revisore", beta.Id, "Beta Snc")
+            new(operatore.Id, "Operatore", alfa.Id, "Alfa Srl", "Active"),
+            new(revisore.Id, "Revisore", beta.Id, "Beta Snc", "Active")
         ];
         Assert.Equal(expected, profiles.OrderBy(profile => profile.Name));
     }

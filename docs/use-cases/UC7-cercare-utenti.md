@@ -5,8 +5,8 @@
 **Obiettivo:** trovare un utente nella vista utenti del portale.
 
 ## Flusso principale
-1. L'amministratore apre la vista utenti e scrive un nome o un'email.
-2. Il sistema mostra gli utenti corrispondenti, di qualunque cliente, con i loro profili e i clienti a cui quei profili appartengono.
+1. L'amministratore apre la vista utenti e scrive un nome o un'email; può filtrare per cliente, profilo e stato (mock 1f).
+2. Il sistema mostra gli utenti corrispondenti, di qualunque cliente, a pagine, con i loro profili e i clienti a cui quei profili appartengono, lo stato (UC19-R1) e l'ultimo accesso.
 
 ## Flussi alternativi
 - **2a. Nessun utente corrisponde:** il sistema mostra un elenco vuoto.
@@ -16,6 +16,8 @@
 - R1. La ricerca è globale, non limitata a un cliente.
 - R2. Cerca in nome, cognome ed email, senza distinzione di maiuscole.
 - R3. Profili che non esistono più (cancellati con UC5) non vengono mostrati.
+- R4. I filtri si combinano con la ricerca; il totale conta tutti gli utenti che corrispondono, non solo la pagina.
+- R5. Ordine: cognome, nome.
 
 ## Scenari di accettazione
 
@@ -104,4 +106,32 @@ Scenario: Keycloak non raggiungibile
   Dato che Keycloak non risponde
   Quando l'amministratore cerca "mario"
   Allora il sistema segnala che il servizio non è disponibile
+```
+
+### UC7-S7
+
+Test: `UC7_CercareUtenti.S7_FiltriPerClienteEStato`
+
+```gherkin
+# language: it
+Funzionalità: Cercare gli utenti
+
+Scenario: Filtrare per cliente e stato
+  Dato che "Mario Rossi" e "Anna Bianchi" hanno profili di "Alfa Srl", "Luca Verdi" di "Beta Snc", e "Anna Bianchi" è disattivata
+  Quando l'amministratore filtra per "Alfa Srl" e stato "Attivo"
+  Allora vede solo "Mario Rossi", su un totale di 1
+```
+
+### UC7-S8
+
+Test: `UC7_CercareUtenti.S8_PagineEOrdine`
+
+```gherkin
+# language: it
+Funzionalità: Cercare gli utenti
+
+Scenario: Pagine e ordine
+  Dato che esistono 3 utenti
+  Quando l'amministratore chiede la pagina 2 da 2
+  Allora vede il terzo utente per cognome e il totale 3
 ```

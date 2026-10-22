@@ -60,6 +60,16 @@ describe('describeAuditEvent', () => {
     expect(sentence.detail).toBe('Base → Pro · moduli aggiunti: warehouse')
   })
 
+  // UC19-S2: changed values before → after, and the profiles added.
+  it('lists what changed on a user', () => {
+    const sentence = describeAuditEvent(
+      event('user.updated', { changes: { lastName: { before: 'Rossi', after: 'Russo' }, profilesAdded: ['Revisore · Beta Snc'] } }),
+      i18next.t,
+    )
+    expect(sentence.what).toBe("ha modificato l'utente")
+    expect(sentence.detail).toBe('Cognome: Rossi → Russo · profili aggiunti: Revisore · Beta Snc')
+  })
+
   // UC18-S3: a failed provisioning names the module and the error.
   it('tells a failed provisioning with its error', () => {
     const sentence = describeAuditEvent(event('module.provisioning.failed', { module: 'Magazzino', version: '1.4.0', error: 'timeout' }), i18next.t)

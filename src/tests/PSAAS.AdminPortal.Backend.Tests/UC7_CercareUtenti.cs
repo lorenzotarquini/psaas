@@ -73,6 +73,33 @@ public sealed class UC7_CercareUtenti(PostgresFixture database) : AcceptanceTest
         Assert.Equal(HttpStatusCode.ServiceUnavailable, response.StatusCode);
     }
 
-    private Task<List<UserView>> SearchAsync(string search) =>
-        GetOkAsync<List<UserView>>($"/api/users?search={Uri.EscapeDataString(search)}");
+    [Fact, Trait("Scenario", "UC7-S7")]
+    public async Task S7_FiltriPerClienteEStato()
+    {
+        var alfa = await GivenTenantAsync("Alfa Srl", profiles: new[] { new { key = "op", name = "Operatore" } });
+        var beta = await GivenTenantAsync("Beta Snc", profiles: new[] { new { key = "rev", name = "Revisore" } });
+        KeycloakUsers.Add("Mario", "Rossi", "mario@example.com", alfa.Profile("Operatore").Id);
+        var anna = KeycloakUsers.Add("Anna", "Bianchi", "anna@example.com", alfa.Profile("Operatore").Id);
+        KeycloakUsers.Add("Luca", "Verdi", "luca@example.com", beta.Profile("Revisore").Id);
+        await Admin.PostAsync($"/api/users/{anna.Id}/disable", null);
+
+        var page = await GetOkAsync<PageView<UserView>>($"/api/users?tenantId={alfa.Id}&status=Active");
+
+        Assert.Equal((1, "Rossi"), (page.TotalCount, Assert.Single(page.Items).LastName));
+    }
+
+    [Fact, Trait("Scenario", "UC7-S8")]
+    public async Task S8_PagineEOrdine()
+    {
+        KeycloakUsers.Add("Anna", "Zeta", "z@example.com");
+        KeycloakUsers.Add("Bruno", "Alfa", "a@example.com");
+        KeycloakUsers.Add("Carla", "Mezzo", "m@example.com");
+
+        var page = await GetOkAsync<PageView<UserView>>("/api/users?page=2&pageSize=2");
+
+        Assert.Equal((3, "Zeta"), (page.TotalCount, Assert.Single(page.Items).LastName));
+    }
+
+    private async Task<List<UserView>> SearchAsync(string search) =>
+        (await GetOkAsync<PageView<UserView>>($"/api/users?search={Uri.EscapeDataString(search)}")).Items;
 }

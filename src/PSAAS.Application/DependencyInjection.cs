@@ -20,6 +20,9 @@ public static class DependencyInjection
         services.AddScoped<SubscriptionService>();
         services.AddScoped<UserCreateService>();
         services.AddScoped<UserSearchService>();
+        services.AddScoped<UserRules>();
+        services.AddScoped<UserManagementService>();
+        services.AddScoped<UserImportService>();
 
         return services;
     }

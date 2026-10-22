@@ -18,7 +18,7 @@ public sealed class UserSearchServiceTests
         _profiles.Profiles.Add(new("p1", "Operatore", "t1", "Alfa Srl"));
         _directory.Users.Add(new("kc-1", "Mario", "Rossi", "mario.rossi@example.com", null, ["p1", "deleted"]));
 
-        var mario = Assert.Single(await Service.SearchAsync("mario"));
+        var mario = Assert.Single((await Service.SearchAsync(new UserQuery("mario", null, null, null))).Items);
 
         Assert.Equal(("Operatore", "Alfa Srl"), (Assert.Single(mario.Profiles).Name, mario.Profiles[0].TenantCompanyName));
         Assert.Null(mario.BirthDate);
@@ -29,6 +29,6 @@ public sealed class UserSearchServiceTests
     {
         _directory.Unavailable = true;
 
-        await Assert.ThrowsAsync<UserDirectoryUnavailableException>(() => Service.SearchAsync("mario"));
+        await Assert.ThrowsAsync<UserDirectoryUnavailableException>(() => Service.SearchAsync(new UserQuery("mario", null, null, null)));
     }
 }

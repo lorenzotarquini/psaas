@@ -12,7 +12,7 @@ Piano: `C:\Users\ltarq\.claude\plans\voglio-che-prepari-un-abundant-quail.md` ·
 | 3 Audit log e storico | ✅ | vedi log |
 | 4 Ciclo di vita e wizard | ✅ | vedi log |
 | 5 Moduli, piani, sottoscrizioni | ✅ | vedi log |
-| 6 Gestione utenti completa | | |
+| 6 Gestione utenti completa | ✅ | vedi log |
 | 7 Elenco clienti avanzato | | |
 | 8 Fatturazione interna | | |
 | 9 Uso e stato dei servizi | | |
@@ -22,7 +22,7 @@ Piano: `C:\Users\ltarq\.claude\plans\voglio-che-prepari-un-abundant-quail.md` ·
 
 ## Test rossi attesi
 
-Nessuno: dopo la fase 5 tutta la suite è verde (accettazione 151/151, unitari Application 94, Vitest 45).
+Nessuno: dopo la fase 6 tutta la suite è verde (accettazione 174/174, unitari Application 106 e Infrastructure 55, Vitest 55).
 
 ## Ambiente di sviluppo autonomo (fuori dal repo, nello scratchpad della sessione)
 
@@ -52,8 +52,15 @@ Per verificare l'interfaccia senza il login reale: provider OIDC locale (`devidp
 19. **Limiti con Keycloak giù**: la sottoscrizione non viene bloccata se non si possono contare gli utenti (warning nel log); il limite viene ricontrollato a ogni nuovo utente (UC6).
 20. **Cambio piano**: i moduli non più inclusi vengono tolti subito (nessun hook di deprovisioning chiamato per ora: `deprovisionUrl` è solo registrato).
 21. **Icone dei moduli**: il manifest indica un nome (`warehouse`, `hr`, `maintenance`…), mappato su icone Font Awesome; nomi sconosciuti → pezzo di puzzle.
+22. **Stato "Sospeso" dell'utente** calcolato: attivo in Keycloak ma tutti i clienti dei suoi profili sono sospesi o cessati. Nessuna sospensione manuale (il mock ha solo "Disattiva").
+23. **Invito in sospeso** = azione richiesta `UPDATE_PASSWORD` impostata alla creazione; contatore inviti e autore negli attributi Keycloak (`invitesSent`, `lastInviteAt`, `createdBy`): vanno dichiarati nel *User profile*.
+24. **Azioni del pannello sempre visibili** (come nel mock), disabilitate quando lo stato non le consente; il backend risponde `409`.
+25. **Filtri e pagine utenti in memoria** sui primi 1000 risultati di Keycloak (shortcut annotato nel codice).
+26. **Ultimo accesso** dagli eventi `LOGIN` di Keycloak, una richiesta per utente della pagina; se gli eventi sono spenti resta "mai" senza errori.
+27. **Import CSV**: virgola o punto e virgola, profili come `Cliente:Profilo` separati da `|`, intestazioni in italiano o inglese; la conferma crea solo le righe valide.
+28. **Scheda Utenti del cliente**: la riga apre l'utente nella vista Utenti (filtrata sul cliente) invece di un secondo pannello.
 
 ## Da far vedere al designer
 
 - Tema scuro, vista mobile (sidebar a scomparsa, tabelle con scorrimento orizzontale).
-- Pagine senza mock: Profili, Impostazioni, 404 Moduli, Piani, Sottoscrizioni, Audit log (e in seguito Fatturazione, Comunicazioni).
+- Pagine senza mock: Profili, Impostazioni, 404 Moduli, Piani, Sottoscrizioni, Audit log, dialog Importa CSV, scheda Utenti del cliente (e in seguito Fatturazione, Comunicazioni).

@@ -165,7 +165,78 @@
     "name": "Name",
     "email": "Email",
     "birthDate": "Birth date",
-    "noProfiles": "No profiles"
+    "noProfiles": "No profiles",
+    "user": "User",
+    "profilesTenant": "Profiles · tenant",
+    "statusLabel": "Status",
+    "lastLogin": "Last login",
+    "never": "never",
+    "status": {
+      "Active": "Active",
+      "Invited": "Invitation sent",
+      "Suspended": "Suspended",
+      "Disabled": "Disabled"
+    },
+    "filters": {
+      "tenant": "Tenant",
+      "profile": "Profile",
+      "status": "Status"
+    },
+    "resultCount_one": "{{count}} result on first name, last name and email",
+    "resultCount_other": "{{count}} results on first name, last name and email",
+    "noTenantUsers": "No user has profiles of this tenant.",
+    "panel": "User detail",
+    "closePanel": "Close the detail",
+    "mfaRequired": "MFA required",
+    "requireMfa": "Require MFA",
+    "actions": {
+      "invite": "Resend invitation",
+      "edit": "Edit",
+      "resetPassword": "Reset password",
+      "disable": "Disable",
+      "enable": "Enable"
+    },
+    "done": {
+      "invite": "Invitation sent again: Keycloak emailed it.",
+      "reset-password": "Keycloak emailed the link to set a new password.",
+      "disable": "User disabled: they can no longer log in.",
+      "enable": "User enabled again."
+    },
+    "groupedByTenant": "grouped by tenant",
+    "addTenantProfile": "Add a profile of another tenant",
+    "save": "Save changes",
+    "details": "Details",
+    "username": "Username",
+    "createdAt": "Created",
+    "by": "by {{name}}",
+    "invite": "Invitation",
+    "invitesSent_one": "sent {{count}} time · last {{last}}",
+    "invitesSent_other": "sent {{count}} times · last {{last}}",
+    "import": {
+      "button": "Import CSV",
+      "title": "Import users from CSV",
+      "hint": "Columns: nome, cognome, email, dataNascita (YYYY-MM-DD), profili (Tenant:Profile separated by |). Check the preview, then confirm.",
+      "choose": "Choose file",
+      "template": "Download the template",
+      "badFile": "The file lacks the required columns or has no rows.",
+      "preview_one": "{{count}} valid row of {{total}}.",
+      "preview_other": "{{count}} valid rows of {{total}}.",
+      "created_one": "{{count}} user created from {{total}} rows.",
+      "created_other": "{{count}} users created from {{total}} rows.",
+      "outcome": "Outcome",
+      "ok": "Valid",
+      "done": "Created",
+      "close": "Close",
+      "confirm_one": "Import {{count}} user",
+      "confirm_other": "Import {{count}} users",
+      "fields": {
+        "firstName": "First name",
+        "lastName": "Last name",
+        "email": "Email",
+        "birthDate": "Birth date",
+        "profiles": "Profiles"
+      }
+    }
   },
   "userForm": {
     "title": "New user",
@@ -247,7 +318,12 @@
         }
       },
       "user": {
-        "created": "created the user"
+        "created": "created the user",
+        "updated": "edited the user",
+        "invited": "resent the invitation to",
+        "passwordReset": "requested a password reset for",
+        "disabled": "disabled the user",
+        "enabled": "enabled the user"
       },
       "subscription": {
         "created": "subscribed a plan for",
@@ -270,7 +346,11 @@
       "certifiedEmail": "PEC",
       "street": "Street",
       "city": "City",
-      "postalCode": "Postal code"
+      "postalCode": "Postal code",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "birthDate": "Birth date",
+      "mfaRequired": "MFA required"
     },
     "details": {
       "profileAdded": "added profile \"{{name}}\"",
@@ -288,7 +368,9 @@
       "reason": "reason: {{reason}}",
       "trial": "on trial",
       "modulesAdded": "modules added: {{names}}",
-      "modulesRemoved": "modules removed: {{names}}"
+      "modulesRemoved": "modules removed: {{names}}",
+      "profilesAdded": "profiles added: {{names}}",
+      "profilesRemoved": "profiles removed: {{names}}"
     },
     "history": "History",
     "historyAll": "Whole history"

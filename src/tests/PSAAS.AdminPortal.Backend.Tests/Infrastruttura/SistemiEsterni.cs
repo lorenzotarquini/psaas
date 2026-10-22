@@ -32,7 +32,9 @@ public sealed class FakeKeycloakUsers : IUserDirectory
             throw new UserEmailConflictException($"User with email {user.Email} exists");
         }
 
-        var created = new DirectoryUser($"kc-user-{++_nextId}", user.FirstName, user.LastName, user.Email, user.BirthDate, user.ProfileIds);
+        var created = new DirectoryUser(
+            $"kc-user-{++_nextId}", user.FirstName, user.LastName, user.Email, user.BirthDate, user.ProfileIds,
+            PasswordPending: true, CreatedAt: user.InvitedAt, CreatedBy: user.CreatedBy, InvitesSent: 1, LastInviteAt: user.InvitedAt);
         Users.Add(created);
         PasswordSetupEmails.Add(user.Email);
         return Task.FromResult(created);
@@ -74,6 +76,61 @@ public sealed class FakeKeycloakUsers : IUserDirectory
 
         return Task.CompletedTask;
     }
+
+
+    /// <summary>Emails asked of Keycloak by UC19: (user id, "invite" or "reset").</summary>
+    public List<(string UserId, string Kind)> ActionEmails { get; } = [];
+
+    public Dictionary<string, DateTimeOffset> LastLogins { get; } = [];
+
+    public Task<DirectoryUser?> GetAsync(string id, CancellationToken cancellationToken = default)
+    {
+        ThrowIfUnavailable();
+        return Task.FromResult(Users.FirstOrDefault(user => user.Id == id));
+    }
+
+    public Task<bool> UpdateAsync(string id, DirectoryUserUpdate update, CancellationToken cancellationToken = default)
+    {
+        ThrowIfUnavailable();
+        var index = Users.FindIndex(user => user.Id == id);
+        if (index < 0) return Task.FromResult(false);
+        Users[index] = Users[index] with
+        {
+            FirstName = update.FirstName,
+            LastName = update.LastName,
+            BirthDate = update.BirthDate,
+            ProfileIds = update.ProfileIds,
+            MfaRequired = update.MfaRequired,
+        };
+        return Task.FromResult(true);
+    }
+
+    public Task SendInviteAsync(string id, DateTimeOffset sentAt, CancellationToken cancellationToken = default)
+    {
+        ThrowIfUnavailable();
+        var index = Users.FindIndex(user => user.Id == id);
+        Users[index] = Users[index] with { InvitesSent = Users[index].InvitesSent + 1, LastInviteAt = sentAt };
+        ActionEmails.Add((id, "invite"));
+        return Task.CompletedTask;
+    }
+
+    public Task SendPasswordResetAsync(string id, CancellationToken cancellationToken = default)
+    {
+        ThrowIfUnavailable();
+        ActionEmails.Add((id, "reset"));
+        return Task.CompletedTask;
+    }
+
+    public Task SetEnabledAsync(string id, bool enabled, CancellationToken cancellationToken = default)
+    {
+        ThrowIfUnavailable();
+        var index = Users.FindIndex(user => user.Id == id);
+        Users[index] = Users[index] with { Enabled = enabled };
+        return Task.CompletedTask;
+    }
+
+    public Task<IReadOnlyDictionary<string, DateTimeOffset>> GetLastLoginsAsync(IReadOnlyCollection<string> userIds, CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyDictionary<string, DateTimeOffset>>(LastLogins.Where(l => userIds.Contains(l.Key)).ToDictionary());
 
     private void ThrowIfUnavailable()
     {

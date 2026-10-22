@@ -67,7 +67,7 @@ public sealed class UC5_ModificareOrganizzazione(PostgresFixture database) : Acc
 
         await ReadAsync<TenantDetail>(await SaveOrganizationAsync(alfa.Id, profiles: [], units: []), HttpStatusCode.OK);
 
-        var mario = Assert.Single(await GetOkAsync<List<UserView>>("/api/users?search=Mario"));
+        var mario = Assert.Single((await GetOkAsync<PageView<UserView>>("/api/users?search=Mario")).Items);
         Assert.Empty(mario.Profiles);
     }
 

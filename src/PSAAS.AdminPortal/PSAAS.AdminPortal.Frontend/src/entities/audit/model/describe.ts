@@ -74,6 +74,28 @@ export function describeAuditEvent(event: AuditEvent, t: TFunction): AuditSenten
           .filter(Boolean)
           .join(' · '),
       }
+    case 'user.updated': {
+      const changes = (d.changes ?? {}) as Record<string, unknown>
+      const parts = Object.entries(changes).flatMap(([field, change]) => {
+        if (field === 'profilesAdded' || field === 'profilesRemoved')
+          return [t(`audit.details.${field}`, { names: list(change).join(', ') })]
+        const { before, after } = change as { before: unknown; after: unknown }
+        return [`${t(`audit.fields.${field}`, { defaultValue: field })}: ${String(before ?? '–')} → ${String(after ?? '–')}`]
+      })
+      return { what: t('audit.actions.user.updated'), detail: parts.join(' · ') }
+    }
+    case 'user.invited':
+    case 'user.password.reset':
+    case 'user.disabled':
+    case 'user.enabled': {
+      const keys: Record<string, string> = {
+        'user.invited': 'invited',
+        'user.password.reset': 'passwordReset',
+        'user.disabled': 'disabled',
+        'user.enabled': 'enabled',
+      }
+      return { what: t(`audit.actions.user.${keys[event.action]}`), detail: String(d.email ?? '') }
+    }
     case 'subscription.changed': {
       const added = list(d.modulesAdded)
       const removed = list(d.modulesRemoved)

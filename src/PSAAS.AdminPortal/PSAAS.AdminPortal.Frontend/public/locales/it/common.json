@@ -165,7 +165,78 @@
     "name": "Nome",
     "email": "Email",
     "birthDate": "Data di nascita",
-    "noProfiles": "Nessun profilo"
+    "noProfiles": "Nessun profilo",
+    "user": "Utente",
+    "profilesTenant": "Profili · cliente",
+    "statusLabel": "Stato",
+    "lastLogin": "Ultimo accesso",
+    "never": "mai",
+    "status": {
+      "Active": "Attivo",
+      "Invited": "Invito inviato",
+      "Suspended": "Sospeso",
+      "Disabled": "Disattivato"
+    },
+    "filters": {
+      "tenant": "Cliente",
+      "profile": "Profilo",
+      "status": "Stato"
+    },
+    "resultCount_one": "{{count}} risultato su nome, cognome ed email",
+    "resultCount_other": "{{count}} risultati su nome, cognome ed email",
+    "noTenantUsers": "Nessun utente ha profili di questo cliente.",
+    "panel": "Dettaglio utente",
+    "closePanel": "Chiudi il dettaglio",
+    "mfaRequired": "MFA richiesta",
+    "requireMfa": "Richiedi MFA",
+    "actions": {
+      "invite": "Reinvia invito",
+      "edit": "Modifica",
+      "resetPassword": "Reset password",
+      "disable": "Disattiva",
+      "enable": "Riattiva"
+    },
+    "done": {
+      "invite": "Invito inviato di nuovo: Keycloak ha mandato l'email.",
+      "reset-password": "Keycloak ha inviato l'email per impostare una nuova password.",
+      "disable": "Utente disattivato: non può più accedere.",
+      "enable": "Utente riattivato."
+    },
+    "groupedByTenant": "raggruppati per cliente",
+    "addTenantProfile": "Aggiungi profilo di un altro cliente",
+    "save": "Salva modifiche",
+    "details": "Dettagli",
+    "username": "Username",
+    "createdAt": "Creato",
+    "by": "da {{name}}",
+    "invite": "Invito",
+    "invitesSent_one": "inviato {{count}} volta · ultimo {{last}}",
+    "invitesSent_other": "inviato {{count}} volte · ultimo {{last}}",
+    "import": {
+      "button": "Importa CSV",
+      "title": "Importa utenti da CSV",
+      "hint": "Colonne: nome, cognome, email, dataNascita (AAAA-MM-GG), profili (Cliente:Profilo separati da |). Prima vedi l'anteprima, poi confermi.",
+      "choose": "Scegli file",
+      "template": "Scarica il modello",
+      "badFile": "Il file non ha le colonne richieste o non contiene righe.",
+      "preview_one": "{{count}} riga valida su {{total}}.",
+      "preview_other": "{{count}} righe valide su {{total}}.",
+      "created_one": "{{count}} utente creato su {{total}} righe.",
+      "created_other": "{{count}} utenti creati su {{total}} righe.",
+      "outcome": "Esito",
+      "ok": "Valida",
+      "done": "Creato",
+      "close": "Chiudi",
+      "confirm_one": "Importa {{count}} utente",
+      "confirm_other": "Importa {{count}} utenti",
+      "fields": {
+        "firstName": "Nome",
+        "lastName": "Cognome",
+        "email": "Email",
+        "birthDate": "Data di nascita",
+        "profiles": "Profili"
+      }
+    }
   },
   "userForm": {
     "title": "Nuovo utente",
@@ -247,7 +318,12 @@
         }
       },
       "user": {
-        "created": "ha creato l'utente"
+        "created": "ha creato l'utente",
+        "updated": "ha modificato l'utente",
+        "invited": "ha reinviato l'invito a",
+        "passwordReset": "ha chiesto il reset della password di",
+        "disabled": "ha disattivato l'utente",
+        "enabled": "ha riattivato l'utente"
       },
       "subscription": {
         "created": "ha sottoscritto un piano per",
@@ -270,7 +346,11 @@
       "certifiedEmail": "PEC",
       "street": "Via",
       "city": "Città",
-      "postalCode": "CAP"
+      "postalCode": "CAP",
+      "firstName": "Nome",
+      "lastName": "Cognome",
+      "birthDate": "Data di nascita",
+      "mfaRequired": "MFA richiesta"
     },
     "details": {
       "profileAdded": "aggiunto il profilo \"{{name}}\"",
@@ -288,7 +368,9 @@
       "reason": "motivo: {{reason}}",
       "trial": "in prova",
       "modulesAdded": "moduli aggiunti: {{names}}",
-      "modulesRemoved": "moduli tolti: {{names}}"
+      "modulesRemoved": "moduli tolti: {{names}}",
+      "profilesAdded": "profili aggiunti: {{names}}",
+      "profilesRemoved": "profili tolti: {{names}}"
     },
     "history": "Storico",
     "historyAll": "Tutto lo storico"

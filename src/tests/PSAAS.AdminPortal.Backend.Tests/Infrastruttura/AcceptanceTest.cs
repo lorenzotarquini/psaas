@@ -89,6 +89,21 @@ public abstract class AcceptanceTest(PostgresFixture database) : IAsyncLifetime
     protected async Task<PageView<TenantSummary>> TenantsAsync(string query = "") =>
         await GetOkAsync<PageView<TenantSummary>>($"/api/tenants{query}");
 
+    // ---- Steps: catalog ----
+
+    protected async Task<ModuleView> GivenModuleAsync(string id, string version = "1.0.0", params string[] requires) =>
+        await ReadAsync<ModuleView>(
+            await Admin.PostAsJsonAsync("/api/modules", new { id, name = id, version, requires, permissions = new[] { $"{id}.read" } }),
+            HttpStatusCode.OK);
+
+    protected async Task<PlanView> GivenPlanAsync(string code, decimal price = 99, int? maxUsers = null, int trialDays = 0, params string[] moduleIds) =>
+        await ReadAsync<PlanView>(
+            await Admin.PostAsJsonAsync("/api/plans", new { code, name = code.ToUpperInvariant(), price, billingPeriod = "Monthly", trialDays, maxUsers, moduleIds }),
+            HttpStatusCode.Created);
+
+    protected Task<HttpResponseMessage> SubscribeAsync(Guid tenantId, Guid planId, bool trial = false) =>
+        Admin.PutAsJsonAsync($"/api/tenants/{tenantId}/subscription", new { planId, trial });
+
     // ---- Steps: HTTP ----
 
     protected async Task<T> GetOkAsync<T>(string url) => await ReadAsync<T>(await Admin.GetAsync(url), HttpStatusCode.OK);

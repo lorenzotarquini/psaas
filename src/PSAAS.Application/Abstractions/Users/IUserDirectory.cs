@@ -23,6 +23,10 @@ public interface IUserDirectory
         IReadOnlyCollection<string> profileIds,
         CancellationToken cancellationToken = default);
 
+    /// <summary>EXP-02: how many distinct users have at least one of the profiles (the users of a tenant).</summary>
+    /// <exception cref="UserDirectoryUnavailableException">The identity provider cannot be reached.</exception>
+    Task<int> CountUsersWithAnyAsync(IReadOnlyCollection<string> profileIds, CancellationToken cancellationToken = default);
+
     /// <summary>UC5-R4: removes the given profiles from every user that has them.</summary>
     /// <exception cref="UserDirectoryUnavailableException">The identity provider cannot be reached.</exception>
     Task RemoveProfilesAsync(IReadOnlyCollection<string> profileIds, CancellationToken cancellationToken = default);

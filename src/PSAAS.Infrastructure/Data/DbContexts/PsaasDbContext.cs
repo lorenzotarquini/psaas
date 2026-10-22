@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using PSAAS.Infrastructure.Audit;
+using PSAAS.Infrastructure.Catalog;
 using PSAAS.Infrastructure.Data.DbModels;
 
 namespace PSAAS.Infrastructure.Data.DbContexts;
@@ -15,6 +16,14 @@ public sealed class PsaasDbContext(DbContextOptions<PsaasDbContext> options) : D
     public DbSet<ProductiveUnitProfileDbModel> ProductiveUnitProfiles => Set<ProductiveUnitProfileDbModel>();
 
     public DbSet<AuditEventDbModel> AuditEvents => Set<AuditEventDbModel>();
+
+    public DbSet<ModuleDbModel> Modules => Set<ModuleDbModel>();
+
+    public DbSet<PlanDbModel> Plans => Set<PlanDbModel>();
+
+    public DbSet<SubscriptionDbModel> Subscriptions => Set<SubscriptionDbModel>();
+
+    public DbSet<TenantModuleDbModel> TenantModules => Set<TenantModuleDbModel>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -124,6 +133,53 @@ public sealed class PsaasDbContext(DbContextOptions<PsaasDbContext> options) : D
             entityBuilder.Property(auditEvent => auditEvent.TargetId).IsRequired();
             entityBuilder.Property(auditEvent => auditEvent.TargetName).IsRequired();
             entityBuilder.Property(auditEvent => auditEvent.Details).HasColumnType("jsonb");
+        });
+
+        // EXP-01/02/03: catalog, plans and the subscription of each tenant.
+        modelBuilder.Entity<ModuleDbModel>(entityBuilder =>
+        {
+            entityBuilder.ToTable("Modules");
+            entityBuilder.HasKey(module => module.Id);
+            entityBuilder.Property(module => module.Name).IsRequired();
+            entityBuilder.Property(module => module.Version).IsRequired();
+            entityBuilder.Property(module => module.Status).IsRequired().HasMaxLength(20);
+            // Core is always there (it is in every plan).
+            entityBuilder.HasData(new ModuleDbModel
+            {
+                Id = "core",
+                Name = "Core",
+                Description = "Base comune della piattaforma",
+                Icon = "cube",
+                Status = "Available",
+                Version = "2.0.3",
+                IsCore = true,
+                UpdatedAt = new DateTimeOffset(2026, 10, 22, 0, 0, 0, TimeSpan.Zero),
+            });
+        });
+
+        modelBuilder.Entity<PlanDbModel>(entityBuilder =>
+        {
+            entityBuilder.ToTable("Plans");
+            entityBuilder.HasKey(plan => plan.Id);
+            entityBuilder.HasIndex(plan => plan.Code).IsUnique();
+            entityBuilder.Property(plan => plan.Price).HasPrecision(10, 2);
+        });
+
+        modelBuilder.Entity<SubscriptionDbModel>(entityBuilder =>
+        {
+            entityBuilder.ToTable("Subscriptions");
+            entityBuilder.HasKey(subscription => subscription.TenantId);
+            entityBuilder.Property(subscription => subscription.Price).HasPrecision(10, 2);
+            entityBuilder.HasIndex(subscription => subscription.PlanId);
+            entityBuilder.HasOne<TenantDbModel>().WithOne().HasForeignKey<SubscriptionDbModel>(s => s.TenantId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<TenantModuleDbModel>(entityBuilder =>
+        {
+            entityBuilder.ToTable("TenantModules");
+            entityBuilder.HasKey(module => new { module.TenantId, module.ModuleId });
+            entityBuilder.HasOne<TenantDbModel>().WithMany().HasForeignKey(m => m.TenantId).OnDelete(DeleteBehavior.Cascade);
+            entityBuilder.HasOne<ModuleDbModel>().WithMany().HasForeignKey(m => m.ModuleId).OnDelete(DeleteBehavior.Restrict);
         });
 
         base.OnModelCreating(modelBuilder);

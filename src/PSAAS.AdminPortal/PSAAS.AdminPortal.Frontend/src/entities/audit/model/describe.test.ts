@@ -50,4 +50,19 @@ describe('describeAuditEvent', () => {
   it('keeps an unknown action readable', () => {
     expect(describeAuditEvent(event('module.installed', null), i18next.t).what).toBe('module.installed')
   })
+
+  // UC17: plan change with the modules it brought and took away.
+  it('summarizes a plan change', () => {
+    const sentence = describeAuditEvent(
+      event('subscription.changed', { plan: 'Pro', previousPlan: 'Base', trial: false, modulesAdded: ['warehouse'], modulesRemoved: [] }),
+      i18next.t,
+    )
+    expect(sentence.detail).toBe('Base → Pro · moduli aggiunti: warehouse')
+  })
+
+  // UC18-S3: a failed provisioning names the module and the error.
+  it('tells a failed provisioning with its error', () => {
+    const sentence = describeAuditEvent(event('module.provisioning.failed', { module: 'Magazzino', version: '1.4.0', error: 'timeout' }), i18next.t)
+    expect(sentence.detail).toBe('Magazzino v1.4.0 · timeout')
+  })
 })

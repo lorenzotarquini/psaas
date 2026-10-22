@@ -108,7 +108,8 @@
     "InvalidFormat": "Invalid format",
     "MaxLengthExceeded": "Text too long",
     "NotUnique": "Value already in use",
-    "InvalidValue": "Invalid value"
+    "InvalidValue": "Invalid value",
+    "LimitExceeded": "Plan limit reached"
   },
   "tenantForm": {
     "createTitle": "New customer",
@@ -247,6 +248,20 @@
       },
       "user": {
         "created": "created the user"
+      },
+      "subscription": {
+        "created": "subscribed a plan for",
+        "changed": "changed the plan of"
+      },
+      "module": {
+        "provisioned": "activated a module for",
+        "provisioningFailed": "provisioning failed for",
+        "registered": "registered the module",
+        "updated": "updated the module"
+      },
+      "plan": {
+        "created": "created the plan",
+        "updated": "updated the plan"
       }
     },
     "fields": {
@@ -270,7 +285,10 @@
       "profiles_other": "{{count}} profiles",
       "units_one": "{{count}} unit",
       "units_other": "{{count}} units",
-      "reason": "reason: {{reason}}"
+      "reason": "reason: {{reason}}",
+      "trial": "on trial",
+      "modulesAdded": "modules added: {{names}}",
+      "modulesRemoved": "modules removed: {{names}}"
     },
     "history": "History",
     "historyAll": "Whole history"
@@ -331,7 +349,6 @@
     "skipAndActivate": "Skip organization and activate",
     "activate": "Activate customer",
     "edit": "Edit",
-    "planPending": "Choosing plan, trial and modules comes with the module catalog. You can go on for now: the customer stays in onboarding until activated.",
     "usersHint": "Keycloak emails each user the link to set the password.",
     "noUsers": "No users: add them now or later.",
     "addUser": "Add user",
@@ -369,8 +386,111 @@
       "empty": "To fill in",
       "addressOk": "{{city}} · {{postalCode}}",
       "waitingCity": "Waiting for the town",
-      "planChosen": "Chosen",
+      "planChosen": "Plan chosen",
       "planStep": "Step 2"
     }
+  },
+  "catalog": {
+    "modulesSubtitle": "Modules installable on the platform, with version, dependencies and permissions",
+    "plansSubtitle": "What is sold: included modules, limits and price",
+    "subscriptionsSubtitle": "The plan of every tenant and the status of its modules",
+    "registerModule": "Register module",
+    "register": "Register",
+    "manifest": "Module manifest (JSON)",
+    "manifestHint": "Paste the manifest published by the module. The same id with a new version updates the module.",
+    "invalidJson": "The text is not valid JSON",
+    "module": "Module",
+    "modules": "Modules",
+    "version": "Version",
+    "status": "Status",
+    "requires": "Requires",
+    "permissions": "Permissions",
+    "permissionCount_one": "{{count}} permission",
+    "permissionCount_other": "{{count}} permissions",
+    "tenants": "Tenants",
+    "tenant": "Tenant",
+    "core": "core",
+    "deprecate": "Deprecate",
+    "restore": "Make available",
+    "moduleStatus": {
+      "Beta": "Beta",
+      "Available": "Available",
+      "Deprecated": "Deprecated"
+    },
+    "provisioning": {
+      "Provisioning": "Provisioning",
+      "Active": "Active",
+      "Failed": "Provisioning failed"
+    },
+    "subscriptionStatus": {
+      "Trial": "Trial",
+      "Active": "Active",
+      "Expired": "Expired",
+      "Cancelled": "Cancelled"
+    },
+    "period": {
+      "Monthly": "monthly",
+      "Yearly": "yearly"
+    },
+    "per": {
+      "Monthly": "month",
+      "Yearly": "year"
+    },
+    "plan": "Plan",
+    "price": "Price",
+    "priceEur": "Price (€)",
+    "trial": "Trial",
+    "trialDays_one": "{{count}} trial day",
+    "trialDays_other": "{{count}} trial days",
+    "trialDaysLabel": "Trial days",
+    "maxUsers": "Max users",
+    "maxProductiveUnits": "Max units",
+    "subscribers": "Tenants",
+    "archived": "Archived",
+    "newPlan": "New plan",
+    "editPlan": "Edit {{name}}",
+    "savePlan": "Save plan",
+    "code": "Code",
+    "name": "Name",
+    "billingPeriod": "Billing period",
+    "sellable": "For sale",
+    "includedModules": "Included modules",
+    "noPlans": "No plans yet: create one from the Plans page.",
+    "noSubscriptions": "No tenant has a subscription yet.",
+    "unlimited": "unlimited",
+    "limits": "{{users}} · {{units}}",
+    "moduleCount_one": "{{count}} module included",
+    "moduleCount_other": "{{count}} modules included",
+    "startTrial_one": "Start with a {{count}}-day trial",
+    "startTrial_other": "Start with a {{count}}-day trial",
+    "autoRenew": "Automatic renewal",
+    "addOns": "Add-on modules",
+    "addOn": "add-on",
+    "subscriptionErrors": {
+      "LimitExceeded": "The tenant has more users or productive units than the plan allows.",
+      "InvalidValue": "Plan not available.",
+      "Required": "Choose a plan."
+    },
+    "activeModules": "Active modules",
+    "manage": "Manage",
+    "noSubscription": "No plan subscribed.",
+    "trialUntil": "On trial until {{date}}",
+    "renewsOn": "Renews on {{date}}",
+    "endsOn": "Ends on {{date}}",
+    "since": "since {{date}}",
+    "attempts": "Attempts",
+    "retry": "Retry",
+    "changePlan": "Change plan",
+    "choosePlan": "Choose the plan",
+    "saveSubscription": "Save subscription",
+    "renewal": "Renewal",
+    "failedCount_one": "{{count}} failed",
+    "failedCount_other": "{{count}} failed",
+    "users_one": "{{count}} user",
+    "users_other": "{{count}} users",
+    "usersUnlimited": "unlimited users",
+    "units_one": "{{count}} unit",
+    "units_other": "{{count}} units",
+    "unitsUnlimited": "unlimited units"
   }
 }

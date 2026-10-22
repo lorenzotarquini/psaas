@@ -1,7 +1,9 @@
 using System.Globalization;
 using NLog;
 using PSAAS.Application.Abstractions.Audit;
+using PSAAS.Application.Abstractions.Catalog;
 using PSAAS.Application.Abstractions.Profiles;
+using PSAAS.Application.Abstractions.Tenants;
 using PSAAS.Application.Abstractions.Users;
 using PSAAS.Application.Contracts.Audit;
 using PSAAS.Application.Contracts.Tenants;
@@ -14,7 +16,12 @@ namespace PSAAS.Application.Services.Users;
 /// UC6: creates a user in the identity provider, which emails them to set the password.
 /// Nothing is created unless every value is valid; errors are reported per field.
 /// </summary>
-public sealed class UserCreateService(IProfileReadRepository profiles, IUserDirectory directory, IAuditLog audit)
+public sealed class UserCreateService(
+    IProfileReadRepository profiles,
+    IUserDirectory directory,
+    IAuditLog audit,
+    ISubscriptionRepository subscriptions,
+    ITenantReadRepository tenants)
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -41,6 +48,11 @@ public sealed class UserCreateService(IProfileReadRepository profiles, IUserDire
             {
                 errors[$"profileIds[{i}]"] = TenantFieldValidationErrorCodes.InvalidValue;
             }
+        }
+
+        if (errors.Count == 0)
+        {
+            await CheckUserLimitsAsync(profileIds, existingProfiles, errors, cancellationToken);
         }
 
         if (errors.Count > 0)
@@ -93,6 +105,27 @@ public sealed class UserCreateService(IProfileReadRepository profiles, IUserDire
                     tenant.Key,
                     new { email = user.Email, tenant = tenant.First().TenantCompanyName, profiles = tenant.Select(p => p.Name).ToArray() }),
                 cancellationToken);
+        }
+    }
+
+    // EXP-02: a tenant whose plan allows N users cannot get the N+1th; reported on its first chosen profile.
+    private async Task CheckUserLimitsAsync(
+        string[] profileIds,
+        IReadOnlyDictionary<string, UserProfileReadModel> existingProfiles,
+        Dictionary<string, string> errors,
+        CancellationToken cancellationToken)
+    {
+        foreach (var tenantId in profileIds.Select(id => existingProfiles[id].TenantId).Distinct())
+        {
+            if (!Guid.TryParse(tenantId, out var id)) continue;
+            var maxUsers = (await subscriptions.GetAsync(id, cancellationToken))?.MaxUsers;
+            if (maxUsers is null) continue;
+            var tenantProfiles = (await tenants.GetProfilesAndProductiveUnitsAsync(tenantId, cancellationToken)).Profiles.Select(p => p.Id).ToArray();
+            if (await directory.CountUsersWithAnyAsync(tenantProfiles, cancellationToken) >= maxUsers)
+            {
+                var first = Array.FindIndex(profileIds, id => existingProfiles[id].TenantId == tenantId);
+                errors[$"profileIds[{first}]"] = TenantFieldValidationErrorCodes.LimitExceeded;
+            }
         }
     }
 

@@ -61,3 +61,16 @@ public sealed record AuditEventView(
     System.Text.Json.JsonElement? Details);
 
 public sealed record LifecycleView(string Status, string? Reason, DateTimeOffset ChangedAt, DateTimeOffset CreatedAt);
+
+public sealed record ModuleView(string Id, string Name, string Status, string Version, bool IsCore, List<string> Requires, List<string> Permissions, int TenantCount);
+
+public sealed record PlanView(Guid Id, string Code, string Name, decimal Price, string BillingPeriod, int TrialDays, int? MaxUsers, List<string> ModuleIds, bool Active);
+
+public sealed record SubscriptionView(
+    Guid TenantId, Guid PlanId, string PlanName, string Status, decimal Price, int? MaxUsers,
+    DateTimeOffset StartsAt, DateTimeOffset? TrialEndsAt, DateTimeOffset RenewsAt, List<TenantModuleView> Modules)
+{
+    public TenantModuleView Module(string id) => Modules.Single(module => module.ModuleId == id);
+}
+
+public sealed record TenantModuleView(string ModuleId, string Status, int Attempts, string? LastError);

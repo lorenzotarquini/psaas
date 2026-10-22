@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useParams, useSearchParams } from 'react-router'
+import { useTenantSubscription } from '@/entities/catalog'
 import { TenantStatusBadge, useTenant, type TenantDetail } from '@/entities/tenant'
 import { ApiError } from '@/shared/api'
 import { useBreadcrumb } from '@/shared/lib/breadcrumb'
@@ -11,13 +12,15 @@ import { onboardingPath, routes, tenantPath, type TenantTab } from '@/shared/rou
 import { ErrorAlert } from '@/shared/ui/error-alert'
 import { Tabs } from '@/shared/ui/tabs'
 import { HistoryCard } from './HistoryCard'
+import { ModulesCard } from './ModulesCard'
 import { OrganizationCard } from './OrganizationCard'
 import { OrganizationTab } from './OrganizationTab'
 import { RegistryCard } from './RegistryCard'
 import { RegistryTab } from './RegistryTab'
 import { StatusActions } from './StatusActions'
+import { SubscriptionTab } from './SubscriptionTab'
 
-const tabs: TenantTab[] = ['overview', 'registry', 'organization', 'history']
+const tabs: TenantTab[] = ['overview', 'registry', 'organization', 'subscription', 'history']
 
 // UC2 (mock 1d): everything about a tenant, one tab per area; registry (UC4) and organization (UC5) edit in place.
 export function TenantDetailPage() {
@@ -44,12 +47,14 @@ function TenantView({ tenant }: { tenant: TenantDetail }) {
   const [searchParams] = useSearchParams()
   const requested = searchParams.get('tab') as TenantTab | null
   const active = requested && tabs.includes(requested) ? requested : 'overview'
+  const { data: subscription } = useTenantSubscription(tenant.id)
 
   const content: Record<string, ReactNode> = {
     overview: <OrganizationCard tenant={tenant} />,
     // key: a saved tenant replaces the form defaults.
     registry: <RegistryTab key={tenant.completeVatNumber + tenant.companyName} tenant={tenant} />,
     organization: <OrganizationTab tenant={tenant} />,
+    subscription: <SubscriptionTab tenantId={tenant.id} subscription={subscription ?? null} />,
     history: <HistoryCard tenantId={tenant.id} full />,
   }
 
@@ -65,6 +70,11 @@ function TenantView({ tenant }: { tenant: TenantDetail }) {
               <h1 className="flex flex-wrap items-center gap-2 text-[22px] font-semibold tracking-[-0.01em]">
                 {tenant.companyName}
                 <TenantStatusBadge status={tenant.lifecycle.status} />
+                {subscription && (
+                  <span className="badge badge-ghost badge-sm font-medium">
+                    {subscription.planName} · {t(`catalog.period.${subscription.billingPeriod}`)}
+                  </span>
+                )}
               </h1>
               <p className="mt-0.5 flex flex-wrap gap-x-3 text-base-content/60">
                 <span className="data">{tenant.completeVatNumber}</span>
@@ -110,6 +120,7 @@ function TenantView({ tenant }: { tenant: TenantDetail }) {
         <div className="min-w-0">{content[active]}</div>
         <aside className="flex flex-col gap-4">
           <RegistryCard tenant={tenant} />
+          {active !== 'subscription' && <ModulesCard tenantId={tenant.id} subscription={subscription} />}
           {active !== 'history' && <HistoryCard tenantId={tenant.id} />}
         </aside>
       </div>

@@ -12,7 +12,11 @@ public sealed class UserCreateServiceTests
     private readonly FakeAuditLog _audit = new();
     private readonly FakeUserDirectory _directory = new();
 
-    private UserCreateService Service => new(_profiles, _directory, _audit);
+    private readonly FakeSubscriptionRepository _subscriptions = new();
+
+    private readonly FakeTenantReadRepository _tenants = new();
+
+    private UserCreateService Service => new(_profiles, _directory, _audit, _subscriptions, _tenants);
 
     private static UserCreateRequest Valid(params string[] profileIds) =>
         new(" Mario ", " Rossi ", " Mario.Rossi@Example.com ", "1980-05-17", profileIds);
@@ -108,5 +112,22 @@ public sealed class UserCreateServiceTests
 
         Assert.Equal(["t1", "t2"], _audit.Records.Select(r => r.TenantId).Order());
         Assert.All(_audit.Records, r => Assert.Equal(("user.created", "Mario Rossi"), (r.Action, r.TargetName)));
+    }
+
+    [Fact]
+    public async Task UC17_S6_TenantAtItsUserLimit_IsLimitExceededOnItsProfile()
+    {
+        var tenantId = Guid.NewGuid();
+        _profiles.Profiles.Add(new("p1", "Operatore", tenantId.ToString(), "Alfa Srl"));
+        _tenants.Structure = new([new("p1", "Operatore", null)], []);
+        _directory.Users.Add(new("u1", "Anna", "Bianchi", "anna@example.com", null, ["p1"]));
+        _subscriptions.Subscriptions[tenantId] = new(
+            tenantId, "Alfa Srl", Guid.NewGuid(), "Base", "Active", 10, "Monthly", 1, null,
+            DateTimeOffset.UtcNow, null, DateTimeOffset.UtcNow, true, [], []);
+
+        var result = await Service.CreateAsync(Valid("p1"));
+
+        Assert.Equal("LimitExceeded", result.Errors["profileIds[0]"]);
+        Assert.Null(_directory.Created);
     }
 }

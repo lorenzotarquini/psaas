@@ -45,3 +45,8 @@ Ogni scenario di accettazione (`UCn-Sm`) scende negli strati interni: qui si ved
 | UC13-S1, S3, S4 | Transizioni consentite, motivo obbligatorio, data di creazione invariata | `TenantLifecycleTests.UC13_*`, `TenantLifecycleServiceTests.UC13_*` |
 | UC14-S3, S4 | Solo una bozza si elimina | `TenantLifecycleServiceTests.UC14_*` |
 | UC14-S5 | Codice SDI facoltativo, 6–7 caratteri | `TenantCreateValidatorTests.UC14_S5_*` |
+| UC15-S2, S3, S5 | Manifest: formato di id, versione e URL, dipendenza da se stesso, core non deprecabile | `CatalogServiceTests.UC15_*` |
+| UC16-S1…S3 | Piani: core sempre incluso, codice unico tranne per se stesso, valori non validi per campo | `CatalogServiceTests.UC16_*` |
+| UC17-S1…S3 | Sottoscrizione: dipendenze transitive, prova solo la prima volta, limite utenti, piano e add-on inesistenti | `SubscriptionServiceTests.UC17_*`, `SubscriptionServiceTests.WithDependencies_*` |
+| UC17-S6 | Nuovo utente oltre il limite del piano | `UserCreateServiceTests.UC17_S6_*` |
+| UC18-S1, S2 | Hook fallito, riprova del job, riprova di un modulo già attivo | `SubscriptionServiceTests.UC18_*` |

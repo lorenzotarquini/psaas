@@ -74,6 +74,35 @@ export function describeAuditEvent(event: AuditEvent, t: TFunction): AuditSenten
           .filter(Boolean)
           .join(' · '),
       }
+    case 'subscription.changed': {
+      const added = list(d.modulesAdded)
+      const removed = list(d.modulesRemoved)
+      return {
+        what: t(d.previousPlan ? 'audit.actions.subscription.changed' : 'audit.actions.subscription.created'),
+        detail: [
+          d.previousPlan ? `${String(d.previousPlan)} → ${String(d.plan)}` : String(d.plan) + (d.trial ? ` · ${t('audit.details.trial')}` : ''),
+          ...(added.length ? [t('audit.details.modulesAdded', { names: added.join(', ') })] : []),
+          ...(removed.length ? [t('audit.details.modulesRemoved', { names: removed.join(', ') })] : []),
+        ].join(' · '),
+      }
+    }
+    case 'module.provisioned':
+      return { what: t('audit.actions.module.provisioned'), detail: `${String(d.module)} v${String(d.version)}` }
+    case 'module.provisioning.failed':
+      return { what: t('audit.actions.module.provisioningFailed'), detail: `${String(d.module)} v${String(d.version)} · ${String(d.error ?? '')}` }
+    case 'module.registered':
+      return { what: t('audit.actions.module.registered'), detail: `v${String(d.version)}` }
+    case 'module.updated':
+      return {
+        what: t('audit.actions.module.updated'),
+        detail: d.status ? t(`catalog.moduleStatus.${String(d.status)}`) : `v${String(d.version)}`,
+      }
+    case 'plan.created':
+    case 'plan.updated':
+      return {
+        what: t(event.action === 'plan.created' ? 'audit.actions.plan.created' : 'audit.actions.plan.updated'),
+        detail: `${String(d.price)} € · ${t(`catalog.period.${String(d.billingPeriod)}`)}`,
+      }
     default:
       return { what: event.action, detail: '' }
   }

@@ -15,7 +15,7 @@ public sealed class TenantLifecycleServiceTests
     private readonly FakeTenantWriteRepository _writer = new();
     private readonly FakeAuditLog _audit = new();
 
-    private TenantLifecycleService Service => new(_reader, _writer, _audit, TimeProvider.System);
+    private TenantLifecycleService Service => new(_reader, _writer, _audit, TimeProvider.System, new FakeSubscriptionRepository());
 
     [Fact]
     public async Task UC13_S1_SuspendsWithTheReasonAndAudits()

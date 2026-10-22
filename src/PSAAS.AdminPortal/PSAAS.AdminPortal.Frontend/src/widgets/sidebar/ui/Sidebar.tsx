@@ -15,6 +15,7 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useTranslation } from 'react-i18next'
 import { NavLink } from 'react-router'
+import { useModules } from '@/entities/catalog'
 import { keycloak } from '@/shared/auth'
 import { routes } from '@/shared/routes'
 
@@ -57,6 +58,8 @@ const groups: { key: string; items: NavItem[] }[] = [
 /** Ink sidebar: it stays dark in both themes to set the operator console apart from the public platform. */
 export function Sidebar({ badges = {} }: { badges?: Partial<Record<string, number>> }) {
   const { t } = useTranslation()
+  // Footer of mock 1b: the platform version is the version of the core module.
+  const core = useModules().data?.find((module) => module.isCore)
 
   return (
     <nav className="flex min-h-full w-[228px] flex-col gap-5 bg-neutral px-2.5 py-3.5 text-neutral-content">
@@ -91,7 +94,7 @@ export function Sidebar({ badges = {} }: { badges?: Partial<Record<string, numbe
         </div>
       ))}
       <div className="mt-auto flex justify-between border-t border-white/10 px-2.5 pt-2.5 font-mono text-[11px] text-neutral-content/55">
-        <span>v{__APP_VERSION__}</span>
+        <span title={`console v${__APP_VERSION__}`}>{core ? `core ${core.version}` : `v${__APP_VERSION__}`}</span>
         <span>realm {keycloak.realm}</span>
       </div>
     </nav>

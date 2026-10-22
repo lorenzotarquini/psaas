@@ -108,7 +108,8 @@
     "InvalidFormat": "Formato non valido",
     "MaxLengthExceeded": "Testo troppo lungo",
     "NotUnique": "Valore già in uso",
-    "InvalidValue": "Valore non valido"
+    "InvalidValue": "Valore non valido",
+    "LimitExceeded": "Limite del piano raggiunto"
   },
   "tenantForm": {
     "createTitle": "Nuovo cliente",
@@ -247,6 +248,20 @@
       },
       "user": {
         "created": "ha creato l'utente"
+      },
+      "subscription": {
+        "created": "ha sottoscritto un piano per",
+        "changed": "ha cambiato il piano di"
+      },
+      "module": {
+        "provisioned": "ha attivato un modulo per",
+        "provisioningFailed": "provisioning fallito per",
+        "registered": "ha registrato il modulo",
+        "updated": "ha aggiornato il modulo"
+      },
+      "plan": {
+        "created": "ha creato il piano",
+        "updated": "ha modificato il piano"
       }
     },
     "fields": {
@@ -270,7 +285,10 @@
       "profiles_other": "{{count}} profili",
       "units_one": "{{count}} unità",
       "units_other": "{{count}} unità",
-      "reason": "motivo: {{reason}}"
+      "reason": "motivo: {{reason}}",
+      "trial": "in prova",
+      "modulesAdded": "moduli aggiunti: {{names}}",
+      "modulesRemoved": "moduli tolti: {{names}}"
     },
     "history": "Storico",
     "historyAll": "Tutto lo storico"
@@ -331,7 +349,6 @@
     "skipAndActivate": "Salta organizzazione e attiva",
     "activate": "Attiva cliente",
     "edit": "Modifica",
-    "planPending": "La scelta di piano, prova e moduli si attiva con il catalogo dei moduli. Per ora puoi proseguire: il cliente resta in onboarding fino all'attivazione.",
     "usersHint": "Ogni utente riceve da Keycloak l'email per impostare la password.",
     "noUsers": "Nessun utente: puoi aggiungerne ora o più tardi.",
     "addUser": "Aggiungi utente",
@@ -369,8 +386,111 @@
       "empty": "Da compilare",
       "addressOk": "{{city}} · {{postalCode}}",
       "waitingCity": "In attesa del comune",
-      "planChosen": "Scelto",
+      "planChosen": "Piano scelto",
       "planStep": "Passo 2"
     }
+  },
+  "catalog": {
+    "modulesSubtitle": "Moduli installabili sulla piattaforma, con versione, dipendenze e permessi",
+    "plansSubtitle": "Pacchetti in vendita: moduli inclusi, limiti e prezzo",
+    "subscriptionsSubtitle": "Il piano di ogni cliente e lo stato dei suoi moduli",
+    "registerModule": "Registra modulo",
+    "register": "Registra",
+    "manifest": "Manifest del modulo (JSON)",
+    "manifestHint": "Incolla il manifest pubblicato dal modulo. Lo stesso id con una versione nuova aggiorna il modulo.",
+    "invalidJson": "Il testo non è un JSON valido",
+    "module": "Modulo",
+    "modules": "Moduli",
+    "version": "Versione",
+    "status": "Stato",
+    "requires": "Richiede",
+    "permissions": "Permessi",
+    "permissionCount_one": "{{count}} permesso",
+    "permissionCount_other": "{{count}} permessi",
+    "tenants": "Clienti",
+    "tenant": "Cliente",
+    "core": "core",
+    "deprecate": "Depreca",
+    "restore": "Rendi disponibile",
+    "moduleStatus": {
+      "Beta": "Beta",
+      "Available": "Disponibile",
+      "Deprecated": "Deprecato"
+    },
+    "provisioning": {
+      "Provisioning": "In provisioning",
+      "Active": "Attivo",
+      "Failed": "Provisioning fallito"
+    },
+    "subscriptionStatus": {
+      "Trial": "Prova",
+      "Active": "Attiva",
+      "Expired": "Scaduta",
+      "Cancelled": "Annullata"
+    },
+    "period": {
+      "Monthly": "mensile",
+      "Yearly": "annuale"
+    },
+    "per": {
+      "Monthly": "mese",
+      "Yearly": "anno"
+    },
+    "plan": "Piano",
+    "price": "Prezzo",
+    "priceEur": "Prezzo (€)",
+    "trial": "Prova",
+    "trialDays_one": "{{count}} giorno di prova",
+    "trialDays_other": "{{count}} giorni di prova",
+    "trialDaysLabel": "Giorni di prova",
+    "maxUsers": "Utenti max",
+    "maxProductiveUnits": "Unità max",
+    "subscribers": "Clienti",
+    "archived": "Archiviato",
+    "newPlan": "Nuovo piano",
+    "editPlan": "Modifica {{name}}",
+    "savePlan": "Salva piano",
+    "code": "Codice",
+    "name": "Nome",
+    "billingPeriod": "Periodicità",
+    "sellable": "In vendita",
+    "includedModules": "Moduli inclusi",
+    "noPlans": "Nessun piano: creane uno dalla pagina Piani.",
+    "noSubscriptions": "Nessun cliente ha ancora una sottoscrizione.",
+    "unlimited": "illimitati",
+    "limits": "{{users}} · {{units}}",
+    "moduleCount_one": "{{count}} modulo incluso",
+    "moduleCount_other": "{{count}} moduli inclusi",
+    "startTrial_one": "Inizia con {{count}} giorno di prova",
+    "startTrial_other": "Inizia con {{count}} giorni di prova",
+    "autoRenew": "Rinnovo automatico",
+    "addOns": "Moduli aggiuntivi",
+    "addOn": "add-on",
+    "subscriptionErrors": {
+      "LimitExceeded": "Il cliente ha più utenti o unità produttive di quanti il piano ne ammetta.",
+      "InvalidValue": "Piano non disponibile.",
+      "Required": "Scegli un piano."
+    },
+    "activeModules": "Moduli attivi",
+    "manage": "Gestisci",
+    "noSubscription": "Nessun piano sottoscritto.",
+    "trialUntil": "In prova fino al {{date}}",
+    "renewsOn": "Si rinnova il {{date}}",
+    "endsOn": "Scade il {{date}}",
+    "since": "dal {{date}}",
+    "attempts": "Tentativi",
+    "retry": "Riprova",
+    "changePlan": "Cambia piano",
+    "choosePlan": "Scegli il piano",
+    "saveSubscription": "Salva abbonamento",
+    "renewal": "Rinnovo",
+    "failedCount_one": "{{count}} fallito",
+    "failedCount_other": "{{count}} falliti",
+    "users_one": "{{count}} utente",
+    "users_other": "{{count}} utenti",
+    "usersUnlimited": "utenti illimitati",
+    "units_one": "{{count}} unità",
+    "units_other": "{{count}} unità",
+    "unitsUnlimited": "unità illimitate"
   }
 }

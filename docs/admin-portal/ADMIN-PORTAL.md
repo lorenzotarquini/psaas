@@ -70,7 +70,11 @@ Stato rilevato dal codice e dalla suite di test di accettazione (aggiornato a og
 | [UC11](../use-cases/UC11-verificare-campo-cliente.md) | Verificare un campo univoco | Stesse regole e codici del salvataggio, campo per campo; indica il cliente che usa già il valore | `GET /api/tenants/field-validation` | Controllo all'uscita dal campo con "Disponibile" o link al cliente in conflitto | ✅ |
 | [UC12](../use-cases/UC12-audit-log.md) | Audit log e storico (EXP-10) | Chi, cosa, quando, su quale cliente; prima/dopo per l'anagrafica; aggiunte e rimozioni per l'organizzazione; filtri e pagine | `GET /api/audit` | Pagina Audit log con filtri nell'URL; scheda Storico e card Storico nella scheda cliente | ✅ |
 | [UC13](../use-cases/UC13-stato-cliente.md) | Stato del cliente (EXP-04) | Onboarding, Trial, Attivo, Sospeso, In disdetta, Cessato; transizioni consentite; motivo per sospensione, disdetta, cessazione | `POST /api/tenants/{id}/status` | Badge di stato, codice `tn_…`, "Cliente dal" e menu "…" con dialog del motivo nella scheda | ✅ |
-| [UC14](../use-cases/UC14-onboarding-cliente.md) | Onboarding guidato (EXP-04, mock 1e) | Bozza salvata al primo passo, ripresa e annullamento; codice SDI e referente | `POST /api/tenants` (`draft`), `DELETE /api/tenants/{id}` | Wizard a 5 passi con pannello Controlli, combobox comuni con CAP dal comune, "Bozza salvata alle…" | ✅ (passo Piano completato con la fase 5) |
+| [UC14](../use-cases/UC14-onboarding-cliente.md) | Onboarding guidato (EXP-04, mock 1e) | Bozza salvata al primo passo, ripresa e annullamento; codice SDI e referente | `POST /api/tenants` (`draft`), `DELETE /api/tenants/{id}` | Wizard a 5 passi con pannello Controlli, combobox comuni con CAP dal comune, "Bozza salvata alle…"; passo 2 con scelta di piano, prova e add-on | ✅ |
+| [UC15](../use-cases/UC15-catalogo-moduli.md) | Catalogo dei moduli (EXP-01) | Core sempre presente; registrazione da manifest JSON con versione semantica, dipendenze e permessi; nuova versione = stesso id; deprecazione | `GET/POST /api/modules`, `PUT /api/modules/{id}/status` | Pagina Moduli con manifest da incollare, stati e numero di clienti | ✅ |
+| [UC16](../use-cases/UC16-piani.md) | Piani commerciali (EXP-02) | Codice unico, prezzo e periodicità, prova 0–90 giorni, limiti di utenti e unità, moduli inclusi | `GET/POST/PUT /api/plans` | Pagina Piani con form di creazione e modifica | ✅ |
+| [UC17](../use-cases/UC17-sottoscrizione.md) | Sottoscrizione del cliente (EXP-03) | Piano con prova e add-on; moduli con dipendenze; limiti del piano anche per i nuovi utenti (UC6); prezzo bloccato | `GET/PUT /api/tenants/{id}/subscription`, `GET /api/subscriptions` | Scheda "Abbonamento e moduli", badge del piano nell'intestazione, pagina Sottoscrizioni, passo 2 del wizard | ✅ |
+| [UC18](../use-cases/UC18-provisioning.md) | Provisioning dei moduli (EXP-03) | Hook del manifest; stato per modulo con errore e tentativi; riprova manuale e automatica (3 tentativi) | `POST /api/tenants/{id}/modules/{moduleId}/retry`, job `ProvisioningRetryJob` | Card "Moduli attivi" (mock 1d), pulsante Riprova, conteggio dei falliti in Sottoscrizioni | ✅ |
 | GEN | Sicurezza | Ogni operazione richiede autenticazione e ruolo `Administrator`; `/health` anonimo | Policy globale sui controller | Login obbligatorio, logout | ✅ |
 
 Funzionalità trasversali già presenti:
@@ -343,8 +347,9 @@ Oggi esiste solo `Administrator`.
 
 | Epica | Use case derivati | Stato |
 |---|---|---|
-| EXP-01 | – | proposta |
+| EXP-01 | UC15 | ✅ implementata (senza marketplace) |
 | EXP-04 | UC13, UC14 | ✅ implementata |
 | EXP-10 | UC12 | ✅ implementata |
-| EXP-02 | – | proposta |
+| EXP-02 | UC16, UC17-S3/S6 | ✅ implementata (senza versioni dei piani: il prezzo è copiato nella sottoscrizione) |
+| EXP-03 | UC17, UC18 | ✅ implementata |
 | … | | |

@@ -43,6 +43,10 @@ L'**Admin Portal** è il pannello di controllo del gestore della piattaforma: se
 | [UC12](UC12-audit-log.md) | Consultare l'audit log e lo storico di un cliente (EXP-10) | in ambito |
 | [UC13](UC13-stato-cliente.md) | Gestire lo stato di un cliente (EXP-04) | in ambito |
 | [UC14](UC14-onboarding-cliente.md) | Attivare un cliente con l'onboarding guidato (EXP-04) | in ambito |
+| [UC15](UC15-catalogo-moduli.md) | Gestire il catalogo dei moduli (EXP-01) | in ambito |
+| [UC16](UC16-piani.md) | Gestire i piani commerciali (EXP-02) | in ambito |
+| [UC17](UC17-sottoscrizione.md) | Gestire la sottoscrizione di un cliente (EXP-03) | in ambito |
+| [UC18](UC18-provisioning.md) | Seguire il provisioning dei moduli (EXP-03) | in ambito |
 
 Contratto HTTP: [API.md](API.md) (collection Postman: [PSAAS.AdminPortal.postman_collection.json](../postman/PSAAS.AdminPortal.postman_collection.json)). Test unitari derivati dagli scenari: [TEST-UNITARI.md](TEST-UNITARI.md).
 

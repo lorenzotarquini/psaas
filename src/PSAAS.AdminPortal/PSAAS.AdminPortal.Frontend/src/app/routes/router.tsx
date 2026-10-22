@@ -1,9 +1,12 @@
 import { createBrowserRouter } from 'react-router'
 import { AuditPage } from '@/pages/audit'
 import { HomePage } from '@/pages/home'
+import { ModulesPage } from '@/pages/modules'
 import { NotFoundPage } from '@/pages/not-found'
+import { PlansPage } from '@/pages/plans'
 import { ProfilesPage } from '@/pages/profiles'
 import { SettingsPage } from '@/pages/settings'
+import { SubscriptionsPage } from '@/pages/subscriptions'
 import { TenantDetailPage } from '@/pages/tenant-detail'
 import { OnboardingPage } from '@/pages/tenant-onboarding'
 import { TenantsListPage } from '@/pages/tenants-list'
@@ -26,6 +29,9 @@ export const createAppRouter = () =>
         { path: routes.users, Component: UsersPage },
         { path: routes.userNew, Component: UserCreatePage },
         { path: routes.profiles, Component: ProfilesPage },
+        { path: routes.modules, Component: ModulesPage },
+        { path: routes.plans, Component: PlansPage },
+        { path: routes.subscriptions, Component: SubscriptionsPage },
         { path: routes.audit, Component: AuditPage },
         { path: routes.settings, Component: SettingsPage },
         { path: '*', Component: NotFoundPage },

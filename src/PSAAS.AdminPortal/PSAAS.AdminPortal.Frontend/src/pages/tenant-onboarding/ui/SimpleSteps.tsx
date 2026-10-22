@@ -1,9 +1,8 @@
-import { faCircleInfo } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMemo, type ReactNode } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
+import { useTenantSubscription } from '@/entities/catalog'
 import { useUpdateTenantOrganization, type TenantDetail } from '@/entities/tenant'
 import {
   countChanges,
@@ -12,6 +11,7 @@ import {
   organizationSchema,
   toOrganizationRequest,
 } from '@/features/organization-editor'
+import { SubscriptionEditor } from '@/features/subscription-editor'
 import { submitWithServerErrors } from '@/shared/lib/form'
 import { ErrorAlert } from '@/shared/ui/error-alert'
 import { StepFooter } from './StepFooter'
@@ -35,18 +35,18 @@ export function StepLayout({ title, hint, children }: { title: string; hint: str
   )
 }
 
-// UC14 step 2: plans and modules arrive with the catalog (EXP-02/03); until then the step only explains it.
+// UC14 step 2 = UC17 on the draft: plan, trial and add-ons; no plan chosen moves on and leaves the check grey.
 export function PlanStep({ draft, onNext, onCancel, nextLabel }: StepProps) {
   const { t } = useTranslation()
+  const { data: subscription, isPending } = useTenantSubscription(draft.id)
   return (
     <StepLayout title={t('onboarding.steps.plan.title')} hint={t('onboarding.steps.plan.hint')}>
-      <form id="onboarding-plan" onSubmit={(e) => (e.preventDefault(), onNext(draft))} className="contents">
-        <div className="panel flex gap-3 px-5 py-4 text-base-content/70">
-          <FontAwesomeIcon icon={faCircleInfo} className="mt-0.5 text-info" />
-          <p>{t('onboarding.planPending')}</p>
-        </div>
-        <StepFooter formId="onboarding-plan" onCancel={onCancel} cancelLabel={t('onboarding.cancel')} busy={false} primaryLabel={nextLabel} />
-      </form>
+      {isPending ? (
+        <span className="loading loading-spinner" aria-label={t('loading')} />
+      ) : (
+        <SubscriptionEditor tenantId={draft.id} current={subscription ?? null} formId="onboarding-plan" onSaved={() => onNext(draft)} />
+      )}
+      <StepFooter formId="onboarding-plan" onCancel={onCancel} cancelLabel={t('onboarding.cancel')} busy={false} primaryLabel={nextLabel} />
     </StepLayout>
   )
 }

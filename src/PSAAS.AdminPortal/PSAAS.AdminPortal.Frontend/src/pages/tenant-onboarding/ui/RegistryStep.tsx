@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { FormProvider, useForm, useWatch } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
+import { useTenantSubscription } from '@/entities/catalog'
 import {
   useChangeTenantStatus,
   useCreateTenant,
@@ -47,6 +48,7 @@ export function RegistryStep({ draft, onSaved, onNext, onActivated, onCancel }: 
   const activate = useChangeTenantStatus()
   const values = useWatch({ control: form.control })
   const errors = form.formState.errors
+  const { data: subscription } = useTenantSubscription(draft?.id)
 
   const checks = buildChecks({
     values: {
@@ -62,7 +64,7 @@ export function RegistryStep({ draft, onSaved, onNext, onActivated, onCancel }: 
         .map((field) => [field, errors[field]!.message!]),
     ),
     unique: (field) => check.statusOf(field, values[field] ?? ''),
-    planChosen: false,
+    planChosen: Boolean(subscription),
   })
 
   // Creates or updates the draft; returns it, or undefined when the server rejected some field.

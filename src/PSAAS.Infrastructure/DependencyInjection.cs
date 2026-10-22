@@ -2,10 +2,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PSAAS.Application.Abstractions.Audit;
+using PSAAS.Application.Abstractions.Catalog;
 using PSAAS.Application.Abstractions.Geography;
 using PSAAS.Application.Abstractions.Profiles;
 using PSAAS.Application.Abstractions.Tenants;
 using PSAAS.Infrastructure.Audit;
+using PSAAS.Infrastructure.Catalog;
 using PSAAS.Infrastructure.Data.DbContexts;
 using PSAAS.Infrastructure.Geography;
 using PSAAS.Infrastructure.Repositories.Profiles;
@@ -38,6 +40,11 @@ public static class DependencyInjection
         services.AddScoped<IAuditLog>(sp => sp.GetRequiredService<AuditLog>());
         services.AddScoped<IAuditReadRepository>(sp => sp.GetRequiredService<AuditLog>());
         services.AddSingleton(TimeProvider.System);
+        services.AddScoped<CatalogRepository>();
+        services.AddScoped<ICatalogRepository>(sp => sp.GetRequiredService<CatalogRepository>());
+        services.AddScoped<ISubscriptionRepository>(sp => sp.GetRequiredService<CatalogRepository>());
+        // Singleton HttpClient like the city list: module hooks get 10 seconds.
+        services.AddSingleton<IModuleProvisioner>(_ => new HttpModuleProvisioner(new HttpClient { Timeout = TimeSpan.FromSeconds(10) }));
 
         services.AddMemoryCache();
         // Singleton HttpClient: avoids the Microsoft.Extensions.Http package.

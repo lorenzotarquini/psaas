@@ -121,6 +121,26 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
         return counts;
     }
 
+    public async Task<int> CountUsersWithAnyAsync(IReadOnlyCollection<string> profileIds, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(profileIds);
+        // Keycloak has no OR on attributes: one search per profile, users counted once.
+        var ids = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var profileId in profileIds.Distinct(StringComparer.Ordinal))
+        {
+            var users = await CallAsync(async () =>
+            {
+                using var response = await http.GetAsync(
+                    $"users?briefRepresentation=true&max={MaxProfileUsers}&q={ProfileQuery(profileId)}", cancellationToken);
+                EnsureSuccess(response, "find the users of a profile");
+                return await response.Content.ReadFromJsonAsync<UserRepresentation[]>(cancellationToken) ?? [];
+            }, cancellationToken);
+            ids.UnionWith(users.Select(user => user.Id!));
+        }
+
+        return ids.Count;
+    }
+
     public async Task RemoveProfilesAsync(IReadOnlyCollection<string> profileIds, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(profileIds);

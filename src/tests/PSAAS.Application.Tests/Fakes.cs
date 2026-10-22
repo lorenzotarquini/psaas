@@ -1,10 +1,12 @@
 using PSAAS.Application.Abstractions.Audit;
+using PSAAS.Application.Abstractions.Catalog;
 using PSAAS.Application.Abstractions.Geography;
 using PSAAS.Application.Abstractions.Profiles;
 using PSAAS.Application.Abstractions.Tenants;
 using PSAAS.Application.Abstractions.Users;
 using PSAAS.Application.Contracts;
 using PSAAS.Application.Contracts.Audit;
+using PSAAS.Application.Contracts.Catalog;
 using PSAAS.Application.Contracts.Profiles;
 using PSAAS.Application.Contracts.Tenants;
 using PSAAS.Application.Contracts.Users;
@@ -159,6 +161,9 @@ public sealed class FakeUserDirectory : IUserDirectory
         CancellationToken cancellationToken = default) =>
         Task.FromResult<IReadOnlyDictionary<string, int>>(profileIds.ToDictionary(id => id, id => Users.Count(u => u.ProfileIds.Contains(id))));
 
+    public Task<int> CountUsersWithAnyAsync(IReadOnlyCollection<string> profileIds, CancellationToken cancellationToken = default) =>
+        Task.FromResult(Users.Count(u => u.ProfileIds.Intersect(profileIds).Any()));
+
     public Task RemoveProfilesAsync(IReadOnlyCollection<string> profileIds, CancellationToken cancellationToken = default)
     {
         if (Unavailable) throw new UserDirectoryUnavailableException("down");
@@ -196,5 +201,99 @@ public sealed class FakeAuditLog : IAuditLog
     {
         Records.Add(record);
         return Task.CompletedTask;
+    }
+}
+
+/// <summary>Subscriptions in memory, with the module statuses the use case set.</summary>
+public sealed class FakeSubscriptionRepository : ISubscriptionRepository
+{
+    public Dictionary<Guid, SubscriptionReadModel> Subscriptions { get; } = [];
+
+    public Dictionary<(Guid, string), (string Status, string? Error, int Attempts)> Modules { get; } = [];
+
+    public Task<SubscriptionReadModel?> GetAsync(Guid tenantId, CancellationToken cancellationToken = default) =>
+        Task.FromResult(Subscriptions.TryGetValue(tenantId, out var s)
+            ? s with
+            {
+                Modules = Modules.Where(m => m.Key.Item1 == tenantId)
+                    .Select(m => new TenantModuleReadModel(m.Key.Item2, m.Key.Item2, null, "1.0.0", m.Value.Status, m.Value.Attempts, m.Value.Error, false, DateTimeOffset.UtcNow))
+                    .ToArray(),
+            }
+            : null);
+
+    public Task<IReadOnlyList<SubscriptionReadModel>> GetAllAsync(CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyList<SubscriptionReadModel>>(Subscriptions.Values.ToArray());
+
+    public Task SaveAsync(SubscriptionReadModel subscription, IReadOnlyCollection<string> moduleIds, CancellationToken cancellationToken = default)
+    {
+        Subscriptions[subscription.TenantId] = subscription;
+        foreach (var key in Modules.Keys.Where(k => k.Item1 == subscription.TenantId && !moduleIds.Contains(k.Item2)).ToArray()) Modules.Remove(key);
+        foreach (var id in moduleIds) Modules.TryAdd((subscription.TenantId, id), (ProvisioningStatuses.Provisioning, null, 0));
+        return Task.CompletedTask;
+    }
+
+    public Task SetModuleStatusAsync(Guid tenantId, string moduleId, string status, string? error, CancellationToken cancellationToken = default)
+    {
+        var attempts = Modules.TryGetValue((tenantId, moduleId), out var current) ? current.Attempts : 0;
+        Modules[(tenantId, moduleId)] = (status, error, status == ProvisioningStatuses.Provisioning ? attempts + 1 : attempts);
+        return Task.CompletedTask;
+    }
+
+    public Task<IReadOnlyList<(Guid TenantId, string ModuleId)>> GetFailedAsync(int maxAttempts, CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyList<(Guid, string)>>(Modules.Where(m => m.Value.Status == ProvisioningStatuses.Failed && m.Value.Attempts < maxAttempts).Select(m => m.Key).ToArray());
+}
+
+public sealed class FakeCatalogRepository : ICatalogRepository
+{
+    public List<ModuleReadModel> Modules { get; } = [Module("core", isCore: true)];
+
+    public List<PlanReadModel> Plans { get; } = [];
+
+    public static ModuleReadModel Module(string id, bool isCore = false, string[]? requires = null, string? hook = null) =>
+        new(id, id, null, null, ModuleStatuses.Available, "1.0.0", isCore, requires ?? [], [], hook, DateTimeOffset.UtcNow, 0);
+
+    public static PlanReadModel Plan(string code, int? maxUsers = null, int trialDays = 0, params string[] modules) =>
+        new(Guid.NewGuid(), code, code, null, 99m, BillingPeriods.Monthly, trialDays, maxUsers, null, ["core", .. modules], true, 0);
+
+    public Task<IReadOnlyList<ModuleReadModel>> GetModulesAsync(CancellationToken cancellationToken = default) => Task.FromResult<IReadOnlyList<ModuleReadModel>>(Modules);
+
+    public Task<ModuleReadModel?> GetModuleAsync(string moduleId, CancellationToken cancellationToken = default) => Task.FromResult(Modules.FirstOrDefault(m => m.Id == moduleId));
+
+    public Task SaveModuleAsync(ModuleManifest manifest, CancellationToken cancellationToken = default)
+    {
+        Modules.RemoveAll(m => m.Id == manifest.Id);
+        Modules.Add(Module(manifest.Id!, requires: manifest.Requires?.ToArray()) with { Name = manifest.Name!, Version = manifest.Version!, Status = manifest.Status! });
+        return Task.CompletedTask;
+    }
+
+    public Task<bool> SetModuleStatusAsync(string moduleId, string status, CancellationToken cancellationToken = default) => Task.FromResult(true);
+
+    public Task<IReadOnlyList<PlanReadModel>> GetPlansAsync(CancellationToken cancellationToken = default) => Task.FromResult<IReadOnlyList<PlanReadModel>>(Plans);
+
+    public Task<PlanReadModel?> GetPlanAsync(Guid planId, CancellationToken cancellationToken = default) => Task.FromResult(Plans.FirstOrDefault(p => p.Id == planId));
+
+    public Task<bool> IsPlanCodeTakenAsync(string code, Guid? exceptPlanId, CancellationToken cancellationToken = default) =>
+        Task.FromResult(Plans.Any(p => p.Code == code && p.Id != exceptPlanId));
+
+    public Task<Guid> SavePlanAsync(Guid? planId, PlanRequest plan, CancellationToken cancellationToken = default)
+    {
+        var id = planId ?? Guid.NewGuid();
+        Plans.RemoveAll(p => p.Id == id);
+        Plans.Add(new(id, plan.Code!, plan.Name!, plan.Description, plan.Price!.Value, plan.BillingPeriod!, plan.TrialDays ?? 0, plan.MaxUsers, plan.MaxProductiveUnits, plan.ModuleIds ?? [], plan.Active, 0));
+        return Task.FromResult(id);
+    }
+}
+
+/// <summary>Provisioning hooks: modules listed in Failing answer with an error.</summary>
+public sealed class FakeModuleProvisioner : IModuleProvisioner
+{
+    public HashSet<string> Failing { get; } = [];
+
+    public List<string> Provisioned { get; } = [];
+
+    public Task<ProvisioningOutcome> ProvisionAsync(ModuleReadModel module, Guid tenantId, CancellationToken cancellationToken = default)
+    {
+        Provisioned.Add(module.Id);
+        return Task.FromResult(Failing.Contains(module.Id) ? new ProvisioningOutcome(false, "timeout") : new ProvisioningOutcome(true, null));
     }
 }

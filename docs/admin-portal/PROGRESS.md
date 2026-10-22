@@ -11,7 +11,7 @@ Piano: `C:\Users\ltarq\.claude\plans\voglio-che-prepari-un-abundant-quail.md` ·
 | 2 Chiusura perimetro (UC1-S4, UC4, UC5, conteggi, UC11) | ✅ | vedi log |
 | 3 Audit log e storico | ✅ | vedi log |
 | 4 Ciclo di vita e wizard | ✅ | vedi log |
-| 5 Moduli, piani, sottoscrizioni | ⏳ | |
+| 5 Moduli, piani, sottoscrizioni | ✅ | vedi log |
 | 6 Gestione utenti completa | | |
 | 7 Elenco clienti avanzato | | |
 | 8 Fatturazione interna | | |
@@ -22,11 +22,11 @@ Piano: `C:\Users\ltarq\.claude\plans\voglio-che-prepari-un-abundant-quail.md` ·
 
 ## Test rossi attesi
 
-Nessuno: dopo la fase 4 tutta la suite è verde (accettazione 122/122).
+Nessuno: dopo la fase 5 tutta la suite è verde (accettazione 151/151, unitari Application 94, Vitest 45).
 
 ## Ambiente di sviluppo autonomo (fuori dal repo, nello scratchpad della sessione)
 
-Per verificare l'interfaccia senza il login reale: provider OIDC locale (`devidp/server.mjs`, porta 8099: login automatico come "Marta Russo", token RS256, sottoinsieme dell'API utenti di Keycloak in memoria), Postgres dedicato (container `psaas-dev-pg`, porta 5433), backend su 5300 (`backend.sh`), Vite su 5180 (`VITE_KEYCLOAK_URL=http://localhost:8099`), screenshot con `e2e/look.mjs`, dati d'esempio con `e2e/seed.mjs`.
+Per verificare l'interfaccia senza il login reale: provider OIDC locale (`devidp/server.mjs`, porta 8099: login automatico come "Marta Russo", token RS256, sottoinsieme dell'API utenti di Keycloak in memoria), Postgres dedicato (container `psaas-dev-pg`, porta 5433), backend su 5300 (`backend.sh`), Vite su 5180 (`VITE_KEYCLOAK_URL=http://localhost:8099`), screenshot con `e2e/look.mjs`, dati d'esempio con `e2e/seed.mjs` e `e2e/seed-catalog.mjs` (moduli, piani, sottoscrizioni; l'hook di Magazzino punta a una porta chiusa per mostrare il provisioning fallito).
 
 ## Decisioni prese in autonomia
 
@@ -34,7 +34,7 @@ Per verificare l'interfaccia senza il login reale: provider OIDC locale (`devidp
 2. **Tema scuro `psaas-dark`** derivato dagli stessi toni (i mock non lo includono): da validare con il designer.
 3. **Font IBM Plex self-hosted** con `@fontsource` invece di Google Fonts.
 4. **UC8 (chi sono)** spostato nel menu dell'avatar: ID Keycloak e ruoli (client e realm) dal token.
-5. **Piè di pagina della sidebar**: versione del portale (`package.json`, 0.2.0) e realm; diventerà la versione del modulo core con la fase 5.
+5. **Piè di pagina della sidebar**: versione del modulo core (`core 2.0.3`, mock 1b) e realm; la versione del portale resta nel tooltip.
 6. **Badge d'ambiente** da `VITE_ENVIRONMENT_LABEL` (`.env`: `SVILUPPO`).
 7. **Tema scelto persistito** in localStorage (`psaas-theme`); senza scelta segue il sistema.
 8. **Pagine di modifica anagrafica e organizzazione** sostituite dalle schede Anagrafica e Organizzazione della scheda cliente (`/tenants/{id}?tab=registry|organization`); la conferma con `window.confirm` alla rimozione di profili è sostituita dall'avviso nella barra delle modifiche (mock 1d).
@@ -43,12 +43,17 @@ Per verificare l'interfaccia senza il login reale: provider OIDC locale (`devidp
 11. **Audit registrato dopo il salvataggio**, non nella stessa transazione (le scritture Keycloak non sono transazionali comunque): se la registrazione fallisce la modifica resta e l'errore va nel log (UC12 flusso 1a).
 12. **Creazione utente nello storico**: un evento per ogni cliente dei profili assegnati, così compare nello storico di ciascuno (mock 1b "ha creato 4 utenti per Officine Rinaldi").
 
-13. **Wizard, passo Piano**: segnaposto esplicativo finché non esiste il catalogo (fase 5), che lo completerà.
+13. **Wizard, passo Piano**: completato in fase 5 (UC17 sulla bozza); senza piano scelto si prosegue e il controllo "Piano" resta grigio.
 14. **Passo Primi utenti**: gli utenti si creano uno alla volta; una riga rifiutata mostra gli errori e ferma il passo, quelle già create restano.
 15. **Annullare l'onboarding** elimina la bozza (profili e unità compresi); gli utenti già creati restano in Keycloak (detto nel dialog).
 16. **Referente commerciale**: testo libero precompilato con l'amministratore corrente (il mock mostra una select "Marta Russo (tu)"; non esiste ancora un elenco di amministratori).
+17. **Prezzo bloccato senza versioni dei piani**: la sottoscrizione copia prezzo, periodicità e limiti; modificare un piano vale solo per le nuove sottoscrizioni. Più semplice delle versioni di piano (grandfathering) del piano di lavoro, stesso effetto per il cliente.
+18. **Manifest incollato come JSON** nella pagina Moduli (nessun upload di file né registro remoto); un id già presente aggiorna il modulo.
+19. **Limiti con Keycloak giù**: la sottoscrizione non viene bloccata se non si possono contare gli utenti (warning nel log); il limite viene ricontrollato a ogni nuovo utente (UC6).
+20. **Cambio piano**: i moduli non più inclusi vengono tolti subito (nessun hook di deprovisioning chiamato per ora: `deprovisionUrl` è solo registrato).
+21. **Icone dei moduli**: il manifest indica un nome (`warehouse`, `hr`, `maintenance`…), mappato su icone Font Awesome; nomi sconosciuti → pezzo di puzzle.
 
 ## Da far vedere al designer
 
 - Tema scuro, vista mobile (sidebar a scomparsa, tabelle con scorrimento orizzontale).
-- Pagine senza mock: Profili, Impostazioni, 404 (e in seguito Moduli, Piani, Sottoscrizioni, Fatturazione, Comunicazioni, Audit log).
+- Pagine senza mock: Profili, Impostazioni, 404 Moduli, Piani, Sottoscrizioni, Audit log (e in seguito Fatturazione, Comunicazioni).

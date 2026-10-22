@@ -12,12 +12,21 @@ public static class AuditActions
     public const string TenantOnboardingDiscarded = "tenant.onboarding.discarded";
     public const string TenantStatusChanged = "tenant.status.changed";
     public const string UserCreated = "user.created";
+    public const string ModuleRegistered = "module.registered";
+    public const string ModuleUpdated = "module.updated";
+    public const string PlanCreated = "plan.created";
+    public const string PlanUpdated = "plan.updated";
+    public const string SubscriptionChanged = "subscription.changed";
+    public const string ModuleProvisioned = "module.provisioned";
+    public const string ModuleProvisioningFailed = "module.provisioning.failed";
 }
 
 public static class AuditTargets
 {
     public const string Tenant = "tenant";
     public const string User = "user";
+    public const string Module = "module";
+    public const string Plan = "plan";
 }
 
 /// <summary>What happened, without the actor (added by the audit log from the current request).</summary>

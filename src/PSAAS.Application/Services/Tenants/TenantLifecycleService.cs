@@ -1,7 +1,9 @@
 using NLog;
 using PSAAS.Application.Abstractions.Audit;
+using PSAAS.Application.Abstractions.Catalog;
 using PSAAS.Application.Abstractions.Tenants;
 using PSAAS.Application.Contracts.Audit;
+using PSAAS.Application.Contracts.Catalog;
 using PSAAS.Application.Contracts.Tenants;
 using PSAAS.Domain;
 
@@ -15,7 +17,8 @@ public sealed class TenantLifecycleService(
     ITenantReadRepository reader,
     ITenantWriteRepository tenants,
     IAuditLog audit,
-    TimeProvider clock)
+    TimeProvider clock,
+    ISubscriptionRepository subscriptions)
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -45,6 +48,13 @@ public sealed class TenantLifecycleService(
         {
             Logger.Info("Status change of tenant {TenantId} from {From} to {To} rejected: {ValidationErrors}", tenantId, tenant.Lifecycle.Status, request.Status, errors);
             return new TenantEditResult(true, errors);
+        }
+
+        // UC14 + EXP-03: a draft activated on a trial subscription starts in Trial.
+        if (next == TenantStatus.Active && tenant.Lifecycle.Status == TenantStatus.Onboarding
+            && (await subscriptions.GetAsync(tenantId, cancellationToken))?.Status == SubscriptionStatuses.Trial)
+        {
+            next = TenantStatus.Trial;
         }
 
         var from = tenant.Lifecycle.Status;

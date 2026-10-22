@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using PSAAS.Application.Services.Catalog;
 using PSAAS.Application.Services.Tenants;
 using PSAAS.Application.Services.Users;
 using PSAAS.Application.Validators.Tenants;
@@ -15,6 +16,8 @@ public static class DependencyInjection
         services.AddScoped<TenantRegistryUpdateService>();
         services.AddScoped<TenantOrganizationService>();
         services.AddScoped<TenantLifecycleService>();
+        services.AddScoped<CatalogService>();
+        services.AddScoped<SubscriptionService>();
         services.AddScoped<UserCreateService>();
         services.AddScoped<UserSearchService>();
 

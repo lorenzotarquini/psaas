@@ -29,14 +29,16 @@ public sealed class PostgresFixture : IAsyncLifetime
     {
         await using var connection = new NpgsqlConnection(ConnectionString);
         await connection.OpenAsync();
-        // Every table but the migrations history: new tables are emptied without touching this fixture.
+        // Every table but the migrations history (and core): new tables are emptied without touching this fixture.
         await using var command = new NpgsqlCommand(
             """
             DO $$ DECLARE tables text;
             BEGIN
               SELECT string_agg(format('%I', tablename), ', ') INTO tables
-              FROM pg_tables WHERE schemaname = 'public' AND tablename <> '__EFMigrationsHistory';
+              FROM pg_tables WHERE schemaname = 'public' AND tablename NOT IN ('__EFMigrationsHistory', 'Modules');
               EXECUTE 'TRUNCATE ' || tables || ' CASCADE';
+              -- The catalog keeps the core module seeded by the migration.
+              DELETE FROM "Modules" WHERE "Id" <> 'core';
             END $$;
             """,
             connection);

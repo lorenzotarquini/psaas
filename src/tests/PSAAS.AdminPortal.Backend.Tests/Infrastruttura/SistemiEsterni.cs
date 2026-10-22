@@ -1,4 +1,6 @@
+using PSAAS.Application.Abstractions.Catalog;
 using PSAAS.Application.Abstractions.Geography;
+using PSAAS.Application.Contracts.Catalog;
 using PSAAS.Application.Abstractions.Users;
 
 namespace PSAAS.AdminPortal.Backend.Tests.Infrastruttura;
@@ -56,6 +58,12 @@ public sealed class FakeKeycloakUsers : IUserDirectory
             id => Users.Count(user => user.ProfileIds.Contains(id))));
     }
 
+    public Task<int> CountUsersWithAnyAsync(IReadOnlyCollection<string> profileIds, CancellationToken cancellationToken = default)
+    {
+        ThrowIfUnavailable();
+        return Task.FromResult(Users.Count(user => user.ProfileIds.Intersect(profileIds).Any()));
+    }
+
     public Task RemoveProfilesAsync(IReadOnlyCollection<string> profileIds, CancellationToken cancellationToken = default)
     {
         ThrowIfUnavailable();
@@ -91,4 +99,13 @@ public sealed class FakeItalianCityList : IItalianCityProvider
         Task.FromResult<IReadOnlyList<ItalianCity>?>(Unavailable
             ? null
             : Cities.Where(city => city.Name.Contains(term.Trim(), StringComparison.OrdinalIgnoreCase)).ToArray());
+}
+
+/// <summary>Plays the provisioning hooks of the modules: those in Failing answer with a timeout.</summary>
+public sealed class FakeModuleHooks : IModuleProvisioner
+{
+    public HashSet<string> Failing { get; } = [];
+
+    public Task<ProvisioningOutcome> ProvisionAsync(ModuleReadModel module, Guid tenantId, CancellationToken cancellationToken = default) =>
+        Task.FromResult(Failing.Contains(module.Id) ? new ProvisioningOutcome(false, "hook provision → timeout") : new ProvisioningOutcome(true, null));
 }

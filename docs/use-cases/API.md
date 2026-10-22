@@ -2,7 +2,7 @@
 
 Contratto HTTP che i test di accettazione esercitano. Tutti gli endpoint `/api/*` richiedono un token Keycloak valido (audience `adminportal-api`) con ruolo `Administrator`: senza token o con token non valido → `401`, senza ruolo → `403`.
 
-Errori di validazione: `400` `ValidationProblem` con un codice per campo in `errors`, ad esempio `{"errors": {"companyName": ["Required"], "profiles[1].name": ["NotUnique"]}}`. Codici: `Required`, `InvalidFormat`, `MaxLengthExceeded`, `NotUnique`, `InvalidValue`.
+Errori di validazione: `400` `ValidationProblem` con un codice per campo in `errors`, ad esempio `{"errors": {"companyName": ["Required"], "profiles[1].name": ["NotUnique"]}}`. Codici: `Required`, `InvalidFormat`, `MaxLengthExceeded`, `NotUnique`, `InvalidValue`, `LimitExceeded` (limite del piano, UC17).
 
 | Use case | Endpoint | Stato |
 |---|---|---|
@@ -20,6 +20,10 @@ Errori di validazione: `400` `ValidationProblem` con un codice per campo in `err
 | UC12 | `GET /api/audit?tenantId=&action=&search=&from=&to=&page=&pageSize=` | esiste |
 | UC13 | `POST /api/tenants/{id}/status` | esiste |
 | UC14 | `POST /api/tenants` con `draft: true` · `DELETE /api/tenants/{id}` | esiste |
+| UC15 | `GET /api/modules` · `POST /api/modules` · `PUT /api/modules/{id}/status` | esiste |
+| UC16 | `GET /api/plans` · `POST /api/plans` · `PUT /api/plans/{id}` | esiste |
+| UC17 | `GET /api/subscriptions` · `GET/PUT /api/tenants/{id}/subscription` | esiste |
+| UC18 | `POST /api/tenants/{id}/modules/{moduleId}/retry` | esiste |
 
 ## Contratti esistenti (sintesi)
 
@@ -102,6 +106,14 @@ Audit log, dal più recente: `{ items: [{ id, occurredAt, actorId, actorName, ac
 - **UC14** `POST /api/tenants` con `draft: true` crea il cliente in `Onboarding` (`201` + scheda); si attiva con UC13 (`status: Active`). `DELETE /api/tenants/{id}` elimina una bozza con profili e unità (`204`); un cliente non in bozza → `409`; inesistente → `404`.
 - Audit (UC12): `tenant.onboarding.started`, `tenant.onboarding.discarded`, `tenant.status.changed` (`{ from, to, reason }`); l'anagrafica registra anche `sdiCode` e `accountManager` cambiati.
 
+### Catalogo, piani e sottoscrizioni (UC15–UC18)
+- **UC15** `GET /api/modules` → `[{ id, name, description, icon, status, version, isCore, requires, permissions, provisionUrl, updatedAt, tenantCount }]` (il modulo `core` c'è sempre). `POST /api/modules` con il manifest `{ id, name, description?, version, icon?, status?, requires?, permissions?, provisionUrl?, deprovisionUrl? }` → `200` + modulo; un id già presente aggiorna il modulo. Errori: `id` `InvalidFormat` (minuscole, cifre, trattini, 2–40), `version` `InvalidFormat` (semver), `status` `InvalidValue` (`Beta`, `Available`, `Deprecated`), `requires[i]` `InvalidValue` (modulo inesistente o se stesso), `provisionUrl`/`deprovisionUrl` `InvalidFormat` (http/https). `PUT /api/modules/{id}/status` `{ status }` → `200` · `400` (`core` non lascia `Available`) · `404`.
+- **UC16** `GET /api/plans` → `[{ id, code, name, description, price, billingPeriod, trialDays, maxUsers, maxProductiveUnits, moduleIds, active, subscriberCount }]`. `POST` (`201`) e `PUT /api/plans/{id}` (`200`, `404`) con `{ code, name, description?, price, billingPeriod, trialDays?, maxUsers?, maxProductiveUnits?, moduleIds?, active }`; `null` nei limiti = illimitato; `core` sempre incluso. Errori: `code` `InvalidFormat`/`NotUnique`, `price` `InvalidValue` (< 0), `billingPeriod` `InvalidValue` (`Monthly`, `Yearly`), `trialDays` `InvalidValue` (0–90), `maxUsers`/`maxProductiveUnits` `InvalidValue` (< 1), `moduleIds[i]` `InvalidValue`.
+- **UC17** `PUT /api/tenants/{id}/subscription` `{ planId, trial, addOnModuleIds, autoRenew }` → `200` + sottoscrizione `{ tenantId, tenantName, planId, planName, status, price, billingPeriod, maxUsers, maxProductiveUnits, startsAt, trialEndsAt, renewsAt, autoRenew, addOnModuleIds, modules: [{ moduleId, name, icon, version, status, attempts, lastError, isAddOn, updatedAt }] }` · `400` (`planId` `Required`/`InvalidValue`/`LimitExceeded`, `addOnModuleIds[i]` `InvalidValue`) · `404`. `GET` della stessa risorsa → `200` oppure `204` se il cliente non ha piano. `GET /api/subscriptions` → tutte. `status`: `Trial`, `Active`, `Expired`, `Cancelled`; stato dei moduli: `Provisioning`, `Active`, `Failed`.
+- **UC6** risponde `400` con `profileIds[i]` = `LimitExceeded` se il cliente di quel profilo ha già gli utenti massimi del piano.
+- **UC18** `POST /api/tenants/{id}/modules/{moduleId}/retry` → `200` + sottoscrizione · `400` (`moduleId` `InvalidValue` se già attivo) · `404`. Il provisioning chiama `provisionUrl` con `POST { tenantId, moduleId, version }` (timeout 10 s; senza hook il modulo è subito attivo). Un job riprova i falliti ogni `Provisioning:RetryMinutes` minuti (default 5, 0 = spento) fino a 3 tentativi.
+- Audit (UC12): `module.registered`, `module.updated` (`{ version }` o `{ status }`), `plan.created`, `plan.updated` (`{ price, billingPeriod }`), `subscription.changed` (`{ plan, previousPlan, trial, modulesAdded, modulesRemoved }`), `module.provisioned`, `module.provisioning.failed` (`{ module, version, error }`).
+
 ## Confini dei test di accettazione
 
 - **Reali:** backend completo (pipeline HTTP, autenticazione, controller, Application, Infrastructure) e **Postgres** (Testcontainers).
@@ -109,4 +121,5 @@ Audit log, dal più recente: `{ items: [{ id, occurredAt, actorId, actorName, ac
   - Keycloak come emittente di token: i test firmano token con la stessa forma di quelli Keycloak.
   - Keycloak come archivio utenti: porta `IUserDirectory` sostituita da un archivio in memoria.
   - Lista comuni: porta `IItalianCityProvider` sostituita da una lista fissa.
+  - Hook di provisioning dei moduli: porta `IModuleProvisioner` sostituita da hook simulati (`FakeModuleHooks.Failing`).
 - Quello che i simulatori nascondono (chiamate HTTP verso Keycloak e verso la lista comuni, ordinamento e limite dei comuni) è verificato dai test unitari di Infrastructure.

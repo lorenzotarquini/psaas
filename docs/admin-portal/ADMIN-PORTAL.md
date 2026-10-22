@@ -68,6 +68,7 @@ Stato rilevato dal codice e dalla suite di test di accettazione (aggiornato a og
 | [UC9](../use-cases/UC9-panoramica-profili.md) | Panoramica dei profili | Tutti i profili, ordinati per nome, con il loro cliente | `GET /api/profiles` | Pagina Profili | ✅ |
 | [UC10](../use-cases/UC10-cercare-comune.md) | Cercare un comune | Almeno 2 caratteri, massimo 20 risultati, ordinati per pertinenza | `GET /api/geography/cities` | Suggerimenti nel campo Città e CAP | ✅ |
 | [UC11](../use-cases/UC11-verificare-campo-cliente.md) | Verificare un campo univoco | Stesse regole e codici del salvataggio, campo per campo; indica il cliente che usa già il valore | `GET /api/tenants/field-validation` | Controllo all'uscita dal campo con "Disponibile" o link al cliente in conflitto | ✅ |
+| [UC12](../use-cases/UC12-audit-log.md) | Audit log e storico (EXP-10) | Chi, cosa, quando, su quale cliente; prima/dopo per l'anagrafica; aggiunte e rimozioni per l'organizzazione; filtri e pagine | `GET /api/audit` | Pagina Audit log con filtri nell'URL; scheda Storico e card Storico nella scheda cliente | ✅ |
 | GEN | Sicurezza | Ogni operazione richiede autenticazione e ruolo `Administrator`; `/health` anonimo | Policy globale sui controller | Login obbligatorio, logout | ✅ |
 
 Funzionalità trasversali già presenti:
@@ -341,5 +342,6 @@ Oggi esiste solo `Administrator`.
 | Epica | Use case derivati | Stato |
 |---|---|---|
 | EXP-01 | – | proposta |
+| EXP-10 | UC12 | ✅ implementata |
 | EXP-02 | – | proposta |
 | … | | |

@@ -1,7 +1,9 @@
 using System.Globalization;
 using NLog;
+using PSAAS.Application.Abstractions.Audit;
 using PSAAS.Application.Abstractions.Profiles;
 using PSAAS.Application.Abstractions.Users;
+using PSAAS.Application.Contracts.Audit;
 using PSAAS.Application.Contracts.Tenants;
 using PSAAS.Application.Contracts.Users;
 using PSAAS.Application.Validators.Tenants;
@@ -12,7 +14,7 @@ namespace PSAAS.Application.Services.Users;
 /// UC6: creates a user in the identity provider, which emails them to set the password.
 /// Nothing is created unless every value is valid; errors are reported per field.
 /// </summary>
-public sealed class UserCreateService(IProfileReadRepository profiles, IUserDirectory directory)
+public sealed class UserCreateService(IProfileReadRepository profiles, IUserDirectory directory, IAuditLog audit)
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -61,8 +63,37 @@ public sealed class UserCreateService(IProfileReadRepository profiles, IUserDire
             return new UserCreateResult(null, errors);
         }
 
+        var user = UserReadModel.From(created, existingProfiles);
+        await RecordAsync(user, cancellationToken);
         Logger.Info("Created user {UserId} with {ProfileCount} profiles", created.Id, created.ProfileIds.Count);
-        return new UserCreateResult(UserReadModel.From(created, existingProfiles), errors);
+        return new UserCreateResult(user, errors);
+    }
+
+    // One event per tenant whose profiles the user got, so each tenant history shows it (mock 1b); none: platform-wide.
+    private async Task RecordAsync(UserReadModel user, CancellationToken cancellationToken)
+    {
+        var name = $"{user.FirstName} {user.LastName}";
+        var byTenant = user.Profiles.GroupBy(profile => profile.TenantId).ToArray();
+        if (byTenant.Length == 0)
+        {
+            await audit.RecordAsync(
+                new AuditRecord(AuditActions.UserCreated, AuditTargets.User, user.Id, name, null, new { email = user.Email, profiles = Array.Empty<string>() }),
+                cancellationToken);
+            return;
+        }
+
+        foreach (var tenant in byTenant)
+        {
+            await audit.RecordAsync(
+                new AuditRecord(
+                    AuditActions.UserCreated,
+                    AuditTargets.User,
+                    user.Id,
+                    name,
+                    tenant.Key,
+                    new { email = user.Email, tenant = tenant.First().TenantCompanyName, profiles = tenant.Select(p => p.Name).ToArray() }),
+                cancellationToken);
+        }
     }
 
     private static string ValidateEmail(string email, Dictionary<string, string> errors)

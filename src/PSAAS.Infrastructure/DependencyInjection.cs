@@ -1,9 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using PSAAS.Application.Abstractions.Audit;
 using PSAAS.Application.Abstractions.Geography;
 using PSAAS.Application.Abstractions.Profiles;
 using PSAAS.Application.Abstractions.Tenants;
+using PSAAS.Infrastructure.Audit;
 using PSAAS.Infrastructure.Data.DbContexts;
 using PSAAS.Infrastructure.Geography;
 using PSAAS.Infrastructure.Repositories.Profiles;
@@ -32,6 +34,10 @@ public static class DependencyInjection
         services.AddScoped<ITenantWriteRepository, TenantWriteRepository>();
         services.AddScoped<ITenantUniquenessChecker, TenantUniquenessChecker>();
         services.AddScoped<IProfileReadRepository, ProfileReadRepository>();
+        services.AddScoped<AuditLog>();
+        services.AddScoped<IAuditLog>(sp => sp.GetRequiredService<AuditLog>());
+        services.AddScoped<IAuditReadRepository>(sp => sp.GetRequiredService<AuditLog>());
+        services.AddSingleton(TimeProvider.System);
 
         services.AddMemoryCache();
         // Singleton HttpClient: avoids the Microsoft.Extensions.Http package.

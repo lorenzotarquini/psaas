@@ -2,6 +2,8 @@ using NLog;
 using NLog.Extensions.Logging;
 using NLog.Web;
 using PSAAS.Application;
+using PSAAS.AdminPortal.Backend.Infrastructure;
+using PSAAS.Application.Abstractions.Audit;
 using PSAAS.Application.Abstractions.Tenants;
 using PSAAS.Application.Abstractions.Users;
 using PSAAS.Auth;
@@ -25,6 +27,7 @@ try
     builder.Services.AddKeycloak(builder.Configuration);
     builder.Services.AddPsaasApplication();
     builder.Services.AddPsaasInfrastructure(builder.Configuration);
+    builder.Services.AddScoped<ICurrentActor, HttpCurrentActor>();
     // UC6/UC7: users live in Keycloak, reached through its admin API with this client's service account
     // (Keycloak:ClientSecret, roles view-users and manage-users of realm-management).
     builder.Services.AddTransient<KeycloakClientCredentialsHandler>();

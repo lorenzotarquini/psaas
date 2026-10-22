@@ -1,5 +1,7 @@
 using NLog;
+using PSAAS.Application.Abstractions.Audit;
 using PSAAS.Application.Abstractions.Tenants;
+using PSAAS.Application.Contracts.Audit;
 using PSAAS.Application.Contracts.Tenants;
 using PSAAS.Application.Validators.Tenants;
 using PSAAS.Domain;
@@ -14,7 +16,8 @@ public sealed class TenantRegistryUpdateService(
     ITenantReadRepository reader,
     TenantCreateValidator validator,
     TenantAddressValidator addressValidator,
-    ITenantWriteRepository tenants)
+    ITenantWriteRepository tenants,
+    IAuditLog audit)
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -24,7 +27,8 @@ public sealed class TenantRegistryUpdateService(
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
-        if (await reader.GetByIdAsync(tenantId, cancellationToken) is null)
+        var before = await reader.GetByIdAsync(tenantId, cancellationToken);
+        if (before is null)
         {
             Logger.Info("Registry update of missing tenant {TenantId}", tenantId);
             return TenantEditResult.NotFound;
@@ -69,7 +73,21 @@ public sealed class TenantRegistryUpdateService(
             return new TenantEditResult(true, errors);
         }
 
-        Logger.Info("Updated the registry of tenant {TenantId}", tenantId);
+        var changes = Changes(before, tenant);
+        if (changes.Count > 0)
+        {
+            await audit.RecordAsync(
+                new AuditRecord(
+                    AuditActions.TenantRegistryUpdated,
+                    AuditTargets.Tenant,
+                    tenantId.ToString(),
+                    tenant.CompanyName,
+                    tenantId.ToString(),
+                    new RegistryChanges(changes)),
+                cancellationToken);
+        }
+
+        Logger.Info("Updated the registry of tenant {TenantId}: {ChangedFields}", tenantId, changes.Keys);
         return new TenantEditResult(true, errors);
     }
 
@@ -84,6 +102,21 @@ public sealed class TenantRegistryUpdateService(
         AddError(errors, "completeVatNumber", completeVatNumber);
         AddError(errors, "certifiedEmail", await validator.ValidateCertifiedEmailAsync(request.CertifiedEmail, tenantId, cancellationToken));
         return completeVatNumber.NormalizedValue;
+    }
+
+    /// <summary>The fields that really changed, with before and after (EXP-10).</summary>
+    private static Dictionary<string, AuditChange> Changes(Tenant before, Tenant after)
+    {
+        var pairs = new (string Field, string Before, string After)[]
+        {
+            ("companyName", before.CompanyName, after.CompanyName),
+            ("completeVatNumber", before.CompleteVatNumber, after.CompleteVatNumber),
+            ("certifiedEmail", before.CertifiedEmail, after.CertifiedEmail),
+            ("street", before.Address.street, after.Address.street),
+            ("city", before.Address.city, after.Address.city),
+            ("postalCode", before.Address.postalCode, after.Address.postalCode),
+        };
+        return pairs.Where(pair => pair.Before != pair.After).ToDictionary(pair => pair.Field, pair => new AuditChange(pair.Before, pair.After));
     }
 
     private static void AddError(Dictionary<string, string> errors, string field, TenantFieldValidationResult result)

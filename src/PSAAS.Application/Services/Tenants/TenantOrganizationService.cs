@@ -1,6 +1,8 @@
 using NLog;
+using PSAAS.Application.Abstractions.Audit;
 using PSAAS.Application.Abstractions.Tenants;
 using PSAAS.Application.Abstractions.Users;
+using PSAAS.Application.Contracts.Audit;
 using PSAAS.Application.Contracts.Tenants;
 using PSAAS.Application.Validators.Tenants;
 
@@ -13,7 +15,8 @@ namespace PSAAS.Application.Services.Tenants;
 public sealed class TenantOrganizationService(
     ITenantReadRepository reader,
     ITenantWriteRepository tenants,
-    IUserDirectory users)
+    IUserDirectory users,
+    IAuditLog audit)
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -68,6 +71,20 @@ public sealed class TenantOrganizationService(
         if (!saved)
         {
             return TenantEditResult.NotFound;
+        }
+
+        var diff = OrganizationDiff.Between(current, request);
+        if (!diff.IsEmpty)
+        {
+            await audit.RecordAsync(
+                new AuditRecord(
+                    AuditActions.TenantOrganizationUpdated,
+                    AuditTargets.Tenant,
+                    tenantId.ToString(),
+                    tenant.CompanyName,
+                    tenantId.ToString(),
+                    diff),
+                cancellationToken);
         }
 
         var kept = profiles.Select(profile => TenantOrganizationRules.Trim(profile.Id)).ToHashSet(StringComparer.Ordinal);

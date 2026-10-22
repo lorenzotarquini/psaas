@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using PSAAS.Infrastructure.Audit;
 using PSAAS.Infrastructure.Data.DbModels;
 
 namespace PSAAS.Infrastructure.Data.DbContexts;
@@ -12,6 +13,8 @@ public sealed class PsaasDbContext(DbContextOptions<PsaasDbContext> options) : D
     public DbSet<ProfileDbModel> Profiles => Set<ProfileDbModel>();
 
     public DbSet<ProductiveUnitProfileDbModel> ProductiveUnitProfiles => Set<ProductiveUnitProfileDbModel>();
+
+    public DbSet<AuditEventDbModel> AuditEvents => Set<AuditEventDbModel>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -99,6 +102,22 @@ public sealed class PsaasDbContext(DbContextOptions<PsaasDbContext> options) : D
                 .WithMany()
                 .HasForeignKey(profile => profile.TenantId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Append-only: no foreign keys, so the history outlives what it talks about.
+        modelBuilder.Entity<AuditEventDbModel>(entityBuilder =>
+        {
+            entityBuilder.ToTable("AuditEvents");
+            entityBuilder.HasKey(auditEvent => auditEvent.Id);
+            entityBuilder.HasIndex(auditEvent => auditEvent.OccurredAt);
+            entityBuilder.HasIndex(auditEvent => new { auditEvent.TenantId, auditEvent.OccurredAt });
+            entityBuilder.Property(auditEvent => auditEvent.ActorId).IsRequired();
+            entityBuilder.Property(auditEvent => auditEvent.ActorName).IsRequired();
+            entityBuilder.Property(auditEvent => auditEvent.Action).IsRequired();
+            entityBuilder.Property(auditEvent => auditEvent.TargetType).IsRequired();
+            entityBuilder.Property(auditEvent => auditEvent.TargetId).IsRequired();
+            entityBuilder.Property(auditEvent => auditEvent.TargetName).IsRequired();
+            entityBuilder.Property(auditEvent => auditEvent.Details).HasColumnType("jsonb");
         });
 
         base.OnModelCreating(modelBuilder);

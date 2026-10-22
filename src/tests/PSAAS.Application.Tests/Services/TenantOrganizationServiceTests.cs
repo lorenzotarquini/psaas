@@ -25,8 +25,9 @@ public sealed class TenantOrganizationServiceTests
 
     private readonly FakeTenantWriteRepository _writer = new();
     private readonly FakeUserDirectory _users = new();
+    private readonly FakeAuditLog _audit = new();
 
-    private TenantOrganizationService Service => new(_reader, _writer, _users);
+    private TenantOrganizationService Service => new(_reader, _writer, _users, _audit);
 
     private static TenantOrganizationRequest Request(
         TenantOrganizationProfileRequest[] profiles,
@@ -94,5 +95,15 @@ public sealed class TenantOrganizationServiceTests
     public async Task UC5_S8_MissingTenant_IsNotFound()
     {
         Assert.False((await Service.SaveAsync(Guid.NewGuid(), Request([], []))).Found);
+    }
+
+    [Fact]
+    public async Task UC12_S3_TheOrganizationDiffIsAudited()
+    {
+        await Service.SaveAsync(Alfa.Id, Request([new("op", "op", "Operatore", null)], [new(PlantId, "Stabilimento", null, ["op"])]));
+
+        var record = Assert.Single(_audit.Records);
+        var diff = Assert.IsType<OrganizationDiff>(record.Details);
+        Assert.Equal(["Revisore"], diff.ProfilesRemoved);
     }
 }

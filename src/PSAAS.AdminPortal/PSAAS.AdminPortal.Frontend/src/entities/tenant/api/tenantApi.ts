@@ -105,6 +105,7 @@ function onTenantSaved(queryClient: QueryClient, tenant: TenantDetail) {
   void queryClient.invalidateQueries({ queryKey: keys.list })
   void queryClient.invalidateQueries({ queryKey: ['profiles'] })
   void queryClient.invalidateQueries({ queryKey: ['users'] })
+  void queryClient.invalidateQueries({ queryKey: ['audit'] })
 }
 
 export function useCreateTenant() {

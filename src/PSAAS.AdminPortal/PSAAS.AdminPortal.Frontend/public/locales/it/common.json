@@ -55,7 +55,8 @@
     "pageSize": "Righe per pagina",
     "previous": "Pagina precedente",
     "next": "Pagina successiva",
-    "pageOf": "Pagina {{page}} di {{totalPages}}"
+    "pageOf": "Pagina {{page}} di {{totalPages}}",
+    "range": "{{first}}–{{last}} di {{total}}"
   },
   "errors": {
     "forbidden": "Non hai i permessi per questa operazione.",
@@ -190,5 +191,63 @@
     "companyName": {
       "MaxLengthExceeded": "al massimo 20 caratteri"
     }
+  },
+  "audit": {
+    "title": "Audit log",
+    "subtitle": "Chi ha fatto cosa, quando e su quale cliente.",
+    "yesterday": "ieri",
+    "empty": "Nessun evento.",
+    "noMatch": "Nessun evento corrisponde ai filtri.",
+    "searchPlaceholder": "Cerca per autore o oggetto",
+    "allActions": "Tutte le azioni",
+    "from": "Dal",
+    "to": "Al",
+    "columns": {
+      "when": "Quando",
+      "actor": "Autore",
+      "event": "Evento",
+      "detail": "Dettaglio"
+    },
+    "filters": {
+      "tenant.": "Clienti",
+      "tenant.created": "Attivazioni",
+      "tenant.registry": "Anagrafiche",
+      "tenant.organization": "Organizzazioni",
+      "user.": "Utenti"
+    },
+    "actions": {
+      "tenant": {
+        "created": "ha attivato",
+        "registryUpdated": "ha modificato l'anagrafica di",
+        "organizationUpdated": "ha modificato l'organizzazione di"
+      },
+      "user": {
+        "created": "ha creato l'utente"
+      }
+    },
+    "fields": {
+      "companyName": "Ragione sociale",
+      "completeVatNumber": "P.IVA",
+      "certifiedEmail": "PEC",
+      "street": "Via",
+      "city": "Città",
+      "postalCode": "CAP"
+    },
+    "details": {
+      "profileAdded": "aggiunto il profilo \"{{name}}\"",
+      "profileRemoved": "tolto il profilo \"{{name}}\"",
+      "unitAdded": "aggiunta l'unità \"{{name}}\"",
+      "unitRemoved": "tolta l'unità \"{{name}}\"",
+      "renamed": "\"{{before}}\" → \"{{after}}\"",
+      "accessChanges_one": "{{count}} accesso cambiato",
+      "accessChanges_other": "{{count}} accessi cambiati",
+      "forTenant": "per {{tenant}}",
+      "profiles_one": "{{count}} profilo",
+      "profiles_other": "{{count}} profili",
+      "units_one": "{{count}} unità",
+      "units_other": "{{count}} unità"
+    },
+    "history": "Storico",
+    "historyAll": "Tutto lo storico"
   }
 }

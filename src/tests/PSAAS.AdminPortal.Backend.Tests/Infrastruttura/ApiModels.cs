@@ -42,3 +42,15 @@ public sealed record UserProfileView(string Id, string Name, string TenantId, st
 public sealed record FieldValidationView(string? ErrorCode, TenantReferenceView? ConflictingTenant = null);
 
 public sealed record TenantReferenceView(Guid Id, string CompanyName);
+
+public sealed record AuditEventView(
+    Guid Id,
+    DateTimeOffset OccurredAt,
+    string ActorId,
+    string ActorName,
+    string Action,
+    string TargetType,
+    string TargetId,
+    string TargetName,
+    string? TenantId,
+    System.Text.Json.JsonElement? Details);

@@ -9,8 +9,8 @@ Piano: `C:\Users\ltarq\.claude\plans\voglio-che-prepari-un-abundant-quail.md` ·
 | 0 Preparazione | ✅ | vedi log |
 | 1 Design system e shell | ✅ | vedi log |
 | 2 Chiusura perimetro (UC1-S4, UC4, UC5, conteggi, UC11) | ✅ | vedi log |
-| 3 Audit log e storico | ⏳ | |
-| 4 Ciclo di vita e wizard | | |
+| 3 Audit log e storico | ✅ | vedi log |
+| 4 Ciclo di vita e wizard | ⏳ | |
 | 5 Moduli, piani, sottoscrizioni | | |
 | 6 Gestione utenti completa | | |
 | 7 Elenco clienti avanzato | | |
@@ -22,7 +22,7 @@ Piano: `C:\Users\ltarq\.claude\plans\voglio-che-prepari-un-abundant-quail.md` ·
 
 ## Test rossi attesi
 
-Nessuno: dopo la fase 2 tutta la suite è verde (accettazione 98/98).
+Nessuno: dopo la fase 3 tutta la suite è verde (accettazione 107/107).
 
 ## Ambiente di sviluppo autonomo (fuori dal repo, nello scratchpad della sessione)
 
@@ -40,6 +40,8 @@ Per verificare l'interfaccia senza il login reale: provider OIDC locale (`devidp
 8. **Pagine di modifica anagrafica e organizzazione** sostituite dalle schede Anagrafica e Organizzazione della scheda cliente (`/tenants/{id}?tab=registry|organization`); la conferma con `window.confirm` alla rimozione di profili è sostituita dall'avviso nella barra delle modifiche (mock 1d).
 9. **Matrice dell'organizzazione**: nomi delle unità e dei profili modificabili direttamente nelle intestazioni della matrice (il mock mostra testo statico ma UC5 richiede la rinomina).
 10. **UC5 con Keycloak giù**: l'organizzazione si salva comunque; gli utenti tengono un id di profilo che le letture già omettono (UC7-R3).
+11. **Audit registrato dopo il salvataggio**, non nella stessa transazione (le scritture Keycloak non sono transazionali comunque): se la registrazione fallisce la modifica resta e l'errore va nel log (UC12 flusso 1a).
+12. **Creazione utente nello storico**: un evento per ogni cliente dei profili assegnati, così compare nello storico di ciascuno (mock 1b "ha creato 4 utenti per Officine Rinaldi").
 
 ## Da far vedere al designer
 

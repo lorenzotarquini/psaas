@@ -55,7 +55,8 @@
     "pageSize": "Rows per page",
     "previous": "Previous page",
     "next": "Next page",
-    "pageOf": "Page {{page}} of {{totalPages}}"
+    "pageOf": "Page {{page}} of {{totalPages}}",
+    "range": "{{first}}–{{last}} of {{total}}"
   },
   "errors": {
     "forbidden": "You are not allowed to do this.",
@@ -190,5 +191,63 @@
     "companyName": {
       "MaxLengthExceeded": "at most 20 characters"
     }
+  },
+  "audit": {
+    "title": "Audit log",
+    "subtitle": "Who did what, when and on which customer.",
+    "yesterday": "yesterday",
+    "empty": "No events.",
+    "noMatch": "No event matches the filters.",
+    "searchPlaceholder": "Search by actor or object",
+    "allActions": "All actions",
+    "from": "From",
+    "to": "To",
+    "columns": {
+      "when": "When",
+      "actor": "Actor",
+      "event": "Event",
+      "detail": "Detail"
+    },
+    "filters": {
+      "tenant.": "Customers",
+      "tenant.created": "Activations",
+      "tenant.registry": "Registries",
+      "tenant.organization": "Organizations",
+      "user.": "Users"
+    },
+    "actions": {
+      "tenant": {
+        "created": "activated",
+        "registryUpdated": "changed the registry of",
+        "organizationUpdated": "changed the organization of"
+      },
+      "user": {
+        "created": "created the user"
+      }
+    },
+    "fields": {
+      "companyName": "Company name",
+      "completeVatNumber": "VAT number",
+      "certifiedEmail": "PEC",
+      "street": "Street",
+      "city": "City",
+      "postalCode": "Postal code"
+    },
+    "details": {
+      "profileAdded": "added profile \"{{name}}\"",
+      "profileRemoved": "removed profile \"{{name}}\"",
+      "unitAdded": "added unit \"{{name}}\"",
+      "unitRemoved": "removed unit \"{{name}}\"",
+      "renamed": "\"{{before}}\" → \"{{after}}\"",
+      "accessChanges_one": "{{count}} access changed",
+      "accessChanges_other": "{{count}} accesses changed",
+      "forTenant": "for {{tenant}}",
+      "profiles_one": "{{count}} profile",
+      "profiles_other": "{{count}} profiles",
+      "units_one": "{{count}} unit",
+      "units_other": "{{count}} units"
+    },
+    "history": "History",
+    "historyAll": "Whole history"
   }
 }

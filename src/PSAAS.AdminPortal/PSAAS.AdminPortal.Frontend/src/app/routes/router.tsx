@@ -1,4 +1,5 @@
 import { createBrowserRouter } from 'react-router'
+import { AuditPage } from '@/pages/audit'
 import { HomePage } from '@/pages/home'
 import { NotFoundPage } from '@/pages/not-found'
 import { ProfilesPage } from '@/pages/profiles'
@@ -24,6 +25,7 @@ export const createAppRouter = () =>
         { path: routes.users, Component: UsersPage },
         { path: routes.userNew, Component: UserCreatePage },
         { path: routes.profiles, Component: ProfilesPage },
+        { path: routes.audit, Component: AuditPage },
         { path: routes.settings, Component: SettingsPage },
         { path: '*', Component: NotFoundPage },
       ],

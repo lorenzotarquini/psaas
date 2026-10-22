@@ -1,8 +1,10 @@
+using PSAAS.Application.Abstractions.Audit;
 using PSAAS.Application.Abstractions.Geography;
 using PSAAS.Application.Abstractions.Profiles;
 using PSAAS.Application.Abstractions.Tenants;
 using PSAAS.Application.Abstractions.Users;
 using PSAAS.Application.Contracts;
+using PSAAS.Application.Contracts.Audit;
 using PSAAS.Application.Contracts.Profiles;
 using PSAAS.Application.Contracts.Tenants;
 using PSAAS.Application.Contracts.Users;
@@ -167,4 +169,16 @@ public sealed class FakeTenantReadRepository : ITenantReadRepository
 
     public Task<TenantStructureReadModel> GetProfilesAndProductiveUnitsAsync(string tenantId, CancellationToken cancellationToken = default) =>
         Task.FromResult(Structure);
+}
+
+/// <summary>Records what the use cases asked to audit.</summary>
+public sealed class FakeAuditLog : IAuditLog
+{
+    public List<AuditRecord> Records { get; } = [];
+
+    public Task RecordAsync(AuditRecord record, CancellationToken cancellationToken = default)
+    {
+        Records.Add(record);
+        return Task.CompletedTask;
+    }
 }

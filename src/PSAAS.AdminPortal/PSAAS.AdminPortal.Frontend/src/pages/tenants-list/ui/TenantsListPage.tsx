@@ -6,8 +6,8 @@ import { useTenants, type TenantsQuery } from '@/entities/tenant'
 import { useDebouncedSearch } from '@/shared/lib/debounce'
 import { routes, tenantPath, type ListReturnState } from '@/shared/routes'
 import { ErrorAlert } from '@/shared/ui/error-alert'
-import { readTenantsQuery, writeTenantsQuery } from '../model/searchParams'
-import { Pagination } from './Pagination'
+import { Pagination } from '@/shared/ui/pagination'
+import { pageSizes, readTenantsQuery, writeTenantsQuery } from '../model/searchParams'
 
 // UC1: tenants ordered by company name, paged, searchable by company name, VAT number and PEC.
 export function TenantsListPage() {
@@ -98,6 +98,7 @@ export function TenantsListPage() {
               page={data.page}
               pageSize={data.pageSize}
               totalCount={data.totalCount}
+              pageSizes={pageSizes}
               onPageChange={(page) => navigate({ page })}
               onPageSizeChange={(pageSize) => navigate({ pageSize, page: 1 })}
             />

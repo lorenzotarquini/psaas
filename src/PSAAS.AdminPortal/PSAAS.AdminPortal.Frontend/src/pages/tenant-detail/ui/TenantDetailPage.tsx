@@ -9,12 +9,13 @@ import { useBreadcrumb } from '@/shared/lib/breadcrumb'
 import { routes, tenantPath, type TenantTab } from '@/shared/routes'
 import { ErrorAlert } from '@/shared/ui/error-alert'
 import { Tabs } from '@/shared/ui/tabs'
+import { HistoryCard } from './HistoryCard'
 import { OrganizationCard } from './OrganizationCard'
 import { OrganizationTab } from './OrganizationTab'
 import { RegistryCard } from './RegistryCard'
 import { RegistryTab } from './RegistryTab'
 
-const tabs: TenantTab[] = ['overview', 'registry', 'organization']
+const tabs: TenantTab[] = ['overview', 'registry', 'organization', 'history']
 
 // UC2 (mock 1d): everything about a tenant, one tab per area; registry (UC4) and organization (UC5) edit in place.
 export function TenantDetailPage() {
@@ -47,6 +48,7 @@ function TenantView({ tenant }: { tenant: TenantDetail }) {
     // key: a saved tenant replaces the form defaults.
     registry: <RegistryTab key={tenant.completeVatNumber + tenant.companyName} tenant={tenant} />,
     organization: <OrganizationTab tenant={tenant} />,
+    history: <HistoryCard tenantId={tenant.id} full />,
   }
 
   return (
@@ -79,6 +81,7 @@ function TenantView({ tenant }: { tenant: TenantDetail }) {
         <div className="min-w-0">{content[active]}</div>
         <aside className="flex flex-col gap-4">
           <RegistryCard tenant={tenant} />
+          {active !== 'history' && <HistoryCard tenantId={tenant.id} />}
         </aside>
       </div>
     </>

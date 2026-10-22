@@ -17,6 +17,7 @@ Errori di validazione: `400` `ValidationProblem` con un codice per campo in `err
 | UC9 | `GET /api/profiles` | esiste |
 | UC10 | `GET /api/geography/cities?term=` | esiste |
 | UC11 | `GET /api/tenants/field-validation?field=&value=&excludeTenantId=` | esiste |
+| UC12 | `GET /api/audit?tenantId=&action=&search=&from=&to=&page=&pageSize=` | esiste |
 
 ## Contratti esistenti (sintesi)
 
@@ -76,6 +77,20 @@ Verifica un solo campo dell'anagrafica con le regole del salvataggio (UC3/UC4), 
 - `field`: `companyName`, `completeVatNumber` oppure `certifiedEmail`. `value`: il valore scritto. `excludeTenantId` (facoltativo): il cliente in modifica, i cui valori non contano come duplicati.
 - Risposte: `200` `{ "errorCode": null, "conflictingTenant": null }` se valido, altrimenti il codice (`NotUnique`, `Required`, `InvalidFormat`, `MaxLengthExceeded`); con `NotUnique` anche `conflictingTenant: { id, companyName }`, il cliente che usa già il valore · `400` con `errors.field = InvalidValue` se `field` non è verificabile.
 - Non registra nulla: il salvataggio ripete tutti i controlli.
+
+### UC12 – `GET /api/audit`
+Audit log, dal più recente: `{ items: [{ id, occurredAt, actorId, actorName, action, targetType, targetId, targetName, tenantId, details }], totalCount, page, pageSize }`.
+- Filtri facoltativi: `tenantId` (storico di un cliente), `action` (codice o prefisso, es. `tenant.`), `search` (testo nel nome dell'autore o dell'oggetto, senza maiuscole), `from`/`to` (istanti ISO, `to` escluso). `pageSize` 1–200 (default 50), altrimenti `400`.
+- Azioni registrate e `details`:
+
+| `action` | Quando | `details` |
+|---|---|---|
+| `tenant.created` | UC3 | `{ profiles, productiveUnits }` (quanti) |
+| `tenant.registry.updated` | UC4, solo se qualcosa cambia | `{ changes: { <campo>: { before, after } } }` |
+| `tenant.organization.updated` | UC5, solo se qualcosa cambia | `{ profilesAdded, profilesRemoved, profilesRenamed: [{ before, after }], unitsAdded, unitsRemoved, unitsRenamed, accessChanges }` |
+| `user.created` | UC6, un evento per ogni cliente dei profili (o uno senza cliente) | `{ email, tenant, profiles }` |
+
+- L'autore viene dal token (`sub`, nome); le operazioni automatiche hanno autore `system`/"Sistema". La registrazione avviene dopo il salvataggio: se non riesce, la modifica resta valida e l'errore va nel log.
 
 ## Confini dei test di accettazione
 

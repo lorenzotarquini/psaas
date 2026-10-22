@@ -39,3 +39,6 @@ Ogni scenario di accettazione (`UCn-Sm`) scende negli strati interni: qui si ved
 | UC8-S1…S5 | Identità e ruoli dal token | `PSAAS.Auth.Tests` (lettura dei ruoli Keycloak) |
 | UC9-S1, S2 | Panoramica dei profili | `ProfileReadRepositoryTests.UC9_*` |
 | UC10-S1…S3 | Ricerca comuni: filtro, ordine, limite di 20, errori | `ItalianCityProviderTests` |
+| UC12-S1…S7 | Audit: registrazione con autore e ora, filtri, ordine, pagine | `AuditLogTests.UC12_*` |
+| UC12-S1…S4 | Eventi scritti da ogni caso d'uso (anagrafica solo se cambia, uno per cliente per gli utenti) | `TenantCreateServiceTests.UC12_*`, `TenantRegistryUpdateServiceTests.UC12_*`, `TenantOrganizationServiceTests.UC12_*`, `UserCreateServiceTests.UC12_*` |
+| UC12-S3 | Differenze dell'organizzazione per nome | `OrganizationDiffTests.UC12_*` |

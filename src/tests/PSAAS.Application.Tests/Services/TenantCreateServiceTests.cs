@@ -12,10 +12,11 @@ namespace PSAAS.Application.Tests.Services;
 public sealed class TenantCreateServiceTests
 {
     private readonly FakeUniquenessChecker _uniqueness = new();
+    private readonly FakeAuditLog _audit = new();
     private readonly FakeCityList _cities = new();
     private readonly FakeTenantWriteRepository _repository = new();
 
-    private TenantCreateService Service => new(new TenantCreateValidator(_uniqueness), new TenantAddressValidator(_cities), _repository);
+    private TenantCreateService Service => new(new TenantCreateValidator(_uniqueness), new TenantAddressValidator(_cities), _repository, _audit);
 
     private static TenantCreateRequest Valid(
         IReadOnlyList<TenantCreateProfileRequest>? profiles = null,
@@ -172,5 +173,14 @@ public sealed class TenantCreateServiceTests
         _repository.BeforeSave = () => throw new TenantUniquenessConflictException("race");
 
         await Assert.ThrowsAsync<TenantUniquenessConflictException>(() => Service.CreateAsync(Valid()));
+    }
+
+    [Fact]
+    public async Task UC12_S1_CreationIsAudited()
+    {
+        var result = await Service.CreateAsync(Valid());
+
+        var record = Assert.Single(_audit.Records);
+        Assert.Equal(("tenant.created", result.TenantId.ToString(), "Alfa Srl"), (record.Action, record.TenantId, record.TargetName));
     }
 }

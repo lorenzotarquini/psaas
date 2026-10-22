@@ -40,6 +40,7 @@ L'**Admin Portal** è il pannello di controllo del gestore della piattaforma: se
 | [UC9](UC9-panoramica-profili.md) | Consultare la panoramica dei profili | in ambito |
 | [UC10](UC10-cercare-comune.md) | Cercare un comune (di supporto a UC3 e UC4) | in ambito |
 | [UC11](UC11-verificare-campo-cliente.md) | Verificare un campo univoco del cliente (di supporto a UC3 e UC4) | in ambito |
+| [UC12](UC12-audit-log.md) | Consultare l'audit log e lo storico di un cliente (EXP-10) | in ambito |
 
 Contratto HTTP: [API.md](API.md) (collection Postman: [PSAAS.AdminPortal.postman_collection.json](../postman/PSAAS.AdminPortal.postman_collection.json)). Test unitari derivati dagli scenari: [TEST-UNITARI.md](TEST-UNITARI.md).
 
@@ -48,7 +49,7 @@ Regola comune a tutti gli use case: l'amministratore deve essere autenticato su 
 ## Fuori ambito per ora
 
 - Disattivazione / cancellazione (soft delete) di un cliente: funzionalità complessa, da definire.
-- Comunicazioni ai clienti, licenze, abbonamenti, fatturazione, report, storico delle modifiche.
+- Comunicazioni ai clienti, licenze, abbonamenti, fatturazione, report (in corso di implementazione con le epiche EXP, vedi [ADMIN-PORTAL.md](../admin-portal/ADMIN-PORTAL.md)).
 - Ruoli dell'Admin Portal con permessi ridotti.
 - Modifica e cancellazione degli utenti.
 

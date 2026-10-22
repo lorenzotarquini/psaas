@@ -29,8 +29,16 @@ public sealed class PostgresFixture : IAsyncLifetime
     {
         await using var connection = new NpgsqlConnection(ConnectionString);
         await connection.OpenAsync();
+        // Every table but the migrations history: new tables are emptied without touching this fixture.
         await using var command = new NpgsqlCommand(
-            "TRUNCATE \"ProductiveUnitProfiles\", \"ProductiveUnits\", \"Profiles\", \"Tenants\" CASCADE",
+            """
+            DO $$ DECLARE tables text;
+            BEGIN
+              SELECT string_agg(format('%I', tablename), ', ') INTO tables
+              FROM pg_tables WHERE schemaname = 'public' AND tablename <> '__EFMigrationsHistory';
+              EXECUTE 'TRUNCATE ' || tables || ' CASCADE';
+            END $$;
+            """,
             connection);
         await command.ExecuteNonQueryAsync();
     }

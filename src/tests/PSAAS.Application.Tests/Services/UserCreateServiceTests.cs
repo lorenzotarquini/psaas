@@ -9,9 +9,10 @@ namespace PSAAS.Application.Tests.Services;
 public sealed class UserCreateServiceTests
 {
     private readonly FakeProfileReadRepository _profiles = new();
+    private readonly FakeAuditLog _audit = new();
     private readonly FakeUserDirectory _directory = new();
 
-    private UserCreateService Service => new(_profiles, _directory);
+    private UserCreateService Service => new(_profiles, _directory, _audit);
 
     private static UserCreateRequest Valid(params string[] profileIds) =>
         new(" Mario ", " Rossi ", " Mario.Rossi@Example.com ", "1980-05-17", profileIds);
@@ -95,5 +96,17 @@ public sealed class UserCreateServiceTests
         _directory.Unavailable = true;
 
         await Assert.ThrowsAsync<UserDirectoryUnavailableException>(() => Service.CreateAsync(Valid()));
+    }
+
+    [Fact]
+    public async Task UC12_S4_OneEventPerTenantOfTheChosenProfiles()
+    {
+        _profiles.Profiles.Add(new("p1", "Operatore", "t1", "Alfa Srl"));
+        _profiles.Profiles.Add(new("p2", "Revisore", "t2", "Beta Snc"));
+
+        await Service.CreateAsync(Valid("p1", "p2"));
+
+        Assert.Equal(["t1", "t2"], _audit.Records.Select(r => r.TenantId).Order());
+        Assert.All(_audit.Records, r => Assert.Equal(("user.created", "Mario Rossi"), (r.Action, r.TargetName)));
     }
 }

@@ -1,5 +1,7 @@
 using NLog;
+using PSAAS.Application.Abstractions.Audit;
 using PSAAS.Application.Abstractions.Tenants;
+using PSAAS.Application.Contracts.Audit;
 using PSAAS.Application.Contracts.Tenants;
 using PSAAS.Application.Validators.Tenants;
 using PSAAS.Domain;
@@ -13,7 +15,8 @@ namespace PSAAS.Application.Services.Tenants;
 public sealed class TenantCreateService(
     TenantCreateValidator validator,
     TenantAddressValidator addressValidator,
-    ITenantWriteRepository tenants)
+    ITenantWriteRepository tenants,
+    IAuditLog audit)
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -77,6 +80,15 @@ public sealed class TenantCreateService(
             return new TenantCreateResult(null, errors);
         }
 
+        await audit.RecordAsync(
+            new AuditRecord(
+                AuditActions.TenantCreated,
+                AuditTargets.Tenant,
+                tenant.Id.ToString(),
+                tenant.CompanyName,
+                tenant.Id.ToString(),
+                new { profiles = profiles.Count, productiveUnits = units.Count }),
+            cancellationToken);
         Logger.Info(
             "Created tenant {TenantId} with {ProfileCount} profiles and {ProductiveUnitCount} productive units",
             tenant.Id,

@@ -55,6 +55,17 @@ public sealed class UC11_VerificareCampoCliente(PostgresFixture database) : Acce
         Assert.Equal("InvalidValue", errors["field"]);
     }
 
+    [Fact, Trait("Scenario", "UC11-S6")]
+    public async Task S6_IndicaIlClienteCheUsaGiaIlValore()
+    {
+        var alfa = await GivenTenantAsync("Alfa Srl");
+
+        var result = await ValidateAsync("companyName", "ALFA s.r.l.");
+
+        Assert.Equal("NotUnique", result.ErrorCode);
+        Assert.Equal(new TenantReferenceView(alfa.Id, "Alfa Srl"), result.ConflictingTenant);
+    }
+
     private async Task<FieldValidationView> ValidateAsync(string field, string value, Guid? excludeTenantId = null)
     {
         var url = $"/api/tenants/field-validation?field={field}&value={Uri.EscapeDataString(value)}";

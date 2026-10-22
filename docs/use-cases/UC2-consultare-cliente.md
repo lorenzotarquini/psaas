@@ -12,6 +12,7 @@
 
 ## Regole
 - R1. Un cliente può non avere unità produttive né profili; un profilo può non aprire nessuna unità.
+- R2. Per ogni profilo si vede quanti utenti lo hanno (da Keycloak); se Keycloak non risponde la scheda si apre comunque, senza i conteggi.
 
 ## Scenari di accettazione
 
@@ -60,4 +61,33 @@ Funzionalità: Consultare la scheda di un cliente
 Scenario: Cliente inesistente
   Quando l'amministratore apre la scheda di un cliente che non esiste
   Allora il sistema risponde che il cliente non è stato trovato
+```
+
+### UC2-S4
+
+Test: `UC2_ConsultareCliente.S4_UtentiPerProfilo`
+
+```gherkin
+# language: it
+Funzionalità: Consultare la scheda di un cliente
+
+Scenario: Quanti utenti hanno ogni profilo
+  Dato che il cliente "Alfa Srl" ha i profili "Operatore" e "Revisore"
+  E che 2 utenti hanno il profilo "Operatore"
+  Quando l'amministratore apre la scheda di "Alfa Srl"
+  Allora vede 2 utenti su "Operatore" e 0 su "Revisore"
+```
+
+### UC2-S5
+
+Test: `UC2_ConsultareCliente.S5_SchedaSenzaKeycloak`
+
+```gherkin
+# language: it
+Funzionalità: Consultare la scheda di un cliente
+
+Scenario: Keycloak non raggiungibile
+  Dato che Keycloak non risponde
+  Quando l'amministratore apre la scheda di un cliente con profili
+  Allora vede la scheda completa, senza il numero di utenti per profilo
 ```

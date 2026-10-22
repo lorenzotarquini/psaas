@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using NLog;
 using PSAAS.Application.Abstractions.Tenants;
 using PSAAS.Application.Contracts;
+using PSAAS.Application.Contracts.Tenants;
 using PSAAS.Application.Validators.Tenants;
 using PSAAS.Domain;
 using PSAAS.Infrastructure.Converters;
@@ -26,10 +27,13 @@ public sealed class TenantReadRepository(PsaasDbContext dbContext) : ITenantRead
         {
             var normalizedName = TenantFieldNormalizer.NormalizeCompanyName(search);
             var vat = search.Trim().ToUpperInvariant();
+            // UC1-R2: certified emails are stored normalized (uppercase), so the search ignores case.
+            var email = TenantFieldNormalizer.NormalizeCertifiedEmail(search);
             query = query.Where(tenant =>
                 (normalizedName != "" && tenant.NormalizedCompanyName.Contains(normalizedName))
                 || tenant.VatNumber.Contains(vat)
-                || tenant.CompleteVatNumber.Contains(vat));
+                || tenant.CompleteVatNumber.Contains(vat)
+                || tenant.NormalizedCertifiedEmail.Contains(email));
         }
 
         var totalCount = await query.CountAsync(cancellationToken).ConfigureAwait(false);
@@ -61,6 +65,29 @@ public sealed class TenantReadRepository(PsaasDbContext dbContext) : ITenantRead
             .ConfigureAwait(false);
 
         return tenant is null ? null : TenantDbModelConverter.ToDomain(tenant);
+    }
+
+    public async Task<TenantReference?> FindByUniqueValueAsync(
+        string field,
+        string normalizedValue,
+        Guid? excludedTenantId,
+        CancellationToken cancellationToken = default)
+    {
+        var excluded = excludedTenantId?.ToString();
+        var query = dbContext.Tenants.AsNoTracking().Where(tenant => tenant.Id != excluded);
+        query = field switch
+        {
+            "companyName" => query.Where(tenant => tenant.NormalizedCompanyName == normalizedValue),
+            "completeVatNumber" => query.Where(tenant => tenant.CompleteVatNumber == normalizedValue),
+            "certifiedEmail" => query.Where(tenant => tenant.NormalizedCertifiedEmail == normalizedValue),
+            _ => throw new ArgumentOutOfRangeException(nameof(field), field, "Not a unique tenant field")
+        };
+
+        var found = await query
+            .Select(tenant => new { tenant.Id, tenant.CompanyName })
+            .FirstOrDefaultAsync(cancellationToken)
+            .ConfigureAwait(false);
+        return found is null ? null : new TenantReference(Guid.Parse(found.Id), found.CompanyName);
     }
 
     public async Task<TenantStructureReadModel> GetProfilesAndProductiveUnitsAsync(

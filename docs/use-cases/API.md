@@ -6,11 +6,11 @@ Errori di validazione: `400` `ValidationProblem` con un codice per campo in `err
 
 | Use case | Endpoint | Stato |
 |---|---|---|
-| UC1 | `GET /api/tenants?search=&page=1&pageSize=20` | esiste (manca la ricerca per PEC) |
+| UC1 | `GET /api/tenants?search=&page=1&pageSize=20` | esiste |
 | UC2 | `GET /api/tenants/{id}` | esiste |
 | UC3 | `POST /api/tenants` | esiste |
-| UC4 | `PUT /api/tenants/{id}` | **nuovo** |
-| UC5 | `PUT /api/tenants/{id}/organization` | **nuovo** |
+| UC4 | `PUT /api/tenants/{id}` | esiste |
+| UC5 | `PUT /api/tenants/{id}/organization` | esiste |
 | UC6 | `POST /api/users` | esiste |
 | UC7 | `GET /api/users?search=` | esiste |
 | UC8 | `GET /api/me` | esiste |
@@ -21,7 +21,7 @@ Errori di validazione: `400` `ValidationProblem` con un codice per campo in `err
 ## Contratti esistenti (sintesi)
 
 - **UC1** → `{ items: [{ id, companyName, vatNumber, completeVatNumber, certifiedEmail, city }], totalCount, page, pageSize }`.
-- **UC2** → `{ id, companyName, vatNumber, completeVatNumber, certifiedEmail, address: { street, city, postalCode, country }, profiles: [{ id, name, description }], productiveUnits: [{ id, name, description, profileIds }] }`; `404` se non esiste.
+- **UC2** → `{ id, companyName, vatNumber, completeVatNumber, certifiedEmail, address: { street, city, postalCode, country }, profiles: [{ id, name, description, userCount }], productiveUnits: [{ id, name, description, profileIds }] }`; `404` se non esiste. `userCount` = utenti con quel profilo (da Keycloak), `null` se Keycloak non risponde: la scheda non fallisce.
 - **UC3** → body `{ companyName, completeVatNumber, certifiedEmail, street, city, postalCode, profiles?: [{ key, name, description }], productiveUnits?: [{ name, description, profileKeys }] }`; `201` + `Location` + scheda (UC2).
 - **UC8** → `{ keycloakId, name, email, roles }`.
 - **UC9** → `[{ id, tenantId, tenantCompanyName, name, description }]` ordinati per nome.
@@ -32,6 +32,7 @@ Errori di validazione: `400` `ValidationProblem` con un codice per campo in `err
 ### UC4 – `PUT /api/tenants/{id}`
 Body: `{ companyName, completeVatNumber, certifiedEmail, street, city, postalCode }` (stesse regole di UC3, unicità che esclude il cliente stesso).
 Risposte: `200` + scheda aggiornata (UC2) · `400` errori per campo · `404` cliente inesistente.
+Un duplicato salvato nello stesso momento da un altro amministratore è riportato sul campo (`NotUnique`), non come errore generico.
 
 ### UC5 – `PUT /api/tenants/{id}/organization`
 Sostituisce l'intera organizzazione del cliente: ciò che non compare nel body viene tolto.
@@ -47,6 +48,7 @@ Sostituisce l'intera organizzazione del cliente: ciò che non compare nel body v
 ```
 - Un profilo con `id` è uno esistente (rinominabile), senza `id` è nuovo. `key` è scelta dal client e serve alle unità per riferirsi ai profili della richiesta.
 - Risposte: `200` + scheda aggiornata (UC2) · `400` errori per campo (`profiles[i].name`, `profiles[i].id` = `InvalidValue` se non è un profilo del cliente, `productiveUnits[i].id`, `productiveUnits[i].profileKeys[j]`) · `404` cliente inesistente.
+- I profili tolti vengono rimossi anche dagli utenti in Keycloak (attributo `profileIds`). Se Keycloak non risponde l'organizzazione resta salvata: gli utenti conservano un id che le letture già omettono (UC7-R3), e l'evento è nel log.
 
 ### UC6 – `POST /api/users`
 Body: `{ firstName, lastName, email, birthDate: "YYYY-MM-DD", profileIds: [] }`.
@@ -72,7 +74,7 @@ Senza segreto o senza ruoli le chiamate a `/api/users` rispondono `503` e la cau
 ### UC11 – `GET /api/tenants/field-validation?field=&value=&excludeTenantId=`
 Verifica un solo campo dell'anagrafica con le regole del salvataggio (UC3/UC4), per controllarlo all'uscita dal campo.
 - `field`: `companyName`, `completeVatNumber` oppure `certifiedEmail`. `value`: il valore scritto. `excludeTenantId` (facoltativo): il cliente in modifica, i cui valori non contano come duplicati.
-- Risposte: `200` `{ "errorCode": null }` se valido, altrimenti `{ "errorCode": "NotUnique" }` (o `Required`, `InvalidFormat`, `MaxLengthExceeded`) · `400` con `errors.field = InvalidValue` se `field` non è verificabile.
+- Risposte: `200` `{ "errorCode": null, "conflictingTenant": null }` se valido, altrimenti il codice (`NotUnique`, `Required`, `InvalidFormat`, `MaxLengthExceeded`); con `NotUnique` anche `conflictingTenant: { id, companyName }`, il cliente che usa già il valore · `400` con `errors.field = InvalidValue` se `field` non è verificabile.
 - Non registra nulla: il salvataggio ripete tutti i controlli.
 
 ## Confini dei test di accettazione

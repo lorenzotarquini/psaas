@@ -16,6 +16,16 @@ public interface IUserDirectory
     /// <summary>Users whose first name, last name or email contains <paramref name="search"/>, ignoring case.</summary>
     /// <exception cref="UserDirectoryUnavailableException">The identity provider cannot be reached.</exception>
     Task<IReadOnlyList<DirectoryUser>> SearchAsync(string? search, CancellationToken cancellationToken = default);
+
+    /// <summary>How many users have each profile (UC2: "Utenti" column of the organization).</summary>
+    /// <exception cref="UserDirectoryUnavailableException">The identity provider cannot be reached.</exception>
+    Task<IReadOnlyDictionary<string, int>> CountByProfilesAsync(
+        IReadOnlyCollection<string> profileIds,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>UC5-R4: removes the given profiles from every user that has them.</summary>
+    /// <exception cref="UserDirectoryUnavailableException">The identity provider cannot be reached.</exception>
+    Task RemoveProfilesAsync(IReadOnlyCollection<string> profileIds, CancellationToken cancellationToken = default);
 }
 
 public sealed record NewDirectoryUser(

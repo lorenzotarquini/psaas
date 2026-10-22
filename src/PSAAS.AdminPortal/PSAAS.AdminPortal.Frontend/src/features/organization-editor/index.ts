@@ -1,4 +1,5 @@
 export {
+  countChanges,
   emptyOrganization,
   organizationFromTenant,
   organizationSchema,
@@ -6,4 +7,4 @@ export {
   toOrganizationRequest,
   type OrganizationValues,
 } from './model/organization'
-export { OrganizationEditor } from './ui/OrganizationEditor'
+export { OrganizationMatrix } from './ui/OrganizationMatrix'

@@ -85,14 +85,25 @@
     "opens": "Opens the unit",
     "doesNotOpen": "Does not open the unit",
     "editRegistry": "Edit registry",
-    "editOrganization": "Edit organization"
+    "editOrganization": "Edit organization",
+    "tabsLabel": "Customer sections",
+    "tabs": {
+      "overview": "Overview",
+      "registry": "Registry",
+      "organization": "Organization",
+      "subscription": "Subscription and modules",
+      "users": "Users",
+      "usage": "Usage",
+      "invoices": "Invoices",
+      "history": "History"
+    }
   },
   "validation": {
-    "Required": "Required field.",
-    "InvalidFormat": "Invalid format.",
-    "MaxLengthExceeded": "Text too long.",
-    "NotUnique": "Value already in use.",
-    "InvalidValue": "Invalid value."
+    "Required": "Required field",
+    "InvalidFormat": "Invalid format",
+    "MaxLengthExceeded": "Text too long",
+    "NotUnique": "Value already in use",
+    "InvalidValue": "Invalid value"
   },
   "tenantForm": {
     "createTitle": "New customer",
@@ -103,7 +114,10 @@
     "cityListUnavailable": "City list unavailable: type city and postal code by hand.",
     "optional": "optional",
     "create": "Activate customer",
-    "save": "Save"
+    "save": "Save",
+    "available": "Available",
+    "openConflicting": "Open \"{{name}}\"",
+    "registryHint": "Each unique field is checked when you leave it, with the same rules as saving."
   },
   "organizationEditor": {
     "title": "Organization of {{name}}",
@@ -116,7 +130,17 @@
     "openedBy": "Opened by profiles:",
     "unnamedProfile": "(unnamed profile)",
     "invalidProfileLink": "Link to an invalid profile.",
-    "confirmRemoveProfiles": "You are removing the profiles: {{names}}. Users who have them will lose them. Continue?"
+    "confirmRemoveProfiles": "You are removing the profiles: {{names}}. Users who have them will lose them. Continue?",
+    "matrixTitle": "Profiles × productive units",
+    "matrixHint": "Click a cell to open or close the access of a profile to a unit.",
+    "users": "Users",
+    "profileName": "Profile name",
+    "unitName": "Unit name",
+    "restore": "Restore",
+    "access": "{{profile}} opens {{unit}}",
+    "save": "Save organization",
+    "removalWarning_one": "Removing {{names}} also removes it from {{count}} user in Keycloak.",
+    "removalWarning_other": "Removing {{names}} also removes it from {{count}} users in Keycloak."
   },
   "users": {
     "title": "Users",
@@ -152,5 +176,19 @@
     "preferences": "Preferences",
     "languageHint": "Interface language.",
     "themeHint": "Light or dark; without a choice it follows the system."
+  },
+  "unsaved": {
+    "count_one": "{{count}} unsaved change.",
+    "count_other": "{{count}} unsaved changes.",
+    "discard": "Discard",
+    "saveShortcut": "Ctrl S"
+  },
+  "validationHint": {
+    "completeVatNumber": {
+      "InvalidFormat": "expected IT + 11 digits"
+    },
+    "companyName": {
+      "MaxLengthExceeded": "at most 20 characters"
+    }
   }
 }

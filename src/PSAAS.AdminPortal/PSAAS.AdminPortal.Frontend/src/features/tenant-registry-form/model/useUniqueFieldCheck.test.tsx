@@ -23,7 +23,7 @@ function setup(values: Partial<RegistryValues>, excludeTenantId?: string) {
 
 const blur = (result: ReturnType<typeof setup>, field: 'companyName' | 'completeVatNumber' | 'certifiedEmail') =>
   act(async () => {
-    await result.current.check(field).onBlur?.({} as never)
+    await result.current.check.onBlur(field).onBlur?.({} as never)
   })
 
 describe('useUniqueFieldCheck', () => {
@@ -31,20 +31,28 @@ describe('useUniqueFieldCheck', () => {
 
   // UC11-S2: the backend code lands on the field.
   it('shows NotUnique from the backend on the field', async () => {
-    validate.mockResolvedValue('NotUnique')
+    validate.mockResolvedValue({ errorCode: 'NotUnique', conflictingTenant: { id: 't-1', companyName: 'Alfa Srl' } })
     const result = setup({ companyName: ' ALFA s.r.l. ' })
     await blur(result, 'companyName')
     expect(validate).toHaveBeenCalledWith('companyName', 'ALFA s.r.l.', undefined)
     expect(result.current.form.getFieldState('companyName').error?.message).toBe('NotUnique')
+    // UC11-R4: the tenant already using the value, to link to it.
+    expect(result.current.check.statusOf('companyName', 'ALFA s.r.l.')).toEqual({
+      verified: false,
+      conflictingTenant: { id: 't-1', companyName: 'Alfa Srl' },
+    })
   })
 
   // UC11-S3: the tenant being edited is passed along.
   it('excludes the tenant being edited', async () => {
-    validate.mockResolvedValue(null)
+    validate.mockResolvedValue({ errorCode: null, conflictingTenant: null })
     const result = setup({ certifiedEmail: 'alfa@pec.it' }, 'tenant-1')
     await blur(result, 'certifiedEmail')
     expect(validate).toHaveBeenCalledWith('certifiedEmail', 'alfa@pec.it', 'tenant-1')
     expect(result.current.form.getFieldState('certifiedEmail').error).toBeUndefined()
+    // Mock 1a: confirmed free while the value stays the same.
+    expect(result.current.check.statusOf('certifiedEmail', 'alfa@pec.it').verified).toBe(true)
+    expect(result.current.check.statusOf('certifiedEmail', 'beta@pec.it').verified).toBe(false)
   })
 
   it('does not call the backend for an empty field or a format the client already rejects', async () => {
@@ -59,7 +67,7 @@ describe('useUniqueFieldCheck', () => {
     const result = setup({ companyName: 'Alfa Srl' })
     validate.mockImplementation(async () => {
       result.current.form.setValue('companyName', 'Beta Snc')
-      return 'NotUnique'
+      return { errorCode: 'NotUnique', conflictingTenant: null }
     })
     await blur(result, 'companyName')
     expect(result.current.form.getFieldState('companyName').error).toBeUndefined()

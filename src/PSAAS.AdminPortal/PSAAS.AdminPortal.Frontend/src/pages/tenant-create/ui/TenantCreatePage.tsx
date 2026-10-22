@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router'
 import { useCreateTenant } from '@/entities/tenant'
 import {
   emptyOrganization,
-  OrganizationEditor,
+  OrganizationMatrix,
   organizationSchema,
   toOrganizationRequest,
 } from '@/features/organization-editor'
@@ -56,7 +56,7 @@ export function TenantCreatePage() {
               {t('tenantDetail.organization')}
               <span className="badge badge-ghost">{t('tenantForm.optional')}</span>
             </h2>
-            <OrganizationEditor />
+            <OrganizationMatrix />
           </div>
         </section>
         <div className="flex justify-end">

@@ -8,8 +8,8 @@ Piano: `C:\Users\ltarq\.claude\plans\voglio-che-prepari-un-abundant-quail.md` ·
 |---|---|---|
 | 0 Preparazione | ✅ | vedi log |
 | 1 Design system e shell | ✅ | vedi log |
-| 2 Chiusura perimetro (UC1-S4, UC4, UC5, conteggi, UC11) | ⏳ | |
-| 3 Audit log e storico | | |
+| 2 Chiusura perimetro (UC1-S4, UC4, UC5, conteggi, UC11) | ✅ | vedi log |
+| 3 Audit log e storico | ⏳ | |
 | 4 Ciclo di vita e wizard | | |
 | 5 Moduli, piani, sottoscrizioni | | |
 | 6 Gestione utenti completa | | |
@@ -22,7 +22,7 @@ Piano: `C:\Users\ltarq\.claude\plans\voglio-che-prepari-un-abundant-quail.md` ·
 
 ## Test rossi attesi
 
-UC1-S4, UC4 (6), UC5 (7), GEN-S1/S2 sulle `PUT /api/tenants` (4): da chiudere nella fase 2.
+Nessuno: dopo la fase 2 tutta la suite è verde (accettazione 98/98).
 
 ## Ambiente di sviluppo autonomo (fuori dal repo, nello scratchpad della sessione)
 
@@ -37,6 +37,9 @@ Per verificare l'interfaccia senza il login reale: provider OIDC locale (`devidp
 5. **Piè di pagina della sidebar**: versione del portale (`package.json`, 0.2.0) e realm; diventerà la versione del modulo core con la fase 5.
 6. **Badge d'ambiente** da `VITE_ENVIRONMENT_LABEL` (`.env`: `SVILUPPO`).
 7. **Tema scelto persistito** in localStorage (`psaas-theme`); senza scelta segue il sistema.
+8. **Pagine di modifica anagrafica e organizzazione** sostituite dalle schede Anagrafica e Organizzazione della scheda cliente (`/tenants/{id}?tab=registry|organization`); la conferma con `window.confirm` alla rimozione di profili è sostituita dall'avviso nella barra delle modifiche (mock 1d).
+9. **Matrice dell'organizzazione**: nomi delle unità e dei profili modificabili direttamente nelle intestazioni della matrice (il mock mostra testo statico ma UC5 richiede la rinomina).
+10. **UC5 con Keycloak giù**: l'organizzazione si salva comunque; gli utenti tengono un id di profilo che le letture già omettono (UC7-R3).
 
 ## Da far vedere al designer
 

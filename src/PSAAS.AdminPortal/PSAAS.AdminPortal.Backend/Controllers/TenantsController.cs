@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using NLog;
 using PSAAS.AdminPortal.Backend.Contracts;
 using PSAAS.Application.Abstractions.Tenants;
+using PSAAS.Application.Abstractions.Users;
 using PSAAS.Application.Contracts;
 using PSAAS.Application.Contracts.Tenants;
 using PSAAS.Application.Services.Tenants;
@@ -12,7 +13,7 @@ namespace PSAAS.AdminPortal.Backend.Controllers;
 
 [ApiController]
 [Route("api/tenants")]
-public sealed class TenantsController(ITenantReadRepository tenants) : ControllerBase
+public sealed class TenantsController(ITenantReadRepository tenants, IUserDirectory users) : ControllerBase
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -49,6 +50,7 @@ public sealed class TenantsController(ITenantReadRepository tenants) : Controlle
         }
 
         var structure = await tenants.GetProfilesAndProductiveUnitsAsync(id.ToString(), cancellationToken);
+        var userCounts = await CountUsersAsync(structure.Profiles.Select(profile => profile.Id).ToArray(), cancellationToken);
         Logger.Info(
             "Returned tenant {TenantId} with {ProfileCount} profiles and {ProductiveUnitCount} productive units",
             id,
@@ -61,8 +63,71 @@ public sealed class TenantsController(ITenantReadRepository tenants) : Controlle
             tenant.CompleteVatNumber,
             tenant.CertifiedEmail,
             AddressDto.From(tenant.Address),
-            structure.Profiles,
+            structure.Profiles
+                .Select(profile => new TenantProfileDto(
+                    profile.Id, profile.Name, profile.Description, userCounts?.GetValueOrDefault(profile.Id)))
+                .ToArray(),
             structure.ProductiveUnits);
+    }
+
+    // The detail stays readable without Keycloak: only the counts are missing.
+    private async Task<IReadOnlyDictionary<string, int>?> CountUsersAsync(string[] profileIds, CancellationToken cancellationToken)
+    {
+        if (profileIds.Length == 0)
+        {
+            return new Dictionary<string, int>();
+        }
+
+        try
+        {
+            return await users.CountByProfilesAsync(profileIds, cancellationToken);
+        }
+        catch (UserDirectoryUnavailableException exception)
+        {
+            Logger.Warn(exception, "Tenant detail returned without user counts");
+            return null;
+        }
+    }
+
+    // UC4.
+    [HttpPut("{id:guid}")]
+    public async Task<ActionResult<TenantDetailDto>> UpdateRegistry(
+        Guid id,
+        TenantRegistryUpdateRequest request,
+        [FromServices] TenantRegistryUpdateService updateService,
+        CancellationToken cancellationToken)
+    {
+        var result = await updateService.UpdateAsync(id, request, cancellationToken);
+        return await EditResultAsync(id, result, cancellationToken);
+    }
+
+    // UC5.
+    [HttpPut("{id:guid}/organization")]
+    public async Task<ActionResult<TenantDetailDto>> SaveOrganization(
+        Guid id,
+        TenantOrganizationRequest request,
+        [FromServices] TenantOrganizationService organizationService,
+        CancellationToken cancellationToken)
+    {
+        var result = await organizationService.SaveAsync(id, request, cancellationToken);
+        return await EditResultAsync(id, result, cancellationToken);
+    }
+
+    private async Task<ActionResult<TenantDetailDto>> EditResultAsync(Guid id, TenantEditResult result, CancellationToken cancellationToken)
+    {
+        if (!result.Found)
+        {
+            return NotFound();
+        }
+
+        if (!result.Succeeded)
+        {
+            // Field details are logged by the service.
+            return ValidationProblem(new ValidationProblemDetails(
+                result.Errors.ToDictionary(error => error.Key, error => new[] { error.Value })));
+        }
+
+        return await GetById(id, cancellationToken);
     }
 
     // UC11: same rules and codes as saving (UC3/UC4), one field at a time, so the form can check on blur.
@@ -94,7 +159,10 @@ public sealed class TenantsController(ITenantReadRepository tenants) : Controlle
             field,
             result.ErrorCode ?? "Valid",
             excludeTenantId);
-        return new TenantFieldValidationDto(result.ErrorCode);
+        var conflicting = result.ErrorCode == TenantFieldValidationErrorCodes.NotUnique
+            ? await tenants.FindByUniqueValueAsync(field, result.NormalizedValue, excludeTenantId, cancellationToken)
+            : null;
+        return new TenantFieldValidationDto(result.ErrorCode, conflicting);
     }
 
     [HttpPost]

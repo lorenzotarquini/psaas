@@ -47,4 +47,30 @@ public sealed class UC2_ConsultareCliente(PostgresFixture database) : Acceptance
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+
+    [Fact, Trait("Scenario", "UC2-S4")]
+    public async Task S4_UtentiPerProfilo()
+    {
+        var alfa = await GivenTenantAsync(
+            "Alfa Srl",
+            profiles: new[] { new { key = "op", name = "Operatore" }, new { key = "rev", name = "Revisore" } });
+        KeycloakUsers.Add("Mario", "Rossi", "mario.rossi@example.com", alfa.Profile("Operatore").Id);
+        KeycloakUsers.Add("Anna", "Bianchi", "anna.bianchi@example.com", alfa.Profile("Operatore").Id);
+
+        var scheda = await TenantAsync(alfa.Id);
+
+        Assert.Equal(2, scheda.Profile("Operatore").UserCount);
+        Assert.Equal(0, scheda.Profile("Revisore").UserCount);
+    }
+
+    [Fact, Trait("Scenario", "UC2-S5")]
+    public async Task S5_SchedaSenzaKeycloak()
+    {
+        var alfa = await GivenTenantAsync("Alfa Srl", profiles: new[] { new { key = "op", name = "Operatore" } });
+        KeycloakUsers.Unavailable = true;
+
+        var scheda = await TenantAsync(alfa.Id);
+
+        Assert.Null(scheda.Profile("Operatore").UserCount);
+    }
 }

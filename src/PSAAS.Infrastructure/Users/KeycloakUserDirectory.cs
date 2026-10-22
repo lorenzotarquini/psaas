@@ -26,6 +26,9 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
     // shortcut: UC7 has no paging, so a search returns at most this many users; add paging when realms grow.
     private const int MaxSearchResults = 100;
 
+    // shortcut: users of one profile updated in a single page; page through them if a profile ever has more.
+    private const int MaxProfileUsers = 1000;
+
     private static readonly string[] PasswordSetupActions = ["UPDATE_PASSWORD"];
 
     public async Task<DirectoryUser> CreateAsync(NewDirectoryUser user, CancellationToken cancellationToken = default)
@@ -97,6 +100,61 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
         Logger.Debug("Keycloak returned {UserCount} users", users.Length);
         return users.Select(ToDirectoryUser).ToArray();
     }
+
+    public async Task<IReadOnlyDictionary<string, int>> CountByProfilesAsync(
+        IReadOnlyCollection<string> profileIds,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(profileIds);
+        var counts = new Dictionary<string, int>(StringComparer.Ordinal);
+        // shortcut: one count request per profile; fine for the tens of profiles of a tenant, batch it if that grows.
+        foreach (var profileId in profileIds.Distinct(StringComparer.Ordinal))
+        {
+            counts[profileId] = await CallAsync(async () =>
+            {
+                using var response = await http.GetAsync($"users/count?q={ProfileQuery(profileId)}", cancellationToken);
+                EnsureSuccess(response, "count users");
+                return await response.Content.ReadFromJsonAsync<int>(cancellationToken);
+            }, cancellationToken);
+        }
+
+        return counts;
+    }
+
+    public async Task RemoveProfilesAsync(IReadOnlyCollection<string> profileIds, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(profileIds);
+        var removed = profileIds.ToHashSet(StringComparer.Ordinal);
+        foreach (var profileId in removed)
+        {
+            var users = await CallAsync(async () =>
+            {
+                using var response = await http.GetAsync(
+                    $"users?briefRepresentation=false&max={MaxProfileUsers}&q={ProfileQuery(profileId)}", cancellationToken);
+                EnsureSuccess(response, "find the users of a profile");
+                return await response.Content.ReadFromJsonAsync<UserRepresentation[]>(cancellationToken) ?? [];
+            }, cancellationToken);
+
+            foreach (var user in users)
+            {
+                // The full representation goes back: Keycloak replaces the attribute map on update.
+                var attributes = user.Attributes ?? [];
+                attributes[ProfileIdsAttribute] = attributes.GetValueOrDefault(ProfileIdsAttribute, [])
+                    .Where(id => !removed.Contains(id)).ToArray();
+                user.Attributes = attributes;
+                await CallAsync(async () =>
+                {
+                    using var response = await http.PutAsJsonAsync($"users/{Uri.EscapeDataString(user.Id!)}", user, cancellationToken);
+                    EnsureSuccess(response, "update the profiles of a user");
+                    return true;
+                }, cancellationToken);
+            }
+
+            Logger.Info("Removed profile {ProfileId} from {UserCount} Keycloak users", profileId, users.Length);
+        }
+    }
+
+    private static string ProfileQuery(string profileId) => Uri.EscapeDataString($"{ProfileIdsAttribute}:{profileId}");
 
     private static DirectoryUser ToDirectoryUser(UserRepresentation user)
     {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { buildAccessMatrix } from './accessMatrix'
 
-const profile = (id: string) => ({ id, name: id, description: null })
+const profile = (id: string) => ({ id, name: id, description: null, userCount: 0 })
 const unit = (id: string, profileIds: string[]) => ({ id, name: id, description: null, profileIds })
 
 describe('buildAccessMatrix', () => {

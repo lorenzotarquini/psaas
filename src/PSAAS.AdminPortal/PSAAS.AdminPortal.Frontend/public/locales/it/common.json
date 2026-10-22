@@ -85,14 +85,25 @@
     "opens": "Apre l'unità",
     "doesNotOpen": "Non apre l'unità",
     "editRegistry": "Modifica anagrafica",
-    "editOrganization": "Modifica organizzazione"
+    "editOrganization": "Modifica organizzazione",
+    "tabsLabel": "Sezioni del cliente",
+    "tabs": {
+      "overview": "Panoramica",
+      "registry": "Anagrafica",
+      "organization": "Organizzazione",
+      "subscription": "Abbonamento e moduli",
+      "users": "Utenti",
+      "usage": "Uso",
+      "invoices": "Fatture",
+      "history": "Storico"
+    }
   },
   "validation": {
-    "Required": "Campo obbligatorio.",
-    "InvalidFormat": "Formato non valido.",
-    "MaxLengthExceeded": "Testo troppo lungo.",
-    "NotUnique": "Valore già in uso.",
-    "InvalidValue": "Valore non valido."
+    "Required": "Campo obbligatorio",
+    "InvalidFormat": "Formato non valido",
+    "MaxLengthExceeded": "Testo troppo lungo",
+    "NotUnique": "Valore già in uso",
+    "InvalidValue": "Valore non valido"
   },
   "tenantForm": {
     "createTitle": "Nuovo cliente",
@@ -103,7 +114,10 @@
     "cityListUnavailable": "Elenco comuni non disponibile: scrivi città e CAP a mano.",
     "optional": "facoltativo",
     "create": "Attiva cliente",
-    "save": "Salva"
+    "save": "Salva",
+    "available": "Disponibile",
+    "openConflicting": "Apri \"{{name}}\"",
+    "registryHint": "Ogni campo univoco viene verificato all'uscita, con le stesse regole del salvataggio."
   },
   "organizationEditor": {
     "title": "Organizzazione di {{name}}",
@@ -116,7 +130,17 @@
     "openedBy": "Aperta dai profili:",
     "unnamedProfile": "(profilo senza nome)",
     "invalidProfileLink": "Collegamento a un profilo non valido.",
-    "confirmRemoveProfiles": "Stai rimuovendo i profili: {{names}}. Gli utenti che li hanno li perderanno. Continuare?"
+    "confirmRemoveProfiles": "Stai rimuovendo i profili: {{names}}. Gli utenti che li hanno li perderanno. Continuare?",
+    "matrixTitle": "Profili × unità produttive",
+    "matrixHint": "Clicca una cella per aprire o chiudere l'accesso di un profilo a un'unità.",
+    "users": "Utenti",
+    "profileName": "Nome del profilo",
+    "unitName": "Nome dell'unità",
+    "restore": "Ripristina",
+    "access": "{{profile}} apre {{unit}}",
+    "save": "Salva organizzazione",
+    "removalWarning_one": "Rimuovere {{names}} lo toglierà anche a {{count}} utente in Keycloak.",
+    "removalWarning_other": "Rimuovere {{names}} lo toglierà anche a {{count}} utenti in Keycloak."
   },
   "users": {
     "title": "Utenti",
@@ -152,5 +176,19 @@
     "preferences": "Preferenze",
     "languageHint": "Lingua dell'interfaccia.",
     "themeHint": "Chiaro o scuro; senza scelta segue il sistema."
+  },
+  "unsaved": {
+    "count_one": "{{count}} modifica non salvata.",
+    "count_other": "{{count}} modifiche non salvate.",
+    "discard": "Annulla",
+    "saveShortcut": "Ctrl S"
+  },
+  "validationHint": {
+    "completeVatNumber": {
+      "InvalidFormat": "atteso IT + 11 cifre"
+    },
+    "companyName": {
+      "MaxLengthExceeded": "al massimo 20 caratteri"
+    }
   }
 }

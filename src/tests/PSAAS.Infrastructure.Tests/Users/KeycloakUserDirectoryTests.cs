@@ -133,4 +133,38 @@ public sealed class KeycloakUserDirectoryTests
 
         await Assert.ThrowsAsync<UserDirectoryUnavailableException>(() => Directory(handler).SearchAsync("mario"));
     }
+
+    [Fact]
+    public async Task UC2_S4_CountByProfiles_AsksKeycloakOncePerProfile()
+    {
+        var handler = new Handler(request => new(HttpStatusCode.OK)
+        {
+            Content = new StringContent(request.RequestUri!.Query.Contains("p1") ? "3" : "0"),
+        });
+
+        var counts = await Directory(handler).CountByProfilesAsync(["p1", "p2", "p1"]);
+
+        Assert.Equal(3, counts["p1"]);
+        Assert.Equal(0, counts["p2"]);
+        Assert.Equal(2, handler.Requests.Count);
+        Assert.Equal($"{BaseUrl}users/count?q=profileIds%3Ap1", handler.Requests[0].Url);
+    }
+
+    [Fact]
+    public async Task UC5_S4_RemoveProfiles_KeepsTheOtherProfilesAndAttributes()
+    {
+        const string Json = """[{"id":"kc-1","username":"mario","enabled":true,"attributes":{"birthDate":["1980-05-17"],"profileIds":["p1","p2"]}}]""";
+        var handler = new Handler(request => request.Method == HttpMethod.Get
+            ? new(HttpStatusCode.OK) { Content = new StringContent(Json) }
+            : new(HttpStatusCode.NoContent));
+
+        await Directory(handler).RemoveProfilesAsync(["p1"]);
+
+        var (method, url, body) = handler.Requests[1];
+        Assert.Equal((HttpMethod.Put, $"{BaseUrl}users/kc-1"), (method, url));
+        var attributes = JsonDocument.Parse(body!).RootElement.GetProperty("attributes");
+        Assert.Equal(["p2"], attributes.GetProperty("profileIds").EnumerateArray().Select(e => e.GetString()));
+        Assert.Equal("1980-05-17", attributes.GetProperty("birthDate")[0].GetString());
+        Assert.True(JsonDocument.Parse(body!).RootElement.GetProperty("enabled").GetBoolean());
+    }
 }

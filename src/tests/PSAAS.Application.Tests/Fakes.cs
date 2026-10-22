@@ -2,7 +2,9 @@ using PSAAS.Application.Abstractions.Geography;
 using PSAAS.Application.Abstractions.Profiles;
 using PSAAS.Application.Abstractions.Tenants;
 using PSAAS.Application.Abstractions.Users;
+using PSAAS.Application.Contracts;
 using PSAAS.Application.Contracts.Profiles;
+using PSAAS.Application.Contracts.Tenants;
 using PSAAS.Application.Contracts.Users;
 using PSAAS.Domain;
 
@@ -74,13 +76,26 @@ public sealed class FakeTenantWriteRepository : ITenantWriteRepository
     public Task AddWithProductiveUnitsAsync(Tenant tenant, IReadOnlyCollection<TenantProductiveUnitCreateModel> productiveUnits, CancellationToken cancellationToken = default) =>
         throw new NotSupportedException();
 
-    public Task<bool> UpdateAsync(Tenant tenant, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+    public Task<bool> UpdateAsync(Tenant tenant, CancellationToken cancellationToken = default)
+    {
+        BeforeSave?.Invoke();
+        Saved = tenant;
+        return Task.FromResult(true);
+    }
+
+    public IReadOnlyCollection<TenantProfileEditModel> EditedProfiles { get; private set; } = [];
+
+    public IReadOnlyCollection<TenantProductiveUnitEditModel> EditedProductiveUnits { get; private set; } = [];
 
     public Task<bool> UpdateWithStructureAsync(
         Tenant tenant,
         IReadOnlyCollection<TenantProfileEditModel> profiles,
         IReadOnlyCollection<TenantProductiveUnitEditModel> productiveUnits,
-        CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        CancellationToken cancellationToken = default)
+    {
+        (Saved, EditedProfiles, EditedProductiveUnits) = (tenant, profiles, productiveUnits);
+        return Task.FromResult(true);
+    }
 }
 
 /// <summary>Profiles that exist, each with its tenant.</summary>
@@ -118,4 +133,38 @@ public sealed class FakeUserDirectory : IUserDirectory
 
     public Task<IReadOnlyList<DirectoryUser>> SearchAsync(string? search, CancellationToken cancellationToken = default) =>
         Unavailable ? throw new UserDirectoryUnavailableException("down") : Task.FromResult<IReadOnlyList<DirectoryUser>>(Users);
+
+    public List<string> RemovedProfiles { get; } = [];
+
+    public Task<IReadOnlyDictionary<string, int>> CountByProfilesAsync(
+        IReadOnlyCollection<string> profileIds,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyDictionary<string, int>>(profileIds.ToDictionary(id => id, id => Users.Count(u => u.ProfileIds.Contains(id))));
+
+    public Task RemoveProfilesAsync(IReadOnlyCollection<string> profileIds, CancellationToken cancellationToken = default)
+    {
+        if (Unavailable) throw new UserDirectoryUnavailableException("down");
+        RemovedProfiles.AddRange(profileIds);
+        return Task.CompletedTask;
+    }
+}
+
+/// <summary>One tenant with its organization, as the read side returns it.</summary>
+public sealed class FakeTenantReadRepository : ITenantReadRepository
+{
+    public Tenant? Tenant { get; set; }
+
+    public TenantStructureReadModel Structure { get; set; } = new([], []);
+
+    public Task<PagedResult<Tenant>> GetPageAsync(string? search, int page, int pageSize, CancellationToken cancellationToken = default) =>
+        throw new NotSupportedException();
+
+    public Task<Tenant?> GetByIdAsync(Guid tenantId, CancellationToken cancellationToken = default) =>
+        Task.FromResult(Tenant?.Id == tenantId ? Tenant : null);
+
+    public Task<TenantReference?> FindByUniqueValueAsync(string field, string normalizedValue, Guid? excludedTenantId, CancellationToken cancellationToken = default) =>
+        throw new NotSupportedException();
+
+    public Task<TenantStructureReadModel> GetProfilesAndProductiveUnitsAsync(string tenantId, CancellationToken cancellationToken = default) =>
+        Task.FromResult(Structure);
 }

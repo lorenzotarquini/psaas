@@ -5,8 +5,6 @@ import { ProfilesPage } from '@/pages/profiles'
 import { SettingsPage } from '@/pages/settings'
 import { TenantCreatePage } from '@/pages/tenant-create'
 import { TenantDetailPage } from '@/pages/tenant-detail'
-import { TenantEditPage } from '@/pages/tenant-edit'
-import { TenantOrganizationPage } from '@/pages/tenant-organization'
 import { TenantsListPage } from '@/pages/tenants-list'
 import { UserCreatePage } from '@/pages/user-create'
 import { UsersPage } from '@/pages/users'
@@ -23,8 +21,6 @@ export const createAppRouter = () =>
         { path: routes.tenants, Component: TenantsListPage },
         { path: routes.tenantNew, Component: TenantCreatePage },
         { path: routes.tenantDetail, Component: TenantDetailPage },
-        { path: routes.tenantEdit, Component: TenantEditPage },
-        { path: routes.tenantOrganization, Component: TenantOrganizationPage },
         { path: routes.users, Component: UsersPage },
         { path: routes.userNew, Component: UserCreatePage },
         { path: routes.profiles, Component: ProfilesPage },

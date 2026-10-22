@@ -9,5 +9,8 @@ public sealed record TenantDetailDto(
     string CompleteVatNumber,
     string CertifiedEmail,
     AddressDto Address,
-    IReadOnlyList<TenantProfileReadModel> Profiles,
+    IReadOnlyList<TenantProfileDto> Profiles,
     IReadOnlyList<TenantProductiveUnitReadModel> ProductiveUnits);
+
+/// <param name="UserCount">Users that have the profile; null when Keycloak cannot be reached.</param>
+public sealed record TenantProfileDto(string Id, string Name, string? Description, int? UserCount);

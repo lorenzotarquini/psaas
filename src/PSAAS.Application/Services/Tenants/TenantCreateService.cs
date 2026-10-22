@@ -1,5 +1,4 @@
 using NLog;
-using PSAAS.Application.Abstractions.Geography;
 using PSAAS.Application.Abstractions.Tenants;
 using PSAAS.Application.Contracts.Tenants;
 using PSAAS.Application.Validators.Tenants;
@@ -13,7 +12,7 @@ namespace PSAAS.Application.Services.Tenants;
 /// </summary>
 public sealed class TenantCreateService(
     TenantCreateValidator validator,
-    IItalianCityProvider cities,
+    TenantAddressValidator addressValidator,
     ITenantWriteRepository tenants)
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
@@ -27,15 +26,14 @@ public sealed class TenantCreateService(
 
         var completeVatNumber = await ValidateUniqueFieldsAsync(request, errors, cancellationToken);
         var street = Trim(request.Street);
-        AddRequiredError(errors, "street", street);
-        var city = await ValidateCityAsync(Trim(request.City), Trim(request.PostalCode), errors, cancellationToken);
+        var city = await addressValidator.ValidateAsync(street, Trim(request.City), Trim(request.PostalCode), errors, cancellationToken);
 
         var profiles = request.Profiles ?? [];
         var units = request.ProductiveUnits ?? [];
-        ValidateNames(profiles.Select(profile => profile.Name).ToArray(), "profiles", errors);
-        ValidateNames(units.Select(unit => unit.Name).ToArray(), "productiveUnits", errors);
-        var profileKeys = ValidateProfileKeys(profiles, errors);
-        ValidateUnitProfileKeys(units, profileKeys, errors);
+        TenantOrganizationRules.ValidateNames(profiles.Select(profile => profile.Name).ToArray(), "profiles", errors);
+        TenantOrganizationRules.ValidateNames(units.Select(unit => unit.Name).ToArray(), "productiveUnits", errors);
+        var profileKeys = TenantOrganizationRules.ValidateProfileKeys(profiles.Select(profile => profile.Key).ToArray(), errors);
+        TenantOrganizationRules.ValidateUnitProfileKeys(units.Select(unit => unit.ProfileKeys).ToArray(), profileKeys, errors);
 
         if (errors.Count > 0)
         {
@@ -99,97 +97,6 @@ public sealed class TenantCreateService(
         return completeVatNumber.NormalizedValue;
     }
 
-    /// <returns>The official city name when the city list is reachable, otherwise the typed one.</returns>
-    private async Task<string> ValidateCityAsync(
-        string city,
-        string postalCode,
-        Dictionary<string, string> errors,
-        CancellationToken cancellationToken)
-    {
-        AddRequiredError(errors, "city", city);
-        AddRequiredError(errors, "postalCode", postalCode);
-        if (city.Length == 0)
-        {
-            return city;
-        }
-
-        var matches = await cities.SearchAsync(city, cancellationToken);
-        if (matches is null)
-        {
-            Logger.Warn("Italian city list unreachable: address of {City} accepted without checking it", city);
-            // shortcut: city list unreachable, the address is accepted unchecked; add a retry/queue if this becomes common.
-            return city;
-        }
-
-        // Several towns share a name (e.g. Calliano TN/AT): the postal code decides.
-        var sameName = matches.Where(match => match.Name.Equals(city, StringComparison.OrdinalIgnoreCase)).ToArray();
-        if (sameName.Length == 0)
-        {
-            errors["city"] = TenantFieldValidationErrorCodes.InvalidValue;
-            return city;
-        }
-
-        var match = sameName.FirstOrDefault(candidate => candidate.PostalCodes.Contains(postalCode));
-        if (match is null && postalCode.Length > 0)
-        {
-            errors["postalCode"] = TenantFieldValidationErrorCodes.InvalidValue;
-        }
-
-        return (match ?? sameName[0]).Name;
-    }
-
-    private static void ValidateNames(IReadOnlyList<string?> names, string collection, Dictionary<string, string> errors)
-    {
-        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        for (var i = 0; i < names.Count; i++)
-        {
-            var name = Trim(names[i]);
-            if (name.Length == 0)
-            {
-                errors[$"{collection}[{i}].name"] = TenantFieldValidationErrorCodes.Required;
-            }
-            else if (!seen.Add(name))
-            {
-                errors[$"{collection}[{i}].name"] = TenantFieldValidationErrorCodes.NotUnique;
-            }
-        }
-    }
-
-    private static HashSet<string> ValidateProfileKeys(
-        IReadOnlyList<TenantCreateProfileRequest> profiles,
-        Dictionary<string, string> errors)
-    {
-        var keys = new HashSet<string>(StringComparer.Ordinal);
-        for (var i = 0; i < profiles.Count; i++)
-        {
-            var key = Trim(profiles[i].Key);
-            if (key.Length > 0 && !keys.Add(key))
-            {
-                errors[$"profiles[{i}].key"] = TenantFieldValidationErrorCodes.NotUnique;
-            }
-        }
-
-        return keys;
-    }
-
-    private static void ValidateUnitProfileKeys(
-        IReadOnlyList<TenantCreateProductiveUnitRequest> units,
-        HashSet<string> profileKeys,
-        Dictionary<string, string> errors)
-    {
-        for (var i = 0; i < units.Count; i++)
-        {
-            var keys = units[i].ProfileKeys ?? [];
-            for (var j = 0; j < keys.Count; j++)
-            {
-                if (!profileKeys.Contains(Trim(keys[j])))
-                {
-                    errors[$"productiveUnits[{i}].profileKeys[{j}]"] = TenantFieldValidationErrorCodes.InvalidValue;
-                }
-            }
-        }
-    }
-
     private static void AddError(Dictionary<string, string> errors, string field, TenantFieldValidationResult result)
     {
         if (!result.IsValid)
@@ -198,15 +105,7 @@ public sealed class TenantCreateService(
         }
     }
 
-    private static void AddRequiredError(Dictionary<string, string> errors, string field, string value)
-    {
-        if (value.Length == 0)
-        {
-            errors[field] = TenantFieldValidationErrorCodes.Required;
-        }
-    }
+    private static string Trim(string? value) => TenantOrganizationRules.Trim(value);
 
-    private static string Trim(string? value) => value?.Trim() ?? string.Empty;
-
-    private static string? NullIfEmpty(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    private static string? NullIfEmpty(string? value) => TenantOrganizationRules.NullIfEmpty(value);
 }

@@ -4,8 +4,6 @@ export const routes = {
   tenants: '/tenants',
   tenantNew: '/tenants/new',
   tenantDetail: '/tenants/:tenantId',
-  tenantEdit: '/tenants/:tenantId/edit',
-  tenantOrganization: '/tenants/:tenantId/organization',
   users: '/users',
   userNew: '/users/new',
   profiles: '/profiles',
@@ -19,9 +17,10 @@ export const routes = {
 } as const
 
 const id = (value: string) => encodeURIComponent(value)
-export const tenantPath = (tenantId: string) => `/tenants/${id(tenantId)}`
-export const tenantEditPath = (tenantId: string) => `/tenants/${id(tenantId)}/edit`
-export const tenantOrganizationPath = (tenantId: string) => `/tenants/${id(tenantId)}/organization`
+/** Tabs of the tenant page (mock 1d), kept in the URL so each one can be linked. */
+export type TenantTab = 'overview' | 'registry' | 'organization' | 'subscription' | 'users' | 'usage' | 'invoices' | 'history'
+export const tenantPath = (tenantId: string, tab?: TenantTab) =>
+  `/tenants/${id(tenantId)}${tab && tab !== 'overview' ? `?tab=${tab}` : ''}`
 export const usersSearchPath = (search: string) => `/users?${new URLSearchParams({ search })}`
 
 /** Navigation state set after UC6: the users page confirms the creation. */

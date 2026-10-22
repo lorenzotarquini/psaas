@@ -24,7 +24,7 @@ public sealed record TenantDetail(
 
 public sealed record AddressView(string Street, string City, string PostalCode, string Country);
 
-public sealed record ProfileView(string Id, string Name, string? Description);
+public sealed record ProfileView(string Id, string Name, string? Description, int? UserCount = null);
 
 public sealed record ProductiveUnitView(Guid Id, string Name, string? Description, List<string> ProfileIds);
 
@@ -39,4 +39,6 @@ public sealed record UserView(
 
 public sealed record UserProfileView(string Id, string Name, string TenantId, string TenantCompanyName);
 
-public sealed record FieldValidationView(string? ErrorCode);
+public sealed record FieldValidationView(string? ErrorCode, TenantReferenceView? ConflictingTenant = null);
+
+public sealed record TenantReferenceView(Guid Id, string CompanyName);

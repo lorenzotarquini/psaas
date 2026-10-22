@@ -25,7 +25,8 @@ export interface TenantDetail {
   completeVatNumber: string
   certifiedEmail: string
   address: { street: string; city: string; postalCode: string; country: string }
-  profiles: { id: string; name: string; description: string | null }[]
+  /** userCount: users with the profile (UC2-R2), null when Keycloak could not count them. */
+  profiles: { id: string; name: string; description: string | null; userCount: number | null }[]
   productiveUnits: { id: string; name: string; description: string | null; profileIds: string[] }[]
 }
 
@@ -54,12 +55,23 @@ export type TenantCreateRequest = TenantRegistryRequest & {
 /** UC11: the fields that can be checked one at a time. */
 export type UniqueTenantField = 'companyName' | 'completeVatNumber' | 'certifiedEmail'
 
-/** UC11: null when valid, otherwise the code saving would return (NotUnique, InvalidFormat…). */
-export async function validateTenantField(field: UniqueTenantField, value: string, excludeTenantId?: string) {
+/** A tenant to name and link to, e.g. the one already using a unique value (UC11-R4). */
+export interface TenantReference {
+  id: string
+  companyName: string
+}
+
+export interface FieldValidation {
+  /** null when valid, otherwise the code saving would return (NotUnique, InvalidFormat…). */
+  errorCode: string | null
+  conflictingTenant: TenantReference | null
+}
+
+/** UC11: checks one unique field with the rules of saving. */
+export function validateTenantField(field: UniqueTenantField, value: string, excludeTenantId?: string) {
   const query = new URLSearchParams({ field, value })
   if (excludeTenantId) query.set('excludeTenantId', excludeTenantId)
-  const { errorCode } = await apiGet<{ errorCode: string | null }>(`/api/tenants/field-validation?${query}`)
-  return errorCode
+  return apiGet<FieldValidation>(`/api/tenants/field-validation?${query}`)
 }
 
 const keys = {

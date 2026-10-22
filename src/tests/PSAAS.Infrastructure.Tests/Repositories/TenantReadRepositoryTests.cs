@@ -119,4 +119,16 @@ public sealed class TenantReadRepositoryTests
         Assert.Empty(structure.Profiles);
         Assert.Empty(structure.ProductiveUnits);
     }
+
+    [Fact]
+    public async Task UC11_S6_FindByUniqueValue_NamesTheTenantUsingIt_ExceptTheExcludedOne()
+    {
+        var alfa = _db.AddTenant("Alfa Srl", "IT11111111111", "alfa@pec.it");
+
+        var found = await Repository.FindByUniqueValueAsync("completeVatNumber", "IT11111111111", null);
+        var excluded = await Repository.FindByUniqueValueAsync("companyName", "alfasrl", Guid.Parse(alfa.Id));
+
+        Assert.Equal(new PSAAS.Application.Contracts.Tenants.TenantReference(Guid.Parse(alfa.Id), "Alfa Srl"), found);
+        Assert.Null(excluded);
+    }
 }

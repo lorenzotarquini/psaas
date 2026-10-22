@@ -16,6 +16,7 @@
 - R1. Si possono verificare solo ragione sociale (`companyName`), P.IVA completa (`completeVatNumber`) e PEC (`certifiedEmail`).
 - R2. Valgono le regole di UC3: obbligatorietà, formato, lunghezza e unicità, con gli stessi codici (`Required`, `InvalidFormat`, `MaxLengthExceeded`, `NotUnique`).
 - R3. La verifica non registra nulla e non sostituisce i controlli del salvataggio: un altro amministratore può usare lo stesso valore nel frattempo (UC3 flusso 3b).
+- R4. Se il valore è già usato, la risposta indica quale cliente lo usa (id e ragione sociale), per poterlo aprire.
 
 ## Scenari di accettazione
 
@@ -106,4 +107,18 @@ Funzionalità: Verificare un campo univoco del cliente
 Scenario: Campo che non si può verificare
   Quando l'amministratore verifica il campo "street"
   Allora la richiesta è rifiutata come non valida
+```
+
+### UC11-S6
+
+Test: `UC11_VerificareCampoCliente.S6_IndicaIlClienteCheUsaGiaIlValore`
+
+```gherkin
+# language: it
+Funzionalità: Verificare un campo univoco del cliente
+
+Scenario: Il duplicato indica quale cliente usa già il valore
+  Dato che esiste il cliente "Alfa Srl"
+  Quando l'amministratore verifica la ragione sociale "ALFA s.r.l."
+  Allora il valore risulta "NotUnique" ed è indicato il cliente "Alfa Srl", per poterlo aprire
 ```

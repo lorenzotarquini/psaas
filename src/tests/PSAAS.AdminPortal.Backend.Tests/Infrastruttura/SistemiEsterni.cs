@@ -46,6 +46,27 @@ public sealed class FakeKeycloakUsers : IUserDirectory
             .ToArray());
     }
 
+    public Task<IReadOnlyDictionary<string, int>> CountByProfilesAsync(
+        IReadOnlyCollection<string> profileIds,
+        CancellationToken cancellationToken = default)
+    {
+        ThrowIfUnavailable();
+        return Task.FromResult<IReadOnlyDictionary<string, int>>(profileIds.Distinct().ToDictionary(
+            id => id,
+            id => Users.Count(user => user.ProfileIds.Contains(id))));
+    }
+
+    public Task RemoveProfilesAsync(IReadOnlyCollection<string> profileIds, CancellationToken cancellationToken = default)
+    {
+        ThrowIfUnavailable();
+        for (var i = 0; i < Users.Count; i++)
+        {
+            Users[i] = Users[i] with { ProfileIds = Users[i].ProfileIds.Except(profileIds).ToArray() };
+        }
+
+        return Task.CompletedTask;
+    }
+
     private void ThrowIfUnavailable()
     {
         if (Unavailable)

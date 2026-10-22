@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><meta name="design_doc_mode" content="canvas"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"><style>body{margin:0;background:#ecebe7;font-family:'IBM Plex Sans',system-ui,sans-serif}a{color:oklch(0.52 0.16 262)}a:hover{color:oklch(0.42 0.16 262)}*{box-sizing:border-box}.dv-turn{padding:40px 44px 32px;border-bottom:1px solid rgba(0,0,0,.08);scroll-margin-top:16px}.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 20px}.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#1a1a1a;color:#fff;border-radius:4px;text-decoration:none}.dv-tname{font:600 13px/1.2 system-ui,sans-serif;color:#1a1a1a}.dv-opts{display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start}.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(0,0,0,.08);color:#1a1a1a;border-radius:5px;text-decoration:none}.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 12px/1.3 system-ui,sans-serif;color:rgba(0,0,0,.6)}.dv-card{max-width:100%;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden}.dv-opt:target .dv-oid{background:#2a78d6;color:#fff}.dv-next{margin:28px 0 0;font:12px/1.5 system-ui,sans-serif;color:rgba(0,0,0,.55)}</style></helmet>
+<section class="dv-turn" id="t1">
+<div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">PSAAS Admin Console — sistema visivo + schermate chiave (stato attuale UC1–UC11 + espansioni EXP-03/04/05/06/10)</span></div>
+<div style="max-width:1440px;margin:0 0 28px;font:13px/1.55 system-ui,sans-serif;color:rgba(0,0,0,.68);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px">
+<div><b style="color:#1a1a1a">Per chi</b><br>Un operatore interno che lavora qui 8 ore al giorno: cerca, confronta, corregge. Densità alta, righe da 36px, dati in monospace, nessuna decorazione da marketing.</div>
+<div><b style="color:#1a1a1a">Direzione</b><br>"Console di controllo": sidebar ink scura che separa nettamente il pannello del gestore dalla piattaforma pubblica; superfici neutre fredde, un solo accento indaco, colori di stato riservati allo stato.</div>
+<div><b style="color:#1a1a1a">Assunzioni</b><br>Dati fittizi. Le schede Abbonamento, Uso, Storico e la coda "Da gestire" anticipano la roadmap (fasi 1–2). Icone Font Awesome 6 Solid; font IBM Plex Sans + Mono.</div>
+</div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="1a"><div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a>Fondamenta — palette, tipografia, icone, componenti</div>
+<div class="dv-card" style="width:1440px;padding:48px 56px;font-family:'IBM Plex Sans',sans-serif;color:oklch(0.24 0.02 260);background:oklch(0.995 0.002 255)">
+<div style="display:flex;align-items:flex-end;justify-content:space-between;border-bottom:1px solid oklch(0.91 0.006 255);padding-bottom:24px">
+<div style="display:flex;align-items:center;gap:14px"><div style="width:40px;height:40px;border-radius:8px;background:oklch(0.21 0.02 262);display:grid;place-items:center;color:oklch(0.78 0.11 262);font:600 15px 'IBM Plex Mono',monospace">ps</div><div><div style="font-size:24px;font-weight:600;letter-spacing:-0.01em">PSAAS Admin Console</div><div style="font-size:13px;color:oklch(0.5 0.015 260)">Linee guida visive per il pannello del gestore della piattaforma</div></div></div>
+<div style="font:12px 'IBM Plex Mono',monospace;color:oklch(0.5 0.015 260)">v0.1 · 22/10/2026</div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px;padding:28px 0;border-bottom:1px solid oklch(0.91 0.006 255)">
+<div style="display:flex;gap:12px"><i class="fa-solid fa-gauge-high" style="color:oklch(0.52 0.16 262);margin-top:3px"></i><div><div style="font-weight:600;font-size:14px">Densità prima di tutto</div><div style="font-size:13px;color:oklch(0.5 0.015 260);line-height:1.5;margin-top:4px">Più righe a schermo, meno clic. Tabelle da 36px, form a due colonne, pannelli laterali al posto delle pagine.</div></div></div>
+<div style="display:flex;gap:12px"><i class="fa-solid fa-traffic-light" style="color:oklch(0.52 0.16 262);margin-top:3px"></i><div><div style="font-weight:600;font-size:14px">Il colore è informazione</div><div style="font-size:13px;color:oklch(0.5 0.015 260);line-height:1.5;margin-top:4px">Verde, ambra, rosso solo per lo stato di clienti, moduli e utenti. L'indaco solo per l'azione principale.</div></div></div>
+<div style="display:flex;gap:12px"><i class="fa-solid fa-keyboard" style="color:oklch(0.52 0.16 262);margin-top:3px"></i><div><div style="font-weight:600;font-size:14px">Da tastiera</div><div style="font-size:13px;color:oklch(0.5 0.015 260);line-height:1.5;margin-top:4px">Ricerca globale ⌘K, scorciatoie nelle tabelle, validazione all'uscita dal campo con gli stessi codici del backend.</div></div></div>
+</div>
+<div style="display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:56px;padding-top:32px">
+<div style="display:flex;flex-direction:column;gap:32px">
+<div><div style="font:500 11px 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:oklch(0.5 0.015 260);margin-bottom:14px">Palette · neutri ink</div>
+<div style="display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px">
+<sc-for list="{{ neutrals }}" as="c" hint-placeholder-count="8"><div style="display:flex;flex-direction:column;gap:6px"><div style="height:56px;border-radius:6px;border:1px solid oklch(0.91 0.006 255);background:{{ c.v }}"></div><div style="font-size:12px;font-weight:500">{{ c.n }}</div><div style="font:10.5px 'IBM Plex Mono',monospace;color:oklch(0.5 0.015 260)">{{ c.v }}</div></div></sc-for>
+</div></div>
+<div><div style="font:500 11px 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:oklch(0.5 0.015 260);margin-bottom:14px">Accento e stati — stessa luminosità, tinta diversa</div>
+<div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px">
+<sc-for list="{{ accents }}" as="c" hint-placeholder-count="5"><div style="border:1px solid oklch(0.91 0.006 255);border-radius:8px;overflow:hidden"><div style="height:64px;background:{{ c.solid }}"></div><div style="height:28px;background:{{ c.soft }};color:{{ c.fg }};font-size:12px;font-weight:600;display:flex;align-items:center;padding:0 10px">{{ c.badge }}</div><div style="padding:8px 10px"><div style="font-size:12.5px;font-weight:600">{{ c.n }}</div><div style="font-size:11.5px;color:oklch(0.5 0.015 260);margin-top:2px">{{ c.use }}</div></div></div></sc-for>
+</div></div>
+<div><div style="font:500 11px 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:oklch(0.5 0.015 260);margin-bottom:14px">Tipografia · IBM Plex Sans / Mono</div>
+<div style="display:flex;flex-direction:column;border-top:1px solid oklch(0.91 0.006 255)">
+<div style="display:grid;grid-template-columns:150px 1fr;align-items:baseline;padding:12px 0;border-bottom:1px solid oklch(0.91 0.006 255)"><span style="font:11px 'IBM Plex Mono',monospace;color:oklch(0.5 0.015 260)">Titolo pagina 22/600</span><span style="font-size:22px;font-weight:600;letter-spacing:-0.01em">Officine Rinaldi Spa</span></div>
+<div style="display:grid;grid-template-columns:150px 1fr;align-items:baseline;padding:12px 0;border-bottom:1px solid oklch(0.91 0.006 255)"><span style="font:11px 'IBM Plex Mono',monospace;color:oklch(0.5 0.015 260)">Sezione 15/600</span><span style="font-size:15px;font-weight:600">Profili × unità produttive</span></div>
+<div style="display:grid;grid-template-columns:150px 1fr;align-items:baseline;padding:12px 0;border-bottom:1px solid oklch(0.91 0.006 255)"><span style="font:11px 'IBM Plex Mono',monospace;color:oklch(0.5 0.015 260)">Corpo 13/400</span><span style="font-size:13px">Togliere un profilo lo rimuove anche agli utenti che lo hanno in Keycloak.</span></div>
+<div style="display:grid;grid-template-columns:150px 1fr;align-items:baseline;padding:12px 0;border-bottom:1px solid oklch(0.91 0.006 255)"><span style="font:11px 'IBM Plex Mono',monospace;color:oklch(0.5 0.015 260)">Etichetta 12/500</span><span style="font-size:12px;font-weight:500;color:oklch(0.42 0.015 260)">Ragione sociale · obbligatorio</span></div>
+<div style="display:grid;grid-template-columns:150px 1fr;align-items:baseline;padding:12px 0;border-bottom:1px solid oklch(0.91 0.006 255)"><span style="font:11px 'IBM Plex Mono',monospace;color:oklch(0.5 0.015 260)">Dato Mono 12.5/400</span><span style="font:12.5px 'IBM Plex Mono',monospace">IT92663969436 · tn_8f2c41a9 · 00118</span></div>
+</div></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:32px">
+<div><div style="font:500 11px 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:oklch(0.5 0.015 260);margin-bottom:14px">Icone di dominio · Font Awesome 6 Solid</div>
+<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px">
+<sc-for list="{{ icons }}" as="ic" hint-placeholder-count="20"><div style="display:flex;align-items:center;gap:10px;padding:9px 10px;border:1px solid oklch(0.93 0.005 255);border-radius:6px;background:oklch(0.985 0.003 255)"><i class="{{ ic.i }}" style="width:16px;text-align:center;font-size:14px;color:oklch(0.32 0.02 260)"></i><span style="font-size:12px">{{ ic.n }}</span></div></sc-for>
+</div></div>
+<div><div style="font:500 11px 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:oklch(0.5 0.015 260);margin-bottom:14px">Componenti</div>
+<div style="display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+<span style="height:32px;padding:0 14px;border-radius:6px;background:oklch(0.52 0.16 262);color:#fff;font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:8px"><i class="fa-solid fa-plus" style="font-size:11px"></i>Nuovo cliente</span>
+<span style="height:32px;padding:0 12px;border-radius:6px;background:#fff;border:1px solid oklch(0.87 0.008 255);font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:8px"><i class="fa-solid fa-pen" style="font-size:11px;color:oklch(0.5 0.015 260)"></i>Modifica</span>
+<span style="height:32px;padding:0 12px;border-radius:6px;font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:8px;color:oklch(0.42 0.015 260)"><i class="fa-solid fa-download" style="font-size:11px"></i>Esporta</span>
+<span style="height:32px;padding:0 12px;border-radius:6px;background:oklch(0.95 0.035 25);color:oklch(0.5 0.16 25);font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:8px"><i class="fa-solid fa-circle-pause" style="font-size:11px"></i>Sospendi</span>
+<span style="height:32px;width:32px;border-radius:6px;border:1px solid oklch(0.87 0.008 255);display:inline-grid;place-items:center"><i class="fa-solid fa-ellipsis" style="font-size:12px"></i></span>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:6px">
+<sc-for list="{{ badges }}" as="b" hint-placeholder-count="6"><span style="height:22px;padding:0 8px;border-radius:4px;background:{{ b.bg }};color:{{ b.fg }};font-size:11.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:{{ b.fg }}"></span>{{ b.t }}</span></sc-for>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+<div style="display:flex;flex-direction:column;gap:5px"><span style="font-size:12px;font-weight:500;color:oklch(0.42 0.015 260)">PEC</span><span style="height:34px;border:1px solid oklch(0.87 0.008 255);border-radius:6px;padding:0 10px;display:flex;align-items:center;font-size:13px;background:#fff">amministrazione@pec.rinaldi.it</span></div>
+<div style="display:flex;flex-direction:column;gap:5px"><span style="font-size:12px;font-weight:500;color:oklch(0.42 0.015 260)">Città</span><span style="height:34px;border:1px solid oklch(0.52 0.16 262);box-shadow:0 0 0 3px oklch(0.92 0.04 262);border-radius:6px;padding:0 10px;display:flex;align-items:center;font-size:13px;background:#fff">Bolog<span style="width:1px;height:16px;background:oklch(0.24 0.02 260);margin-left:1px"></span></span></div>
+<div style="display:flex;flex-direction:column;gap:5px"><span style="font-size:12px;font-weight:500;color:oklch(0.42 0.015 260)">P.IVA completa</span><span style="height:34px;border:1px solid oklch(0.58 0.17 25);border-radius:6px;padding:0 10px;display:flex;align-items:center;justify-content:space-between;font:13px 'IBM Plex Mono',monospace;background:#fff">IT123<i class="fa-solid fa-circle-exclamation" style="color:oklch(0.55 0.17 25)"></i></span><span style="font-size:11.5px;color:oklch(0.5 0.16 25)">Formato non valido · atteso IT + 11 cifre</span></div>
+<div style="display:flex;flex-direction:column;gap:5px"><span style="font-size:12px;font-weight:500;color:oklch(0.42 0.015 260)">Ragione sociale</span><span style="height:34px;border:1px solid oklch(0.87 0.008 255);border-radius:6px;padding:0 10px;display:flex;align-items:center;justify-content:space-between;font-size:13px;background:#fff">Ceramiche Bassi Srl<i class="fa-solid fa-circle-check" style="color:oklch(0.55 0.13 155)"></i></span><span style="font-size:11.5px;color:oklch(0.42 0.11 155)">Disponibile · 19/20</span></div>
+</div>
+<div style="display:flex;gap:22px;border-bottom:1px solid oklch(0.91 0.006 255);font-size:13px">
+<span style="padding:8px 0;color:oklch(0.5 0.015 260)">Anagrafica</span><span style="padding:8px 0;font-weight:600;border-bottom:2px solid oklch(0.52 0.16 262);margin-bottom:-1px">Organizzazione</span><span style="padding:8px 0;color:oklch(0.5 0.015 260)">Utenti <span style="font:11px 'IBM Plex Mono',monospace;background:oklch(0.95 0.005 260);padding:1px 5px;border-radius:3px">37</span></span><span style="padding:8px 0;color:oklch(0.5 0.015 260)">Storico</span>
+</div>
+<div style="display:flex;gap:16px;align-items:center;font-size:12px;color:oklch(0.5 0.015 260)"><span style="display:flex;gap:4px;align-items:center"><span style="font:11px 'IBM Plex Mono',monospace;border:1px solid oklch(0.87 0.008 255);border-bottom-width:2px;border-radius:4px;padding:1px 6px;color:oklch(0.32 0.02 260)">⌘K</span>cerca ovunque</span><span style="display:flex;gap:4px;align-items:center"><span style="font:11px 'IBM Plex Mono',monospace;border:1px solid oklch(0.87 0.008 255);border-bottom-width:2px;border-radius:4px;padding:1px 6px;color:oklch(0.32 0.02 260)">N</span>nuovo cliente</span><span style="display:flex;gap:4px;align-items:center"><span style="font:11px 'IBM Plex Mono',monospace;border:1px solid oklch(0.87 0.008 255);border-bottom-width:2px;border-radius:4px;padding:1px 6px;color:oklch(0.32 0.02 260)">J</span><span style="font:11px 'IBM Plex Mono',monospace;border:1px solid oklch(0.87 0.008 255);border-bottom-width:2px;border-radius:4px;padding:1px 6px;color:oklch(0.32 0.02 260)">K</span>riga succ./prec.</span></div>
+</div></div>
+</div>
+</div>
+</div></div>
+
+<div class="dv-opt" id="1b"><div class="dv-olabel"><a class="dv-oid" href="#1b">1b</a>Panoramica — coda di lavoro del giorno (sostituisce la Home "chi sono")</div>
+<div class="dv-card" style="width:1440px">
+<div style="display:flex;width:1440px;height:900px;background:oklch(0.975 0.004 255);font-family:'IBM Plex Sans',sans-serif;color:oklch(0.24 0.02 260);font-size:13px">
+<aside style="width:228px;flex:none;background:oklch(0.21 0.02 262);color:oklch(0.86 0.01 260);display:flex;flex-direction:column;padding:14px 10px;gap:20px">
+<div style="display:flex;align-items:center;gap:10px;padding:2px 8px 4px"><div style="width:28px;height:28px;border-radius:6px;background:oklch(0.3 0.03 262);display:grid;place-items:center;color:oklch(0.78 0.11 262);font:600 12px 'IBM Plex Mono',monospace">ps</div><div><div style="font-weight:600;font-size:13.5px;color:#fff">PSAAS</div><div style="font-size:11px;color:oklch(0.62 0.015 260)">Admin console</div></div></div>
+<sc-for list="{{ navHome }}" as="g" hint-placeholder-count="3"><div style="display:flex;flex-direction:column;gap:1px"><div style="font:500 10.5px 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:oklch(0.58 0.015 260);padding:0 10px 6px">{{ g.label }}</div><sc-for list="{{ g.items }}" as="it" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:10px;height:32px;padding:0 10px;border-radius:6px;background:{{ it.bg }};color:{{ it.fg }}"><i class="{{ it.icon }}" style="width:16px;text-align:center;font-size:12.5px"></i><span style="flex:1">{{ it.label }}</span><sc-if value="{{ it.count }}" hint-placeholder-val="{{ false }}"><span style="font:500 11px 'IBM Plex Mono',monospace;background:oklch(0.55 0.17 25);color:#fff;border-radius:9px;padding:1px 6px">{{ it.count }}</span></sc-if></div></sc-for></div></sc-for>
+<div style="margin-top:auto;padding:10px;border-top:1px solid oklch(0.3 0.02 262);font:11px 'IBM Plex Mono',monospace;color:oklch(0.58 0.015 260);display:flex;justify-content:space-between"><span>core 2.0.3</span><span>realm PSAAS</span></div>
+</aside>
+<div style="flex:1;display:flex;flex-direction:column;min-width:0">
+<header style="height:52px;flex:none;background:#fff;border-bottom:1px solid oklch(0.91 0.006 255);display:flex;align-items:center;gap:16px;padding:0 20px">
+<span style="font-weight:600">Panoramica</span>
+<div style="flex:1;display:flex;justify-content:center"><div style="width:440px;height:32px;border:1px solid oklch(0.89 0.007 255);border-radius:6px;background:oklch(0.975 0.004 255);display:flex;align-items:center;gap:10px;padding:0 10px;color:oklch(0.55 0.015 260)"><i class="fa-solid fa-magnifying-glass" style="font-size:12px"></i><span style="flex:1">Cerca clienti, utenti, P.IVA, PEC…</span><span style="font:11px 'IBM Plex Mono',monospace;border:1px solid oklch(0.87 0.008 255);border-radius:4px;padding:0 5px">⌘K</span></div></div>
+<span style="height:24px;padding:0 8px;border-radius:4px;background:oklch(0.96 0.05 85);color:oklch(0.48 0.11 65);font:600 11px 'IBM Plex Mono',monospace;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:oklch(0.62 0.14 70)"></span>PRODUZIONE</span>
+<span style="display:flex;align-items:center;gap:6px;color:oklch(0.42 0.015 260)"><i class="fa-solid fa-globe"></i>IT</span><i class="fa-solid fa-moon" style="color:oklch(0.42 0.015 260)"></i><i class="fa-solid fa-bell" style="color:oklch(0.42 0.015 260)"></i>
+<div style="width:30px;height:30px;border-radius:50%;background:oklch(0.9 0.04 262);color:oklch(0.4 0.14 262);display:grid;place-items:center;font-weight:600;font-size:12px">MR</div>
+</header>
+<main style="flex:1;padding:24px 28px;display:flex;flex-direction:column;gap:20px;overflow:hidden">
+<div style="display:flex;align-items:flex-end;justify-content:space-between"><div><div style="font-size:22px;font-weight:600;letter-spacing:-0.01em">Buongiorno, Marta</div><div style="color:oklch(0.5 0.015 260);margin-top:2px">Mercoledì 22 ottobre · 5 attività da gestire, 2 urgenti</div></div><div style="display:flex;gap:8px"><span style="height:32px;padding:0 12px;border-radius:6px;background:#fff;border:1px solid oklch(0.87 0.008 255);font-weight:500;display:inline-flex;align-items:center;gap:8px"><i class="fa-solid fa-user-plus" style="font-size:11px;color:oklch(0.5 0.015 260)"></i>Nuovo utente</span><span style="height:32px;padding:0 14px;border-radius:6px;background:oklch(0.52 0.16 262);color:#fff;font-weight:500;display:inline-flex;align-items:center;gap:8px"><i class="fa-solid fa-plus" style="font-size:11px"></i>Nuovo cliente</span></div></div>
+<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px">
+<sc-for list="{{ stats }}" as="s" hint-placeholder-count="4"><div style="background:#fff;border:1px solid oklch(0.91 0.006 255);border-radius:8px;padding:14px 16px;display:flex;justify-content:space-between;align-items:flex-start"><div><div style="color:oklch(0.5 0.015 260);font-size:12px">{{ s.l }}</div><div style="font:500 24px 'IBM Plex Mono',monospace;margin-top:4px">{{ s.v }}</div><div style="font-size:12px;color:oklch(0.5 0.015 260);margin-top:2px">{{ s.d }}</div></div><i class="{{ s.i }}" style="color:oklch(0.62 0.015 260)"></i></div></sc-for>
+</div>
+<div style="display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:16px;flex:1;min-height:0">
+<div style="background:#fff;border:1px solid oklch(0.91 0.006 255);border-radius:8px;display:flex;flex-direction:column">
+<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid oklch(0.93 0.005 255)"><div style="display:flex;align-items:center;gap:10px"><span style="font-size:15px;font-weight:600">Da gestire</span><span style="font:11px 'IBM Plex Mono',monospace;background:oklch(0.95 0.005 260);padding:1px 6px;border-radius:3px">5</span></div><div style="display:flex;gap:16px;font-size:12px;color:oklch(0.5 0.015 260)"><span style="color:oklch(0.24 0.02 260);font-weight:600">Tutte</span><span>Provisioning</span><span>Sottoscrizioni</span><span>Fatture</span><span>Utenti</span></div></div>
+<sc-for list="{{ queue }}" as="q" hint-placeholder-count="5"><div style="display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 16px;border-bottom:1px solid oklch(0.94 0.004 255)"><div style="width:34px;height:34px;border-radius:7px;background:{{ q.bg }};color:{{ q.fg }};display:grid;place-items:center"><i class="{{ q.i }}" style="font-size:13px"></i></div><div style="min-width:0"><div style="font-weight:600">{{ q.t }}</div><div style="color:oklch(0.5 0.015 260);font-size:12.5px;margin-top:2px;display:flex;gap:8px"><span style="color:oklch(0.32 0.02 260)">{{ q.c }}</span><span>·</span><span>{{ q.m }}</span></div></div><div style="display:flex;align-items:center;gap:12px"><span style="font:11.5px 'IBM Plex Mono',monospace;color:oklch(0.55 0.015 260)">{{ q.when }}</span><span style="height:28px;padding:0 10px;border-radius:6px;background:#fff;border:1px solid oklch(0.87 0.008 255);font-size:12.5px;font-weight:500;display:inline-flex;align-items:center">{{ q.a }}</span></div></div></sc-for>
+</div>
+<div style="display:flex;flex-direction:column;gap:16px;min-height:0">
+<div style="background:#fff;border:1px solid oklch(0.91 0.006 255);border-radius:8px;padding:14px 16px">
+<div style="font-size:15px;font-weight:600;margin-bottom:10px">Servizi collegati</div>
+<sc-for list="{{ services }}" as="s" hint-placeholder-count="4"><div style="display:flex;align-items:center;gap:10px;padding:7px 0"><span style="width:8px;height:8px;border-radius:50%;background:{{ s.c }}"></span><span style="flex:1">{{ s.n }}</span><span style="font:11.5px 'IBM Plex Mono',monospace;color:oklch(0.5 0.015 260)">{{ s.d }}</span></div></sc-for>
+</div>
+<div style="background:#fff;border:1px solid oklch(0.91 0.006 255);border-radius:8px;padding:14px 16px;flex:1">
+<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px"><span style="font-size:15px;font-weight:600">Attività recente</span><span style="font-size:12px;color:oklch(0.52 0.16 262)">Audit log →</span></div>
+<sc-for list="{{ activity }}" as="a" hint-placeholder-count="5"><div style="display:grid;grid-template-columns:22px 1fr;gap:10px;padding:7px 0"><i class="{{ a.i }}" style="font-size:12px;color:oklch(0.55 0.015 260);margin-top:3px;text-align:center"></i><div><div style="line-height:1.4"><b style="font-weight:600">{{ a.who }}</b> {{ a.what }} <b style="font-weight:600">{{ a.obj }}</b></div><div style="font:11px 'IBM Plex Mono',monospace;color:oklch(0.55 0.015 260);margin-top:2px">{{ a.when }}</div></div></div></sc-for>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+</div></div>
+
+<div class="dv-opt" id="1c"><div class="dv-olabel"><a class="dv-oid" href="#1c">1c</a>Clienti — viste salvate, filtri, selezione multipla (UC1 + EXP-02/03/04)</div>
+<div class="dv-card" style="width:1440px">
+<div style="display:flex;width:1440px;height:900px;background:oklch(0.975 0.004 255);font-family:'IBM Plex Sans',sans-serif;color:oklch(0.24 0.02 260);font-size:13px">
+<aside style="width:228px;flex:none;background:oklch(0.21 0.02 262);color:oklch(0.86 0.01 260);display:flex;flex-direction:column;padding:14px 10px;gap:20px">
+<div style="display:flex;align-items:center;gap:10px;padding:2px 8px 4px"><div style="width:28px;height:28px;border-radius:6px;background:oklch(0.3 0.03 262);display:grid;place-items:center;color:oklch(0.78 0.11 262);font:600 12px 'IBM Plex Mono',monospace">ps</div><div><div style="font-weight:600;font-size:13.5px;color:#fff">PSAAS</div><div style="font-size:11px;color:oklch(0.62 0.015 260)">Admin console</div></div></div>
+<sc-for list="{{ navClienti }}" as="g" hint-placeholder-count="3"><div style="display:flex;flex-direction:column;gap:1px"><div style="font:500 10.5px 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:oklch(0.58 0.015 260);padding:0 10px 6px">{{ g.label }}</div><sc-for list="{{ g.items }}" as="it" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:10px;height:32px;padding:0 10px;border-radius:6px;background:{{ it.bg }};color:{{ it.fg }}"><i class="{{ it.icon }}" style="width:16px;text-align:center;font-size:12.5px"></i><span style="flex:1">{{ it.label }}</span><sc-if value="{{ it.count }}" hint-placeholder-val="{{ false }}"><span style="font:500 11px 'IBM Plex Mono',monospace;background:oklch(0.55 0.17 25);color:#fff;border-radius:9px;padding:1px 6px">{{ it.count }}</span></sc-if></div></sc-for></div></sc-for>
+<div style="margin-top:auto;padding:10px;border-top:1px solid oklch(0.3 0.02 262);font:11px 'IBM Plex Mono',monospace;color:oklch(0.58 0.015 260);display:flex;justify-content:space-between"><span>core 2.0.3</span><span>realm PSAAS</span></div>
+</aside>
+<div style="flex:1;display:flex;flex-direction:column;min-width:0">
+<header style="height:52px;flex:none;background:#fff;border-bottom:1px solid oklch(0.91 0.006 255);display:flex;align-items:center;gap:16px;padding:0 20px">
+<span style="font-weight:600">Clienti</span>
+<div style="flex:1;display:flex;justify-content:center"><div style="width:440px;height:32px;border:1px solid oklch(0.89 0.007 255);border-radius:6px;background:oklch(0.975 0.004 255);display:flex;align-items:center;gap:10px;padding:0 10px;color:oklch(0.55 0.015 260)"><i class="fa-solid fa-magnifying-glass" style="font-size:12px"></i><span style="flex:1">Cerca clienti, utenti, P.IVA, PEC…</span><span style="font:11px 'IBM Plex Mono',monospace;border:1px solid oklch(0.87 0.008 255);border-radius:4px;padding:0 5px">⌘K</span></div></div>
+<span style="height:24px;padding:0 8px;border-radius:4px;background:oklch(0.96 0.05 85);color:oklch(0.48 0.11 65);font:600 11px 'IBM Plex Mono',monospace;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:oklch(0.62 0.14 70)"></span>PRODUZIONE</span>
+<span style="display:flex;align-items:center;gap:6px;color:oklch(0.42 0.015 260)"><i class="fa-solid fa-globe"></i>IT</span><i class="fa-solid fa-moon" style="color:oklch(0.42 0.015 260)"></i><i class="fa-solid fa-bell" style="color:oklch(0.42 0.015 260)"></i>
+<div style="width:30px;height:30px;border-radius:50%;background:oklch(0.9 0.04 262);color:oklch(0.4 0.14 262);display:grid;place-items:center;font-weight:600;font-size:12px">MR</div>
+</header>
+<main style="flex:1;padding:20px 28px;display:flex;flex-direction:column;gap:14px;overflow:hidden">
+<div style="display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:baseline;gap:10px"><span style="font-size:22px;font-weight:600;letter-spacing:-0.01em">Clienti</span><span style="font:13px 'IBM Plex Mono',monospace;color:oklch(0.5 0.015 260)">142</span></div><div style="display:flex;gap:8px"><span style="height:32px;padding:0 12px;border-radius:6px;font-weight:500;display:inline-flex;align-items:center;gap:8px;color:oklch(0.42 0.015 260)"><i class="fa-solid fa-download" style="font-size:11px"></i>Esporta CSV</span><span style="height:32px;padding:0 14px;border-radius:6px;background:oklch(0.52 0.16 262);color:#fff;font-weight:500;display:inline-flex;align-items:center;gap:8px"><i class="fa-solid fa-plus" style="font-size:11px"></i>Nuovo cliente<span style="font:10.5px 'IBM Plex Mono',monospace;background:oklch(0.6 0.14 262);border-radius:3px;padding:0 4px">N</span></span></div></div>
+<div style="display:flex;gap:2px;border-bottom:1px solid oklch(0.91 0.006 255)">
+<sc-for list="{{ views }}" as="v" hint-placeholder-count="6"><div style="padding:8px 12px;display:flex;gap:8px;align-items:center;border-bottom:2px solid {{ v.bd }};margin-bottom:-1px;color:{{ v.fg }};font-weight:{{ v.fw }}">{{ v.n }}<span style="font:11px 'IBM Plex Mono',monospace;background:oklch(0.94 0.005 260);color:oklch(0.42 0.015 260);padding:1px 5px;border-radius:3px">{{ v.c }}</span></div></sc-for>
+<div style="padding:8px 12px;color:oklch(0.52 0.16 262);display:flex;align-items:center;gap:6px"><i class="fa-solid fa-plus" style="font-size:10px"></i>Salva vista</div>
+</div>
+<div style="display:flex;align-items:center;gap:8px">
+<div style="width:340px;height:32px;border:1px solid oklch(0.87 0.008 255);border-radius:6px;background:#fff;display:flex;align-items:center;gap:8px;padding:0 10px;color:oklch(0.55 0.015 260)"><i class="fa-solid fa-magnifying-glass" style="font-size:12px"></i>Ragione sociale, P.IVA o PEC</div>
+<span style="height:32px;padding:0 10px;border:1px solid oklch(0.87 0.008 255);border-radius:6px;background:#fff;display:inline-flex;align-items:center;gap:6px"><span style="color:oklch(0.5 0.015 260)">Piano</span><b style="font-weight:600">Pro, Enterprise</b><i class="fa-solid fa-xmark" style="font-size:11px;color:oklch(0.55 0.015 260)"></i></span>
+<span style="height:32px;padding:0 10px;border:1px dashed oklch(0.82 0.01 255);border-radius:6px;display:inline-flex;align-items:center;gap:6px;color:oklch(0.42 0.015 260)"><i class="fa-solid fa-puzzle-piece" style="font-size:11px"></i>Modulo</span>
+<span style="height:32px;padding:0 10px;border:1px dashed oklch(0.82 0.01 255);border-radius:6px;display:inline-flex;align-items:center;gap:6px;color:oklch(0.42 0.015 260)"><i class="fa-solid fa-location-dot" style="font-size:11px"></i>Provincia</span>
+<span style="height:32px;padding:0 10px;border:1px dashed oklch(0.82 0.01 255);border-radius:6px;display:inline-flex;align-items:center;gap:6px;color:oklch(0.42 0.015 260)"><i class="fa-solid fa-calendar" style="font-size:11px"></i>Rinnovo</span>
+<span style="margin-left:auto;display:flex;gap:6px;align-items:center;color:oklch(0.5 0.015 260)"><i class="fa-solid fa-table-columns" style="font-size:12px"></i>Colonne</span>
+</div>
+<div style="background:#fff;border:1px solid oklch(0.91 0.006 255);border-radius:8px;overflow:hidden;flex:1;display:flex;flex-direction:column">
+<div style="height:40px;background:oklch(0.24 0.02 262);color:#fff;display:flex;align-items:center;gap:18px;padding:0 14px;font-size:12.5px"><span style="width:16px;height:16px;border-radius:4px;background:oklch(0.52 0.16 262);display:grid;place-items:center"><i class="fa-solid fa-minus" style="font-size:9px"></i></span><b style="font-weight:600">2 selezionati</b><span style="display:flex;gap:6px;align-items:center;color:oklch(0.85 0.01 260)"><i class="fa-solid fa-layer-group" style="font-size:11px"></i>Cambia piano</span><span style="display:flex;gap:6px;align-items:center;color:oklch(0.85 0.01 260)"><i class="fa-solid fa-bullhorn" style="font-size:11px"></i>Invia comunicazione</span><span style="display:flex;gap:6px;align-items:center;color:oklch(0.85 0.01 260)"><i class="fa-solid fa-download" style="font-size:11px"></i>Esporta</span><span style="margin-left:auto;color:oklch(0.7 0.015 260)">Esc per deselezionare</span></div>
+<div style="display:grid;grid-template-columns:40px minmax(0,2.2fr) minmax(0,1.9fr) minmax(0,1.1fr) 110px 100px 120px 130px 90px;align-items:center;height:36px;padding:0 4px;border-bottom:1px solid oklch(0.91 0.006 255);font-size:12px;font-weight:500;color:oklch(0.5 0.015 260);background:oklch(0.985 0.003 255)"><span></span><span style="display:flex;gap:6px;align-items:center;color:oklch(0.24 0.02 260)">Ragione sociale<i class="fa-solid fa-arrow-down-a-z" style="font-size:10px"></i></span><span>PEC</span><span>Sede</span><span>Stato</span><span>Piano</span><span>Moduli</span><span>Utenti</span><span>Rinnovo</span></div>
+<sc-for list="{{ tenants }}" as="t" hint-placeholder-count="12"><div style="display:grid;grid-template-columns:40px minmax(0,2.2fr) minmax(0,1.9fr) minmax(0,1.1fr) 110px 100px 120px 130px 90px;align-items:center;height:44px;padding:0 4px;border-bottom:1px solid oklch(0.95 0.004 255);background:{{ t.rowBg }}">
+<span style="display:grid;place-items:center"><span style="width:16px;height:16px;border-radius:4px;border:1px solid {{ t.cbBd }};background:{{ t.cbBg }};display:grid;place-items:center;color:#fff"><sc-if value="{{ t.sel }}" hint-placeholder-val="{{ false }}"><i class="fa-solid fa-check" style="font-size:9px"></i></sc-if></span></span>
+<span style="min-width:0"><div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.name }}</div><div style="font:11.5px 'IBM Plex Mono',monospace;color:oklch(0.52 0.015 260)">IT{{ t.piva }}</div></span>
+<span style="color:oklch(0.38 0.015 260);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:12px">{{ t.pec }}</span>
+<span style="color:oklch(0.38 0.015 260)">{{ t.city }}</span>
+<span><span style="height:22px;padding:0 8px;border-radius:4px;background:{{ t.sbg }};color:{{ t.sfg }};font-size:11.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:{{ t.sfg }}"></span>{{ t.status }}</span></span>
+<span style="font-weight:500">{{ t.plan }}</span>
+<span style="display:flex;gap:4px"><sc-for list="{{ t.mods }}" as="m" hint-placeholder-count="2"><span style="width:22px;height:22px;border-radius:4px;background:{{ m.bg }};color:{{ m.fg }};display:grid;place-items:center"><i class="{{ m.i }}" style="font-size:10.5px"></i></span></sc-for></span>
+<span style="display:flex;flex-direction:column;gap:4px;padding-right:20px"><span style="font:11.5px 'IBM Plex Mono',monospace">{{ t.users }}</span><span style="height:4px;border-radius:2px;background:oklch(0.93 0.005 255);overflow:hidden"><span style="display:block;height:4px;width:{{ t.pct }}%;background:{{ t.barC }}"></span></span></span>
+<span style="font:11.5px 'IBM Plex Mono',monospace;color:{{ t.renC }}">{{ t.ren }}</span>
+</div></sc-for>
+<div style="margin-top:auto;height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-top:1px solid oklch(0.93 0.005 255);color:oklch(0.5 0.015 260);font-size:12.5px"><span>Righe per pagina <b style="color:oklch(0.24 0.02 260);font-weight:500">20 ▾</b></span><span style="display:flex;align-items:center;gap:14px"><span style="font-family:'IBM Plex Mono',monospace">1–12 di 38 filtrati</span><span style="display:flex;gap:4px"><span style="width:28px;height:28px;border:1px solid oklch(0.89 0.007 255);border-radius:6px;display:grid;place-items:center;color:oklch(0.75 0.01 260)"><i class="fa-solid fa-chevron-left" style="font-size:10px"></i></span><span style="width:28px;height:28px;border:1px solid oklch(0.89 0.007 255);border-radius:6px;display:grid;place-items:center"><i class="fa-solid fa-chevron-right" style="font-size:10px"></i></span></span></span></div>
+</div>
+</main>
+</div>
+</div>
+</div></div>
+
+<div class="dv-opt" id="1d"><div class="dv-olabel"><a class="dv-oid" href="#1d">1d</a>Scheda cliente a schede — Organizzazione in modifica (UC2 + UC5 + EXP-03/10)</div>
+<div class="dv-card" style="width:1440px">
+<div style="display:flex;width:1440px;height:900px;background:oklch(0.975 0.004 255);font-family:'IBM Plex Sans',sans-serif;color:oklch(0.24 0.02 260);font-size:13px">
+<aside style="width:228px;flex:none;background:oklch(0.21 0.02 262);color:oklch(0.86 0.01 260);display:flex;flex-direction:column;padding:14px 10px;gap:20px">
+<div style="display:flex;align-items:center;gap:10px;padding:2px 8px 4px"><div style="width:28px;height:28px;border-radius:6px;background:oklch(0.3 0.03 262);display:grid;place-items:center;color:oklch(0.78 0.11 262);font:600 12px 'IBM Plex Mono',monospace">ps</div><div><div style="font-weight:600;font-size:13.5px;color:#fff">PSAAS</div><div style="font-size:11px;color:oklch(0.62 0.015 260)">Admin console</div></div></div>
+<sc-for list="{{ navClienti }}" as="g" hint-placeholder-count="3"><div style="display:flex;flex-direction:column;gap:1px"><div style="font:500 10.5px 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:oklch(0.58 0.015 260);padding:0 10px 6px">{{ g.label }}</div><sc-for list="{{ g.items }}" as="it" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:10px;height:32px;padding:0 10px;border-radius:6px;background:{{ it.bg }};color:{{ it.fg }}"><i class="{{ it.icon }}" style="width:16px;text-align:center;font-size:12.5px"></i><span style="flex:1">{{ it.label }}</span><sc-if value="{{ it.count }}" hint-placeholder-val="{{ false }}"><span style="font:500 11px 'IBM Plex Mono',monospace;background:oklch(0.55 0.17 25);color:#fff;border-radius:9px;padding:1px 6px">{{ it.count }}</span></sc-if></div></sc-for></div></sc-for>
+<div style="margin-top:auto;padding:10px;border-top:1px solid oklch(0.3 0.02 262);font:11px 'IBM Plex Mono',monospace;color:oklch(0.58 0.015 260);display:flex;justify-content:space-between"><span>core 2.0.3</span><span>realm PSAAS</span></div>
+</aside>
+<div style="flex:1;display:flex;flex-direction:column;min-width:0">
+<header style="height:52px;flex:none;background:#fff;border-bottom:1px solid oklch(0.91 0.006 255);display:flex;align-items:center;gap:16px;padding:0 20px">
+<span style="display:flex;gap:8px;align-items:center;color:oklch(0.5 0.015 260)">Clienti<i class="fa-solid fa-chevron-right" style="font-size:9px"></i><b style="color:oklch(0.24 0.02 260);font-weight:600">Officine Rinaldi Spa</b></span>
+<div style="flex:1;display:flex;justify-content:center"><div style="width:440px;height:32px;border:1px solid oklch(0.89 0.007 255);border-radius:6px;background:oklch(0.975 0.004 255);display:flex;align-items:center;gap:10px;padding:0 10px;color:oklch(0.55 0.015 260)"><i class="fa-solid fa-magnifying-glass" style="font-size:12px"></i><span style="flex:1">Cerca clienti, utenti, P.IVA, PEC…</span><span style="font:11px 'IBM Plex Mono',monospace;border:1px solid oklch(0.87 0.008 255);border-radius:4px;padding:0 5px">⌘K</span></div></div>
+<span style="height:24px;padding:0 8px;border-radius:4px;background:oklch(0.96 0.05 85);color:oklch(0.48 0.11 65);font:600 11px 'IBM Plex Mono',monospace;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:oklch(0.62 0.14 70)"></span>PRODUZIONE</span>
+<span style="display:flex;align-items:center;gap:6px;color:oklch(0.42 0.015 260)"><i class="fa-solid fa-globe"></i>IT</span><i class="fa-solid fa-moon" style="color:oklch(0.42 0.015 260)"></i><i class="fa-solid fa-bell" style="color:oklch(0.42 0.015 260)"></i>
+<div style="width:30px;height:30px;border-radius:50%;background:oklch(0.9 0.04 262);color:oklch(0.4 0.14 262);display:grid;place-items:center;font-weight:600;font-size:12px">MR</div>
+</header>
+<div style="background:#fff;border-bottom:1px solid oklch(0.91 0.006 255);padding:18px 28px 0">
+<div style="display:flex;align-items:flex-start;justify-content:space-between">
+<div style="display:flex;gap:14px;align-items:center"><div style="width:44px;height:44px;border-radius:8px;background:oklch(0.95 0.03 262);color:oklch(0.45 0.15 262);display:grid;place-items:center"><i class="fa-solid fa-building" style="font-size:18px"></i></div><div><div style="display:flex;gap:10px;align-items:center"><span style="font-size:22px;font-weight:600;letter-spacing:-0.01em">Officine Rinaldi Spa</span><span style="height:22px;padding:0 8px;border-radius:4px;background:oklch(0.95 0.04 155);color:oklch(0.42 0.11 155);font-size:11.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:oklch(0.42 0.11 155)"></span>Attivo</span><span style="height:22px;padding:0 8px;border-radius:4px;background:oklch(0.95 0.005 260);color:oklch(0.42 0.015 260);font-size:11.5px;font-weight:600;display:inline-flex;align-items:center">Pro · annuale</span></div><div style="display:flex;gap:14px;margin-top:4px;font:12px 'IBM Plex Mono',monospace;color:oklch(0.5 0.015 260)"><span>IT03918270372</span><span>tn_8f2c41a9</span><span style="font-family:'IBM Plex Sans',sans-serif">Cliente dal 14/03/2024</span></div></div></div>
+<div style="display:flex;gap:8px"><span style="height:32px;padding:0 12px;border-radius:6px;background:#fff;border:1px solid oklch(0.87 0.008 255);font-weight:500;display:inline-flex;align-items:center;gap:8px"><i class="fa-solid fa-user-secret" style="font-size:11px;color:oklch(0.5 0.015 260)"></i>Impersona</span><span style="height:32px;padding:0 12px;border-radius:6px;background:#fff;border:1px solid oklch(0.87 0.008 255);font-weight:500;display:inline-flex;align-items:center;gap:8px"><i class="fa-solid fa-pen" style="font-size:11px;color:oklch(0.5 0.015 260)"></i>Modifica anagrafica</span><span style="height:32px;width:32px;border-radius:6px;border:1px solid oklch(0.87 0.008 255);display:inline-grid;place-items:center"><i class="fa-solid fa-ellipsis" style="font-size:12px"></i></span></div>
+</div>
+<div style="display:flex;gap:24px;margin-top:16px">
+<sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="8"><span style="padding:10px 0;border-bottom:2px solid {{ tb.bd }};color:{{ tb.fg }};font-weight:{{ tb.fw }};display:flex;gap:7px;align-items:center">{{ tb.n }}<sc-if value="{{ tb.c }}" hint-placeholder-val="{{ false }}"><span style="font:11px 'IBM Plex Mono',monospace;background:oklch(0.94 0.005 260);color:oklch(0.42 0.015 260);padding:1px 5px;border-radius:3px">{{ tb.c }}</span></sc-if></span></sc-for>
+</div>
+</div>
+<main style="flex:1;padding:20px 28px;display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;overflow:hidden">
+<div style="display:flex;flex-direction:column;gap:12px;min-width:0">
+<div style="background:#fff;border:1px solid oklch(0.91 0.006 255);border-radius:8px">
+<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid oklch(0.93 0.005 255)"><div><div style="font-size:15px;font-weight:600">Profili × unità produttive</div><div style="color:oklch(0.5 0.015 260);font-size:12.5px;margin-top:2px">Clicca una cella per aprire o chiudere l'accesso di un profilo a un'unità</div></div><div style="display:flex;gap:8px"><span style="height:30px;padding:0 10px;border-radius:6px;background:#fff;border:1px solid oklch(0.87 0.008 255);font-weight:500;display:inline-flex;align-items:center;gap:7px;font-size:12.5px"><i class="fa-solid fa-id-badge" style="font-size:11px;color:oklch(0.5 0.015 260)"></i>Aggiungi profilo</span><span style="height:30px;padding:0 10px;border-radius:6px;background:#fff;border:1px solid oklch(0.87 0.008 255);font-weight:500;display:inline-flex;align-items:center;gap:7px;font-size:12.5px"><i class="fa-solid fa-industry" style="font-size:11px;color:oklch(0.5 0.015 260)"></i>Aggiungi unità</span></div></div>
+<div style="display:grid;grid-template-columns:minmax(0,1.6fr) 70px repeat(4,minmax(0,1fr));align-items:end;padding:12px 16px 8px;font-size:12px;color:oklch(0.5 0.015 260);font-weight:500;border-bottom:1px solid oklch(0.93 0.005 255)"><span>Profilo</span><span>Utenti</span><sc-for list="{{ units }}" as="u" hint-placeholder-count="4"><span style="text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px"><i class="fa-solid fa-industry" style="font-size:11px"></i><span style="color:oklch(0.24 0.02 260)">{{ u.n }}</span><span style="font-size:11px">{{ u.d }}</span></span></sc-for></div>
+<sc-for list="{{ matrix }}" as="r" hint-placeholder-count="5"><div style="display:grid;grid-template-columns:minmax(0,1.6fr) 70px repeat(4,minmax(0,1fr));align-items:center;padding:0 16px;height:52px;border-bottom:1px solid oklch(0.95 0.004 255);background:{{ r.bg }}"><span><div style="font-weight:600;text-decoration:{{ r.td }};color:{{ r.fg }}">{{ r.n }}</div><div style="font-size:12px;color:oklch(0.52 0.015 260)">{{ r.d }}</div></span><span style="font:12px 'IBM Plex Mono',monospace;color:{{ r.fg }}">{{ r.u }}</span><sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="4"><span style="display:grid;place-items:center"><span style="width:24px;height:24px;border-radius:5px;border:1px solid {{ c.bd }};background:{{ c.bg }};color:{{ c.fg }};display:grid;place-items:center;box-shadow:{{ c.sh }}"><sc-if value="{{ c.on }}" hint-placeholder-val="{{ false }}"><i class="fa-solid fa-check" style="font-size:11px"></i></sc-if></span></span></sc-for></div></sc-for>
+</div>
+<div style="background:oklch(0.24 0.02 262);color:#fff;border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:14px"><i class="fa-solid fa-triangle-exclamation" style="color:oklch(0.8 0.13 80)"></i><div style="flex:1;line-height:1.45"><b style="font-weight:600">3 modifiche non salvate.</b> <span style="color:oklch(0.82 0.01 260)">Rimuovere il profilo "Ispettore" lo toglierà anche a 3 utenti in Keycloak.</span></div><span style="height:30px;padding:0 12px;border-radius:6px;font-weight:500;display:inline-flex;align-items:center;color:oklch(0.85 0.01 260)">Annulla</span><span style="height:30px;padding:0 12px;border-radius:6px;background:oklch(0.52 0.16 262);font-weight:500;display:inline-flex;align-items:center;gap:8px">Salva organizzazione<span style="font:10.5px 'IBM Plex Mono',monospace;background:oklch(0.6 0.14 262);border-radius:3px;padding:0 4px">⌘S</span></span></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;min-height:0">
+<div style="background:#fff;border:1px solid oklch(0.91 0.006 255);border-radius:8px;padding:14px 16px">
+<div style="font-size:15px;font-weight:600;margin-bottom:10px">Anagrafica</div>
+<sc-for list="{{ anag }}" as="a" hint-placeholder-count="5"><div style="display:grid;grid-template-columns:88px 1fr;gap:8px;padding:5px 0;font-size:12.5px"><span style="color:oklch(0.5 0.015 260)">{{ a.k }}</span><span style="font-family:{{ a.f }}">{{ a.v }}</span></div></sc-for>
+</div>
+<div style="background:#fff;border:1px solid oklch(0.91 0.006 255);border-radius:8px;padding:14px 16px">
+<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px"><span style="font-size:15px;font-weight:600">Moduli attivi</span><span style="font-size:12px;color:oklch(0.52 0.16 262)">Gestisci →</span></div>
+<sc-for list="{{ tmods }}" as="m" hint-placeholder-count="4"><div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid oklch(0.95 0.004 255)"><span style="width:26px;height:26px;border-radius:5px;background:oklch(0.95 0.005 260);display:grid;place-items:center"><i class="{{ m.i }}" style="font-size:11px;color:oklch(0.35 0.02 260)"></i></span><span style="flex:1"><div style="font-weight:500">{{ m.n }}</div><div style="font:11px 'IBM Plex Mono',monospace;color:oklch(0.52 0.015 260)">{{ m.v }}</div></span><span style="font-size:11.5px;font-weight:600;color:{{ m.fg }};display:flex;gap:5px;align-items:center"><i class="{{ m.si }}" style="font-size:10px"></i>{{ m.s }}</span></div></sc-for>
+</div>
+<div style="background:#fff;border:1px solid oklch(0.91 0.006 255);border-radius:8px;padding:14px 16px;flex:1">
+<div style="font-size:15px;font-weight:600;margin-bottom:10px">Storico</div>
+<sc-for list="{{ hist }}" as="h" hint-placeholder-count="3"><div style="display:grid;grid-template-columns:12px 1fr;gap:10px;padding-bottom:10px"><span style="width:8px;height:8px;border-radius:50%;border:2px solid oklch(0.7 0.02 260);margin-top:5px"></span><div><div style="font-size:12.5px;line-height:1.4">{{ h.t }}</div><div style="font:11px 'IBM Plex Mono',monospace;color:oklch(0.55 0.015 260);margin-top:2px">{{ h.w }}</div></div></div></sc-for>
+</div>
+</div>
+</main>
+</div>
+</div>
+</div></div>
+
+<div class="dv-opt" id="1e"><div class="dv-olabel"><a class="dv-oid" href="#1e">1e</a>Attiva cliente — wizard di onboarding, passo Anagrafica con validazione live (UC3 + UC10 + UC11 + EXP-04)</div>
+<div class="dv-card" style="width:1440px">
+<div style="display:flex;width:1440px;height:900px;background:oklch(0.975 0.004 255);font-family:'IBM Plex Sans',sans-serif;color:oklch(0.24 0.02 260);font-size:13px">
+<aside style="width:228px;flex:none;background:oklch(0.21 0.02 262);color:oklch(0.86 0.01 260);display:flex;flex-direction:column;padding:14px 10px;gap:20px">
+<div style="display:flex;align-items:center;gap:10px;padding:2px 8px 4px"><div style="width:28px;height:28px;border-radius:6px;background:oklch(0.3 0.03 262);display:grid;place-items:center;color:oklch(0.78 0.11 262);font:600 12px 'IBM Plex Mono',monospace">ps</div><div><div style="font-weight:600;font-size:13.5px;color:#fff">PSAAS</div><div style="font-size:11px;color:oklch(0.62 0.015 260)">Admin console</div></div></div>
+<sc-for list="{{ navClienti }}" as="g" hint-placeholder-count="3"><div style="display:flex;flex-direction:column;gap:1px"><div style="font:500 10.5px 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:oklch(0.58 0.015 260);padding:0 10px 6px">{{ g.label }}</div><sc-for list="{{ g.items }}" as="it" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:10px;height:32px;padding:0 10px;border-radius:6px;background:{{ it.bg }};color:{{ it.fg }}"><i class="{{ it.icon }}" style="width:16px;text-align:center;font-size:12.5px"></i><span style="flex:1">{{ it.label }}</span><sc-if value="{{ it.count }}" hint-placeholder-val="{{ false }}"><span style="font:500 11px 'IBM Plex Mono',monospace;background:oklch(0.55 0.17 25);color:#fff;border-radius:9px;padding:1px 6px">{{ it.count }}</span></sc-if></div></sc-for></div></sc-for>
+<div style="margin-top:auto;padding:10px;border-top:1px solid oklch(0.3 0.02 262);font:11px 'IBM Plex Mono',monospace;color:oklch(0.58 0.015 260);display:flex;justify-content:space-between"><span>core 2.0.3</span><span>realm PSAAS</span></div>
+</aside>
+<div style="flex:1;display:flex;flex-direction:column;min-width:0">
+<header style="height:52px;flex:none;background:#fff;border-bottom:1px solid oklch(0.91 0.006 255);display:flex;align-items:center;gap:16px;padding:0 20px">
+<span style="display:flex;gap:8px;align-items:center;color:oklch(0.5 0.015 260)">Clienti<i class="fa-solid fa-chevron-right" style="font-size:9px"></i><b style="color:oklch(0.24 0.02 260);font-weight:600">Attiva nuovo cliente</b></span>
+<div style="flex:1"></div>
+<span style="font-size:12px;color:oklch(0.5 0.015 260);display:flex;gap:6px;align-items:center"><i class="fa-solid fa-cloud" style="font-size:11px"></i>Bozza salvata alle 10:42</span>
+<span style="height:24px;padding:0 8px;border-radius:4px;background:oklch(0.96 0.05 85);color:oklch(0.48 0.11 65);font:600 11px 'IBM Plex Mono',monospace;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:oklch(0.62 0.14 70)"></span>PRODUZIONE</span>
+<div style="width:30px;height:30px;border-radius:50%;background:oklch(0.9 0.04 262);color:oklch(0.4 0.14 262);display:grid;place-items:center;font-weight:600;font-size:12px">MR</div>
+</header>
+<div style="flex:1;display:grid;grid-template-columns:240px minmax(0,1fr) 280px;min-height:0">
+<nav style="border-right:1px solid oklch(0.91 0.006 255);padding:24px 20px;display:flex;flex-direction:column;gap:4px">
+<div style="font:500 10.5px 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:oklch(0.5 0.015 260);margin-bottom:10px">Passo 1 di 5</div>
+<sc-for list="{{ steps }}" as="s" hint-placeholder-count="5"><div style="display:flex;gap:12px;align-items:flex-start;padding:8px;border-radius:6px;background:{{ s.bg }}"><span style="width:22px;height:22px;border-radius:50%;flex:none;border:1.5px solid {{ s.bd }};background:{{ s.cbg }};color:{{ s.cfg }};display:grid;place-items:center;font:600 11px 'IBM Plex Mono',monospace">{{ s.k }}</span><div><div style="font-weight:{{ s.fw }};color:{{ s.fg }}">{{ s.n }}</div><div style="font-size:12px;color:oklch(0.52 0.015 260);margin-top:1px">{{ s.d }}</div></div></div></sc-for>
+</nav>
+<main style="padding:24px 32px;display:flex;flex-direction:column;gap:16px;overflow:hidden">
+<div><div style="font-size:22px;font-weight:600;letter-spacing:-0.01em">Anagrafica</div><div style="color:oklch(0.5 0.015 260);margin-top:2px">Ogni campo univoco viene verificato all'uscita, con le stesse regole del salvataggio.</div></div>
+<div style="background:#fff;border:1px solid oklch(0.91 0.006 255);border-radius:8px;padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px 16px">
+<div style="grid-column:1/-1;display:flex;flex-direction:column;gap:5px"><div style="display:flex;justify-content:space-between"><span style="font-size:12px;font-weight:500;color:oklch(0.42 0.015 260)">Ragione sociale</span><span style="font:11px 'IBM Plex Mono',monospace;color:oklch(0.55 0.015 260)">11/20</span></div><span style="height:34px;border:1px solid oklch(0.58 0.17 25);border-radius:6px;padding:0 10px;display:flex;align-items:center;justify-content:space-between;background:#fff">Rinaldi Srl<i class="fa-solid fa-circle-exclamation" style="color:oklch(0.55 0.17 25)"></i></span><span style="font-size:12px;color:oklch(0.5 0.16 25);display:flex;gap:8px">Valore già in uso da un altro cliente.<a style="font-weight:500">Apri "Rinaldi Srl" →</a></span></div>
+<div style="display:flex;flex-direction:column;gap:5px"><span style="font-size:12px;font-weight:500;color:oklch(0.42 0.015 260)">P.IVA completa</span><span style="height:34px;border:1px solid oklch(0.58 0.17 25);border-radius:6px;padding:0 10px;display:flex;align-items:center;justify-content:space-between;font-family:'IBM Plex Mono',monospace;background:#fff">IT123<i class="fa-solid fa-circle-exclamation" style="color:oklch(0.55 0.17 25)"></i></span><span style="font-size:12px;color:oklch(0.5 0.16 25)">Formato non valido · atteso IT + 11 cifre</span></div>
+<div style="display:flex;flex-direction:column;gap:5px"><span style="font-size:12px;font-weight:500;color:oklch(0.42 0.015 260)">PEC</span><span style="height:34px;border:1px solid oklch(0.87 0.008 255);border-radius:6px;padding:0 10px;display:flex;align-items:center;justify-content:space-between;background:#fff">amministrazione@pec.rinaldi.it<i class="fa-solid fa-circle-check" style="color:oklch(0.55 0.13 155)"></i></span><span style="font-size:12px;color:oklch(0.42 0.11 155)">Disponibile</span></div>
+<div style="grid-column:1/-1;display:flex;flex-direction:column;gap:5px"><span style="font-size:12px;font-weight:500;color:oklch(0.42 0.015 260)">Via</span><span style="height:34px;border:1px solid oklch(0.87 0.008 255);border-radius:6px;padding:0 10px;display:flex;align-items:center;background:#fff">Via dell'Industria 18</span></div>
+<div style="display:flex;flex-direction:column;gap:5px;position:relative"><span style="font-size:12px;font-weight:500;color:oklch(0.42 0.015 260)">Comune</span><span style="height:34px;border:1px solid oklch(0.52 0.16 262);box-shadow:0 0 0 3px oklch(0.92 0.04 262);border-radius:6px;padding:0 10px;display:flex;align-items:center;gap:8px;background:#fff"><i class="fa-solid fa-location-dot" style="font-size:11px;color:oklch(0.55 0.015 260)"></i>Bolo<span style="width:1px;height:16px;background:oklch(0.24 0.02 260);margin-left:-7px"></span></span>
+<div style="position:absolute;top:62px;left:0;right:0;background:#fff;border:1px solid oklch(0.89 0.007 255);border-radius:8px;box-shadow:0 10px 30px oklch(0.24 0.02 260 / 0.14);padding:4px;z-index:2">
+<sc-for list="{{ cities }}" as="c" hint-placeholder-count="4"><div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:5px;background:{{ c.bg }}"><span><b style="font-weight:600">{{ c.hl }}</b>{{ c.rest }} <span style="color:oklch(0.5 0.015 260)">({{ c.pr }})</span></span><span style="font:11.5px 'IBM Plex Mono',monospace;color:oklch(0.5 0.015 260)">{{ c.cap }}</span></div></sc-for>
+<div style="padding:6px 10px;border-top:1px solid oklch(0.94 0.004 255);margin-top:4px;font-size:11.5px;color:oklch(0.55 0.015 260);display:flex;gap:12px"><span>↑↓ naviga</span><span>↵ seleziona</span><span style="margin-left:auto">Fonte ISTAT</span></div>
+</div></div>
+<div style="display:flex;flex-direction:column;gap:5px"><span style="font-size:12px;font-weight:500;color:oklch(0.42 0.015 260)">CAP</span><span style="height:34px;border:1px solid oklch(0.87 0.008 255);border-radius:6px;padding:0 10px;display:flex;align-items:center;background:oklch(0.975 0.004 255);color:oklch(0.6 0.015 260)">Si compila dal comune</span></div>
+<div style="display:flex;flex-direction:column;gap:5px;margin-top:70px"><span style="font-size:12px;font-weight:500;color:oklch(0.42 0.015 260)">Codice destinatario SDI <span style="font-weight:400;color:oklch(0.55 0.015 260)">· facoltativo</span></span><span style="height:34px;border:1px solid oklch(0.87 0.008 255);border-radius:6px;padding:0 10px;display:flex;align-items:center;font-family:'IBM Plex Mono',monospace;background:#fff;color:oklch(0.6 0.015 260)">XXXXXXX</span></div>
+<div style="display:flex;flex-direction:column;gap:5px;margin-top:70px"><span style="font-size:12px;font-weight:500;color:oklch(0.42 0.015 260)">Referente commerciale</span><span style="height:34px;border:1px solid oklch(0.87 0.008 255);border-radius:6px;padding:0 10px;display:flex;align-items:center;justify-content:space-between;background:#fff">Marta Russo (tu)<i class="fa-solid fa-chevron-down" style="font-size:10px;color:oklch(0.55 0.015 260)"></i></span></div>
+</div>
+<div style="margin-top:auto;display:flex;justify-content:space-between;align-items:center;border-top:1px solid oklch(0.91 0.006 255);padding-top:16px"><span style="height:32px;padding:0 12px;border-radius:6px;font-weight:500;display:inline-flex;align-items:center;color:oklch(0.42 0.015 260)">Annulla</span><div style="display:flex;gap:8px"><span style="height:32px;padding:0 12px;border-radius:6px;background:#fff;border:1px solid oklch(0.87 0.008 255);font-weight:500;display:inline-flex;align-items:center">Salta organizzazione e attiva</span><span style="height:32px;padding:0 14px;border-radius:6px;background:oklch(0.8 0.05 262);color:#fff;font-weight:500;display:inline-flex;align-items:center;gap:8px">Avanti: Piano e moduli<i class="fa-solid fa-arrow-right" style="font-size:11px"></i></span></div></div>
+</main>
+<aside style="border-left:1px solid oklch(0.91 0.006 255);padding:24px 20px;background:#fff;display:flex;flex-direction:column;gap:14px">
+<div style="font-size:15px;font-weight:600">Controlli</div>
+<sc-for list="{{ checks }}" as="c" hint-placeholder-count="6"><div style="display:flex;gap:10px;align-items:flex-start"><i class="{{ c.i }}" style="color:{{ c.c }};margin-top:2px;width:14px;text-align:center"></i><div><div style="font-weight:500">{{ c.n }}</div><div style="font-size:12px;color:oklch(0.52 0.015 260);margin-top:1px">{{ c.d }}</div></div></div></sc-for>
+<div style="margin-top:auto;padding:12px;border-radius:6px;background:oklch(0.97 0.012 262);color:oklch(0.38 0.08 262);font-size:12px;line-height:1.5;display:flex;gap:10px"><i class="fa-solid fa-circle-info" style="margin-top:2px"></i><span>Il cliente resta "In onboarding" finché non scegli un piano. Puoi riprendere la bozza da Clienti → Onboarding.</span></div>
+</aside>
+</div>
+</div>
+</div>
+</div></div>
+
+<div class="dv-opt" id="1f"><div class="dv-olabel"><a class="dv-oid" href="#1f">1f</a>Utenti — ricerca globale + pannello di dettaglio laterale (UC6 + UC7 + EXP-06)</div>
+<div class="dv-card" style="width:1440px">
+<div style="display:flex;width:1440px;height:900px;background:oklch(0.975 0.004 255);font-family:'IBM Plex Sans',sans-serif;color:oklch(0.24 0.02 260);font-size:13px">
+<aside style="width:228px;flex:none;background:oklch(0.21 0.02 262);color:oklch(0.86 0.01 260);display:flex;flex-direction:column;padding:14px 10px;gap:20px">
+<div style="display:flex;align-items:center;gap:10px;padding:2px 8px 4px"><div style="width:28px;height:28px;border-radius:6px;background:oklch(0.3 0.03 262);display:grid;place-items:center;color:oklch(0.78 0.11 262);font:600 12px 'IBM Plex Mono',monospace">ps</div><div><div style="font-weight:600;font-size:13.5px;color:#fff">PSAAS</div><div style="font-size:11px;color:oklch(0.62 0.015 260)">Admin console</div></div></div>
+<sc-for list="{{ navUtenti }}" as="g" hint-placeholder-count="3"><div style="display:flex;flex-direction:column;gap:1px"><div style="font:500 10.5px 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:oklch(0.58 0.015 260);padding:0 10px 6px">{{ g.label }}</div><sc-for list="{{ g.items }}" as="it" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:10px;height:32px;padding:0 10px;border-radius:6px;background:{{ it.bg }};color:{{ it.fg }}"><i class="{{ it.icon }}" style="width:16px;text-align:center;font-size:12.5px"></i><span style="flex:1">{{ it.label }}</span><sc-if value="{{ it.count }}" hint-placeholder-val="{{ false }}"><span style="font:500 11px 'IBM Plex Mono',monospace;background:oklch(0.55 0.17 25);color:#fff;border-radius:9px;padding:1px 6px">{{ it.count }}</span></sc-if></div></sc-for></div></sc-for>
+<div style="margin-top:auto;padding:10px;border-top:1px solid oklch(0.3 0.02 262);font:11px 'IBM Plex Mono',monospace;color:oklch(0.58 0.015 260);display:flex;justify-content:space-between"><span>core 2.0.3</span><span>realm PSAAS</span></div>
+</aside>
+<div style="flex:1;display:flex;flex-direction:column;min-width:0">
+<header style="height:52px;flex:none;background:#fff;border-bottom:1px solid oklch(0.91 0.006 255);display:flex;align-items:center;gap:16px;padding:0 20px">
+<span style="font-weight:600">Utenti</span>
+<div style="flex:1;display:flex;justify-content:center"><div style="width:440px;height:32px;border:1px solid oklch(0.89 0.007 255);border-radius:6px;background:oklch(0.975 0.004 255);display:flex;align-items:center;gap:10px;padding:0 10px;color:oklch(0.55 0.015 260)"><i class="fa-solid fa-magnifying-glass" style="font-size:12px"></i><span style="flex:1">Cerca clienti, utenti, P.IVA, PEC…</span><span style="font:11px 'IBM Plex Mono',monospace;border:1px solid oklch(0.87 0.008 255);border-radius:4px;padding:0 5px">⌘K</span></div></div>
+<span style="height:24px;padding:0 8px;border-radius:4px;background:oklch(0.96 0.05 85);color:oklch(0.48 0.11 65);font:600 11px 'IBM Plex Mono',monospace;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:oklch(0.62 0.14 70)"></span>PRODUZIONE</span>
+<span style="display:flex;align-items:center;gap:6px;color:oklch(0.42 0.015 260)"><i class="fa-solid fa-globe"></i>IT</span><i class="fa-solid fa-moon" style="color:oklch(0.42 0.015 260)"></i><i class="fa-solid fa-bell" style="color:oklch(0.42 0.015 260)"></i>
+<div style="width:30px;height:30px;border-radius:50%;background:oklch(0.9 0.04 262);color:oklch(0.4 0.14 262);display:grid;place-items:center;font-weight:600;font-size:12px">MR</div>
+</header>
+<div style="flex:1;display:grid;grid-template-columns:minmax(0,1fr) 400px;min-height:0">
+<main style="padding:20px 24px 20px 28px;display:flex;flex-direction:column;gap:14px;overflow:hidden">
+<div style="display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:baseline;gap:10px"><span style="font-size:22px;font-weight:600;letter-spacing:-0.01em">Utenti</span><span style="font:13px 'IBM Plex Mono',monospace;color:oklch(0.5 0.015 260)">2.416</span></div><div style="display:flex;gap:8px"><span style="height:32px;padding:0 12px;border-radius:6px;font-weight:500;display:inline-flex;align-items:center;gap:8px;color:oklch(0.42 0.015 260)"><i class="fa-solid fa-file-csv" style="font-size:12px"></i>Importa CSV</span><span style="height:32px;padding:0 14px;border-radius:6px;background:oklch(0.52 0.16 262);color:#fff;font-weight:500;display:inline-flex;align-items:center;gap:8px"><i class="fa-solid fa-user-plus" style="font-size:11px"></i>Nuovo utente</span></div></div>
+<div style="display:flex;gap:8px;align-items:center">
+<div style="width:320px;height:32px;border:1px solid oklch(0.52 0.16 262);box-shadow:0 0 0 3px oklch(0.92 0.04 262);border-radius:6px;background:#fff;display:flex;align-items:center;gap:8px;padding:0 10px"><i class="fa-solid fa-magnifying-glass" style="font-size:12px;color:oklch(0.55 0.015 260)"></i><span style="flex:1">ferri</span><i class="fa-solid fa-circle-xmark" style="font-size:12px;color:oklch(0.7 0.01 260)"></i></div>
+<span style="height:32px;padding:0 10px;border:1px dashed oklch(0.82 0.01 255);border-radius:6px;display:inline-flex;align-items:center;gap:6px;color:oklch(0.42 0.015 260)"><i class="fa-solid fa-building" style="font-size:11px"></i>Cliente</span>
+<span style="height:32px;padding:0 10px;border:1px dashed oklch(0.82 0.01 255);border-radius:6px;display:inline-flex;align-items:center;gap:6px;color:oklch(0.42 0.015 260)"><i class="fa-solid fa-id-badge" style="font-size:11px"></i>Profilo</span>
+<span style="height:32px;padding:0 10px;border:1px dashed oklch(0.82 0.01 255);border-radius:6px;display:inline-flex;align-items:center;gap:6px;color:oklch(0.42 0.015 260)"><i class="fa-solid fa-circle-half-stroke" style="font-size:11px"></i>Stato</span>
+<span style="margin-left:auto;font-size:12px;color:oklch(0.5 0.015 260)">6 risultati su nome, cognome ed email</span>
+</div>
+<div style="background:#fff;border:1px solid oklch(0.91 0.006 255);border-radius:8px;overflow:hidden">
+<div style="display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1.9fr) 120px 110px;align-items:center;height:36px;padding:0 14px;border-bottom:1px solid oklch(0.91 0.006 255);font-size:12px;font-weight:500;color:oklch(0.5 0.015 260);background:oklch(0.985 0.003 255)"><span>Utente</span><span>Profili · cliente</span><span>Stato</span><span>Ultimo accesso</span></div>
+<sc-for list="{{ users }}" as="u" hint-placeholder-count="6"><div style="display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1.9fr) 120px 110px;align-items:center;min-height:56px;padding:8px 14px;border-bottom:1px solid oklch(0.95 0.004 255);background:{{ u.bg }};box-shadow:{{ u.sh }}">
+<span style="display:flex;gap:10px;align-items:center;min-width:0"><span style="width:30px;height:30px;flex:none;border-radius:50%;background:oklch(0.94 0.008 260);color:oklch(0.4 0.02 260);display:grid;place-items:center;font-size:11.5px;font-weight:600">{{ u.ini }}</span><span style="min-width:0"><div style="font-weight:600">{{ u.n }}</div><div style="font-size:12px;color:oklch(0.5 0.015 260);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ u.e }}</div></span></span>
+<span style="display:flex;flex-wrap:wrap;gap:4px"><sc-for list="{{ u.p }}" as="p" hint-placeholder-count="1"><span style="height:22px;padding:0 7px;border-radius:4px;border:1px solid oklch(0.9 0.006 255);font-size:11.5px;display:inline-flex;align-items:center;gap:5px"><b style="font-weight:600">{{ p.p }}</b><span style="color:oklch(0.52 0.015 260)">{{ p.t }}</span></span></sc-for></span>
+<span><span style="height:22px;padding:0 8px;border-radius:4px;background:{{ u.sbg }};color:{{ u.sfg }};font-size:11.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:{{ u.sfg }}"></span>{{ u.s }}</span></span>
+<span style="font:11.5px 'IBM Plex Mono',monospace;color:oklch(0.45 0.015 260)">{{ u.l }}</span>
+</div></sc-for>
+</div>
+</main>
+<aside style="background:#fff;border-left:1px solid oklch(0.91 0.006 255);display:flex;flex-direction:column;box-shadow:-8px 0 24px oklch(0.24 0.02 260 / 0.05)">
+<div style="padding:18px 20px;border-bottom:1px solid oklch(0.93 0.005 255);display:flex;gap:12px;align-items:flex-start"><span style="width:44px;height:44px;border-radius:50%;background:oklch(0.9 0.04 262);color:oklch(0.4 0.14 262);display:grid;place-items:center;font-weight:600">GF</span><div style="flex:1"><div style="font-size:16px;font-weight:600">Giulia Ferri</div><div style="font-size:12.5px;color:oklch(0.5 0.015 260)">giulia.ferri@rinaldi.it</div><div style="display:flex;gap:6px;margin-top:8px"><span style="height:22px;padding:0 8px;border-radius:4px;background:oklch(0.96 0.05 85);color:oklch(0.48 0.11 65);font-size:11.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:oklch(0.48 0.11 65)"></span>Invito inviato</span><span style="height:22px;padding:0 8px;border-radius:4px;background:oklch(0.95 0.005 260);color:oklch(0.42 0.015 260);font-size:11.5px;font-weight:600;display:inline-flex;align-items:center;gap:5px"><i class="fa-solid fa-shield-halved" style="font-size:10px"></i>MFA richiesta</span></div></div><i class="fa-solid fa-xmark" style="color:oklch(0.55 0.015 260)"></i></div>
+<div style="padding:14px 20px;display:grid;grid-template-columns:1fr 1fr;gap:8px;border-bottom:1px solid oklch(0.93 0.005 255)">
+<span style="height:32px;padding:0 10px;border-radius:6px;background:oklch(0.52 0.16 262);color:#fff;font-weight:500;display:inline-flex;align-items:center;gap:8px;font-size:12.5px"><i class="fa-solid fa-paper-plane" style="font-size:11px"></i>Reinvia invito</span>
+<span style="height:32px;padding:0 10px;border-radius:6px;background:#fff;border:1px solid oklch(0.87 0.008 255);font-weight:500;display:inline-flex;align-items:center;gap:8px;font-size:12.5px"><i class="fa-solid fa-pen" style="font-size:11px;color:oklch(0.5 0.015 260)"></i>Modifica</span>
+<span style="height:32px;padding:0 10px;border-radius:6px;background:#fff;border:1px solid oklch(0.87 0.008 255);font-weight:500;display:inline-flex;align-items:center;gap:8px;font-size:12.5px"><i class="fa-solid fa-key" style="font-size:11px;color:oklch(0.5 0.015 260)"></i>Reset password</span>
+<span style="height:32px;padding:0 10px;border-radius:6px;background:oklch(0.95 0.035 25);color:oklch(0.5 0.16 25);font-weight:500;display:inline-flex;align-items:center;gap:8px;font-size:12.5px"><i class="fa-solid fa-user-slash" style="font-size:11px"></i>Disattiva</span>
+</div>
+<div style="padding:16px 20px;border-bottom:1px solid oklch(0.93 0.005 255)">
+<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px"><span style="font-size:14px;font-weight:600">Profili</span><span style="font-size:12px;color:oklch(0.5 0.015 260)">raggruppati per cliente</span></div>
+<sc-for list="{{ uprof }}" as="g" hint-placeholder-count="2"><div style="margin-bottom:12px"><div style="display:flex;gap:8px;align-items:center;font-weight:600;font-size:12.5px;margin-bottom:6px"><i class="fa-solid fa-building" style="font-size:11px;color:oklch(0.55 0.015 260)"></i>{{ g.t }}</div><div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ g.p }}" as="p" hint-placeholder-count="3"><span style="height:28px;padding:0 10px;border-radius:6px;border:1px solid {{ p.bd }};background:{{ p.bg }};color:{{ p.fg }};display:inline-flex;align-items:center;gap:6px;font-size:12.5px"><i class="{{ p.i }}" style="font-size:10px"></i>{{ p.n }}</span></sc-for></div></div></sc-for>
+<span style="font-size:12.5px;color:oklch(0.52 0.16 262);display:flex;gap:6px;align-items:center"><i class="fa-solid fa-plus" style="font-size:10px"></i>Aggiungi profilo di un altro cliente</span>
+</div>
+<div style="padding:16px 20px;display:flex;flex-direction:column;gap:2px">
+<div style="font-size:14px;font-weight:600;margin-bottom:8px">Dettagli</div>
+<sc-for list="{{ udet }}" as="a" hint-placeholder-count="5"><div style="display:grid;grid-template-columns:120px 1fr;gap:8px;padding:5px 0;font-size:12.5px"><span style="color:oklch(0.5 0.015 260)">{{ a.k }}</span><span style="font-family:{{ a.f }}">{{ a.v }}</span></div></sc-for>
+</div>
+</aside>
+</div>
+</div>
+</div>
+</div></div>
+
+</div>
+<p class="dv-next">Prova: "versione tema scuro di <a class="dv-oid" href="#1c">1c</a>" · "schermata Abbonamento e moduli per la scheda di <a class="dv-oid" href="#1d">1d</a>" · "catalogo moduli e piani (EXP-01/02)" · "vista mobile di <a class="dv-oid" href="#1f">1f</a>"</p>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const C = {
+      ok: ['oklch(0.95 0.04 155)', 'oklch(0.42 0.11 155)'],
+      warn: ['oklch(0.96 0.05 85)', 'oklch(0.48 0.11 65)'],
+      bad: ['oklch(0.95 0.035 25)', 'oklch(0.5 0.16 25)'],
+      info: ['oklch(0.95 0.03 262)', 'oklch(0.45 0.15 262)'],
+      neu: ['oklch(0.95 0.005 260)', 'oklch(0.42 0.015 260)'],
+    };
+    const MOD = {
+      core: 'fa-solid fa-cube', wh: 'fa-solid fa-boxes-stacked', hr: 'fa-solid fa-user-tie',
+      crm: 'fa-solid fa-handshake', qa: 'fa-solid fa-clipboard-check', acc: 'fa-solid fa-calculator',
+    };
+    const NAV = [
+      { label: 'Operatività', items: [['home', 'Panoramica', 'fa-solid fa-gauge-high', 5], ['clienti', 'Clienti', 'fa-solid fa-building'], ['utenti', 'Utenti', 'fa-solid fa-users'], ['profili', 'Profili', 'fa-solid fa-id-badge']] },
+      { label: 'Catalogo', items: [['moduli', 'Moduli', 'fa-solid fa-puzzle-piece'], ['piani', 'Piani', 'fa-solid fa-layer-group'], ['sub', 'Sottoscrizioni', 'fa-solid fa-file-contract']] },
+      { label: 'Amministrazione', items: [['fatt', 'Fatturazione', 'fa-solid fa-file-invoice'], ['com', 'Comunicazioni', 'fa-solid fa-bullhorn'], ['audit', 'Audit log', 'fa-solid fa-clock-rotate-left'], ['set', 'Impostazioni', 'fa-solid fa-sliders']] },
+    ];
+    const nav = (active) => NAV.map(g => ({
+      label: g.label,
+      items: g.items.map(([k, label, icon, count]) => ({
+        label, icon, count: count || 0,
+        bg: k === active ? 'oklch(0.32 0.04 262)' : 'transparent',
+        fg: k === active ? '#fff' : 'oklch(0.8 0.012 260)',
+      })),
+    }));
+    const st = (s) => ({ Attivo: C.ok, Trial: C.info, Sospeso: C.bad, Onboarding: C.warn, 'In disdetta': C.neu }[s]);
+    const T = [
+      ['Acciaierie Ventura Spa', '01834560219', 'amm@pec.acciaierieventura.it', 'Bolzano', 'Attivo', 'Enterprise', ['core', 'wh', 'hr', 'acc'], 212, 250, '31/12/2026'],
+      ['Ceramiche Bassi Srl', '02291870364', 'ceramichebassi@legalmail.it', 'Sassuolo', 'Attivo', 'Pro', ['core', 'wh', 'qa'], 48, 50, '14/01/2027'],
+      ['E2E Test 969436 Srl', '92663969436', 'e2e969436@pec.example.com', 'Roma', 'Onboarding', '—', ['core'], 0, 10, '—'],
+      ['Ferramenta Colombo Snc', '07712340158', 'colombo.snc@pec.it', 'Monza', 'Trial', 'Pro', ['core', 'wh'], 6, 50, 'tra 3 gg'],
+      ['Logistica Adriatica Srl', '04418290427', 'logadriatica@pec.it', 'Ancona', 'Sospeso', 'Pro', ['core', 'wh', 'crm'], 31, 50, 'scaduto'],
+      ['Officine Rinaldi Spa', '03918270372', 'amministrazione@pec.rinaldi.it', 'Bologna', 'Attivo', 'Pro', ['core', 'wh', 'hr'], 37, 50, '14/03/2027'],
+      ['Pastificio Lucani Srl', '01290040763', 'pastificiolucani@pec.it', 'Matera', 'Attivo', 'Base', ['core', 'qa'], 12, 15, '02/05/2027'],
+      ['Studio Ferretti Associati', '09831120481', 'studioferretti@pec.it', 'Firenze', 'Trial', 'Pro', ['core', 'crm'], 4, 50, 'tra 3 gg'],
+      ['Tessiture Bergamasche Spa', '02944110164', 'tessiture.bg@legalmail.it', 'Bergamo', 'Attivo', 'Enterprise', ['core', 'wh', 'hr', 'qa', 'acc'], 164, 300, '30/06/2027'],
+      ['Vetreria Murano Arte Srl', '04120980271', 'vetreria@pec.muranoarte.it', 'Venezia', 'In disdetta', 'Base', ['core'], 8, 15, '30/11/2026'],
+      ['eyeve srls', '05257610757', 'eyevesrls@pec.it', "L'Aquila", 'Attivo', 'Base', ['core'], 3, 15, '19/09/2027'],
+      ['roberto srl', '05157610757', 'robertoroberti@pec.it', 'Cervara di Roma', 'Attivo', 'Base', ['core'], 2, 15, '07/08/2027'],
+    ];
+    const selected = [1, 5];
+    const tenants = T.map(([name, piva, pec, city, status, plan, mods, u, lim, ren], i) => {
+      const pct = Math.round((u / lim) * 100);
+      const sel = selected.includes(i);
+      return {
+        name, piva, pec, city, status, plan, sel,
+        sbg: st(status)[0], sfg: st(status)[1],
+        mods: mods.map(m => ({ i: MOD[m], bg: m === 'core' ? 'oklch(0.94 0.005 260)' : 'oklch(0.95 0.03 262)', fg: m === 'core' ? 'oklch(0.45 0.015 260)' : 'oklch(0.45 0.15 262)' })),
+        users: `${u} / ${lim}`, pct,
+        barC: pct >= 90 ? 'oklch(0.62 0.14 70)' : 'oklch(0.6 0.08 262)',
+        ren, renC: /gg|scad/.test(ren) ? 'oklch(0.5 0.16 25)' : 'oklch(0.42 0.015 260)',
+        rowBg: sel ? 'oklch(0.97 0.015 262)' : '#fff',
+        cbBg: sel ? 'oklch(0.52 0.16 262)' : '#fff',
+        cbBd: sel ? 'oklch(0.52 0.16 262)' : 'oklch(0.82 0.01 255)',
+      };
+    });
+    const views = [['Tutti', 142, 1], ['Attivi', 128], ['Trial', 9], ['Onboarding', 3], ['Sospesi', 2], ['Rinnovo < 30 gg', 11]].map(([n, c, a]) => ({
+      n, c, bd: a ? 'oklch(0.52 0.16 262)' : 'transparent', fg: a ? 'oklch(0.24 0.02 260)' : 'oklch(0.5 0.015 260)', fw: a ? 600 : 400,
+    }));
+    const queue = [
+      ['bad', 'fa-solid fa-gears', 'Provisioning fallito · modulo Magazzino 1.4.0', 'Officine Rinaldi Spa', 'hook provision → timeout dopo 3 tentativi', '12 min', 'Riprova'],
+      ['bad', 'fa-solid fa-file-invoice', 'Fattura insoluta da 32 giorni', 'Logistica Adriatica Srl', '€ 1.240,00 · sospeso automaticamente ieri', '1 g', 'Apri fattura'],
+      ['warn', 'fa-solid fa-hourglass-half', 'Trial in scadenza tra 3 giorni', 'Studio Ferretti Associati', 'Piano Pro · 4 utenti attivi', '3 g', 'Converti'],
+      ['warn', 'fa-solid fa-users', 'Limite utenti al 96%', 'Ceramiche Bassi Srl', '48 di 50 · piano Pro', '2 g', 'Proponi upgrade'],
+      ['info', 'fa-solid fa-envelope', '7 utenti non hanno completato il primo accesso', 'Vari clienti', 'invito inviato da oltre 5 giorni', '5 g', 'Reinvia inviti'],
+    ].map(([k, i, t, c, m, when, a]) => ({ bg: C[k][0], fg: C[k][1], i, t, c, m, when, a }));
+    const stats = [
+      ['Clienti attivi', '128', '+3 questo mese', 'fa-solid fa-building'],
+      ['In trial', '9', '4 scadono entro 7 gg', 'fa-solid fa-hourglass-half'],
+      ['Utenti', '2.416', '96 creati questo mese', 'fa-solid fa-users'],
+      ['Moduli installati', '6', '1 aggiornamento disponibile', 'fa-solid fa-puzzle-piece'],
+    ].map(([l, v, d, i]) => ({ l, v, d, i }));
+    const services = [
+      ['Keycloak · realm PSAAS', '42 ms', 'oklch(0.6 0.13 155)'],
+      ['API amministrazione utenti', '68 ms', 'oklch(0.6 0.13 155)'],
+      ['Elenco comuni ISTAT', 'agg. 01/10', 'oklch(0.6 0.13 155)'],
+      ['Hook modulo Magazzino', 'degradato', 'oklch(0.66 0.14 70)'],
+    ].map(([n, d, c]) => ({ n, d, c }));
+    const activity = [
+      ['fa-solid fa-sitemap', 'Luca B.', 'ha modificato l’organizzazione di', 'Tessiture Bergamasche', '10:31 · 2 profili, 1 unità'],
+      ['fa-solid fa-user-plus', 'Marta R.', 'ha creato 4 utenti per', 'Officine Rinaldi', '09:58'],
+      ['fa-solid fa-layer-group', 'Sistema', 'ha rinnovato il piano Enterprise di', 'Acciaierie Ventura', '06:00 · rinnovo automatico'],
+      ['fa-solid fa-circle-pause', 'Sistema', 'ha sospeso', 'Logistica Adriatica', 'ieri 23:00 · morosità'],
+      ['fa-solid fa-building', 'Marta R.', 'ha avviato l’onboarding di', 'E2E Test 969436', 'ieri 17:12'],
+    ].map(([i, who, what, obj, when]) => ({ i, who, what, obj, when }));
+    const tabs = [['Panoramica'], ['Anagrafica'], ['Organizzazione', 0, 1], ['Abbonamento e moduli'], ['Utenti', 37], ['Uso'], ['Fatture', 14], ['Storico']].map(([n, c, a]) => ({
+      n, c: c || 0, bd: a ? 'oklch(0.52 0.16 262)' : 'transparent', fg: a ? 'oklch(0.24 0.02 260)' : 'oklch(0.5 0.015 260)', fw: a ? 600 : 400,
+    }));
+    const units = [['Stab. Nord', 'Casalecchio'], ['Stab. Sud', 'San Lazzaro'], ['Magazzino', 'Interporto'], ['Uffici', 'Bologna centro']].map(([n, d]) => ({ n, d }));
+    const M = [
+      ['Operatore', 'Operatore di linea', 18, [1, 1, 0, 0]],
+      ['Capoturno', 'Responsabile di turno', 6, [1, 1, 0, 0], [null, null, 'add', null]],
+      ['Magazziniere', 'Movimenti e inventario', 7, [0, 0, 1, 0]],
+      ['Amministrazione', 'Ufficio amministrativo', 3, [0, 0, 0, 1], [null, null, null, null], [1]],
+      ['Ispettore', 'Controllo qualità', 3, [1, 1, 0, 0], null, null, true],
+    ];
+    const matrix = M.map(([n, d, u, cells, chg, _x, removed]) => ({
+      n, d, u, td: removed ? 'line-through' : 'none',
+      fg: removed ? 'oklch(0.5 0.16 25)' : 'oklch(0.24 0.02 260)',
+      bg: removed ? 'oklch(0.985 0.012 25)' : '#fff',
+      cells: cells.map((on, j) => {
+        const added = chg && chg[j] === 'add';
+        const isOn = on || added || (n === 'Amministrazione' && j === 2);
+        const changed = added || (n === 'Amministrazione' && j === 2);
+        return {
+          on: !!isOn,
+          bg: removed && on ? 'oklch(0.95 0.035 25)' : isOn ? 'oklch(0.52 0.16 262)' : '#fff',
+          fg: removed && on ? 'oklch(0.5 0.16 25)' : '#fff',
+          bd: removed && on ? 'oklch(0.85 0.06 25)' : isOn ? 'oklch(0.52 0.16 262)' : 'oklch(0.86 0.008 255)',
+          sh: changed ? '0 0 0 3px oklch(0.88 0.08 85)' : 'none',
+        };
+      }),
+    }));
+    const mono = "'IBM Plex Mono',monospace", sans = "'IBM Plex Sans',sans-serif";
+    const anag = [['P.IVA', 'IT03918270372', mono], ['PEC', 'amministrazione@pec.rinaldi.it', sans], ['Sede', "Via dell'Industria 18, 40138 Bologna (BO)", sans], ['Codice SDI', 'M5UXCR1', mono], ['Referente', 'Marta Russo', sans]].map(([k, v, f]) => ({ k, v, f }));
+    const tmods = [
+      ['fa-solid fa-cube', 'Core', 'v2.0.3', 'Attivo', 'fa-solid fa-circle-check', C.ok[1]],
+      ['fa-solid fa-boxes-stacked', 'Magazzino', 'v1.4.0', 'Provisioning fallito', 'fa-solid fa-circle-xmark', C.bad[1]],
+      ['fa-solid fa-user-tie', 'Risorse umane', 'v0.9.2 · beta', 'Attivo', 'fa-solid fa-circle-check', C.ok[1]],
+    ].map(([i, n, v, s, si, fg]) => ({ i, n, v, s, si, fg }));
+    const hist = [['Luca B. ha aggiunto l’unità "Magazzino"', '20/10/2026 15:02'], ['Piano cambiato da Base a Pro', '02/09/2026 11:40'], ['Cliente attivato da Marta R.', '14/03/2024 09:15']].map(([t, w]) => ({ t, w }));
+    const SN = [['Anagrafica', 'Dati legali e sede'], ['Piano e moduli', 'Sottoscrizione, trial, add-on'], ['Organizzazione', 'Profili e unità produttive'], ['Primi utenti', 'Inviti via Keycloak'], ['Riepilogo', 'Verifica e attiva']];
+    const steps = SN.map(([n, d], i) => ({
+      k: i + 1, n, d,
+      bg: i === 0 ? 'oklch(0.96 0.015 262)' : 'transparent',
+      bd: i === 0 ? 'oklch(0.52 0.16 262)' : 'oklch(0.84 0.008 255)',
+      cbg: i === 0 ? 'oklch(0.52 0.16 262)' : '#fff',
+      cfg: i === 0 ? '#fff' : 'oklch(0.5 0.015 260)',
+      fg: i === 0 ? 'oklch(0.24 0.02 260)' : 'oklch(0.42 0.015 260)', fw: i === 0 ? 600 : 500,
+    }));
+    const cities = [['Bolo', 'gna', 'BO', '40121–40141', 1], ['Bolo', 'gnano', 'VA', '21020'], ['Bolo', 'gnetta', 'MO', '41058'], ['Bolo', 'gnola', 'PU', '61021']].map(([hl, rest, pr, cap, a]) => ({ hl, rest, pr, cap, bg: a ? 'oklch(0.96 0.015 262)' : 'transparent' }));
+    const R = 'oklch(0.55 0.17 25)', G = 'oklch(0.55 0.13 155)', N = 'oklch(0.75 0.01 260)';
+    const checks = [
+      ['fa-solid fa-circle-xmark', R, 'Ragione sociale unica', 'Già usata da "Rinaldi Srl"'],
+      ['fa-solid fa-circle-xmark', R, 'P.IVA valida e unica', 'Formato non valido'],
+      ['fa-solid fa-circle-check', G, 'PEC unica', 'Verificata alle 10:42'],
+      ['fa-regular fa-circle', N, 'Comune e CAP coerenti', 'In attesa del comune'],
+      ['fa-regular fa-circle', N, 'Piano selezionato', 'Passo 2'],
+    ].map(([i, c, n, d]) => ({ i, c, n, d }));
+    const U = [
+      ['GF', 'Giulia Ferri', 'giulia.ferri@rinaldi.it', [['Capoturno', 'Officine Rinaldi'], ['Operatore', 'Ceramiche Bassi']], 'Invito inviato', 'warn', 'mai', 1],
+      ['MF', 'Marco Ferri', 'm.ferri@tessiturebg.it', [['Magazziniere', 'Tessiture Bergamasche']], 'Attivo', 'ok', 'oggi 08:14'],
+      ['AF', 'Anna Ferrini', 'anna.ferrini@acciaierieventura.it', [['Amministrazione', 'Acciaierie Ventura']], 'Attivo', 'ok', 'ieri 17:40'],
+      ['PF', 'Paolo Ferrigno', 'p.ferrigno@logadriatica.it', [['Operatore', 'Logistica Adriatica']], 'Sospeso', 'bad', '03/10/2026'],
+      ['LF', 'Laura Ferrari', 'laura.ferrari@pastificiolucani.it', [['Qualità', 'Pastificio Lucani'], ['Operatore', 'Pastificio Lucani']], 'Attivo', 'ok', '20/10/2026'],
+      ['SF', 'Stefano Ferraioli', 's.ferraioli@studioferretti.it', [], 'Disattivato', 'neu', '11/06/2026'],
+    ];
+    const users = U.map(([ini, n, e, p, s, k, l, a]) => ({
+      ini, n, e, s, l, sbg: C[k][0], sfg: C[k][1],
+      p: p.length ? p.map(([pp, t]) => ({ p: pp, t })) : [{ p: 'Nessun profilo', t: '' }],
+      bg: a ? 'oklch(0.97 0.015 262)' : '#fff', sh: a ? 'inset 3px 0 0 oklch(0.52 0.16 262)' : 'none',
+    }));
+    const on = (n) => ({ n, i: 'fa-solid fa-check', bd: 'oklch(0.52 0.16 262)', bg: 'oklch(0.96 0.015 262)', fg: 'oklch(0.4 0.15 262)' });
+    const off = (n) => ({ n, i: 'fa-regular fa-square', bd: 'oklch(0.89 0.007 255)', bg: '#fff', fg: 'oklch(0.42 0.015 260)' });
+    const uprof = [
+      { t: 'Officine Rinaldi Spa', p: [off('Operatore'), on('Capoturno'), off('Magazziniere'), off('Amministrazione')] },
+      { t: 'Ceramiche Bassi Srl', p: [on('Operatore'), off('Qualità')] },
+    ];
+    const udet = [['ID Keycloak', 'a41f…9c02', mono], ['Username', 'giulia.ferri@rinaldi.it', sans], ['Data di nascita', '12/04/1991', mono], ['Creato', '17/10/2026 da Marta R.', sans], ['Invito', 'inviato 2 volte · ultimo 19/10', sans]].map(([k, v, f]) => ({ k, v, f }));
+    const neutrals = [['ink 900', 'oklch(0.21 0.02 262)'], ['ink 800', 'oklch(0.24 0.02 260)'], ['ink 600', 'oklch(0.42 0.015 260)'], ['ink 500', 'oklch(0.5 0.015 260)'], ['line', 'oklch(0.87 0.008 255)'], ['divider', 'oklch(0.91 0.006 255)'], ['canvas', 'oklch(0.975 0.004 255)'], ['surface', 'oklch(0.995 0.002 255)']].map(([n, v]) => ({ n, v }));
+    const accents = [
+      ['Indaco · primario', 'oklch(0.52 0.16 262)', C.info, 'Azione', 'Azioni, selezione, focus'],
+      ['Verde · attivo', 'oklch(0.55 0.13 155)', C.ok, 'Attivo', 'Clienti, moduli, utenti OK'],
+      ['Ambra · attenzione', 'oklch(0.62 0.14 70)', C.warn, 'Trial', 'Scadenze, limiti, inviti'],
+      ['Rosso · critico', 'oklch(0.55 0.17 25)', C.bad, 'Sospeso', 'Errori, morosità, rimozioni'],
+      ['Grigio · inerte', 'oklch(0.5 0.015 260)', C.neu, 'Cessato', 'Disattivati, disdette'],
+    ].map(([n, solid, c, badge, use]) => ({ n, solid, soft: c[0], fg: c[1], badge, use }));
+    const icons = [['Cliente', 'fa-building'], ['Utente', 'fa-user'], ['Utenti', 'fa-users'], ['Profilo', 'fa-id-badge'], ['Unità produttiva', 'fa-industry'], ['Organizzazione', 'fa-sitemap'], ['Modulo', 'fa-puzzle-piece'], ['Core', 'fa-cube'], ['Piano', 'fa-layer-group'], ['Sottoscrizione', 'fa-file-contract'], ['Fattura', 'fa-file-invoice'], ['Provisioning', 'fa-gears'], ['Permesso', 'fa-key'], ['MFA', 'fa-shield-halved'], ['Impersona', 'fa-user-secret'], ['Sospendi', 'fa-circle-pause'], ['Sede', 'fa-location-dot'], ['PEC', 'fa-envelope-circle-check'], ['Audit', 'fa-clock-rotate-left'], ['Uso', 'fa-chart-column']].map(([n, i]) => ({ n, i: 'fa-solid ' + i }));
+    const badges = [['Attivo', 'ok'], ['Trial', 'info'], ['Onboarding', 'warn'], ['Invito inviato', 'warn'], ['Sospeso', 'bad'], ['Cessato', 'neu']].map(([t, k]) => ({ t, bg: C[k][0], fg: C[k][1] }));
+    return {
+      navHome: nav('home'), navClienti: nav('clienti'), navUtenti: nav('utenti'),
+      tenants, views, queue, stats, services, activity, tabs, units, matrix, anag, tmods, hist,
+      steps, cities, checks, users, uprof, udet, neutrals, accents, icons, badges,
+    };
+  }
+}
+</script>
+</body>
+</html>

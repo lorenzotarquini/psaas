@@ -18,10 +18,23 @@
   },
   "menu": "Menu",
   "nav": {
-    "home": "Home",
+    "home": "Panoramica",
     "tenants": "Clienti",
     "users": "Utenti",
-    "profiles": "Profili"
+    "profiles": "Profili",
+    "console": "Admin console",
+    "groups": {
+      "operations": "Operatività",
+      "catalog": "Catalogo",
+      "administration": "Amministrazione"
+    },
+    "modules": "Moduli",
+    "plans": "Piani",
+    "subscriptions": "Sottoscrizioni",
+    "billing": "Fatturazione",
+    "communications": "Comunicazioni",
+    "audit": "Audit log",
+    "settings": "Impostazioni"
   },
   "profile": {
     "title": "Il mio profilo",
@@ -53,7 +66,8 @@
     "validation": "Alcuni dati non sono validi: controlla i campi evidenziati.",
     "loadFailed": "Caricamento non riuscito (errore {{status}}). Riprova o contatta l'assistenza.",
     "saveFailed": "Salvataggio non riuscito (errore {{status}}): nessuna modifica è stata registrata. Riprova o contatta l'assistenza.",
-    "network": "Server non raggiungibile: controlla la connessione e riprova."
+    "network": "Server non raggiungibile: controlla la connessione e riprova.",
+    "pageNotFoundHint": "L'indirizzo non corrisponde a nessuna pagina del portale."
   },
   "tenantDetail": {
     "backToList": "Torna all'elenco clienti",
@@ -131,5 +145,12 @@
     "filterPlaceholder": "Filtra per profilo, descrizione o cliente",
     "count": "{{count}} di {{total}} profili",
     "tenant": "Cliente"
+  },
+  "breadcrumb": "Percorso",
+  "settings": {
+    "subtitle": "Preferenze di questo amministratore, salvate nel browser.",
+    "preferences": "Preferenze",
+    "languageHint": "Lingua dell'interfaccia.",
+    "themeHint": "Chiaro o scuro; senza scelta segue il sistema."
   }
 }

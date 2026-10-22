@@ -43,6 +43,14 @@ Fuori ambito oggi, come dichiarato in [`docs/use-cases/README.md`](../use-cases/
 
 Contratto HTTP: [`docs/use-cases/API.md`](../use-cases/API.md). Collection Postman: [`docs/postman`](../postman/PSAAS.AdminPortal.postman_collection.json).
 
+### Design system "Admin console"
+
+Dai mock del designer ([`mockups/`](mockups/), schermata 1a), realizzato con i temi daisyUI 5 in `src/app/styles/index.css`:
+
+- **Temi** `psaas` (chiaro, predefinito) e `psaas-dark` (segue la preferenza del sistema), colori in oklch: superfici neutre fredde, un solo accento indaco per l'azione principale, verde/ambra/rosso/grigio riservati agli **stati** (`StatusBadge`). La sidebar usa il colore `neutral` (ink) e resta scura in entrambi i temi.
+- **Densità**: testo a 13 px, campi e pulsanti da 32 px (`--size-field`), tabelle da 36 px per riga (`.table-dense`), dati (P.IVA, id, date, conteggi) in **IBM Plex Mono**, testo in **IBM Plex Sans** (self-hosted con `@fontsource`).
+- **Struttura**: sidebar a gruppi (Operatività, Catalogo, Amministrazione) con versione e realm; topbar con percorso (dichiarato dalle pagine tramite `PageHeader`), ricerca globale, badge d'ambiente (`VITE_ENVIRONMENT_LABEL`), lingua, tema (ricordato nel browser), avatar con identità e ruoli (UC8).
+
 ## 3. Funzionalità attuali rispetto ai requisiti
 
 Stato rilevato dal codice e dalla suite di test di accettazione (95 test: 77 verdi, 18 rossi tutti riferiti a UC1-S4, UC4 e UC5).

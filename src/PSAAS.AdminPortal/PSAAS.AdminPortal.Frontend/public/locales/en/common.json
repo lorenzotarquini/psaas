@@ -18,10 +18,23 @@
   },
   "menu": "Menu",
   "nav": {
-    "home": "Home",
+    "home": "Overview",
     "tenants": "Customers",
     "users": "Users",
-    "profiles": "Profiles"
+    "profiles": "Profiles",
+    "console": "Admin console",
+    "groups": {
+      "operations": "Operations",
+      "catalog": "Catalog",
+      "administration": "Administration"
+    },
+    "modules": "Modules",
+    "plans": "Plans",
+    "subscriptions": "Subscriptions",
+    "billing": "Billing",
+    "communications": "Communications",
+    "audit": "Audit log",
+    "settings": "Settings"
   },
   "profile": {
     "title": "My profile",
@@ -53,7 +66,8 @@
     "validation": "Some data is not valid: check the highlighted fields.",
     "loadFailed": "Loading failed (error {{status}}). Try again or contact support.",
     "saveFailed": "Saving failed (error {{status}}): no change was recorded. Try again or contact support.",
-    "network": "Server unreachable: check your connection and try again."
+    "network": "Server unreachable: check your connection and try again.",
+    "pageNotFoundHint": "The address does not match any page of the portal."
   },
   "tenantDetail": {
     "backToList": "Back to customers",
@@ -131,5 +145,12 @@
     "filterPlaceholder": "Filter by profile, description or customer",
     "count": "{{count}} of {{total}} profiles",
     "tenant": "Customer"
+  },
+  "breadcrumb": "Breadcrumb",
+  "settings": {
+    "subtitle": "Preferences of this administrator, stored in the browser.",
+    "preferences": "Preferences",
+    "languageHint": "Interface language.",
+    "themeHint": "Light or dark; without a choice it follows the system."
   }
 }

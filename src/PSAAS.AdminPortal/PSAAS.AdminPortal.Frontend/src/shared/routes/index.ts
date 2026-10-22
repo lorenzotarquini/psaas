@@ -9,6 +9,12 @@ export const routes = {
   users: '/users',
   userNew: '/users/new',
   profiles: '/profiles',
+  modules: '/modules',
+  plans: '/plans',
+  subscriptions: '/subscriptions',
+  billing: '/billing',
+  communications: '/communications',
+  audit: '/audit',
   settings: '/settings',
 } as const
 

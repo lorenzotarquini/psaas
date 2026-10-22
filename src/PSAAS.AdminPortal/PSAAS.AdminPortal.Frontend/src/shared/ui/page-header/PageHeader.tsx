@@ -1,27 +1,29 @@
-import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import type { ReactNode } from 'react'
-import { Link } from 'react-router'
+import { useBreadcrumb, type Crumb } from '@/shared/lib/breadcrumb'
 
 interface PageHeaderProps {
   title: string
-  back?: { to: string; label: string }
+  /** Shown next to the title in mono, e.g. the number of tenants. */
+  count?: number
+  subtitle?: ReactNode
+  /** Pages above this one in the topbar breadcrumb (e.g. Clienti for a tenant). */
+  parents?: Crumb[]
   actions?: ReactNode
 }
 
-export function PageHeader({ title, back, actions }: PageHeaderProps) {
+export function PageHeader({ title, count, subtitle, parents = [], actions }: PageHeaderProps) {
+  useBreadcrumb([...parents, { label: title }])
+
   return (
-    <div className="flex flex-col gap-2">
-      {back && (
-        <Link to={back.to} className="link link-hover w-fit">
-          <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
-          {back.label}
-        </Link>
-      )}
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-2xl font-semibold">{title}</h1>
-        {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
+    <div className="flex flex-wrap items-end justify-between gap-3">
+      <div>
+        <h1 className="flex items-baseline gap-2 text-[22px] font-semibold tracking-[-0.01em]">
+          {title}
+          {count !== undefined && <span className="data text-[13px] font-normal text-base-content/50">{count.toLocaleString()}</span>}
+        </h1>
+        {subtitle && <div className="mt-0.5 text-base-content/60">{subtitle}</div>}
       </div>
+      {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
     </div>
   )
 }

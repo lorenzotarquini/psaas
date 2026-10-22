@@ -1,4 +1,132 @@
 @import "tailwindcss";
+@import "@fontsource/ibm-plex-sans/400.css";
+@import "@fontsource/ibm-plex-sans/500.css";
+@import "@fontsource/ibm-plex-sans/600.css";
+@import "@fontsource/ibm-plex-sans/700.css";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/500.css";
+
+/* Only the PSAAS themes below: the daisyUI built-ins are not used. */
 @plugin "daisyui" {
-  themes: light --default, dark --prefersdark;
+  themes: false;
+}
+
+/*
+ * "Control console" design system (docs/admin-portal/mockups, screen 1a).
+ * Cold neutral surfaces, one indigo accent for the main action, status colors reserved for status.
+ * neutral = the ink of the sidebar, which stays dark in both themes.
+ */
+@plugin "daisyui/theme" {
+  name: "psaas";
+  default: true;
+  color-scheme: light;
+  --color-base-100: oklch(0.995 0.002 255);
+  --color-base-200: oklch(0.975 0.004 255);
+  --color-base-300: oklch(0.91 0.006 255);
+  --color-base-content: oklch(0.24 0.02 260);
+  --color-primary: oklch(0.52 0.16 262);
+  --color-primary-content: oklch(0.99 0 0);
+  --color-secondary: oklch(0.42 0.015 260);
+  --color-secondary-content: oklch(0.99 0 0);
+  --color-accent: oklch(0.52 0.16 262);
+  --color-accent-content: oklch(0.99 0 0);
+  --color-neutral: oklch(0.21 0.02 262);
+  --color-neutral-content: oklch(0.86 0.01 260);
+  --color-info: oklch(0.52 0.16 262);
+  --color-info-content: oklch(0.99 0 0);
+  --color-success: oklch(0.55 0.13 155);
+  --color-success-content: oklch(0.99 0 0);
+  --color-warning: oklch(0.62 0.14 70);
+  --color-warning-content: oklch(0.2 0.02 70);
+  --color-error: oklch(0.55 0.17 25);
+  --color-error-content: oklch(0.99 0 0);
+  --radius-selector: 0.25rem;
+  --radius-field: 0.375rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.2rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+/* Not in the mocks: the same hues with dark surfaces, to be reviewed by the designer. */
+@plugin "daisyui/theme" {
+  name: "psaas-dark";
+  prefersdark: true;
+  color-scheme: dark;
+  --color-base-100: oklch(0.24 0.02 262);
+  --color-base-200: oklch(0.2 0.02 262);
+  --color-base-300: oklch(0.32 0.02 262);
+  --color-base-content: oklch(0.92 0.008 255);
+  --color-primary: oklch(0.62 0.15 262);
+  --color-primary-content: oklch(0.99 0 0);
+  --color-secondary: oklch(0.78 0.012 260);
+  --color-secondary-content: oklch(0.2 0.02 262);
+  --color-accent: oklch(0.62 0.15 262);
+  --color-accent-content: oklch(0.99 0 0);
+  --color-neutral: oklch(0.17 0.02 262);
+  --color-neutral-content: oklch(0.86 0.01 260);
+  --color-info: oklch(0.68 0.13 262);
+  --color-info-content: oklch(0.18 0.02 262);
+  --color-success: oklch(0.68 0.13 155);
+  --color-success-content: oklch(0.18 0.02 155);
+  --color-warning: oklch(0.75 0.13 75);
+  --color-warning-content: oklch(0.2 0.02 70);
+  --color-error: oklch(0.65 0.17 25);
+  --color-error-content: oklch(0.99 0 0);
+  --radius-selector: 0.25rem;
+  --radius-field: 0.375rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.2rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+@theme {
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+
+@layer base {
+  /* Density first (screen 1a): 13px body, rem stays 16px so daisyUI sizes keep their scale. */
+  body {
+    @apply bg-base-200 font-sans text-[13px] text-base-content antialiased;
+  }
+}
+
+@layer components {
+  /* Data (VAT numbers, ids, dates, counts) in mono, as in the mocks. */
+  .data {
+    @apply font-mono text-[12.5px];
+  }
+
+  /* 36px rows (screen 1a: "Tabelle da 36px"). */
+  .table-dense {
+    @apply text-[13px];
+  }
+
+  .table-dense :where(th, td) {
+    @apply px-3 py-[7px] leading-5;
+  }
+
+  .table-dense thead th {
+    @apply text-[12px] font-medium text-base-content/60;
+  }
+
+  /* Surface of the mocks: white, thin border, no shadow. */
+  .panel {
+    @apply rounded-box border border-base-300 bg-base-100;
+  }
+
+  .panel-title {
+    @apply text-[15px] font-semibold;
+  }
+
+  /* Section label in mono caps, like the sidebar groups and the 1a headings. */
+  .eyebrow {
+    @apply font-mono text-[10.5px] font-medium tracking-[0.08em] uppercase;
+  }
 }

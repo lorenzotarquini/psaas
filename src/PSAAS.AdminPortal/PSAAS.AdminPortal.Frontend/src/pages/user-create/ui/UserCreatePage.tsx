@@ -31,7 +31,7 @@ export function UserCreatePage() {
   return (
     <FormProvider {...form}>
       <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
-        <PageHeader title={t('userForm.title')} back={{ to: routes.users, label: t('userForm.backToUsers') }} />
+        <PageHeader title={t('userForm.title')} parents={[{ to: routes.users, label: t('nav.users') }]} />
         {createUser.error && <ErrorAlert error={createUser.error} action="save" />}
         <section className="card bg-base-100 shadow-sm">
           <div className="card-body">

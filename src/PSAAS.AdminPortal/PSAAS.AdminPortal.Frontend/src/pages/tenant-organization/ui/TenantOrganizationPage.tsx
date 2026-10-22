@@ -11,7 +11,7 @@ import {
   toOrganizationRequest,
 } from '@/features/organization-editor'
 import { submitWithServerErrors } from '@/shared/lib/form'
-import { tenantPath } from '@/shared/routes'
+import { routes, tenantPath } from '@/shared/routes'
 import { ErrorAlert } from '@/shared/ui/error-alert'
 import { PageHeader } from '@/shared/ui/page-header'
 
@@ -55,7 +55,7 @@ function OrganizationForm({ tenant }: { tenant: TenantDetail }) {
       <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
         <PageHeader
           title={t('organizationEditor.title', { name: tenant.companyName })}
-          back={{ to: tenantPath(tenant.id), label: t('tenantForm.backToDetail') }}
+          parents={[{ to: routes.tenants, label: t('nav.tenants') }, { to: tenantPath(tenant.id), label: tenant.companyName }]}
         />
         {update.error && <ErrorAlert error={update.error} action="save" />}
         <section className="card bg-base-100 shadow-sm">

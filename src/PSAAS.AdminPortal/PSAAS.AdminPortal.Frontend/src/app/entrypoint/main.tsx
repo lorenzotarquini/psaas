@@ -2,6 +2,7 @@ import { StrictMode, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
 import '../styles/index.css'
 import '@/shared/i18n'
+import { applyStoredTheme } from '@/features/switch-theme'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { RouterProvider } from 'react-router'
 import { initAuth } from '@/shared/auth'
@@ -10,6 +11,7 @@ import { queryClient } from '../api/queryClient'
 import { createAppRouter } from '../routes/router'
 
 const logger = getLogger('main')
+applyStoredTheme()
 const root = createRoot(document.getElementById('root')!)
 
 // Keycloak docs: init before rendering/routing, since login changes the URL.

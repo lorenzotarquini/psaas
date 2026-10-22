@@ -17,65 +17,61 @@ export function ProfilesPage() {
   // The whole list is already here: filter on the client.
   const needle = filter.trim().toLowerCase()
   const visible = profiles.filter((profile) =>
-    [profile.name, profile.description ?? '', profile.tenantCompanyName].some((text) =>
-      text.toLowerCase().includes(needle),
-    ),
+    [profile.name, profile.description ?? '', profile.tenantCompanyName].some((text) => text.toLowerCase().includes(needle)),
   )
 
   return (
-    <div className="flex flex-col gap-4">
-      <PageHeader title={t('profiles.title')} />
-      <div className="card bg-base-100 shadow-sm">
-        <div className="card-body gap-4">
-          {error ? (
+    <>
+      <PageHeader title={t('profiles.title')} count={isPending ? undefined : profiles.length} />
+      <label className="input w-full max-w-sm">
+        <FontAwesomeIcon icon={faFilter} className="text-base-content/40" />
+        <input
+          type="search"
+          placeholder={t('profiles.filterPlaceholder')}
+          aria-label={t('profiles.filterPlaceholder')}
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+        />
+      </label>
+      <div className="panel overflow-hidden">
+        {error ? (
+          <div className="p-4">
             <ErrorAlert error={error} />
-          ) : isPending ? (
-            <span className="loading loading-spinner" aria-label={t('loading')} />
-          ) : profiles.length === 0 ? (
-            <p className="py-8 text-center text-base-content/70">{t('profiles.empty')}</p>
-          ) : (
-            <>
-              <label className="input w-full max-w-md">
-                <FontAwesomeIcon icon={faFilter} className="opacity-50" />
-                <input
-                  type="search"
-                  placeholder={t('profiles.filterPlaceholder')}
-                  aria-label={t('profiles.filterPlaceholder')}
-                  value={filter}
-                  onChange={(e) => setFilter(e.target.value)}
-                />
-              </label>
-              <p className="text-sm text-base-content/70">
-                {t('profiles.count', { count: visible.length, total: profiles.length })}
-              </p>
-              <div className="overflow-x-auto">
-                <table className="table table-zebra">
-                  <thead>
-                    <tr>
-                      <th>{t('tenantDetail.profile')}</th>
-                      <th>{t('organizationEditor.description')}</th>
-                      <th>{t('profiles.tenant')}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {visible.map((profile) => (
-                      <tr key={profile.id}>
-                        <td className="font-medium">{profile.name}</td>
-                        <td>{profile.description}</td>
-                        <td>
-                          <Link to={tenantPath(profile.tenantId)} className="link link-hover">
-                            {profile.tenantCompanyName}
-                          </Link>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </>
-          )}
-        </div>
+          </div>
+        ) : isPending ? (
+          <span className="loading loading-spinner m-4" aria-label={t('loading')} />
+        ) : profiles.length === 0 ? (
+          <p className="py-10 text-center text-base-content/60">{t('profiles.empty')}</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="table table-dense">
+              <thead>
+                <tr>
+                  <th>{t('tenantDetail.profile')}</th>
+                  <th>{t('organizationEditor.description')}</th>
+                  <th>{t('profiles.tenant')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {visible.map((profile) => (
+                  <tr key={profile.id} className="hover:bg-base-200/60">
+                    <td className="font-semibold">{profile.name}</td>
+                    <td className="text-base-content/70">{profile.description}</td>
+                    <td>
+                      <Link to={tenantPath(profile.tenantId)} className="link link-hover">
+                        {profile.tenantCompanyName}
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p className="border-t border-base-300 px-3 py-2 text-[12px] text-base-content/60">
+              {t('profiles.count', { count: visible.length, total: profiles.length })}
+            </p>
+          </div>
+        )}
       </div>
-    </div>
+    </>
   )
 }

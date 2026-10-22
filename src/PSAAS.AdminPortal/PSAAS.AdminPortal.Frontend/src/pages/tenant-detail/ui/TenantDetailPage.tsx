@@ -3,10 +3,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useParams, useSearchParams } from 'react-router'
-import { useTenant, type TenantDetail } from '@/entities/tenant'
+import { TenantStatusBadge, useTenant, type TenantDetail } from '@/entities/tenant'
 import { ApiError } from '@/shared/api'
 import { useBreadcrumb } from '@/shared/lib/breadcrumb'
-import { routes, tenantPath, type TenantTab } from '@/shared/routes'
+import { formatDate } from '@/shared/lib/format'
+import { onboardingPath, routes, tenantPath, type TenantTab } from '@/shared/routes'
 import { ErrorAlert } from '@/shared/ui/error-alert'
 import { Tabs } from '@/shared/ui/tabs'
 import { HistoryCard } from './HistoryCard'
@@ -14,6 +15,7 @@ import { OrganizationCard } from './OrganizationCard'
 import { OrganizationTab } from './OrganizationTab'
 import { RegistryCard } from './RegistryCard'
 import { RegistryTab } from './RegistryTab'
+import { StatusActions } from './StatusActions'
 
 const tabs: TenantTab[] = ['overview', 'registry', 'organization', 'history']
 
@@ -38,7 +40,7 @@ export function TenantDetailPage() {
 }
 
 function TenantView({ tenant }: { tenant: TenantDetail }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [searchParams] = useSearchParams()
   const requested = searchParams.get('tab') as TenantTab | null
   const active = requested && tabs.includes(requested) ? requested : 'overview'
@@ -60,14 +62,24 @@ function TenantView({ tenant }: { tenant: TenantDetail }) {
               <FontAwesomeIcon icon={faBuilding} />
             </div>
             <div>
-              <h1 className="text-[22px] font-semibold tracking-[-0.01em]">{tenant.companyName}</h1>
-              <p className="data mt-0.5 text-base-content/60">{tenant.completeVatNumber}</p>
+              <h1 className="flex flex-wrap items-center gap-2 text-[22px] font-semibold tracking-[-0.01em]">
+                {tenant.companyName}
+                <TenantStatusBadge status={tenant.lifecycle.status} />
+              </h1>
+              <p className="mt-0.5 flex flex-wrap gap-x-3 text-base-content/60">
+                <span className="data">{tenant.completeVatNumber}</span>
+                <span className="data">{tenant.code}</span>
+                <span>{t('tenantDetail.customerSince', { date: formatDate(tenant.lifecycle.createdAt, i18n.language) })}</span>
+              </p>
             </div>
           </div>
-          <Link to={tenantPath(tenant.id, 'registry')} className="btn btn-sm">
-            <FontAwesomeIcon icon={faPen} />
-            {t('tenantDetail.editRegistry')}
-          </Link>
+          <div className="flex gap-2">
+            <Link to={tenantPath(tenant.id, 'registry')} className="btn btn-sm">
+              <FontAwesomeIcon icon={faPen} />
+              {t('tenantDetail.editRegistry')}
+            </Link>
+            <StatusActions tenant={tenant} />
+          </div>
         </div>
         <div className="mt-4">
           <Tabs
@@ -77,6 +89,23 @@ function TenantView({ tenant }: { tenant: TenantDetail }) {
           />
         </div>
       </div>
+      {tenant.lifecycle.status === 'Onboarding' && (
+        <div role="status" className="alert alert-warning alert-soft">
+          <span>{t('tenantDetail.draftBanner')}</span>
+          <Link to={onboardingPath(tenant.id, 'registry')} className="btn btn-sm">
+            {t('tenantDetail.resumeOnboarding')}
+          </Link>
+        </div>
+      )}
+      {tenant.lifecycle.reason && tenant.lifecycle.status !== 'Active' && (
+        <p className="text-base-content/70">
+          {t('tenantDetail.statusReason', {
+            status: t(`tenantStatus.${tenant.lifecycle.status}`),
+            date: formatDate(tenant.lifecycle.changedAt, i18n.language),
+            reason: tenant.lifecycle.reason,
+          })}
+        </p>
+      )}
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
         <div className="min-w-0">{content[active]}</div>
         <aside className="flex flex-col gap-4">

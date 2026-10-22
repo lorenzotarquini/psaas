@@ -97,7 +97,11 @@
       "usage": "Usage",
       "invoices": "Invoices",
       "history": "History"
-    }
+    },
+    "customerSince": "Customer since {{date}}",
+    "draftBanner": "This customer is a draft in onboarding: it is not active yet.",
+    "resumeOnboarding": "Resume onboarding",
+    "statusReason": "{{status}} since {{date}}: {{reason}}"
   },
   "validation": {
     "Required": "Required field",
@@ -118,7 +122,14 @@
     "save": "Save",
     "available": "Available",
     "openConflicting": "Open \"{{name}}\"",
-    "registryHint": "Each unique field is checked when you leave it, with the same rules as saving."
+    "registryHint": "Each unique field is checked when you leave it, with the same rules as saving.",
+    "city": "Town",
+    "sdiCode": "SDI code",
+    "accountManager": "Account manager",
+    "postalCodeFromCity": "Filled from the town",
+    "choosePostalCode": "Choose the postal code",
+    "cityKeys": "↑↓ move · ↵ select",
+    "citySource": "Source ISTAT"
   },
   "organizationEditor": {
     "title": "Organization of {{name}}",
@@ -213,13 +224,26 @@
       "tenant.created": "Activations",
       "tenant.registry": "Registries",
       "tenant.organization": "Organizations",
-      "user.": "Users"
+      "user.": "Users",
+      "tenant.onboarding": "Onboarding",
+      "tenant.status": "Statuses"
     },
     "actions": {
       "tenant": {
         "created": "activated",
         "registryUpdated": "changed the registry of",
-        "organizationUpdated": "changed the organization of"
+        "organizationUpdated": "changed the organization of",
+        "onboardingStarted": "started the onboarding of",
+        "onboardingDiscarded": "cancelled the onboarding of",
+        "status": {
+          "Activated": "activated",
+          "Active": "reactivated",
+          "Suspended": "suspended",
+          "Cancelling": "put on notice",
+          "Ceased": "ceased",
+          "Trial": "started the trial of",
+          "other": "changed the status of"
+        }
       },
       "user": {
         "created": "created the user"
@@ -245,9 +269,108 @@
       "profiles_one": "{{count}} profile",
       "profiles_other": "{{count}} profiles",
       "units_one": "{{count}} unit",
-      "units_other": "{{count}} units"
+      "units_other": "{{count}} units",
+      "reason": "reason: {{reason}}"
     },
     "history": "History",
     "historyAll": "Whole history"
+  },
+  "tenantStatus": {
+    "Onboarding": "Onboarding",
+    "Trial": "Trial",
+    "Active": "Active",
+    "Suspended": "Suspended",
+    "Cancelling": "Cancelling",
+    "Ceased": "Ceased",
+    "actions": "Status actions",
+    "reason": "Reason",
+    "to": {
+      "Active": "Reactivate",
+      "Suspended": "Suspend",
+      "Cancelling": "Give notice",
+      "Ceased": "Cease the customer",
+      "Trial": "Start trial"
+    },
+    "explain": {
+      "Active": "The customer is active again and its users can sign in.",
+      "Suspended": "Access to the platform is blocked; data is kept. It can be reactivated.",
+      "Cancelling": "The customer enters its notice period; reactivating revokes it.",
+      "Ceased": "Soft delete with no way back. Company name, VAT number and PEC stay taken.",
+      "Trial": "The customer starts its trial."
+    }
+  },
+  "onboarding": {
+    "title": "Activate new customer",
+    "stepsLabel": "Onboarding steps",
+    "stepOf": "Step {{step}} of {{total}}",
+    "savedAt": "Draft saved at {{time}}",
+    "steps": {
+      "registry": {
+        "title": "Registry",
+        "hint": "Legal data and address"
+      },
+      "plan": {
+        "title": "Plan and modules",
+        "hint": "Subscription, trial, add-ons"
+      },
+      "organization": {
+        "title": "Organization",
+        "hint": "Profiles and productive units"
+      },
+      "users": {
+        "title": "First users",
+        "hint": "Invitations via Keycloak"
+      },
+      "summary": {
+        "title": "Summary",
+        "hint": "Check and activate"
+      }
+    },
+    "cancel": "Cancel",
+    "nextTo": "Next: {{step}}",
+    "skipAndActivate": "Skip organization and activate",
+    "activate": "Activate customer",
+    "edit": "Edit",
+    "planPending": "Choosing plan, trial and modules comes with the module catalog. You can go on for now: the customer stays in onboarding until activated.",
+    "usersHint": "Keycloak emails each user the link to set the password.",
+    "noUsers": "No users: add them now or later.",
+    "addUser": "Add user",
+    "removeUser": "Remove user",
+    "noProfilesYet": "The customer has no profiles yet.",
+    "usersCreated_one": "Created {{count}} user: {{emails}}",
+    "usersCreated_other": "Created {{count}} users: {{emails}}",
+    "userFields": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "birthDate": "Date of birth"
+    },
+    "summaryHint": "Check the data and activate the customer.",
+    "organizationSummary": "{{profiles}} profiles, {{units}} productive units",
+    "usersSummary_one": "{{count}} user with profiles of the customer",
+    "usersSummary_other": "{{count}} users with profiles of the customer",
+    "activationNote": "On activation the customer goes from Onboarding to Active.",
+    "openDraft": "Open the draft page",
+    "discardTitle": "Cancel the onboarding?",
+    "discardText": "The draft \"{{name}}\" is deleted with its profiles and units. Users already created stay in Keycloak.",
+    "keepDraft": "Continue",
+    "discard": "Delete the draft",
+    "draftInfo": "The customer stays \"In onboarding\" until you activate it. You can resume the draft from Customers.",
+    "checks": {
+      "title": "Checks",
+      "companyName": "Unique company name",
+      "completeVatNumber": "Valid and unique VAT number",
+      "certifiedEmail": "Unique PEC",
+      "address": "Matching town and postal code",
+      "plan": "Plan chosen",
+      "usedBy": "Already used by \"{{name}}\"",
+      "verified": "Verified",
+      "toVerify": "Checked when you leave the field",
+      "empty": "To fill in",
+      "addressOk": "{{city}} · {{postalCode}}",
+      "waitingCity": "Waiting for the town",
+      "planChosen": "Chosen",
+      "planStep": "Step 2"
+    }
   }
 }

@@ -18,6 +18,10 @@ export function RegistryCard({ tenant }: { tenant: TenantDetail }) {
         <dd>
           {street}, {postalCode} {city} ({country})
         </dd>
+        <dt className="text-base-content/60">{t('tenantForm.sdiCode')}</dt>
+        <dd className="data">{tenant.sdiCode ?? '–'}</dd>
+        <dt className="text-base-content/60">{t('tenantForm.accountManager')}</dt>
+        <dd>{tenant.accountManager ?? '–'}</dd>
       </dl>
     </section>
   )

@@ -69,6 +69,8 @@ Stato rilevato dal codice e dalla suite di test di accettazione (aggiornato a og
 | [UC10](../use-cases/UC10-cercare-comune.md) | Cercare un comune | Almeno 2 caratteri, massimo 20 risultati, ordinati per pertinenza | `GET /api/geography/cities` | Suggerimenti nel campo Città e CAP | ✅ |
 | [UC11](../use-cases/UC11-verificare-campo-cliente.md) | Verificare un campo univoco | Stesse regole e codici del salvataggio, campo per campo; indica il cliente che usa già il valore | `GET /api/tenants/field-validation` | Controllo all'uscita dal campo con "Disponibile" o link al cliente in conflitto | ✅ |
 | [UC12](../use-cases/UC12-audit-log.md) | Audit log e storico (EXP-10) | Chi, cosa, quando, su quale cliente; prima/dopo per l'anagrafica; aggiunte e rimozioni per l'organizzazione; filtri e pagine | `GET /api/audit` | Pagina Audit log con filtri nell'URL; scheda Storico e card Storico nella scheda cliente | ✅ |
+| [UC13](../use-cases/UC13-stato-cliente.md) | Stato del cliente (EXP-04) | Onboarding, Trial, Attivo, Sospeso, In disdetta, Cessato; transizioni consentite; motivo per sospensione, disdetta, cessazione | `POST /api/tenants/{id}/status` | Badge di stato, codice `tn_…`, "Cliente dal" e menu "…" con dialog del motivo nella scheda | ✅ |
+| [UC14](../use-cases/UC14-onboarding-cliente.md) | Onboarding guidato (EXP-04, mock 1e) | Bozza salvata al primo passo, ripresa e annullamento; codice SDI e referente | `POST /api/tenants` (`draft`), `DELETE /api/tenants/{id}` | Wizard a 5 passi con pannello Controlli, combobox comuni con CAP dal comune, "Bozza salvata alle…" | ✅ (passo Piano completato con la fase 5) |
 | GEN | Sicurezza | Ogni operazione richiede autenticazione e ruolo `Administrator`; `/health` anonimo | Policy globale sui controller | Login obbligatorio, logout | ✅ |
 
 Funzionalità trasversali già presenti:
@@ -342,6 +344,7 @@ Oggi esiste solo `Administrator`.
 | Epica | Use case derivati | Stato |
 |---|---|---|
 | EXP-01 | – | proposta |
+| EXP-04 | UC13, UC14 | ✅ implementata |
 | EXP-10 | UC12 | ✅ implementata |
 | EXP-02 | – | proposta |
 | … | | |

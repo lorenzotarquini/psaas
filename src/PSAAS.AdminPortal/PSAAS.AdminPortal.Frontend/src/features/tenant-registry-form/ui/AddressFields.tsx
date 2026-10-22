@@ -81,7 +81,7 @@ export function AddressFields() {
           {isFetching && <span className="loading loading-spinner loading-xs" />}
         </label>
         {showList && (
-          <ul id={listId} role="listbox" className="absolute top-full z-20 mt-1 w-full overflow-hidden rounded-box border border-base-300 bg-base-100 shadow-lg">
+          <ul id={listId} role="listbox" className="absolute top-full z-20 mt-1 max-h-72 w-full overflow-y-auto rounded-box border border-base-300 bg-base-100 shadow-lg">
             {cities.map((candidate, i) => {
               const { before, match, after } = highlight(candidate.name, term)
               return (

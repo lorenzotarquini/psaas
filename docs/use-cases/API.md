@@ -18,6 +18,8 @@ Errori di validazione: `400` `ValidationProblem` con un codice per campo in `err
 | UC10 | `GET /api/geography/cities?term=` | esiste |
 | UC11 | `GET /api/tenants/field-validation?field=&value=&excludeTenantId=` | esiste |
 | UC12 | `GET /api/audit?tenantId=&action=&search=&from=&to=&page=&pageSize=` | esiste |
+| UC13 | `POST /api/tenants/{id}/status` | esiste |
+| UC14 | `POST /api/tenants` con `draft: true` · `DELETE /api/tenants/{id}` | esiste |
 
 ## Contratti esistenti (sintesi)
 
@@ -91,6 +93,14 @@ Audit log, dal più recente: `{ items: [{ id, occurredAt, actorId, actorName, ac
 | `user.created` | UC6, un evento per ogni cliente dei profili (o uno senza cliente) | `{ email, tenant, profiles }` |
 
 - L'autore viene dal token (`sub`, nome); le operazioni automatiche hanno autore `system`/"Sistema". La registrazione avviene dopo il salvataggio: se non riesce, la modifica resta valida e l'errore va nel log.
+
+### Ciclo di vita e dati commerciali (UC13, UC14)
+- Scheda (UC2) e righe dell'elenco (UC1) hanno anche `code` (es. `tn_8f2c41a9`, ricavato dall'id), stato e date: la scheda `lifecycle: { status, reason, changedAt, createdAt }`, `sdiCode`, `accountManager`; l'elenco `status` e `createdAt`.
+- `status`: `Onboarding`, `Trial`, `Active`, `Suspended`, `Cancelling`, `Ceased`. Transizioni consentite e motivi obbligatori in [UC13](UC13-stato-cliente.md).
+- UC3/UC4 accettano anche `sdiCode` (facoltativo, 6–7 lettere o cifre, salvato in maiuscolo; altrimenti `InvalidFormat`) e `accountManager` (testo libero).
+- **UC13** `POST /api/tenants/{id}/status` body `{ status, reason }` → `200` + scheda · `400` (`status` = `InvalidValue` se la transizione non è consentita, `reason` = `Required`) · `404`.
+- **UC14** `POST /api/tenants` con `draft: true` crea il cliente in `Onboarding` (`201` + scheda); si attiva con UC13 (`status: Active`). `DELETE /api/tenants/{id}` elimina una bozza con profili e unità (`204`); un cliente non in bozza → `409`; inesistente → `404`.
+- Audit (UC12): `tenant.onboarding.started`, `tenant.onboarding.discarded`, `tenant.status.changed` (`{ from, to, reason }`); l'anagrafica registra anche `sdiCode` e `accountManager` cambiati.
 
 ## Confini dei test di accettazione
 

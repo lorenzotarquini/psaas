@@ -97,7 +97,11 @@
       "usage": "Uso",
       "invoices": "Fatture",
       "history": "Storico"
-    }
+    },
+    "customerSince": "Cliente dal {{date}}",
+    "draftBanner": "Questo cliente è una bozza in onboarding: non è ancora attivo.",
+    "resumeOnboarding": "Riprendi l'onboarding",
+    "statusReason": "{{status}} dal {{date}}: {{reason}}"
   },
   "validation": {
     "Required": "Campo obbligatorio",
@@ -118,7 +122,14 @@
     "save": "Salva",
     "available": "Disponibile",
     "openConflicting": "Apri \"{{name}}\"",
-    "registryHint": "Ogni campo univoco viene verificato all'uscita, con le stesse regole del salvataggio."
+    "registryHint": "Ogni campo univoco viene verificato all'uscita, con le stesse regole del salvataggio.",
+    "city": "Comune",
+    "sdiCode": "Codice SDI",
+    "accountManager": "Referente commerciale",
+    "postalCodeFromCity": "Si compila dal comune",
+    "choosePostalCode": "Scegli il CAP",
+    "cityKeys": "↑↓ naviga · ↵ seleziona",
+    "citySource": "Fonte ISTAT"
   },
   "organizationEditor": {
     "title": "Organizzazione di {{name}}",
@@ -213,13 +224,26 @@
       "tenant.created": "Attivazioni",
       "tenant.registry": "Anagrafiche",
       "tenant.organization": "Organizzazioni",
-      "user.": "Utenti"
+      "user.": "Utenti",
+      "tenant.onboarding": "Onboarding",
+      "tenant.status": "Stati"
     },
     "actions": {
       "tenant": {
         "created": "ha attivato",
         "registryUpdated": "ha modificato l'anagrafica di",
-        "organizationUpdated": "ha modificato l'organizzazione di"
+        "organizationUpdated": "ha modificato l'organizzazione di",
+        "onboardingStarted": "ha avviato l'onboarding di",
+        "onboardingDiscarded": "ha annullato l'onboarding di",
+        "status": {
+          "Activated": "ha attivato",
+          "Active": "ha riattivato",
+          "Suspended": "ha sospeso",
+          "Cancelling": "ha messo in disdetta",
+          "Ceased": "ha cessato",
+          "Trial": "ha avviato la prova di",
+          "other": "ha cambiato lo stato di"
+        }
       },
       "user": {
         "created": "ha creato l'utente"
@@ -245,9 +269,108 @@
       "profiles_one": "{{count}} profilo",
       "profiles_other": "{{count}} profili",
       "units_one": "{{count}} unità",
-      "units_other": "{{count}} unità"
+      "units_other": "{{count}} unità",
+      "reason": "motivo: {{reason}}"
     },
     "history": "Storico",
     "historyAll": "Tutto lo storico"
+  },
+  "tenantStatus": {
+    "Onboarding": "Onboarding",
+    "Trial": "Trial",
+    "Active": "Attivo",
+    "Suspended": "Sospeso",
+    "Cancelling": "In disdetta",
+    "Ceased": "Cessato",
+    "actions": "Azioni sullo stato",
+    "reason": "Motivo",
+    "to": {
+      "Active": "Riattiva",
+      "Suspended": "Sospendi",
+      "Cancelling": "Avvia disdetta",
+      "Ceased": "Cessa il cliente",
+      "Trial": "Avvia prova"
+    },
+    "explain": {
+      "Active": "Il cliente torna attivo e i suoi utenti possono accedere.",
+      "Suspended": "L'accesso alla piattaforma viene bloccato; i dati restano. Si può riattivare.",
+      "Cancelling": "Il cliente entra nel periodo di preavviso; si può revocare riattivandolo.",
+      "Ceased": "Cancellazione logica: non si torna indietro. Ragione sociale, P.IVA e PEC restano occupate.",
+      "Trial": "Il cliente inizia il periodo di prova."
+    }
+  },
+  "onboarding": {
+    "title": "Attiva nuovo cliente",
+    "stepsLabel": "Passi dell'onboarding",
+    "stepOf": "Passo {{step}} di {{total}}",
+    "savedAt": "Bozza salvata alle {{time}}",
+    "steps": {
+      "registry": {
+        "title": "Anagrafica",
+        "hint": "Dati legali e sede"
+      },
+      "plan": {
+        "title": "Piano e moduli",
+        "hint": "Sottoscrizione, trial, add-on"
+      },
+      "organization": {
+        "title": "Organizzazione",
+        "hint": "Profili e unità produttive"
+      },
+      "users": {
+        "title": "Primi utenti",
+        "hint": "Inviti via Keycloak"
+      },
+      "summary": {
+        "title": "Riepilogo",
+        "hint": "Verifica e attiva"
+      }
+    },
+    "cancel": "Annulla",
+    "nextTo": "Avanti: {{step}}",
+    "skipAndActivate": "Salta organizzazione e attiva",
+    "activate": "Attiva cliente",
+    "edit": "Modifica",
+    "planPending": "La scelta di piano, prova e moduli si attiva con il catalogo dei moduli. Per ora puoi proseguire: il cliente resta in onboarding fino all'attivazione.",
+    "usersHint": "Ogni utente riceve da Keycloak l'email per impostare la password.",
+    "noUsers": "Nessun utente: puoi aggiungerne ora o più tardi.",
+    "addUser": "Aggiungi utente",
+    "removeUser": "Rimuovi utente",
+    "noProfilesYet": "Il cliente non ha ancora profili.",
+    "usersCreated_one": "Creato {{count}} utente: {{emails}}",
+    "usersCreated_other": "Creati {{count}} utenti: {{emails}}",
+    "userFields": {
+      "firstName": "Nome",
+      "lastName": "Cognome",
+      "email": "Email",
+      "birthDate": "Data di nascita"
+    },
+    "summaryHint": "Controlla i dati e attiva il cliente.",
+    "organizationSummary": "{{profiles}} profili, {{units}} unità produttive",
+    "usersSummary_one": "{{count}} utente con profili del cliente",
+    "usersSummary_other": "{{count}} utenti con profili del cliente",
+    "activationNote": "All'attivazione il cliente passa da Onboarding ad Attivo.",
+    "openDraft": "Apri la scheda della bozza",
+    "discardTitle": "Annullare l'onboarding?",
+    "discardText": "La bozza \"{{name}}\" viene eliminata con profili e unità. Gli utenti già creati restano in Keycloak.",
+    "keepDraft": "Continua",
+    "discard": "Elimina la bozza",
+    "draftInfo": "Il cliente resta \"In onboarding\" finché non lo attivi. Puoi riprendere la bozza da Clienti.",
+    "checks": {
+      "title": "Controlli",
+      "companyName": "Ragione sociale unica",
+      "completeVatNumber": "P.IVA valida e unica",
+      "certifiedEmail": "PEC unica",
+      "address": "Comune e CAP coerenti",
+      "plan": "Piano selezionato",
+      "usedBy": "Già usata da \"{{name}}\"",
+      "verified": "Verificata",
+      "toVerify": "Da verificare all'uscita dal campo",
+      "empty": "Da compilare",
+      "addressOk": "{{city}} · {{postalCode}}",
+      "waitingCity": "In attesa del comune",
+      "planChosen": "Scelto",
+      "planStep": "Passo 2"
+    }
   }
 }

@@ -10,7 +10,7 @@ import { ErrorAlert } from '@/shared/ui/error-alert'
 import { PageHeader } from '@/shared/ui/page-header'
 import { Pagination } from '@/shared/ui/pagination'
 
-const actionFilters = ['tenant.', 'tenant.created', 'tenant.registry', 'tenant.organization', 'user.'] as const
+const actionFilters = ['tenant.', 'tenant.created', 'tenant.onboarding', 'tenant.status', 'tenant.registry', 'tenant.organization', 'user.'] as const
 const pageSizes = [25, 50, 100, 200] as const
 
 // UC12 (EXP-10): every change made through the portal, newest first; filters live in the URL.

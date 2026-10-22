@@ -156,10 +156,10 @@ export function useUpdateTenantOrganization(id: string) {
 }
 
 /** UC13: change status (with a reason when suspending, giving notice or ceasing); UC14: activate a draft. */
-export function useChangeTenantStatus(id: string) {
+export function useChangeTenantStatus() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (body: { status: TenantStatus; reason?: string }) =>
+    mutationFn: ({ id, ...body }: { id: string; status: TenantStatus; reason?: string }) =>
       apiPost<TenantDetail>(`/api/tenants/${encodeURIComponent(id)}/status`, body),
     onSuccess: (tenant) => onTenantSaved(queryClient, tenant),
   })

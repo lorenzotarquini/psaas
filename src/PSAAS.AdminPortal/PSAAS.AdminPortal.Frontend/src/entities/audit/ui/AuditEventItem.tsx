@@ -1,8 +1,10 @@
 import {
   faBuilding,
+  faCirclePause,
   faClockRotateLeft,
   faPen,
   faSitemap,
+  faTrash,
   faUserPlus,
   type IconDefinition,
 } from '@fortawesome/free-solid-svg-icons'
@@ -19,6 +21,9 @@ const icons: Record<string, IconDefinition> = {
   'tenant.registry.updated': faPen,
   'tenant.organization.updated': faSitemap,
   'user.created': faUserPlus,
+  'tenant.onboarding.started': faBuilding,
+  'tenant.onboarding.discarded': faTrash,
+  'tenant.status.changed': faCirclePause,
 }
 
 /** One line of mock 1b "Attività recente" / 1d "Storico": who did what to whom, when, and the detail. */

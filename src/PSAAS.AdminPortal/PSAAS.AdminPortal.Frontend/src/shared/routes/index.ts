@@ -4,6 +4,7 @@ export const routes = {
   tenants: '/tenants',
   tenantNew: '/tenants/new',
   tenantDetail: '/tenants/:tenantId',
+  tenantOnboarding: '/tenants/:tenantId/onboarding',
   users: '/users',
   userNew: '/users/new',
   profiles: '/profiles',
@@ -21,6 +22,8 @@ const id = (value: string) => encodeURIComponent(value)
 export type TenantTab = 'overview' | 'registry' | 'organization' | 'subscription' | 'users' | 'usage' | 'invoices' | 'history'
 export const tenantPath = (tenantId: string, tab?: TenantTab) =>
   `/tenants/${id(tenantId)}${tab && tab !== 'overview' ? `?tab=${tab}` : ''}`
+/** UC14: the wizard of a draft, at a step. */
+export const onboardingPath = (tenantId: string, step: string) => `/tenants/${id(tenantId)}/onboarding?step=${step}`
 export const usersSearchPath = (search: string) => `/users?${new URLSearchParams({ search })}`
 
 /** Navigation state set after UC6: the users page confirms the creation. */

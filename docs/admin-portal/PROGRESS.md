@@ -10,8 +10,8 @@ Piano: `C:\Users\ltarq\.claude\plans\voglio-che-prepari-un-abundant-quail.md` ·
 | 1 Design system e shell | ✅ | vedi log |
 | 2 Chiusura perimetro (UC1-S4, UC4, UC5, conteggi, UC11) | ✅ | vedi log |
 | 3 Audit log e storico | ✅ | vedi log |
-| 4 Ciclo di vita e wizard | ⏳ backend fatto (UC13, UC14, test verdi 122/122); frontend in corso | WIP |
-| 5 Moduli, piani, sottoscrizioni | | |
+| 4 Ciclo di vita e wizard | ✅ | vedi log |
+| 5 Moduli, piani, sottoscrizioni | ⏳ | |
 | 6 Gestione utenti completa | | |
 | 7 Elenco clienti avanzato | | |
 | 8 Fatturazione interna | | |
@@ -20,14 +20,9 @@ Piano: `C:\Users\ltarq\.claude\plans\voglio-che-prepari-un-abundant-quail.md` ·
 | 11 Panoramica, ricerca, impersonificazione | | |
 | 12 Consolidamento | | |
 
-## Punto di ripresa (fase 4)
-
-Fatto: dominio `TenantLifecycle`, migration `TenantLifecycle`, `TenantLifecycleService` (`POST /api/tenants/{id}/status`, `DELETE` della bozza), campi SDI e referente, UC13/UC14 con test; frontend: tipi e API (`useChangeTenantStatus`, `useDiscardDraft`, `TenantStatusBadge`), combobox comuni, campi SDI/referente, nota nella topbar, modello del wizard (`pages/tenant-onboarding/model`) con test, `Stepper`, `StepFooter`, `ChecksPanel`.
-Da fare: passi del wizard (Registry, Plan segnaposto fino alla fase 5, Organization, Users, Summary) e `OnboardingPage`, rotte `/tenants/new` e `/tenants/:id/onboarding` al posto di `TenantCreatePage`; header della scheda con stato, codice, "Cliente dal" e menu azioni di stato (dialog con motivo); frasi audit per `tenant.onboarding.*` e `tenant.status.changed`; testi i18n (`onboarding.*`, `tenantStatus.*`, `tenantForm.sdiCode/accountManager/city/...`); applicare la migration al DB di sviluppo; docs (API.md, README, ADMIN-PORTAL.md, TEST-UNITARI) e Postman della fase 4.
-
 ## Test rossi attesi
 
-Nessuno: dopo la fase 3 tutta la suite è verde (accettazione 107/107).
+Nessuno: dopo la fase 4 tutta la suite è verde (accettazione 122/122).
 
 ## Ambiente di sviluppo autonomo (fuori dal repo, nello scratchpad della sessione)
 
@@ -47,6 +42,11 @@ Per verificare l'interfaccia senza il login reale: provider OIDC locale (`devidp
 10. **UC5 con Keycloak giù**: l'organizzazione si salva comunque; gli utenti tengono un id di profilo che le letture già omettono (UC7-R3).
 11. **Audit registrato dopo il salvataggio**, non nella stessa transazione (le scritture Keycloak non sono transazionali comunque): se la registrazione fallisce la modifica resta e l'errore va nel log (UC12 flusso 1a).
 12. **Creazione utente nello storico**: un evento per ogni cliente dei profili assegnati, così compare nello storico di ciascuno (mock 1b "ha creato 4 utenti per Officine Rinaldi").
+
+13. **Wizard, passo Piano**: segnaposto esplicativo finché non esiste il catalogo (fase 5), che lo completerà.
+14. **Passo Primi utenti**: gli utenti si creano uno alla volta; una riga rifiutata mostra gli errori e ferma il passo, quelle già create restano.
+15. **Annullare l'onboarding** elimina la bozza (profili e unità compresi); gli utenti già creati restano in Keycloak (detto nel dialog).
+16. **Referente commerciale**: testo libero precompilato con l'amministratore corrente (il mock mostra una select "Marta Russo (tu)"; non esiste ancora un elenco di amministratori).
 
 ## Da far vedere al designer
 

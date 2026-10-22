@@ -4,8 +4,8 @@ import { HomePage } from '@/pages/home'
 import { NotFoundPage } from '@/pages/not-found'
 import { ProfilesPage } from '@/pages/profiles'
 import { SettingsPage } from '@/pages/settings'
-import { TenantCreatePage } from '@/pages/tenant-create'
 import { TenantDetailPage } from '@/pages/tenant-detail'
+import { OnboardingPage } from '@/pages/tenant-onboarding'
 import { TenantsListPage } from '@/pages/tenants-list'
 import { UserCreatePage } from '@/pages/user-create'
 import { UsersPage } from '@/pages/users'
@@ -20,7 +20,8 @@ export const createAppRouter = () =>
       children: [
         { path: routes.home, Component: HomePage },
         { path: routes.tenants, Component: TenantsListPage },
-        { path: routes.tenantNew, Component: TenantCreatePage },
+        { path: routes.tenantNew, Component: OnboardingPage },
+        { path: routes.tenantOnboarding, Component: OnboardingPage },
         { path: routes.tenantDetail, Component: TenantDetailPage },
         { path: routes.users, Component: UsersPage },
         { path: routes.userNew, Component: UserCreatePage },

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useFormContext, type RegisterOptions } from 'react-hook-form'
+import { useFormContext, type RegisterOptions, type UseFormReturn } from 'react-hook-form'
 import { validateTenantField, type TenantReference, type UniqueTenantField } from '@/entities/tenant'
 import { getLogger } from '@/shared/lib/logger'
 import type { RegistryValues } from './registry'
@@ -16,8 +16,10 @@ interface CheckedValue {
  * excludeTenantId: the tenant being edited (UC4), whose own values are not duplicates.
  * statusOf tells whether the current value was confirmed free, or which tenant already uses it (UC11-R4).
  */
-export function useUniqueFieldCheck(excludeTenantId?: string) {
-  const { getValues, trigger, setError } = useFormContext<RegistryValues>()
+export function useUniqueFieldCheck(excludeTenantId?: string, form?: UseFormReturn<RegistryValues>) {
+  // form: for a page that owns the form and shows the results outside it (the wizard "Controlli" panel).
+  const context = useFormContext<RegistryValues>()
+  const { getValues, trigger, setError } = form ?? context
   const [checked, setChecked] = useState<Partial<Record<UniqueTenantField, CheckedValue>>>({})
 
   const onBlur = (field: UniqueTenantField): RegisterOptions => ({

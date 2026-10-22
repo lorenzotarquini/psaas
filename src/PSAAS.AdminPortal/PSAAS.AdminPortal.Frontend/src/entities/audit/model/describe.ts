@@ -54,6 +54,19 @@ export function describeAuditEvent(event: AuditEvent, t: TFunction): AuditSenten
         detail: [counts(t, profiles, units), ...parts].join(' · '),
       }
     }
+    case 'tenant.onboarding.started':
+      return { what: t('audit.actions.tenant.onboardingStarted'), detail: '' }
+    case 'tenant.onboarding.discarded':
+      return { what: t('audit.actions.tenant.onboardingDiscarded'), detail: '' }
+    case 'tenant.status.changed': {
+      // Same target status reads differently by origin: Onboarding → Active is an activation.
+      const to = String(d.to)
+      const verb = to === 'Active' && (d.from === 'Onboarding' || d.from === 'Trial') ? 'Activated' : to
+      return {
+        what: t(`audit.actions.tenant.status.${verb}`, { defaultValue: t('audit.actions.tenant.status.other') }),
+        detail: d.reason ? t('audit.details.reason', { reason: String(d.reason) }) : '',
+      }
+    }
     case 'user.created':
       return {
         what: t('audit.actions.user.created'),

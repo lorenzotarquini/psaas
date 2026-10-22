@@ -22,8 +22,8 @@ public sealed class ProfileReadRepositoryTests
         var profiles = await Repository.GetAllAsync();
 
         Assert.Equal(
-            [("Amministrativo", beta.Id), ("Operatore", alfa.Id)],
-            profiles.Select(profile => (profile.Name, profile.TenantId)));
+            [("Amministrativo", beta.Id, "Beta Snc"), ("Operatore", alfa.Id, "Alfa Srl")],
+            profiles.Select(profile => (profile.Name, profile.TenantId, profile.TenantCompanyName)));
     }
 
     [Fact]

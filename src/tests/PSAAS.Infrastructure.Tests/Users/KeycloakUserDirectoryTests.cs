@@ -117,10 +117,20 @@ public sealed class KeycloakUserDirectoryTests
     }
 
     [Fact]
-    public async Task Search_ServiceAccountWithoutRights_IsAConfigurationError()
+    public async Task Search_ServiceAccountWithoutRights_IsUnavailable()
     {
         var handler = new Handler(_ => new(HttpStatusCode.Forbidden));
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => Directory(handler).SearchAsync("mario"));
+        var exception = await Assert.ThrowsAsync<UserDirectoryUnavailableException>(() => Directory(handler).SearchAsync("mario"));
+        Assert.IsType<InvalidOperationException>(exception.InnerException);
+    }
+
+    [Fact]
+    public async Task Search_MissingClientSecret_IsUnavailable()
+    {
+        // What KeycloakClientCredentialsHandler throws when Keycloak:ClientSecret is not configured.
+        var handler = new Handler(_ => throw new InvalidOperationException("Keycloak client credentials ClientSecret is required."));
+
+        await Assert.ThrowsAsync<UserDirectoryUnavailableException>(() => Directory(handler).SearchAsync("mario"));
     }
 }

@@ -5,6 +5,7 @@ import { apiGet } from '@/shared/api'
 export interface Profile {
   id: string
   tenantId: string
+  tenantCompanyName: string
   name: string
   description: string | null
 }

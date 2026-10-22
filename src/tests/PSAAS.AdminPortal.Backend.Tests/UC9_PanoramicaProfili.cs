@@ -15,8 +15,8 @@ public sealed class UC9_PanoramicaProfili(PostgresFixture database) : Acceptance
         var profiles = await GetOkAsync<List<ProfileOverview>>("/api/profiles");
 
         Assert.Equal(
-            [("Amministrativo", beta.Id.ToString()), ("Operatore", alfa.Id.ToString())],
-            profiles.Select(profile => (profile.Name, profile.TenantId)));
+            [("Amministrativo", beta.Id.ToString(), "Beta Snc"), ("Operatore", alfa.Id.ToString(), "Alfa Srl")],
+            profiles.Select(profile => (profile.Name, profile.TenantId, profile.TenantCompanyName)));
     }
 
     [Fact, Trait("Scenario", "UC9-S2")]

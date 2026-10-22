@@ -50,7 +50,10 @@
     "unavailable": "Service temporarily unavailable. Please try again shortly.",
     "generic": "An unexpected error occurred.",
     "pageNotFound": "Page not found",
-    "validation": "Some data is not valid: check the highlighted fields."
+    "validation": "Some data is not valid: check the highlighted fields.",
+    "loadFailed": "Loading failed (error {{status}}). Try again or contact support.",
+    "saveFailed": "Saving failed (error {{status}}): no change was recorded. Try again or contact support.",
+    "network": "Server unreachable: check your connection and try again."
   },
   "tenantDetail": {
     "backToList": "Back to customers",

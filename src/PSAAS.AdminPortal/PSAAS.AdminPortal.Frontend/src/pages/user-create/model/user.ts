@@ -23,12 +23,12 @@ export interface TenantProfiles {
 }
 
 // R4: profiles may belong to different tenants; group them so the choice reads "tenant → profiles".
-export function groupProfilesByTenant(profiles: Profile[], tenantNames: Map<string, string>): TenantProfiles[] {
+export function groupProfilesByTenant(profiles: Profile[]): TenantProfiles[] {
   const groups = new Map<string, TenantProfiles>()
   for (const profile of profiles) {
     const group = groups.get(profile.tenantId) ?? {
       tenantId: profile.tenantId,
-      tenantName: tenantNames.get(profile.tenantId) ?? profile.tenantId,
+      tenantName: profile.tenantCompanyName,
       profiles: [],
     }
     group.profiles.push(profile)

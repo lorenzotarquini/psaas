@@ -50,7 +50,10 @@
     "unavailable": "Servizio temporaneamente non disponibile. Riprova tra poco.",
     "generic": "Si è verificato un errore imprevisto.",
     "pageNotFound": "Pagina non trovata",
-    "validation": "Alcuni dati non sono validi: controlla i campi evidenziati."
+    "validation": "Alcuni dati non sono validi: controlla i campi evidenziati.",
+    "loadFailed": "Caricamento non riuscito (errore {{status}}). Riprova o contatta l'assistenza.",
+    "saveFailed": "Salvataggio non riuscito (errore {{status}}): nessuna modifica è stata registrata. Riprova o contatta l'assistenza.",
+    "network": "Server non raggiungibile: controlla la connessione e riprova."
   },
   "tenantDetail": {
     "backToList": "Torna all'elenco clienti",

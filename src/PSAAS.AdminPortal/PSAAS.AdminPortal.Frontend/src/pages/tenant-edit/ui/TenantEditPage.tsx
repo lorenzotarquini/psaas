@@ -46,7 +46,7 @@ function RegistryForm({ tenant }: { tenant: TenantDetail }) {
           title={t('tenantForm.editTitle', { name: tenant.companyName })}
           back={{ to: tenantPath(tenant.id), label: t('tenantForm.backToDetail') }}
         />
-        {update.error && <ErrorAlert error={update.error} />}
+        {update.error && <ErrorAlert error={update.error} action="save" />}
         <section className="card bg-base-100 shadow-sm">
           <div className="card-body">
             <RegistryFields excludeTenantId={tenant.id} />

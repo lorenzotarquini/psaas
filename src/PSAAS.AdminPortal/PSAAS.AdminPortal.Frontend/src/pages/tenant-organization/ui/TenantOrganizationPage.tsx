@@ -57,7 +57,7 @@ function OrganizationForm({ tenant }: { tenant: TenantDetail }) {
           title={t('organizationEditor.title', { name: tenant.companyName })}
           back={{ to: tenantPath(tenant.id), label: t('tenantForm.backToDetail') }}
         />
-        {update.error && <ErrorAlert error={update.error} />}
+        {update.error && <ErrorAlert error={update.error} action="save" />}
         <section className="card bg-base-100 shadow-sm">
           <div className="card-body">
             <OrganizationEditor />

@@ -1,4 +1,4 @@
-import { keepPreviousData, useMutation, useQueries, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import { apiGet, apiPost, apiPut, type PagedResult } from '@/shared/api'
 
 // Mirrors TenantSummaryDto in PSAAS.AdminPortal.Backend.
@@ -86,18 +86,6 @@ export const useTenants = (query: TenantsQuery) =>
 
 export const useTenant = (id: string) =>
   useQuery({ queryKey: keys.detail(id), queryFn: ({ signal }) => getTenant(id, signal) })
-
-/**
- * Company names by tenant id, for pages that only receive tenantId (GET /api/profiles).
- * shortcut: one detail request per distinct tenant; drop it once /api/profiles returns tenantCompanyName.
- */
-export function useTenantNames(ids: string[]): Map<string, string> {
-  const distinct = [...new Set(ids)]
-  const results = useQueries({
-    queries: distinct.map((id) => ({ queryKey: keys.detail(id), queryFn: ({ signal }: { signal: AbortSignal }) => getTenant(id, signal) })),
-  })
-  return new Map(distinct.flatMap((id, i) => (results[i].data ? [[id, results[i].data.companyName]] : [])))
-}
 
 // Every save returns the updated detail: cache it, and refresh what may show stale names or profiles.
 function onTenantSaved(queryClient: QueryClient, tenant: TenantDetail) {

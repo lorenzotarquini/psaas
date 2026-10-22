@@ -35,6 +35,11 @@ try
             http.Timeout = TimeSpan.FromSeconds(10);
         })
         .AddHttpMessageHandler<KeycloakClientCredentialsHandler>();
+    if (string.IsNullOrWhiteSpace(builder.Configuration["Keycloak:ClientSecret"]))
+    {
+        // Not fatal: the rest of the portal works, the users pages answer 503 until it is set.
+        logger.Warn("Keycloak:ClientSecret is not configured: users (UC6, UC7) are unavailable");
+    }
     builder.Services.AddControllers();
     builder.Services.AddProblemDetails();
     builder.Services.AddHealthChecks();

@@ -69,7 +69,7 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
                 return true;
             }, cancellationToken);
         }
-        catch (Exception exception) when (exception is UserDirectoryUnavailableException or InvalidOperationException)
+        catch (UserDirectoryUnavailableException exception)
         {
             // UC6 3d: nothing is created, otherwise the user would exist with no way to set a password.
             await DeleteQuietlyAsync(id);
@@ -114,7 +114,10 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
             attributes.TryGetValue(ProfileIdsAttribute, out var profileIds) ? profileIds : []);
     }
 
-    /// <summary>Turns "Keycloak cannot be reached" (network, timeout, 5xx, token endpoint down) into one exception.</summary>
+    /// <summary>
+    /// Turns every way the user directory can fail into one exception (503 for the portal): Keycloak down
+    /// (network, timeout, 5xx, token endpoint) or misconfigured (no client secret, missing service account roles).
+    /// </summary>
     private static async Task<T> CallAsync<T>(Func<Task<T>> call, CancellationToken cancellationToken)
     {
         try
@@ -127,6 +130,12 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
         {
             Logger.Warn(exception, "Keycloak admin API unavailable");
             throw new UserDirectoryUnavailableException("Keycloak is not reachable", exception);
+        }
+        catch (InvalidOperationException exception)
+        {
+            // Retrying will not help: Keycloak:ClientSecret or the realm-management roles must be fixed.
+            Logger.Error(exception, "Keycloak admin API misconfigured");
+            throw new UserDirectoryUnavailableException("Keycloak admin API is misconfigured", exception);
         }
     }
 
@@ -142,8 +151,7 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
             throw new HttpRequestException($"Keycloak could not {operation}", null, response.StatusCode);
         }
 
-        // 401/403/400: the service account or the realm is misconfigured, retrying will not help.
-        Logger.Error("Keycloak refused to {Operation} with status code {StatusCode}", operation, (int)response.StatusCode);
+        // 401/403/400: the service account or the realm is misconfigured.
         throw new InvalidOperationException($"Keycloak refused to {operation} (HTTP {(int)response.StatusCode})");
     }
 

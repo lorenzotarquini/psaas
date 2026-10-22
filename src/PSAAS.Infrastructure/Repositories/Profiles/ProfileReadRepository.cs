@@ -16,8 +16,14 @@ public sealed class ProfileReadRepository(PsaasDbContext dbContext) : IProfileRe
         Logger.Debug("Querying all profiles");
         var profiles = await dbContext.Profiles
             .AsNoTracking()
-            .OrderBy(profile => profile.Name)
-            .Select(profile => new ProfileReadModel(profile.Id, profile.TenantId, profile.Name, profile.Description))
+            .Join(
+                dbContext.Tenants,
+                profile => profile.TenantId,
+                tenant => tenant.Id,
+                (profile, tenant) => new { profile, tenant })
+            .OrderBy(row => row.profile.Name)
+            .Select(row => new ProfileReadModel(
+                row.profile.Id, row.tenant.Id, row.tenant.CompanyName, row.profile.Name, row.profile.Description))
             .ToArrayAsync(cancellationToken)
             .ConfigureAwait(false);
         Logger.Debug("Queried {ProfileCount} profiles", profiles.Length);

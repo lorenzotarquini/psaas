@@ -43,7 +43,7 @@ export function TenantCreatePage() {
     <FormProvider {...form}>
       <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
         <PageHeader title={t('tenantForm.createTitle')} back={{ to: routes.tenants, label: t('tenantDetail.backToList') }} />
-        {createTenant.error && <ErrorAlert error={createTenant.error} />}
+        {createTenant.error && <ErrorAlert error={createTenant.error} action="save" />}
         <section className="card bg-base-100 shadow-sm">
           <div className="card-body">
             <h2 className="card-title text-base">{t('tenantDetail.registry')}</h2>

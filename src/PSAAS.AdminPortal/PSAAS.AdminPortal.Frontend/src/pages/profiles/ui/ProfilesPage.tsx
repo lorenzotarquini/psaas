@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { useProfiles } from '@/entities/profile'
-import { useTenantNames } from '@/entities/tenant'
 import { tenantPath } from '@/shared/routes'
 import { ErrorAlert } from '@/shared/ui/error-alert'
 import { PageHeader } from '@/shared/ui/page-header'
@@ -13,13 +12,12 @@ import { PageHeader } from '@/shared/ui/page-header'
 export function ProfilesPage() {
   const { t } = useTranslation()
   const { data: profiles = [], error, isPending } = useProfiles()
-  const tenantNames = useTenantNames(profiles.map((p) => p.tenantId))
   const [filter, setFilter] = useState('')
 
   // The whole list is already here: filter on the client.
   const needle = filter.trim().toLowerCase()
   const visible = profiles.filter((profile) =>
-    [profile.name, profile.description ?? '', tenantNames.get(profile.tenantId) ?? ''].some((text) =>
+    [profile.name, profile.description ?? '', profile.tenantCompanyName].some((text) =>
       text.toLowerCase().includes(needle),
     ),
   )
@@ -66,7 +64,7 @@ export function ProfilesPage() {
                         <td>{profile.description}</td>
                         <td>
                           <Link to={tenantPath(profile.tenantId)} className="link link-hover">
-                            {tenantNames.get(profile.tenantId) ?? <span className="loading loading-dots loading-xs" />}
+                            {profile.tenantCompanyName}
                           </Link>
                         </td>
                       </tr>

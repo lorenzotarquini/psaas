@@ -27,4 +27,9 @@ i18n
 
 i18n.on('failedLoading', (lng, ns, msg) => logger.error({ lng, ns }, msg))
 
+// Screen readers and hyphenation follow <html lang>, which index.html fixes to "it".
+i18n.on('languageChanged', (lng) => {
+  document.documentElement.lang = lng
+})
+
 export default i18n

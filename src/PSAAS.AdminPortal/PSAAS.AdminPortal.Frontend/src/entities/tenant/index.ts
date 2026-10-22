@@ -1,7 +1,6 @@
 export {
   useCreateTenant,
   useTenant,
-  useTenantNames,
   useTenants,
   useUpdateTenantOrganization,
   useUpdateTenantRegistry,

@@ -24,7 +24,7 @@ Errori di validazione: `400` `ValidationProblem` con un codice per campo in `err
 - **UC2** → `{ id, companyName, vatNumber, completeVatNumber, certifiedEmail, address: { street, city, postalCode, country }, profiles: [{ id, name, description }], productiveUnits: [{ id, name, description, profileIds }] }`; `404` se non esiste.
 - **UC3** → body `{ companyName, completeVatNumber, certifiedEmail, street, city, postalCode, profiles?: [{ key, name, description }], productiveUnits?: [{ name, description, profileKeys }] }`; `201` + `Location` + scheda (UC2).
 - **UC8** → `{ keycloakId, name, email, roles }`.
-- **UC9** → `[{ id, tenantId, name, description }]` ordinati per nome.
+- **UC9** → `[{ id, tenantId, tenantCompanyName, name, description }]` ordinati per nome.
 - **UC10** → `[{ name, provinceCode, postalCodes }]`; `400` se `term` ha meno di 2 caratteri, `503` se la lista comuni non risponde.
 
 ## Contratti nuovi
@@ -67,7 +67,7 @@ Il backend chiama l'API di amministrazione di Keycloak (`{Authority}` con `/real
 - nel *User profile* del realm vanno dichiarati gli attributi `birthDate` e `profileIds` (multivalore), oppure vanno abilitati gli *Unmanaged attributes*: da Keycloak 24 gli attributi non dichiarati vengono scartati senza errore;
 - il realm deve avere l'SMTP configurato, altrimenti la creazione risponde `503`.
 
-Senza segreto o senza ruoli la chiamata fallisce con `500` e l'errore compare nel log.
+Senza segreto o senza ruoli le chiamate a `/api/users` rispondono `503` e la causa compare nel log come errore; all'avvio il backend avvisa se `Keycloak:ClientSecret` manca.
 
 ### UC11 – `GET /api/tenants/field-validation?field=&value=&excludeTenantId=`
 Verifica un solo campo dell'anagrafica con le regole del salvataggio (UC3/UC4), per controllarlo all'uscita dal campo.

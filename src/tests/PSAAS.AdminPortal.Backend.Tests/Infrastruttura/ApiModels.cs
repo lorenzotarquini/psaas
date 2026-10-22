@@ -28,7 +28,7 @@ public sealed record ProfileView(string Id, string Name, string? Description);
 
 public sealed record ProductiveUnitView(Guid Id, string Name, string? Description, List<string> ProfileIds);
 
-public sealed record ProfileOverview(string Id, string TenantId, string Name, string? Description);
+public sealed record ProfileOverview(string Id, string TenantId, string TenantCompanyName, string Name, string? Description);
 
 public sealed record CityView(string Name, string ProvinceCode, List<string> PostalCodes);
 

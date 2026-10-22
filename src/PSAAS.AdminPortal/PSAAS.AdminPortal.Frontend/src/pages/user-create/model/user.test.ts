@@ -1,25 +1,25 @@
 import { describe, expect, it } from 'vitest'
 import { groupProfilesByTenant, userSchema } from './user'
 
-const profile = (id: string, tenantId: string) => ({ id, tenantId, name: id, description: null })
+const profile = (id: string, tenantId: string, tenantCompanyName: string) => ({
+  id,
+  tenantId,
+  tenantCompanyName,
+  name: id,
+  description: null,
+})
 
 describe('groupProfilesByTenant', () => {
   it('groups profiles by tenant, ordered by tenant name, keeping the profile order', () => {
-    const groups = groupProfilesByTenant(
-      [profile('Amministrativo', 'beta'), profile('Operatore', 'alfa'), profile('Revisore', 'beta')],
-      new Map([
-        ['alfa', 'Alfa Srl'],
-        ['beta', 'Beta Snc'],
-      ]),
-    )
+    const groups = groupProfilesByTenant([
+      profile('Amministrativo', 'beta', 'Beta Snc'),
+      profile('Operatore', 'alfa', 'Alfa Srl'),
+      profile('Revisore', 'beta', 'Beta Snc'),
+    ])
     expect(groups.map((g) => [g.tenantName, g.profiles.map((p) => p.id)])).toEqual([
       ['Alfa Srl', ['Operatore']],
       ['Beta Snc', ['Amministrativo', 'Revisore']],
     ])
-  })
-
-  it('falls back to the tenant id while its name is loading', () => {
-    expect(groupProfilesByTenant([profile('Operatore', 'alfa')], new Map())[0].tenantName).toBe('alfa')
   })
 })
 

@@ -1,14 +1,12 @@
 import { get, useFormContext } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { useProfiles } from '@/entities/profile'
-import { useTenantNames } from '@/entities/tenant'
 import { ErrorAlert } from '@/shared/ui/error-alert'
 import { groupProfilesByTenant, type UserValues } from '../model/user'
 
 export function ProfilePicker() {
   const { t } = useTranslation()
   const { data: profiles = [], error, isPending } = useProfiles()
-  const tenantNames = useTenantNames(profiles.map((p) => p.tenantId))
   const { watch, setValue, formState } = useFormContext<UserValues>()
   const selected = watch('profileIds')
   // The backend reports an unknown profile as profileIds[i] = InvalidValue.
@@ -24,7 +22,7 @@ export function ProfilePicker() {
 
   return (
     <div className="flex flex-col gap-3">
-      {groupProfilesByTenant(profiles, tenantNames).map((group) => (
+      {groupProfilesByTenant(profiles).map((group) => (
         <fieldset key={group.tenantId}>
           <legend className="font-medium">{group.tenantName}</legend>
           <div className="flex flex-wrap gap-x-4 gap-y-1">

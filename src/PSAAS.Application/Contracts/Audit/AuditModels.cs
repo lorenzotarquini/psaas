@@ -17,6 +17,7 @@ public static class AuditActions
     public const string UserPasswordReset = "user.password.reset";
     public const string UserDisabled = "user.disabled";
     public const string UserEnabled = "user.enabled";
+    public const string UserImpersonated = "user.impersonated";
     public const string ModuleRegistered = "module.registered";
     public const string ModuleUpdated = "module.updated";
     public const string PlanCreated = "plan.created";

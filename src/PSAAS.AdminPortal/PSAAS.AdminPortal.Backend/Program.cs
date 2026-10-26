@@ -4,6 +4,7 @@ using NLog.Web;
 using PSAAS.AdminPortal.Backend.Controllers;
 using PSAAS.Application;
 using PSAAS.Application.Abstractions.Health;
+using PSAAS.Application.Abstractions.Impersonation;
 using PSAAS.Application.Services.Billing;
 using PSAAS.AdminPortal.Backend.Infrastructure;
 using PSAAS.AdminPortal.Backend.Jobs;
@@ -35,6 +36,9 @@ try
     builder.Services.AddHostedService<ProvisioningRetryJob>();
     builder.Services.AddHostedService<BillingJob>();
     builder.Services.AddScoped<IServiceProbe, KeycloakSignInProbe>();
+    builder.Services.AddHttpClient(nameof(KeycloakImpersonationGateway), http => http.Timeout = TimeSpan.FromSeconds(10));
+    builder.Services.AddSingleton<IImpersonationGateway, KeycloakImpersonationGateway>();
+    builder.Services.AddScoped<IServiceProbe, ImpersonationProbe>();
     builder.Services.AddSingleton(new BillingOptions(builder.Configuration.GetValue("Billing:SuspendAfterDays", 30)));
     // UC6/UC7: users live in Keycloak, reached through its admin API with this client's service account
     // (Keycloak:ClientSecret, roles view-users and manage-users of realm-management).
@@ -68,6 +72,7 @@ try
         {
             TenantUniquenessConflictException or ProductiveUnitNameConflictException => StatusCodes.Status409Conflict,
             UserDirectoryUnavailableException => StatusCodes.Status503ServiceUnavailable,
+            ImpersonationUnavailableException => StatusCodes.Status503ServiceUnavailable,
             _ => StatusCodes.Status500InternalServerError
         }
     });

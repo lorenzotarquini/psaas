@@ -50,6 +50,7 @@ public sealed class NotificationService(
             .Select(i => new Notification(NotificationKinds.InvoiceOverdue, NotificationSeverities.Critical, i.TenantId, i.TenantName, i.Number, i.Id.ToString(), i.DueAt)));
 
         items.AddRange(await UserLimitsAsync(all, now, cancellationToken));
+        items.AddRange(await StaleInvitesAsync(now, cancellationToken));
 
         var drafts = await tenantList.GetListAsync(new TenantListQuery(Statuses: [nameof(TenantStatus.Onboarding)], PageSize: 100), now, cancellationToken);
         items.AddRange(drafts.Items
@@ -60,6 +61,24 @@ public sealed class NotificationService(
         Logger.Debug("{Count} items to handle", items.Count);
         // R3: most severe first, then the oldest.
         return items.OrderBy(n => Array.IndexOf(Severity, n.Severity)).ThenBy(n => n.At).ToArray();
+    }
+
+    // UC29-R2: one item for every tenant together (mock 1b "Vari clienti").
+    private async Task<IEnumerable<Notification>> StaleInvitesAsync(DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var stale = Users.UserManagementService.StaleInvites(await users.SearchAsync(null, cancellationToken), now);
+            return stale.Count == 0
+                ? []
+                : [new Notification(NotificationKinds.InvitesPending, NotificationSeverities.Info, Guid.Empty, string.Empty, null, null,
+                    stale.Min(u => u.LastInviteAt ?? u.CreatedAt)!.Value, Value: stale.Count)];
+        }
+        catch (UserDirectoryUnavailableException exception)
+        {
+            Logger.Warn(exception, "Stale invitations left out of the queue: Keycloak unreachable");
+            return [];
+        }
     }
 
     // EXP-02: 90% of the plan's users; skipped while Keycloak is unreachable.

@@ -70,6 +70,27 @@ public sealed class UserManagementService(IUserDirectory directory, IProfileRead
         return new UserActionResult(updated, true, false, errors);
     }
 
+    /// <summary>UC29-R2: invitations still open after this many days.</summary>
+    public const int StaleInviteDays = 5;
+
+    /// <summary>UC29-R2: users whose invitation is open since more than <see cref="StaleInviteDays"/> days.</summary>
+    public static IReadOnlyList<DirectoryUser> StaleInvites(IEnumerable<DirectoryUser> users, DateTimeOffset now) =>
+        users.Where(u => u.Enabled && u.PasswordPending && (u.LastInviteAt ?? u.CreatedAt) is { } at && at <= now.AddDays(-StaleInviteDays)).ToArray();
+
+    /// <summary>UC29 "Reinvia inviti": the invitation again to every stale one; returns how many.</summary>
+    /// <exception cref="UserDirectoryUnavailableException">The identity provider cannot be reached.</exception>
+    public async Task<int> ResendStaleInvitesAsync(CancellationToken cancellationToken = default)
+    {
+        var stale = StaleInvites(await directory.SearchAsync(null, cancellationToken), clock.GetUtcNow());
+        foreach (var user in stale)
+        {
+            await InviteAsync(user.Id, cancellationToken);
+        }
+
+        Logger.Info("Resent {Count} stale invitations", stale.Count);
+        return stale.Count;
+    }
+
     /// <summary>UC19-R3: only while the invitation is open.</summary>
     public Task<UserActionResult> InviteAsync(string id, CancellationToken cancellationToken = default) =>
         ActAsync(id, user => user.Status == UserStatuses.Invited, AuditActions.UserInvited,

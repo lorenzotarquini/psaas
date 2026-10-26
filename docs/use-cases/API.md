@@ -32,6 +32,9 @@ Errori di validazione: `400` `ValidationProblem` con un codice per campo in `err
 | UC26 | `GET /api/system/services` | esiste |
 | UC27 | `GET /api/communications?tenantId=&page=&pageSize=` · `GET /api/communications/{id}` · `POST /api/communications/preview` · `POST /api/communications` | esiste |
 | UC28 | `GET /api/notifications` | esiste |
+| UC29 | `GET /api/overview` · `POST /api/users/invites/resend` | esiste |
+| UC30 | `GET /api/search?q=` | esiste |
+| UC31 | `GET /api/impersonation` · `POST /api/users/{id}/impersonate` | esiste |
 | UC24 | `GET /api/invoices?tenantId=&status=&search=&page=&pageSize=` · `GET /api/invoices/summary` · `GET /api/invoices/{id}` · `POST /api/invoices/{id}/payments` · `POST /api/invoices/{id}/cancel` | esiste |
 
 ## Contratti esistenti (sintesi)
@@ -126,6 +129,21 @@ Risposta: `{ items: [utente], totalCount, page, pageSize }` con utente = `{ id, 
 ### UC28 – Da gestire
 - `GET /api/notifications` → `[{ kind, severity: critical|warning|info, tenantId, tenantName, subject, objectId, at, value, limit }]`, dal più grave e più vecchio. `kind`: `module.failed` (subject = modulo), `invoice.overdue` (subject = numero, objectId = fattura), `trial.ending` (value = giorni), `users.limit` (value/limit), `draft.stalled` (value = giorni). Calcolate a ogni richiesta, senza stato "letto".
 
+### UC29 – Panoramica
+- `GET /api/overview` → `{ activeTenants, activeTenantsThisMonth, trialTenants, trialsEndingSoon, users, usersThisMonth, modules, modulesInBeta }` (mese UTC corrente; `users` `null` se Keycloak non risponde).
+- La coda è `GET /api/notifications` (UC28), con in più `users.invites` (`value` = utenti con invito aperto da più di 5 giorni, `tenantId` vuoto).
+- `POST /api/users/invites/resend` → `200` `{ resent }`: reinvia l'invito a quegli utenti (UC19-R3) · `503` se Keycloak non risponde.
+
+### UC30 – Ricerca globale
+- `GET /api/search?q=` (almeno 2 caratteri, altrimenti `400` `q` = `InvalidValue`) → `{ tenants: [{ id, companyName, completeVatNumber, certifiedEmail, status }], users: [utente UC7], usersUnavailable }`, al massimo 5 + 5, con le regole di UC1 e UC7.
+
+### UC31 – Impersonificazione
+- `GET /api/impersonation` → `{ configured }`.
+- `POST /api/users/{id}/impersonate` `{ reason, minutes }` → `200` `{ url, expiresAt }` · `400` (`reason` `Required`/`InvalidValue` sotto 10 caratteri, `minutes` `InvalidValue` fuori 5–60) · `404` · `409` se non configurata o l'utente non è attivo · `503` se Keycloak rifiuta lo scambio.
+- `url` = `Impersonation:PlatformUrl` + `/impersonate#access_token=…&expires_in=…`: il token è nel frammento, mai nella query né nei log.
+- Configurazione: `Impersonation:PlatformUrl`, `Impersonation:Audience` (client della piattaforma) e `Keycloak:ClientSecret`; in Keycloak il token exchange abilitato e il ruolo `impersonation` di `realm-management` al service account di `adminportal-api`.
+- Audit: `user.impersonated` (`{ email, reason, minutes }`) nello storico dei clienti dell'utente.
+
 ### UC19 – Gestire un utente
 - `GET /api/users/{id}` → utente (come in UC7) · `404`.
 - `PUT /api/users/{id}` body `{ firstName, lastName, birthDate: "YYYY-MM-DD", profileIds, mfaRequired }` → `200` + utente · `400` con i codici di UC6 (`firstName`, `lastName`, `birthDate`, `profileIds[i]` = `InvalidValue` o `LimitExceeded` per un cliente nuovo al limite) · `404`. L'email non si modifica. `mfaRequired: true` aggiunge l'azione `CONFIGURE_TOTP`.
@@ -190,5 +208,6 @@ Audit log, dal più recente: `{ items: [{ id, occurredAt, actorId, actorName, ac
   - Lista comuni: porta `IItalianCityProvider` sostituita da una lista fissa.
   - Hook di provisioning dei moduli: porta `IModuleProvisioner` sostituita da hook simulati (`FakeModuleHooks.Failing`).
   - Email: porta `IEmailSender` sostituita da una casella simulata (`FakeMailbox`, con indirizzi che rifiutano).
+  - Impersonificazione: porta `IImpersonationGateway` sostituita da un token exchange simulato (`FakeImpersonation`).
   - Tempo: `TimeProvider` sostituito da un orologio che gli scenari spostano in avanti (`DaysPassAsync`) per scadenze e rinnovi; i token restano validati con l'ora reale.
 - Quello che i simulatori nascondono (chiamate HTTP verso Keycloak e verso la lista comuni, ordinamento e limite dei comuni) è verificato dai test unitari di Infrastructure.

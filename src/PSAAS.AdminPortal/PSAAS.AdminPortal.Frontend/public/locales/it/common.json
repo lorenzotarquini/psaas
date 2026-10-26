@@ -376,7 +376,8 @@
         "invited": "ha reinviato l'invito a",
         "passwordReset": "ha chiesto il reset della password di",
         "disabled": "ha disattivato l'utente",
-        "enabled": "ha riattivato l'utente"
+        "enabled": "ha riattivato l'utente",
+        "impersonated": "ha impersonato"
       },
       "subscription": {
         "created": "ha sottoscritto un piano per",
@@ -730,13 +731,15 @@
       "city-list": "Elenco dei comuni",
       "module-hooks": "Hook dei moduli",
       "invoice-transmission": "Trasmissione fatture",
-      "email": "Email (SMTP)"
+      "email": "Email (SMTP)",
+      "impersonation": "Impersonificazione"
     },
     "failedModules_one": "{{count}} modulo in errore di provisioning",
     "failedModules_other": "{{count}} moduli in errore di provisioning",
     "notConfigured": {
       "invoice-transmission": "SDI non configurato: le fatture restano nel portale",
-      "email": "SMTP non configurato: comunicazioni e solleciti non partono per email"
+      "email": "SMTP non configurato: comunicazioni e solleciti non partono per email",
+      "impersonation": "Token exchange non configurato"
     }
   },
   "communications": {
@@ -788,7 +791,90 @@
       "invoice.overdue": "Fattura {{subject}} di {{tenant}} scaduta",
       "trial.ending": "La prova di {{tenant}} finisce tra {{count}} giorni",
       "users.limit": "{{tenant}} ha {{count}} utenti su {{limit}}",
-      "draft.stalled": "Onboarding di {{tenant}} fermo da {{count}} giorni"
+      "draft.stalled": "Onboarding di {{tenant}} fermo da {{count}} giorni",
+      "users.invites": "{{count}} utenti non hanno completato il primo accesso"
+    }
+  },
+  "overview": {
+    "morning": "Buongiorno, {{name}}",
+    "afternoon": "Buon pomeriggio, {{name}}",
+    "evening": "Buonasera, {{name}}",
+    "summary_one": "{{count}} attività da gestire, {{urgent}} urgenti",
+    "summary_other": "{{count}} attività da gestire, {{urgent}} urgenti",
+    "kpi": {
+      "activeTenants": "Clienti attivi",
+      "trials": "In trial",
+      "users": "Utenti",
+      "modules": "Moduli installati"
+    },
+    "thisMonth_one": "+{{count}} questo mese",
+    "thisMonth_other": "+{{count}} questo mese",
+    "endingSoon_one": "{{count}} scade entro 7 gg",
+    "endingSoon_other": "{{count}} scadono entro 7 gg",
+    "createdThisMonth_one": "{{count}} creato questo mese",
+    "createdThisMonth_other": "{{count}} creati questo mese",
+    "inBeta_one": "{{count}} in beta",
+    "inBeta_other": "{{count}} in beta",
+    "areas": {
+      "all": "Tutte",
+      "provisioning": "Provisioning",
+      "subscriptions": "Sottoscrizioni",
+      "invoices": "Fatture",
+      "users": "Utenti"
+    },
+    "actions": {
+      "retry": "Riprova",
+      "openInvoice": "Apri fattura",
+      "convert": "Converti",
+      "proposeUpgrade": "Proponi upgrade",
+      "resendInvites": "Reinvia inviti",
+      "resume": "Riprendi"
+    },
+    "variousTenants": "Vari clienti",
+    "recent": "Attività recente",
+    "age": {
+      "minutes_one": "{{count}} min",
+      "minutes_other": "{{count}} min",
+      "hours_one": "{{count}} h",
+      "hours_other": "{{count}} h",
+      "days_one": "{{count}} g",
+      "days_other": "{{count}} g"
+    }
+  },
+  "search": {
+    "placeholder": "Cerca clienti, utenti, P.IVA, PEC…",
+    "open": "Apri la ricerca",
+    "title": "Ricerca",
+    "groups": {
+      "tenants": "Clienti",
+      "users": "Utenti",
+      "actions": "Azioni rapide"
+    },
+    "usersUnavailable": "Utenti non disponibili: Keycloak non risponde.",
+    "move": "per spostarti",
+    "openItem": "per aprire",
+    "close": "Chiudi"
+  },
+  "impersonation": {
+    "button": "Impersona",
+    "title": "Entra come un utente",
+    "hint": "La piattaforma si apre in una nuova scheda con la sessione dell'utente, per il tempo scelto.",
+    "user": "Utente",
+    "chooseUser": "Scegli un utente attivo",
+    "noUsers": "Nessun utente attivo per questo cliente.",
+    "reason": "Motivo",
+    "reasonPlaceholder": "Es. verifica segnalazione 4521",
+    "duration": "Durata",
+    "minutes_one": "{{count}} minuto",
+    "minutes_other": "{{count}} minuti",
+    "audited": "L'impersonificazione viene registrata nello storico con il motivo.",
+    "start": "Apri la piattaforma",
+    "notConfigured": "Impersonificazione non configurata (token exchange di Keycloak)",
+    "errors": {
+      "reason": {
+        "Required": "Indica il motivo",
+        "InvalidValue": "Almeno 10 caratteri"
+      }
     }
   }
 }

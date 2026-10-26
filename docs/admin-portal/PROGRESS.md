@@ -17,12 +17,12 @@ Piano: `C:\Users\ltarq\.claude\plans\voglio-che-prepari-un-abundant-quail.md` ·
 | 8 Fatturazione interna | ✅ | vedi log |
 | 9 Uso e stato dei servizi | ✅ | vedi log |
 | 10 Comunicazioni e notifiche | ✅ | vedi log |
-| 11 Panoramica, ricerca, impersonificazione | | |
+| 11 Panoramica, ricerca, impersonificazione | ✅ | vedi log |
 | 12 Consolidamento | | |
 
 ## Test rossi attesi
 
-Nessuno: dopo la fase 10 tutta la suite è verde (accettazione 247/247, unitari Application 140 e Infrastructure 55, Vitest 63).
+Nessuno: dopo la fase 11 tutta la suite è verde (accettazione 267/267, unitari Application 146 e Infrastructure 55, Vitest 68).
 
 ## Ambiente di sviluppo autonomo (fuori dal repo, nello scratchpad della sessione)
 
@@ -84,6 +84,12 @@ Per verificare l'interfaccia senza il login reale: provider OIDC locale (`devidp
 51. **Campanella senza stato "letto"**: le voci spariscono quando il problema è risolto; il numero in Panoramica (mock 1b) è lo stesso conteggio.
 52. **SMTP con `System.Net.Mail`** e cartella di pickup per lo sviluppo (nessuna nuova dipendenza); lo stato dei servizi mostra solo se è configurato, senza collegarsi.
 53. **Conferma dell'invio con `window.confirm`**: un dialog del design system arriverà con il consolidamento (fase 12).
+54. **La Panoramica sostituisce la Home**: le informazioni di UC8 restano nel menu dell'avatar.
+55. **"Moduli installati"** conta i moduli del catalogo con quanti in beta: non c'è ancora un "aggiornamento disponibile" per cliente (le versioni installate per cliente non sono tracciate).
+56. **Azioni della coda**: "Converti" apre l'abbonamento del cliente, "Proponi upgrade" apre una comunicazione al cliente; "Riprova" e "Reinvia inviti" agiscono subito.
+57. **Scorciatoie**: ⌘K/Ctrl+K, N (nuovo cliente), Esc; J/K per scorrere le righe non implementate (il mock non le mostra).
+58. **Impersonificazione solo dalla scheda cliente** (mock 1d): il pannello utente non la ospita per le regole FSD (una feature non importa un'altra).
+59. **Token exchange "legacy" di Keycloak** (`requested_subject`): richiede la feature `token-exchange` attiva nel realm; la piattaforma deve leggere il token dal frammento `/impersonate#access_token=…`.
 
 ## Da far vedere al designer
 

@@ -1,6 +1,7 @@
 using PSAAS.Application.Abstractions.Catalog;
 using PSAAS.Application.Abstractions.Communications;
 using PSAAS.Application.Abstractions.Geography;
+using PSAAS.Application.Abstractions.Impersonation;
 using PSAAS.Application.Contracts.Catalog;
 using PSAAS.Application.Abstractions.Users;
 
@@ -17,6 +18,14 @@ public sealed class FakeKeycloakUsers : IUserDirectory
     public List<string> PasswordSetupEmails { get; } = [];
 
     public bool Unavailable { get; set; }
+
+    /// <summary>A user who has not set the password yet, invited at the given time.</summary>
+    public DirectoryUser AddInvited(string firstName, string lastName, string email, DateTimeOffset invitedAt)
+    {
+        var user = Add(firstName, lastName, email) with { PasswordPending = true, InvitesSent = 1, CreatedAt = invitedAt, LastInviteAt = invitedAt };
+        Users[^1] = user;
+        return user;
+    }
 
     public DirectoryUser Add(string firstName, string lastName, string email, params string[] profileIds)
     {
@@ -183,4 +192,13 @@ public sealed class FakeMailbox : IEmailSender
         Sent.Add(message);
         return Task.CompletedTask;
     }
+}
+
+/// <summary>Plays Keycloak token exchange: a fixed platform address with the user and the duration.</summary>
+public sealed class FakeImpersonation : IImpersonationGateway
+{
+    public bool IsConfigured { get; set; } = true;
+
+    public Task<string> CreateSessionUrlAsync(string userId, TimeSpan duration, CancellationToken cancellationToken = default) =>
+        Task.FromResult($"https://platform.test/impersonate#access_token=token-of-{userId}&expires_in={(int)duration.TotalSeconds}");
 }

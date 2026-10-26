@@ -376,7 +376,8 @@
         "invited": "resent the invitation to",
         "passwordReset": "requested a password reset for",
         "disabled": "disabled the user",
-        "enabled": "enabled the user"
+        "enabled": "enabled the user",
+        "impersonated": "impersonated"
       },
       "subscription": {
         "created": "subscribed a plan for",
@@ -730,13 +731,15 @@
       "city-list": "City list",
       "module-hooks": "Module hooks",
       "invoice-transmission": "Invoice transmission",
-      "email": "Email (SMTP)"
+      "email": "Email (SMTP)",
+      "impersonation": "Impersonation"
     },
     "failedModules_one": "{{count}} module with failed provisioning",
     "failedModules_other": "{{count}} modules with failed provisioning",
     "notConfigured": {
       "invoice-transmission": "SDI not configured: invoices stay in the portal",
-      "email": "SMTP not configured: communications and reminders are not emailed"
+      "email": "SMTP not configured: communications and reminders are not emailed",
+      "impersonation": "Token exchange not configured"
     }
   },
   "communications": {
@@ -788,7 +791,90 @@
       "invoice.overdue": "Invoice {{subject}} of {{tenant}} overdue",
       "trial.ending": "The trial of {{tenant}} ends in {{count}} days",
       "users.limit": "{{tenant}} has {{count}} users of {{limit}}",
-      "draft.stalled": "Onboarding of {{tenant}} stalled for {{count}} days"
+      "draft.stalled": "Onboarding of {{tenant}} stalled for {{count}} days",
+      "users.invites": "{{count}} users have not completed their first login"
+    }
+  },
+  "overview": {
+    "morning": "Good morning, {{name}}",
+    "afternoon": "Good afternoon, {{name}}",
+    "evening": "Good evening, {{name}}",
+    "summary_one": "{{count}} thing to handle, {{urgent}} urgent",
+    "summary_other": "{{count}} things to handle, {{urgent}} urgent",
+    "kpi": {
+      "activeTenants": "Active tenants",
+      "trials": "In trial",
+      "users": "Users",
+      "modules": "Installed modules"
+    },
+    "thisMonth_one": "+{{count}} this month",
+    "thisMonth_other": "+{{count}} this month",
+    "endingSoon_one": "{{count}} ends within 7 days",
+    "endingSoon_other": "{{count}} end within 7 days",
+    "createdThisMonth_one": "{{count}} created this month",
+    "createdThisMonth_other": "{{count}} created this month",
+    "inBeta_one": "{{count}} in beta",
+    "inBeta_other": "{{count}} in beta",
+    "areas": {
+      "all": "All",
+      "provisioning": "Provisioning",
+      "subscriptions": "Subscriptions",
+      "invoices": "Invoices",
+      "users": "Users"
+    },
+    "actions": {
+      "retry": "Retry",
+      "openInvoice": "Open invoice",
+      "convert": "Convert",
+      "proposeUpgrade": "Propose upgrade",
+      "resendInvites": "Resend invitations",
+      "resume": "Resume"
+    },
+    "variousTenants": "Several tenants",
+    "recent": "Recent activity",
+    "age": {
+      "minutes_one": "{{count}} min",
+      "minutes_other": "{{count}} min",
+      "hours_one": "{{count}} h",
+      "hours_other": "{{count}} h",
+      "days_one": "{{count}} d",
+      "days_other": "{{count}} d"
+    }
+  },
+  "search": {
+    "placeholder": "Search tenants, users, VAT, PEC…",
+    "open": "Open search",
+    "title": "Search",
+    "groups": {
+      "tenants": "Tenants",
+      "users": "Users",
+      "actions": "Quick actions"
+    },
+    "usersUnavailable": "Users unavailable: Keycloak is not answering.",
+    "move": "to move",
+    "openItem": "to open",
+    "close": "Close"
+  },
+  "impersonation": {
+    "button": "Impersonate",
+    "title": "Sign in as a user",
+    "hint": "The platform opens in a new tab with the user's session, for the chosen time.",
+    "user": "User",
+    "chooseUser": "Choose an active user",
+    "noUsers": "No active users for this tenant.",
+    "reason": "Reason",
+    "reasonPlaceholder": "E.g. checking ticket 4521",
+    "duration": "Duration",
+    "minutes_one": "{{count}} minute",
+    "minutes_other": "{{count}} minutes",
+    "audited": "The impersonation is recorded in the history with the reason.",
+    "start": "Open the platform",
+    "notConfigured": "Impersonation not configured (Keycloak token exchange)",
+    "errors": {
+      "reason": {
+        "Required": "Give a reason",
+        "InvalidValue": "At least 10 characters"
+      }
     }
   }
 }

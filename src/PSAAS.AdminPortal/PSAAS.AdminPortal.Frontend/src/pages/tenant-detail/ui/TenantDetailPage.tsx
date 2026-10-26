@@ -7,6 +7,7 @@ import { useTenantSubscription } from '@/entities/catalog'
 import { useInvoices } from '@/entities/invoice'
 import { TenantStatusBadge, useTenant, type TenantDetail } from '@/entities/tenant'
 import { useUsers } from '@/entities/user'
+import { ImpersonateButton } from '@/features/impersonate'
 import { ApiError } from '@/shared/api'
 import { useBreadcrumb } from '@/shared/lib/breadcrumb'
 import { formatDate } from '@/shared/lib/format'
@@ -95,6 +96,7 @@ function TenantView({ tenant }: { tenant: TenantDetail }) {
             </div>
           </div>
           <div className="flex gap-2">
+            <ImpersonateButton tenantId={tenant.id} />
             <Link to={tenantPath(tenant.id, 'registry')} className="btn btn-sm">
               <FontAwesomeIcon icon={faPen} />
               {t('tenantDetail.editRegistry')}

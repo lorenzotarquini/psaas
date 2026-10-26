@@ -112,3 +112,11 @@ public sealed record RecipientView(Guid TenantId, string TenantName, string Emai
 public sealed record CommunicationView(Guid Id, string Subject, int RecipientCount, int EmailsSent, int EmailsFailed, List<RecipientView> Recipients);
 
 public sealed record NotificationView(string Kind, string Severity, Guid TenantId, string TenantName, string? Subject, int? Value, int? Limit);
+
+public sealed record OverviewView(int ActiveTenants, int ActiveTenantsThisMonth, int TrialTenants, int TrialsEndingSoon, int? Users, int Modules, int ModulesInBeta);
+
+public sealed record SearchTenantView(Guid Id, string CompanyName);
+
+public sealed record SearchView(List<SearchTenantView> Tenants, List<UserView> Users, bool UsersUnavailable);
+
+public sealed record TicketView(string Url, DateTimeOffset ExpiresAt);

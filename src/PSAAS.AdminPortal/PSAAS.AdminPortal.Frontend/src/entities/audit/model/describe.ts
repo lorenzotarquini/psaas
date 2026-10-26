@@ -87,6 +87,8 @@ export function describeAuditEvent(event: AuditEvent, t: TFunction): AuditSenten
       })
       return { what: t('audit.actions.user.updated'), detail: parts.join(' · ') }
     }
+    case 'user.impersonated':
+      return { what: t('audit.actions.user.impersonated'), detail: `${String(d.reason)} · ${t('impersonation.minutes', { count: Number(d.minutes) })}` }
     case 'user.invited':
     case 'user.password.reset':
     case 'user.disabled':

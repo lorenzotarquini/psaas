@@ -64,6 +64,9 @@ public static class NotificationKinds
     public const string TrialEnding = "trial.ending";
     public const string UserLimit = "users.limit";
     public const string DraftStalled = "draft.stalled";
+
+    /// <summary>Users of any tenant whose invitation is open for days (UC29-R2); TenantId is empty.</summary>
+    public const string InvitesPending = "users.invites";
 }
 
 public static class NotificationSeverities

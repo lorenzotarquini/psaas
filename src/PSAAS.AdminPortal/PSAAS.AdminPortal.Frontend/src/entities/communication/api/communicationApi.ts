@@ -38,7 +38,7 @@ export interface CommunicationRequest {
 }
 
 export interface Notification {
-  kind: 'module.failed' | 'invoice.overdue' | 'trial.ending' | 'users.limit' | 'draft.stalled'
+  kind: 'module.failed' | 'invoice.overdue' | 'trial.ending' | 'users.limit' | 'users.invites' | 'draft.stalled'
   severity: 'critical' | 'warning' | 'info'
   tenantId: string
   tenantName: string

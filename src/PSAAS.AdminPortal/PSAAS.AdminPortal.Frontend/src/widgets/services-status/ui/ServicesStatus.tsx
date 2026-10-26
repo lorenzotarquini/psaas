@@ -9,7 +9,7 @@ import { StatusBadge, type StatusTone } from '@/shared/ui/status-badge'
 const tones: Record<ServiceStatus, StatusTone> = { Up: 'success', Degraded: 'warning', Down: 'error', NotConfigured: 'neutral' }
 
 // From the platform itself out to the integrations; unknown keys go last.
-const order = ['database', 'keycloak', 'keycloak-admin', 'city-list', 'module-hooks', 'invoice-transmission']
+const order = ['database', 'keycloak', 'keycloak-admin', 'city-list', 'module-hooks', 'email', 'invoice-transmission']
 const rank = (key: string) => (order.includes(key) ? order.indexOf(key) : order.length)
 
 // UC26 (mock 1b "Servizi collegati"): one row per connected system with status and response time.

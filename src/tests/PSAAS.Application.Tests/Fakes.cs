@@ -1,6 +1,7 @@
 using PSAAS.Application.Abstractions.Audit;
 using PSAAS.Application.Abstractions.Billing;
 using PSAAS.Application.Abstractions.Catalog;
+using PSAAS.Application.Abstractions.Communications;
 using PSAAS.Application.Abstractions.Geography;
 using PSAAS.Application.Abstractions.Profiles;
 using PSAAS.Application.Abstractions.Tenants;
@@ -412,6 +413,23 @@ public sealed class FakeInvoiceTransmitter : IInvoiceTransmitter
     public Task TransmitAsync(Invoice invoice, CancellationToken cancellationToken = default)
     {
         Transmitted.Add(invoice.Number);
+        return Task.CompletedTask;
+    }
+}
+
+/// <summary>An outbox: what would have been emailed; addresses in Rejecting are refused.</summary>
+public sealed class FakeEmailSender : IEmailSender
+{
+    public bool IsConfigured { get; set; } = true;
+
+    public List<EmailMessage> Sent { get; } = [];
+
+    public HashSet<string> Rejecting { get; } = [];
+
+    public Task SendAsync(EmailMessage message, CancellationToken cancellationToken = default)
+    {
+        if (Rejecting.Contains(message.To)) throw new EmailDeliveryException($"550 mailbox {message.To} unavailable");
+        Sent.Add(message);
         return Task.CompletedTask;
     }
 }

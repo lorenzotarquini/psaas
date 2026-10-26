@@ -104,3 +104,11 @@ public sealed record ServicesHealthView(string Status, List<ServiceHealthView> S
 {
     public ServiceHealthView Service(string key) => Services.Single(s => s.Key == key);
 }
+
+public sealed record CommunicationPreviewView(int Count, List<string> Sample);
+
+public sealed record RecipientView(Guid TenantId, string TenantName, string Email, string? EmailStatus, string? Error);
+
+public sealed record CommunicationView(Guid Id, string Subject, int RecipientCount, int EmailsSent, int EmailsFailed, List<RecipientView> Recipients);
+
+public sealed record NotificationView(string Kind, string Severity, Guid TenantId, string TenantName, string? Subject, int? Value, int? Limit);

@@ -30,6 +30,8 @@ Errori di validazione: `400` `ValidationProblem` con un codice per campo in `err
 | UC23 | `POST /api/billing/run` (e fatture emesse da UC17) | esiste |
 | UC25 | `POST /api/usage` (ruolo `UsageReporter`) · `GET /api/tenants/{id}/usage?days=` | esiste |
 | UC26 | `GET /api/system/services` | esiste |
+| UC27 | `GET /api/communications?tenantId=&page=&pageSize=` · `GET /api/communications/{id}` · `POST /api/communications/preview` · `POST /api/communications` | esiste |
+| UC28 | `GET /api/notifications` | esiste |
 | UC24 | `GET /api/invoices?tenantId=&status=&search=&page=&pageSize=` · `GET /api/invoices/summary` · `GET /api/invoices/{id}` · `POST /api/invoices/{id}/payments` · `POST /api/invoices/{id}/cancel` | esiste |
 
 ## Contratti esistenti (sintesi)
@@ -113,6 +115,17 @@ Risposta: `{ items: [utente], totalCount, page, pageSize }` con utente = `{ id, 
 - `GET /api/system/services` → `{ status, checkedAt, services: [{ key, status: Up|Degraded|Down|NotConfigured, latencyMs, detail }] }`. Chiavi: `database`, `keycloak` (documento di discovery usato per validare i token), `keycloak-admin` (conteggio su un profilo inesistente), `city-list`, `module-hooks` (`detail` = moduli in errore), `invoice-transmission` (oggi `NotConfigured`).
 - Ogni verifica entro 5 s; un errore o un timeout rendono quel servizio `Down` con il motivo, mai la risposta intera. `status` è il peggiore tra i servizi configurati.
 
+### UC27 – Comunicazioni
+- Segmento `{ statuses?, planIds?, moduleId?, tenantIds? }`: filtri in AND, valori in OR; `tenantIds` (selezione dall'elenco) ignora gli altri filtri. I clienti cessati sono sempre esclusi.
+- `POST /api/communications/preview` (body = segmento) → `{ count, sample }` (primi 5 per nome) · `400` (`segment.statuses` `InvalidValue`; `segment` `InvalidValue` se nessuno, `LimitExceeded` oltre 1000).
+- `POST /api/communications` `{ subject, body, channels: [InApp|Email], segment, visibleUntil? }` → `201` + comunicazione con `recipients: [{ tenantId, tenantName, email, emailStatus: Sent|Failed|Skipped|null, error }]` · `400` (`subject` `Required`/`MaxLengthExceeded` oltre 150, `body` oltre 5000, `channels` `Required`/`InvalidValue`, `visibleUntil` `InvalidValue` se passata o oltre 90 giorni, errori del segmento). L'email va alla PEC; senza SMTP l'esito è `Skipped`, un rifiuto è `Failed` con il motivo e non ferma gli altri.
+- `GET /api/communications` dalla più recente, senza destinatari; `tenantId` = quelle che hanno raggiunto quel cliente. `GET /api/communications/{id}` con i destinatari.
+- Configurazione email: `Email:From` e `Email:Smtp:Host|Port|User|Password|EnableSsl`, oppure `Email:PickupDirectory` (file .eml, sviluppo). Con l'email configurata partono anche i solleciti delle fatture (UC24).
+- Audit: `communication.sent` (`{ channels, email }`), una riga per cliente.
+
+### UC28 – Da gestire
+- `GET /api/notifications` → `[{ kind, severity: critical|warning|info, tenantId, tenantName, subject, objectId, at, value, limit }]`, dal più grave e più vecchio. `kind`: `module.failed` (subject = modulo), `invoice.overdue` (subject = numero, objectId = fattura), `trial.ending` (value = giorni), `users.limit` (value/limit), `draft.stalled` (value = giorni). Calcolate a ogni richiesta, senza stato "letto".
+
 ### UC19 – Gestire un utente
 - `GET /api/users/{id}` → utente (come in UC7) · `404`.
 - `PUT /api/users/{id}` body `{ firstName, lastName, birthDate: "YYYY-MM-DD", profileIds, mfaRequired }` → `200` + utente · `400` con i codici di UC6 (`firstName`, `lastName`, `birthDate`, `profileIds[i]` = `InvalidValue` o `LimitExceeded` per un cliente nuovo al limite) · `404`. L'email non si modifica. `mfaRequired: true` aggiunge l'azione `CONFIGURE_TOTP`.
@@ -176,5 +189,6 @@ Audit log, dal più recente: `{ items: [{ id, occurredAt, actorId, actorName, ac
   - Keycloak come archivio utenti: porta `IUserDirectory` sostituita da un archivio in memoria.
   - Lista comuni: porta `IItalianCityProvider` sostituita da una lista fissa.
   - Hook di provisioning dei moduli: porta `IModuleProvisioner` sostituita da hook simulati (`FakeModuleHooks.Failing`).
+  - Email: porta `IEmailSender` sostituita da una casella simulata (`FakeMailbox`, con indirizzi che rifiutano).
   - Tempo: `TimeProvider` sostituito da un orologio che gli scenari spostano in avanti (`DaysPassAsync`) per scadenze e rinnovi; i token restano validati con l'ora reale.
 - Quello che i simulatori nascondono (chiamate HTTP verso Keycloak e verso la lista comuni, ordinamento e limite dei comuni) è verificato dai test unitari di Infrastructure.

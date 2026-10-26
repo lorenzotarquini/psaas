@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Time.Testing;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using PSAAS.Application.Abstractions.Catalog;
+using PSAAS.Application.Abstractions.Communications;
 using PSAAS.Application.Abstractions.Geography;
 using PSAAS.Application.Abstractions.Users;
 
@@ -21,6 +22,8 @@ public sealed class AdminPortalHost(string connectionString) : WebApplicationFac
     public FakeItalianCityList CityList { get; } = new();
 
     public FakeModuleHooks ModuleHooks { get; } = new();
+
+    public FakeMailbox Mailbox { get; } = new();
 
     /// <summary>
     /// The clock of the backend: scenarios move it forward (due dates, renewals). It ticks by itself so events keep their order.
@@ -47,6 +50,7 @@ public sealed class AdminPortalHost(string connectionString) : WebApplicationFac
             services.AddSingleton<IUserDirectory>(KeycloakUsers);
             services.AddSingleton<IItalianCityProvider>(CityList);
             services.AddSingleton<IModuleProvisioner>(ModuleHooks);
+            services.AddSingleton<IEmailSender>(Mailbox);
         });
     }
 }

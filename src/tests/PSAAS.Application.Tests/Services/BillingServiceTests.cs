@@ -26,7 +26,7 @@ public sealed class BillingServiceTests
     private BillingService Service(int suspendAfterDays = 30) => new(
         _invoices, new FakeInvoiceTransmitter(), _subscriptions, _tenants,
         new TenantLifecycleService(_tenants, _writer, _audit, _clock, _subscriptions),
-        _audit, new BillingOptions(suspendAfterDays), _clock);
+        new FakeEmailSender(), _audit, new BillingOptions(suspendAfterDays), _clock);
 
     private SubscriptionReadModel Subscription(decimal price, string period = BillingPeriods.Monthly, bool autoRenew = true, DateTimeOffset? renewsAt = null) =>
         new(TenantId, "Alfa Srl", Guid.NewGuid(), "Pro", SubscriptionStatuses.Active, price, period, null, null,

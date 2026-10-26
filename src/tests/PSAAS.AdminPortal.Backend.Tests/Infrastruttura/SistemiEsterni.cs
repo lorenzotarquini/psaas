@@ -1,4 +1,5 @@
 using PSAAS.Application.Abstractions.Catalog;
+using PSAAS.Application.Abstractions.Communications;
 using PSAAS.Application.Abstractions.Geography;
 using PSAAS.Application.Contracts.Catalog;
 using PSAAS.Application.Abstractions.Users;
@@ -165,4 +166,21 @@ public sealed class FakeModuleHooks : IModuleProvisioner
 
     public Task<ProvisioningOutcome> ProvisionAsync(ModuleReadModel module, Guid tenantId, CancellationToken cancellationToken = default) =>
         Task.FromResult(Failing.Contains(module.Id) ? new ProvisioningOutcome(false, "hook provision → timeout") : new ProvisioningOutcome(true, null));
+}
+
+/// <summary>Plays the mail server: what was sent, and mailboxes that refuse.</summary>
+public sealed class FakeMailbox : IEmailSender
+{
+    public bool IsConfigured { get; set; } = true;
+
+    public List<EmailMessage> Sent { get; } = [];
+
+    public HashSet<string> Rejecting { get; } = [];
+
+    public Task SendAsync(EmailMessage message, CancellationToken cancellationToken = default)
+    {
+        if (Rejecting.Contains(message.To)) throw new EmailDeliveryException($"550 mailbox {message.To} unavailable");
+        Sent.Add(message);
+        return Task.CompletedTask;
+    }
 }

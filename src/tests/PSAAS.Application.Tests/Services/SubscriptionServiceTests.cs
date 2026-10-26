@@ -30,7 +30,7 @@ public sealed class SubscriptionServiceTests
 
     private SubscriptionService Service => new(
         _tenants, _catalog, _subscriptions, _provisioner, _users, Lifecycle,
-        new BillingService(_invoices, new FakeInvoiceTransmitter(), _subscriptions, _tenants, Lifecycle, _audit, new BillingOptions(), TimeProvider.System),
+        new BillingService(_invoices, new FakeInvoiceTransmitter(), _subscriptions, _tenants, Lifecycle, new FakeEmailSender(), _audit, new BillingOptions(), TimeProvider.System),
         _audit, TimeProvider.System);
 
     private PlanReadModel GivenPlan(int? maxUsers = null, int trialDays = 0, params string[] modules)

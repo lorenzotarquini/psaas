@@ -29,6 +29,7 @@ public static class AuditActions
     public const string InvoicePaid = "invoice.paid";
     public const string InvoiceReminderSent = "invoice.reminder.sent";
     public const string InvoiceCancelled = "invoice.cancelled";
+    public const string CommunicationSent = "communication.sent";
 }
 
 public static class AuditTargets
@@ -38,6 +39,7 @@ public static class AuditTargets
     public const string Module = "module";
     public const string Plan = "plan";
     public const string Invoice = "invoice";
+    public const string Communication = "communication";
 }
 
 /// <summary>What happened, without the actor (added by the audit log from the current request).</summary>

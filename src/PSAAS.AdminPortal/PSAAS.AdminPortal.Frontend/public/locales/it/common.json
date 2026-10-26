@@ -95,7 +95,6 @@
       "selected_other": "{{count}} selezionati",
       "changePlan": "Cambia piano",
       "communicate": "Invia comunicazione",
-      "communicationSoon": "Disponibile con le comunicazioni",
       "export": "Esporta",
       "escHint": "Esc per deselezionare",
       "changePlanTitle_one": "Cambia il piano di {{count}} cliente",
@@ -400,6 +399,9 @@
         "paid": "ha registrato il pagamento della fattura",
         "reminder": "ha sollecitato il pagamento della fattura",
         "cancelled": "ha annullato la fattura"
+      },
+      "communication": {
+        "sent": "ha inviato la comunicazione"
       }
     },
     "fields": {
@@ -727,12 +729,66 @@
       "keycloak-admin": "API utenti Keycloak",
       "city-list": "Elenco dei comuni",
       "module-hooks": "Hook dei moduli",
-      "invoice-transmission": "Trasmissione fatture"
+      "invoice-transmission": "Trasmissione fatture",
+      "email": "Email (SMTP)"
     },
     "failedModules_one": "{{count}} modulo in errore di provisioning",
     "failedModules_other": "{{count}} moduli in errore di provisioning",
     "notConfigured": {
-      "invoice-transmission": "SDI non configurato: le fatture restano nel portale"
+      "invoice-transmission": "SDI non configurato: le fatture restano nel portale",
+      "email": "SMTP non configurato: comunicazioni e solleciti non partono per email"
+    }
+  },
+  "communications": {
+    "subtitle": "Annunci nella piattaforma ed email alla PEC dei clienti",
+    "new": "Nuova comunicazione",
+    "subject": "Oggetto",
+    "body": "Testo",
+    "channels": "Canali",
+    "channel": {
+      "InApp": "Annuncio nella piattaforma",
+      "Email": "Email"
+    },
+    "recipients": "Destinatari",
+    "recipientsShort": "Clienti",
+    "selection_one": "Il cliente selezionato",
+    "selection_other": "I {{count}} clienti selezionati",
+    "byFilters": "Per filtri",
+    "filterStatus": "Stato",
+    "filterPlan": "Piano",
+    "filterModule": "Modulo attivo",
+    "anyModule": "Qualsiasi modulo",
+    "reach_one": "Raggiunge {{count}} cliente: {{sample}}",
+    "reach_other": "Raggiunge {{count}} clienti: {{sample}}",
+    "reachNone": "Nessun cliente corrisponde a questi filtri.",
+    "confirm_one": "Inviare la comunicazione a {{count}} cliente?",
+    "confirm_other": "Inviare la comunicazione a {{count}} clienti?",
+    "send": "Invia",
+    "empty": "Nessuna comunicazione inviata.",
+    "sentAt": "Inviata",
+    "failed_one": "{{count}} email non recapitata",
+    "failed_other": "{{count}} email non recapitate",
+    "detail": "Dettaglio comunicazione",
+    "close": "Chiudi",
+    "tenant": "Cliente",
+    "visibleUntil": "visibile fino al {{date}}",
+    "emailStatus": {
+      "Sent": "Inviata",
+      "Failed": "Errore",
+      "Skipped": "Non inviata"
+    }
+  },
+  "notifications": {
+    "title": "Da gestire",
+    "label_one": "{{count}} cosa da gestire",
+    "label_other": "{{count}} cose da gestire",
+    "empty": "Niente da gestire.",
+    "kinds": {
+      "module.failed": "Provisioning di {{subject}} fallito per {{tenant}}",
+      "invoice.overdue": "Fattura {{subject}} di {{tenant}} scaduta",
+      "trial.ending": "La prova di {{tenant}} finisce tra {{count}} giorni",
+      "users.limit": "{{tenant}} ha {{count}} utenti su {{limit}}",
+      "draft.stalled": "Onboarding di {{tenant}} fermo da {{count}} giorni"
     }
   }
 }

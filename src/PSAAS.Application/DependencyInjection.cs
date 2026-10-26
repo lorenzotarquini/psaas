@@ -24,6 +24,8 @@ public static class DependencyInjection
         services.AddScoped<TenantListService>();
         services.AddScoped<Services.Billing.BillingService>();
         services.AddScoped<Services.Usage.UsageService>();
+        services.AddScoped<Services.Communications.CommunicationService>();
+        services.AddScoped<Services.Communications.NotificationService>();
         services.AddScoped<Services.Health.ServicesHealthService>();
         services.AddScoped<Abstractions.Health.IServiceProbe, Services.Health.UserDirectoryProbe>();
         services.AddScoped<Abstractions.Health.IServiceProbe, Services.Health.CityListProbe>();

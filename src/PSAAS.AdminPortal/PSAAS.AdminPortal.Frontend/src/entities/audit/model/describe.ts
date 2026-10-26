@@ -123,6 +123,11 @@ export function describeAuditEvent(event: AuditEvent, t: TFunction): AuditSenten
       return { what: t('audit.actions.invoice.reminder'), detail: `${t('audit.details.reminder', { count: Number(d.reminder) })} · ${money(d.total)}` }
     case 'invoice.cancelled':
       return { what: t('audit.actions.invoice.cancelled'), detail: `${t('audit.details.creditNoteOf', { number: String(d.creditNote) })} · ${String(d.reason)}` }
+    case 'communication.sent':
+      return {
+        what: t('audit.actions.communication.sent'),
+        detail: list(d.channels).map((c) => t(`communications.channel.${String(c)}`)).join(', ') + (d.email ? ` · ${t(`communications.emailStatus.${String(d.email)}`)}` : ''),
+      }
     case 'subscription.expired':
       return { what: t('audit.actions.subscription.expired'), detail: String(d.plan) }
     case 'module.provisioned':

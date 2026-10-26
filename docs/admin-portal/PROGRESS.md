@@ -16,13 +16,13 @@ Piano: `C:\Users\ltarq\.claude\plans\voglio-che-prepari-un-abundant-quail.md` ·
 | 7 Elenco clienti avanzato | ✅ | vedi log |
 | 8 Fatturazione interna | ✅ | vedi log |
 | 9 Uso e stato dei servizi | ✅ | vedi log |
-| 10 Comunicazioni e notifiche | | |
+| 10 Comunicazioni e notifiche | ✅ | vedi log |
 | 11 Panoramica, ricerca, impersonificazione | | |
 | 12 Consolidamento | | |
 
 ## Test rossi attesi
 
-Nessuno: dopo la fase 9 tutta la suite è verde (accettazione 229/229, unitari Application 132 e Infrastructure 55, Vitest 61).
+Nessuno: dopo la fase 10 tutta la suite è verde (accettazione 247/247, unitari Application 140 e Infrastructure 55, Vitest 63).
 
 ## Ambiente di sviluppo autonomo (fuori dal repo, nello scratchpad della sessione)
 
@@ -78,6 +78,12 @@ Per verificare l'interfaccia senza il login reale: provider OIDC locale (`devidp
 45. **Utenti attivi** dall'ultimo accesso Keycloak (eventi LOGIN): leggono gli utenti del realm e filtrano per profilo (shortcut annotato).
 46. **Stato dei servizi in Impostazioni** finché la Panoramica (fase 11) non lo ospita; ricontrollato ogni minuto mentre è aperto.
 47. **Hook dei moduli "Degradato"** quando un provisioning è fallito, invece di chiamare gli URL dei moduli (eviterebbe effetti collaterali sugli hook).
+48. **Email alla PEC del cliente**: non esiste ancora un referente email dei clienti; la PEC è l'unico recapito certo.
+49. **Annuncio nella piattaforma registrato ma non ancora letto da nessuno**: l'endpoint per i moduli/core che lo mostrano agli utenti arriverà con il core (porta pronta nei dati: `visibleUntil`).
+50. **Invio sincrono** fino a 1000 clienti; oltre serve una coda (shortcut implicito nel limite).
+51. **Campanella senza stato "letto"**: le voci spariscono quando il problema è risolto; il numero in Panoramica (mock 1b) è lo stesso conteggio.
+52. **SMTP con `System.Net.Mail`** e cartella di pickup per lo sviluppo (nessuna nuova dipendenza); lo stato dei servizi mostra solo se è configurato, senza collegarsi.
+53. **Conferma dell'invio con `window.confirm`**: un dialog del design system arriverà con il consolidamento (fase 12).
 
 ## Da far vedere al designer
 

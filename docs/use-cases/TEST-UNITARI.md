@@ -58,6 +58,9 @@ Ogni scenario di accettazione (`UCn-Sm`) scende negli strati interni: qui si ved
 | UC21-R3 | Provincia salvata con l'indirizzo | `TenantCreateServiceTests.UC3_S1_*`, `TenantRegistryUpdateServiceTests.UC4_S1_*` |
 | UC22 | Nome unico per amministratore senza maiuscole, area valida, lunghezza e numero massimo | `TenantListServiceTests.UC22_*` |
 | UC23-R2, R4, R6 | IVA e scadenza, piano gratuito senza fattura, pro-rata arrotondato al centesimo, rinnovi arretrati recuperati una sola volta | `BillingServiceTests.UC23_*` |
+| UC27 | Clienti cessati mai raggiunti, PEC in minuscolo, email non configurata = annuncio senza email, visibilità entro 90 giorni, canali e stati sconosciuti | `CommunicationServiceTests.UC27_*` |
+| UC28-R3 | Prima i critici, poi i più vecchi | `CommunicationServiceTests.UC28_*` |
+| UC24-R3 | Sollecito via email alla PEC; un rifiuto non ferma la fatturazione | `CommunicationServiceTests.UC24_*` |
 | UC25 | Righe non valide (metrica, tipo, data), lotti vuoti o oltre 500, totale come somma o ultimo valore, Keycloak giù | `UsageServiceTests.UC25_*` |
 | UC26 | Probe che falliscono o vanno in timeout = Non raggiungibile; stato complessivo peggiore, senza i non configurati | `UsageServiceTests.UC26_*` |
 | UC24-R4 | Pagamento e annullamento consentiti solo su fatture aperte, motivo obbligatorio, sospensione solo dei clienti attivi, soglia 0 = mai | `BillingServiceTests.UC24_*` |

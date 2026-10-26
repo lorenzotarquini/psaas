@@ -6,6 +6,7 @@ import { Link } from 'react-router'
 import { LanguageSwitcher } from '@/features/switch-language'
 import { ThemeSwitcher } from '@/features/switch-theme'
 import { useCrumbs } from '@/shared/lib/breadcrumb'
+import { NotificationsBell } from './NotificationsBell'
 import { ProfileMenu } from './ProfileMenu'
 
 interface HeaderProps {
@@ -57,6 +58,7 @@ export function Header({ drawerId, search, actions }: HeaderProps) {
         )}
         <LanguageSwitcher />
         <ThemeSwitcher />
+        <NotificationsBell />
         {actions}
         <ProfileMenu />
       </div>

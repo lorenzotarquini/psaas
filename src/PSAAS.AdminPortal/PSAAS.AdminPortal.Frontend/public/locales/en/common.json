@@ -95,7 +95,6 @@
       "selected_other": "{{count}} selected",
       "changePlan": "Change plan",
       "communicate": "Send communication",
-      "communicationSoon": "Available with communications",
       "export": "Export",
       "escHint": "Esc to deselect",
       "changePlanTitle_one": "Change the plan of {{count}} tenant",
@@ -400,6 +399,9 @@
         "paid": "registered the payment of the invoice",
         "reminder": "sent a payment reminder for the invoice",
         "cancelled": "cancelled the invoice"
+      },
+      "communication": {
+        "sent": "sent the communication"
       }
     },
     "fields": {
@@ -727,12 +729,66 @@
       "keycloak-admin": "Keycloak users API",
       "city-list": "City list",
       "module-hooks": "Module hooks",
-      "invoice-transmission": "Invoice transmission"
+      "invoice-transmission": "Invoice transmission",
+      "email": "Email (SMTP)"
     },
     "failedModules_one": "{{count}} module with failed provisioning",
     "failedModules_other": "{{count}} modules with failed provisioning",
     "notConfigured": {
-      "invoice-transmission": "SDI not configured: invoices stay in the portal"
+      "invoice-transmission": "SDI not configured: invoices stay in the portal",
+      "email": "SMTP not configured: communications and reminders are not emailed"
+    }
+  },
+  "communications": {
+    "subtitle": "Platform announcements and emails to the tenants' PEC",
+    "new": "New communication",
+    "subject": "Subject",
+    "body": "Text",
+    "channels": "Channels",
+    "channel": {
+      "InApp": "Platform announcement",
+      "Email": "Email"
+    },
+    "recipients": "Recipients",
+    "recipientsShort": "Tenants",
+    "selection_one": "The selected tenant",
+    "selection_other": "The {{count}} selected tenants",
+    "byFilters": "By filters",
+    "filterStatus": "Status",
+    "filterPlan": "Plan",
+    "filterModule": "Active module",
+    "anyModule": "Any module",
+    "reach_one": "Reaches {{count}} tenant: {{sample}}",
+    "reach_other": "Reaches {{count}} tenants: {{sample}}",
+    "reachNone": "No tenant matches these filters.",
+    "confirm_one": "Send the communication to {{count}} tenant?",
+    "confirm_other": "Send the communication to {{count}} tenants?",
+    "send": "Send",
+    "empty": "No communications sent.",
+    "sentAt": "Sent",
+    "failed_one": "{{count}} email not delivered",
+    "failed_other": "{{count}} emails not delivered",
+    "detail": "Communication detail",
+    "close": "Close",
+    "tenant": "Tenant",
+    "visibleUntil": "visible until {{date}}",
+    "emailStatus": {
+      "Sent": "Sent",
+      "Failed": "Error",
+      "Skipped": "Not sent"
+    }
+  },
+  "notifications": {
+    "title": "To handle",
+    "label_one": "{{count}} thing to handle",
+    "label_other": "{{count}} things to handle",
+    "empty": "Nothing to handle.",
+    "kinds": {
+      "module.failed": "Provisioning of {{subject}} failed for {{tenant}}",
+      "invoice.overdue": "Invoice {{subject}} of {{tenant}} overdue",
+      "trial.ending": "The trial of {{tenant}} ends in {{count}} days",
+      "users.limit": "{{tenant}} has {{count}} users of {{limit}}",
+      "draft.stalled": "Onboarding of {{tenant}} stalled for {{count}} days"
     }
   }
 }

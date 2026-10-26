@@ -2,7 +2,7 @@ import { faBullhorn, faDownload, faLayerGroup, faPlus } from '@fortawesome/free-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, useSearchParams } from 'react-router'
+import { Link, useNavigate, useSearchParams } from 'react-router'
 import { tenantsExportPath, useTenants, type TenantsQuery } from '@/entities/tenant'
 import { apiDownload } from '@/shared/api'
 import { useDebouncedSearch } from '@/shared/lib/debounce'
@@ -46,6 +46,7 @@ export function TenantsListPage() {
   const query = readTenantsQuery(searchParams)
   const { data, error, isPending, isPlaceholderData } = useTenants(query)
   const returnState: ListReturnState = { listSearch: searchParams.toString() }
+  const navigateTo = useNavigate()
   const [columns, setColumns] = useState(readColumns)
   const [selected, setSelected] = useState<string[]>([])
   const [changingPlan, setChangingPlan] = useState<{ id: string; companyName: string }[] | null>(null)
@@ -122,7 +123,11 @@ export function TenantsListPage() {
               <FontAwesomeIcon icon={faLayerGroup} />
               {t('tenants.bulk.changePlan')}
             </button>
-            <button type="button" className="flex items-center gap-1.5 opacity-50" disabled title={t('tenants.bulk.communicationSoon')}>
+            <button
+              type="button"
+              className="flex items-center gap-1.5 hover:text-white"
+              onClick={() => navigateTo(`${routes.communications}?${new URLSearchParams([['new', '1'], ...selected.map((id) => ['tenantId', id])])}`)}
+            >
               <FontAwesomeIcon icon={faBullhorn} />
               {t('tenants.bulk.communicate')}
             </button>

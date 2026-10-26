@@ -369,6 +369,88 @@ namespace PSAAS.Infrastructure.Data.Migrations
                     b.ToTable("TenantModules", (string)null);
                 });
 
+            modelBuilder.Entity("PSAAS.Infrastructure.Communications.CommunicationDbModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(5000)
+                        .HasColumnType("character varying(5000)");
+
+                    b.PrimitiveCollection<string[]>("Channels")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<int>("EmailsFailed")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("EmailsSent")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RecipientCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Segment")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTimeOffset>("SentAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("SentBy")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<DateOnly?>("VisibleUntil")
+                        .HasColumnType("date");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SentAt");
+
+                    b.ToTable("Communications", (string)null);
+                });
+
+            modelBuilder.Entity("PSAAS.Infrastructure.Communications.CommunicationRecipientDbModel", b =>
+                {
+                    b.Property<Guid>("CommunicationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("TenantId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("EmailStatus")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("Error")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("TenantName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("CommunicationId", "TenantId");
+
+                    b.HasIndex("TenantId");
+
+                    b.ToTable("CommunicationRecipients", (string)null);
+                });
+
             modelBuilder.Entity("PSAAS.Infrastructure.Data.DbModels.ProductiveUnitDbModel", b =>
                 {
                     b.Property<Guid>("Id")
@@ -609,6 +691,15 @@ namespace PSAAS.Infrastructure.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("PSAAS.Infrastructure.Communications.CommunicationRecipientDbModel", b =>
+                {
+                    b.HasOne("PSAAS.Infrastructure.Communications.CommunicationDbModel", null)
+                        .WithMany("Recipients")
+                        .HasForeignKey("CommunicationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("PSAAS.Infrastructure.Data.DbModels.ProductiveUnitDbModel", b =>
                 {
                     b.HasOne("PSAAS.Infrastructure.Data.DbModels.TenantDbModel", "Tenant")
@@ -691,6 +782,11 @@ namespace PSAAS.Infrastructure.Data.Migrations
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("PSAAS.Infrastructure.Communications.CommunicationDbModel", b =>
+                {
+                    b.Navigation("Recipients");
                 });
 
             modelBuilder.Entity("PSAAS.Infrastructure.Data.DbModels.ProductiveUnitDbModel", b =>

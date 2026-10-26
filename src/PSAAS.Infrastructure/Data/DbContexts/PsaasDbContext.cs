@@ -32,6 +32,8 @@ public sealed class PsaasDbContext(DbContextOptions<PsaasDbContext> options) : D
 
     public DbSet<Usage.UsageDailyDbModel> UsageDaily => Set<Usage.UsageDailyDbModel>();
 
+    public DbSet<Communications.CommunicationDbModel> Communications => Set<Communications.CommunicationDbModel>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<TenantDbModel>(entityBuilder =>
@@ -232,6 +234,27 @@ public sealed class PsaasDbContext(DbContextOptions<PsaasDbContext> options) : D
             entityBuilder.Property(u => u.Kind).IsRequired().HasMaxLength(10);
             entityBuilder.Property(u => u.Value).HasPrecision(18, 4);
             entityBuilder.HasOne<TenantDbModel>().WithMany().HasForeignKey(u => u.TenantId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // UC27: communications and the outcome per tenant.
+        modelBuilder.Entity<Communications.CommunicationDbModel>(entityBuilder =>
+        {
+            entityBuilder.ToTable("Communications");
+            entityBuilder.HasKey(c => c.Id);
+            entityBuilder.Property(c => c.Subject).IsRequired().HasMaxLength(150);
+            entityBuilder.Property(c => c.Body).IsRequired().HasMaxLength(5000);
+            entityBuilder.Property(c => c.Segment).HasColumnType("jsonb");
+            entityBuilder.Property(c => c.SentBy).HasMaxLength(200);
+            entityBuilder.HasIndex(c => c.SentAt);
+            entityBuilder.HasMany(c => c.Recipients).WithOne().HasForeignKey(r => r.CommunicationId).OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<Communications.CommunicationRecipientDbModel>(entityBuilder =>
+        {
+            entityBuilder.ToTable("CommunicationRecipients");
+            entityBuilder.HasKey(r => new { r.CommunicationId, r.TenantId });
+            entityBuilder.HasIndex(r => r.TenantId);
+            entityBuilder.Property(r => r.EmailStatus).HasMaxLength(10);
+            entityBuilder.Property(r => r.Error).HasMaxLength(500);
         });
 
         base.OnModelCreating(modelBuilder);

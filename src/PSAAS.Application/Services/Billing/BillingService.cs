@@ -3,6 +3,7 @@ using NLog;
 using PSAAS.Application.Abstractions.Audit;
 using PSAAS.Application.Abstractions.Billing;
 using PSAAS.Application.Abstractions.Catalog;
+using PSAAS.Application.Abstractions.Communications;
 using PSAAS.Application.Abstractions.Tenants;
 using PSAAS.Application.Contracts.Audit;
 using PSAAS.Application.Contracts.Billing;
@@ -26,6 +27,7 @@ public sealed class BillingService(
     ISubscriptionRepository subscriptions,
     ITenantReadRepository tenants,
     TenantLifecycleService lifecycle,
+    IEmailSender email,
     IAuditLog audit,
     BillingOptions options,
     TimeProvider clock)
@@ -88,6 +90,7 @@ public sealed class BillingService(
                 overdue = overdue with { RemindersSent = overdue.RemindersSent + 1, LastReminderAt = now };
                 reminders++;
                 await RecordAsync(AuditActions.InvoiceReminderSent, overdue, new { number = overdue.Number, reminder = overdue.RemindersSent, total = overdue.Total }, cancellationToken);
+                await EmailReminderAsync(overdue, cancellationToken);
             }
 
             if (overdue != invoice) await invoices.UpdateAsync(overdue, cancellationToken);
@@ -238,6 +241,24 @@ public sealed class BillingService(
         await RecordAsync(AuditActions.InvoiceIssued, invoice, new { number = invoice.Number, kind, total = invoice.Total }, cancellationToken);
         Logger.Info("Issued {Kind} {Number} of {Total} to tenant {TenantId}", kind, invoice.Number, invoice.Total, tenantId);
         return invoice;
+    }
+
+    // UC27-R4 / UC24-R3: the reminder goes to the PEC of the tenant; a refused email is logged and retried with the next reminder.
+    private async Task EmailReminderAsync(Invoice invoice, CancellationToken cancellationToken)
+    {
+        if (!email.IsConfigured) return;
+        var body =
+            $"Gentile {invoice.TenantName},\n\nrisulta non ancora saldata la fattura {invoice.Number} del {invoice.IssuedAt.ToString("dd'/'MM'/'yyyy", CultureInfo.InvariantCulture)}, " +
+            $"scaduta il {invoice.DueAt.ToString("dd'/'MM'/'yyyy", CultureInfo.InvariantCulture)}, di {invoice.Total.ToString("N2", CultureInfo.GetCultureInfo("it-IT"))} €.\n" +
+            "Se ha già provveduto al pagamento, non tenga conto di questo messaggio.";
+        try
+        {
+            await email.SendAsync(new EmailMessage(invoice.TenantCertifiedEmail.ToLowerInvariant(), $"Sollecito di pagamento fattura {invoice.Number}", body), cancellationToken);
+        }
+        catch (EmailDeliveryException exception)
+        {
+            Logger.Warn(exception, "Reminder email for invoice {Number} refused", invoice.Number);
+        }
     }
 
     private Task RecordAsync(string action, Invoice invoice, object details, CancellationToken cancellationToken) =>

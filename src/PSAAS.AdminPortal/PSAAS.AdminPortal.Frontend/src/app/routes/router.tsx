@@ -1,5 +1,6 @@
 import { createBrowserRouter } from 'react-router'
 import { AuditPage } from '@/pages/audit'
+import { CommunicationsPage } from '@/pages/communications'
 import { BillingPage } from '@/pages/billing'
 import { HomePage } from '@/pages/home'
 import { ModulesPage } from '@/pages/modules'
@@ -34,6 +35,7 @@ export const createAppRouter = () =>
         { path: routes.plans, Component: PlansPage },
         { path: routes.subscriptions, Component: SubscriptionsPage },
         { path: routes.billing, Component: BillingPage },
+        { path: routes.communications, Component: CommunicationsPage },
         { path: routes.audit, Component: AuditPage },
         { path: routes.settings, Component: SettingsPage },
         { path: '*', Component: NotFoundPage },

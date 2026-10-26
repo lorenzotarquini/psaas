@@ -55,6 +55,8 @@ L'**Admin Portal** è il pannello di controllo del gestore della piattaforma: se
 | [UC24](UC24-incassi-solleciti.md) | Seguire incassi, solleciti e morosità (EXP-08) | in ambito |
 | [UC25](UC25-uso-cliente.md) | Misurare l'uso di un cliente (EXP-09) | in ambito |
 | [UC26](UC26-stato-servizi.md) | Controllare lo stato dei servizi collegati (EXP-09) | in ambito |
+| [UC27](UC27-comunicazioni.md) | Inviare una comunicazione ai clienti (EXP-11) | in ambito |
+| [UC28](UC28-notifiche.md) | Vedere cosa c'è da gestire (EXP-11) | in ambito |
 
 Contratto HTTP: [API.md](API.md) (collection Postman: [PSAAS.AdminPortal.postman_collection.json](../postman/PSAAS.AdminPortal.postman_collection.json)). Test unitari derivati dagli scenari: [TEST-UNITARI.md](TEST-UNITARI.md).
 

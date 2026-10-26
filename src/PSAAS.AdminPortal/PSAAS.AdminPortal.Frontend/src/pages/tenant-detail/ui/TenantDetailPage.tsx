@@ -22,9 +22,10 @@ import { RegistryTab } from './RegistryTab'
 import { StatusActions } from './StatusActions'
 import { SubscriptionTab } from './SubscriptionTab'
 import { InvoicesTab } from './InvoicesTab'
+import { UsageTab } from './UsageTab'
 import { UsersTab } from './UsersTab'
 
-const tabs: TenantTab[] = ['overview', 'registry', 'organization', 'subscription', 'users', 'invoices', 'history']
+const tabs: TenantTab[] = ['overview', 'registry', 'organization', 'subscription', 'users', 'usage', 'invoices', 'history']
 
 // UC2 (mock 1d): everything about a tenant, one tab per area; registry (UC4) and organization (UC5) edit in place.
 export function TenantDetailPage() {
@@ -63,6 +64,7 @@ function TenantView({ tenant }: { tenant: TenantDetail }) {
     organization: <OrganizationTab tenant={tenant} />,
     subscription: <SubscriptionTab tenantId={tenant.id} subscription={subscription ?? null} />,
     users: <UsersTab tenantId={tenant.id} />,
+    usage: <UsageTab tenantId={tenant.id} />,
     invoices: <InvoicesTab tenantId={tenant.id} />,
     history: <HistoryCard tenantId={tenant.id} full />,
   }

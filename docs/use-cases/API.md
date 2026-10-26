@@ -28,6 +28,8 @@ Errori di validazione: `400` `ValidationProblem` con un codice per campo in `err
 | UC20 | `POST /api/users/import` | esiste |
 | UC22 | `GET /api/saved-views?area=` · `POST /api/saved-views` · `DELETE /api/saved-views/{id}` | esiste |
 | UC23 | `POST /api/billing/run` (e fatture emesse da UC17) | esiste |
+| UC25 | `POST /api/usage` (ruolo `UsageReporter`) · `GET /api/tenants/{id}/usage?days=` | esiste |
+| UC26 | `GET /api/system/services` | esiste |
 | UC24 | `GET /api/invoices?tenantId=&status=&search=&page=&pageSize=` · `GET /api/invoices/summary` · `GET /api/invoices/{id}` · `POST /api/invoices/{id}/payments` · `POST /api/invoices/{id}/cancel` | esiste |
 
 ## Contratti esistenti (sintesi)
@@ -100,6 +102,16 @@ Risposta: `{ items: [utente], totalCount, page, pageSize }` con utente = `{ id, 
 - `POST /api/invoices/{id}/cancel` `{ reason }` → `200` + fattura annullata con `relatedInvoiceId` della nota di credito · `400` (`reason` `Required`) · `409` se pagata, annullata o è una nota di credito · `404`.
 - Processo giornaliero: fatture oltre la scadenza → `Overdue`, sollecito ogni 7 giorni, sospensione del cliente attivo o in prova scaduto da più di `Billing:SuspendAfterDays` giorni (default 30, 0 = mai) con motivo "Morosità: fattura N".
 - Audit: `invoice.paid` (`{ number, total, reference }`), `invoice.reminder.sent` (`{ number, reminder, total }`), `invoice.cancelled` (`{ number, reason, creditNote }`), `tenant.status.changed` per la sospensione.
+
+### UC25 – Uso del cliente
+- `POST /api/usage` `{ records: [{ tenantId, moduleId, metric, value, kind: counter|gauge, at? }] }` (1–500 righe) → `204` · `400` con `records[i].<campo>` (`tenantId` `Required`/`InvalidValue`; `moduleId` `InvalidValue` se il modulo non è attivo per il cliente; `metric` `InvalidFormat`, minuscole/cifre/`._-` fino a 60; `value` `InvalidValue` se negativo; `kind` `InvalidValue`; `at` `InvalidValue` se futuro o più vecchio di 366 giorni). Nessuna riga viene salvata se una è sbagliata.
+- Autorizzazione: policy `UsageReporter` (ruoli `UsageReporter` o `Administrator`). È l'unico endpoint fuori dalla policy `Administrator`: un service account con il solo `UsageReporter` riceve `403` sul resto dell'API.
+- Aggregazione giornaliera per cliente, modulo e metrica: i contatori si sommano, le misure tengono l'ultimo valore del giorno.
+- `GET /api/tenants/{id}/usage?days=30` (1–365) → `{ days, users, maxUsers, activeUsers, productiveUnits, maxProductiveUnits, metrics: [{ moduleId, moduleName, metric, kind, total, points: [{ day, value }] }] }` · `404`. `users`/`activeUsers` `null` se Keycloak non risponde; attivo = accesso negli ultimi 30 giorni.
+
+### UC26 – Stato dei servizi
+- `GET /api/system/services` → `{ status, checkedAt, services: [{ key, status: Up|Degraded|Down|NotConfigured, latencyMs, detail }] }`. Chiavi: `database`, `keycloak` (documento di discovery usato per validare i token), `keycloak-admin` (conteggio su un profilo inesistente), `city-list`, `module-hooks` (`detail` = moduli in errore), `invoice-transmission` (oggi `NotConfigured`).
+- Ogni verifica entro 5 s; un errore o un timeout rendono quel servizio `Down` con il motivo, mai la risposta intera. `status` è il peggiore tra i servizi configurati.
 
 ### UC19 – Gestire un utente
 - `GET /api/users/{id}` → utente (come in UC7) · `404`.

@@ -547,6 +547,35 @@ namespace PSAAS.Infrastructure.Data.Migrations
                     b.ToTable("SavedViews", (string)null);
                 });
 
+            modelBuilder.Entity("PSAAS.Infrastructure.Usage.UsageDailyDbModel", b =>
+                {
+                    b.Property<string>("TenantId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ModuleId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Metric")
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)");
+
+                    b.Property<DateOnly>("Day")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<decimal>("Value")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)");
+
+                    b.HasKey("TenantId", "ModuleId", "Metric", "Day");
+
+                    b.ToTable("UsageDaily", (string)null);
+                });
+
             modelBuilder.Entity("PSAAS.Infrastructure.Billing.InvoiceDbModel", b =>
                 {
                     b.HasOne("PSAAS.Infrastructure.Data.DbModels.TenantDbModel", null)
@@ -652,6 +681,15 @@ namespace PSAAS.Infrastructure.Data.Migrations
                         });
 
                     b.Navigation("Address")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("PSAAS.Infrastructure.Usage.UsageDailyDbModel", b =>
+                {
+                    b.HasOne("PSAAS.Infrastructure.Data.DbModels.TenantDbModel", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 

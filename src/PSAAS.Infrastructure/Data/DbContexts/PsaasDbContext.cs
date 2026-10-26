@@ -30,6 +30,8 @@ public sealed class PsaasDbContext(DbContextOptions<PsaasDbContext> options) : D
 
     public DbSet<Billing.InvoiceDbModel> Invoices => Set<Billing.InvoiceDbModel>();
 
+    public DbSet<Usage.UsageDailyDbModel> UsageDaily => Set<Usage.UsageDailyDbModel>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<TenantDbModel>(entityBuilder =>
@@ -219,6 +221,17 @@ public sealed class PsaasDbContext(DbContextOptions<PsaasDbContext> options) : D
 
             entityBuilder.Property(invoice => invoice.VatRate).HasPrecision(5, 4);
             entityBuilder.HasOne<TenantDbModel>().WithMany().HasForeignKey(invoice => invoice.TenantId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // UC25: daily usage per tenant, module and metric.
+        modelBuilder.Entity<Usage.UsageDailyDbModel>(entityBuilder =>
+        {
+            entityBuilder.ToTable("UsageDaily");
+            entityBuilder.HasKey(u => new { u.TenantId, u.ModuleId, u.Metric, u.Day });
+            entityBuilder.Property(u => u.Metric).HasMaxLength(60);
+            entityBuilder.Property(u => u.Kind).IsRequired().HasMaxLength(10);
+            entityBuilder.Property(u => u.Value).HasPrecision(18, 4);
+            entityBuilder.HasOne<TenantDbModel>().WithMany().HasForeignKey(u => u.TenantId).OnDelete(DeleteBehavior.Cascade);
         });
 
         base.OnModelCreating(modelBuilder);

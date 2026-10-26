@@ -75,6 +75,8 @@ Stato rilevato dal codice e dalla suite di test di accettazione (aggiornato a og
 | [UC22](../use-cases/UC22-viste-salvate.md) | Viste salvate (mock 1c) | Viste personali per amministratore, nome unico, max 20 | `GET/POST/DELETE /api/saved-views` | "+ Salva vista" accanto alle schede | ✅ |
 | [UC23](../use-cases/UC23-fatturazione.md) | Fatturare i periodi (EXP-08) | Prima fattura alla sottoscrizione, rinnovi, fine prova, pro-rata sul cambio piano, numerazione annuale, IVA 22%, scadenza 30 gg; trasmissione dietro porta (oggi interna, senza SDI) | `POST /api/billing/run`, job `BillingJob` | Pulsante "Esegui fatturazione" | ✅ |
 | [UC24](../use-cases/UC24-incassi-solleciti.md) | Incassi, solleciti e morosità (EXP-08) | Pagamenti con data e riferimento, scadute e solleciti ogni 7 gg, sospensione dopo 30 gg, annullamento con nota di credito | `GET /api/invoices`, `/summary`, `/{id}`, `POST …/payments`, `POST …/cancel` | Pagina Fatturazione con indicatori, filtri e pannello fattura; scheda Fatture del cliente | ✅ |
+| [UC25](../use-cases/UC25-uso-cliente.md) | Uso del cliente (EXP-09) | Metriche inviate dai moduli (contatori e misure per giorno) con ruolo dedicato; utenti, utenti attivi e unità rispetto al piano | `POST /api/usage`, `GET /api/tenants/{id}/usage` | Scheda "Uso" con indicatori e andamento giornaliero a 7/30/90 giorni | ✅ |
+| [UC26](../use-cases/UC26-stato-servizi.md) | Stato dei servizi collegati (EXP-09) | Database, Keycloak, API utenti, elenco comuni, hook dei moduli, trasmissione fatture; timeout 5 s per servizio | `GET /api/system/services` | Riquadro "Servizi collegati" in Impostazioni (e in Panoramica con la fase 11) | ✅ |
 | [UC19](../use-cases/UC19-gestire-utente.md) | Gestire un utente (EXP-06, mock 1f) | Stati Invito inviato / Attivo / Sospeso / Disattivato; modifica di dati, profili ed MFA; reinvio invito, reset password, disattiva/riattiva; tutto nello storico | `GET/PUT /api/users/{id}`, `POST /api/users/{id}/invite\|reset-password\|disable\|enable` | Pannello laterale con azioni, profili raggruppati per cliente cliccabili e dettagli | ✅ (richiede la configurazione Keycloak) |
 | [UC20](../use-cases/UC20-importare-utenti.md) | Importare utenti da CSV (EXP-06) | Anteprima con errori per riga (codici di UC6), poi creazione delle righe valide; max 500 righe | `POST /api/users/import` | Dialog "Importa CSV" con modello scaricabile | ✅ |
 | [UC15](../use-cases/UC15-catalogo-moduli.md) | Catalogo dei moduli (EXP-01) | Core sempre presente; registrazione da manifest JSON con versione semantica, dipendenze e permessi; nuova versione = stesso id; deprecazione | `GET/POST /api/modules`, `PUT /api/modules/{id}/status` | Pagina Moduli con manifest da incollare, stati e numero di clienti | ✅ |
@@ -358,6 +360,7 @@ Oggi esiste solo `Administrator`.
 | EXP-10 | UC12 | ✅ implementata |
 | EXP-02 | UC16, UC17-S3/S6 | ✅ implementata (senza versioni dei piani: il prezzo è copiato nella sottoscrizione) |
 | EXP-03 | UC17, UC18 | ✅ implementata |
+| EXP-09 | UC25, UC26 | ✅ implementata (metriche dei moduli via API; niente consumi a pagamento) |
 | EXP-08 | UC23, UC24 | ✅ implementata (interna: senza SDI né pagamenti online, porta `IInvoiceTransmitter` pronta) |
 | EXP-06 | UC7 (filtri), UC19, UC20 | ✅ implementata (senza ultimo accesso storico oltre gli eventi conservati da Keycloak) |
 | … | | |

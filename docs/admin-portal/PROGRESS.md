@@ -15,14 +15,14 @@ Piano: `C:\Users\ltarq\.claude\plans\voglio-che-prepari-un-abundant-quail.md` ·
 | 6 Gestione utenti completa | ✅ | vedi log |
 | 7 Elenco clienti avanzato | ✅ | vedi log |
 | 8 Fatturazione interna | ✅ | vedi log |
-| 9 Uso e stato dei servizi | | |
+| 9 Uso e stato dei servizi | ✅ | vedi log |
 | 10 Comunicazioni e notifiche | | |
 | 11 Panoramica, ricerca, impersonificazione | | |
 | 12 Consolidamento | | |
 
 ## Test rossi attesi
 
-Nessuno: dopo la fase 8 tutta la suite è verde (accettazione 216/216, unitari Application 123 e Infrastructure 55, Vitest 59).
+Nessuno: dopo la fase 9 tutta la suite è verde (accettazione 229/229, unitari Application 132 e Infrastructure 55, Vitest 61).
 
 ## Ambiente di sviluppo autonomo (fuori dal repo, nello scratchpad della sessione)
 
@@ -73,6 +73,11 @@ Per verificare l'interfaccia senza il login reale: provider OIDC locale (`devidp
 40. **Solleciti registrati** sulla fattura e nello storico; l'email partirà con le comunicazioni (fase 10).
 41. **Orologio dei test di accettazione** spostabile (`FakeTimeProvider`); i token JWT restano validati sull'ora reale.
 42. **Pagina Fatturazione** disegnata con il sistema 1a (non c'è un mock): da far vedere al designer.
+43. **Invio dell'uso con ruolo `UsageReporter`** sul client `adminportal-api` (service account del modulo), endpoint mappato fuori dai controller per non ereditare la policy `Administrator`; nessuna chiave per modulo da gestire nel portale.
+44. **Uso aggregato per giorno** (contatori sommati, misure all'ultimo valore); niente serie orarie.
+45. **Utenti attivi** dall'ultimo accesso Keycloak (eventi LOGIN): leggono gli utenti del realm e filtrano per profilo (shortcut annotato).
+46. **Stato dei servizi in Impostazioni** finché la Panoramica (fase 11) non lo ospita; ricontrollato ogni minuto mentre è aperto.
+47. **Hook dei moduli "Degradato"** quando un provisioning è fallito, invece di chiamare gli URL dei moduli (eviterebbe effetti collaterali sugli hook).
 
 ## Da far vedere al designer
 

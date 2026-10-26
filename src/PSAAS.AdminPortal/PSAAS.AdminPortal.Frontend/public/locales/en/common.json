@@ -310,7 +310,7 @@
   },
   "breadcrumb": "Breadcrumb",
   "settings": {
-    "subtitle": "Preferences of this administrator, stored in the browser.",
+    "subtitle": "Preferences of this administrator (kept in the browser) and status of the connected services.",
     "preferences": "Preferences",
     "languageHint": "Interface language.",
     "themeHint": "Light or dark; without a choice it follows the system."
@@ -694,5 +694,45 @@
     "cancelReason": "Reason for cancelling",
     "cancelHint": "A credit note of the same amount will be issued.",
     "confirmCancel": "Cancel and issue credit note"
+  },
+  "usage": {
+    "users": "Users",
+    "activeUsers": "Active users",
+    "activeHint": "Logged in during the last 30 days",
+    "units": "Productive units",
+    "unlimited": "unlimited",
+    "metrics": "Module metrics",
+    "days_one": "{{count}} day",
+    "days_other": "{{count}} days",
+    "noMetrics": "No module has sent usage data for this tenant yet.",
+    "kind": {
+      "counter": "total of the period",
+      "gauge": "latest value"
+    },
+    "chart": "Trend of {{metric}} over the last {{days}} days"
+  },
+  "services": {
+    "title": "Connected services",
+    "refresh": "Check again",
+    "checkedAt": "Checked {{when}}",
+    "status": {
+      "Up": "Operational",
+      "Degraded": "Degraded",
+      "Down": "Unreachable",
+      "NotConfigured": "Not configured"
+    },
+    "names": {
+      "database": "Database",
+      "keycloak": "Keycloak (sign-in)",
+      "keycloak-admin": "Keycloak users API",
+      "city-list": "City list",
+      "module-hooks": "Module hooks",
+      "invoice-transmission": "Invoice transmission"
+    },
+    "failedModules_one": "{{count}} module with failed provisioning",
+    "failedModules_other": "{{count}} modules with failed provisioning",
+    "notConfigured": {
+      "invoice-transmission": "SDI not configured: invoices stay in the portal"
+    }
   }
 }

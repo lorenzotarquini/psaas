@@ -2,8 +2,9 @@ import { useTranslation } from 'react-i18next'
 import { LanguageSwitcher } from '@/features/switch-language'
 import { ThemeSwitcher } from '@/features/switch-theme'
 import { PageHeader } from '@/shared/ui/page-header'
+import { ServicesStatus } from '@/widgets/services-status'
 
-// Preferences of this administrator, kept in the browser (language and theme).
+// Preferences of this administrator, kept in the browser (language and theme), and the connected systems (UC26).
 export function SettingsPage() {
   const { t } = useTranslation()
 
@@ -33,6 +34,9 @@ export function SettingsPage() {
           </div>
         </dl>
       </section>
+      <div className="max-w-xl">
+        <ServicesStatus />
+      </div>
     </>
   )
 }

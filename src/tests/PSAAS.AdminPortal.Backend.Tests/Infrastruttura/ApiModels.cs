@@ -91,3 +91,16 @@ public sealed record InvoiceView(
     decimal Net, decimal Vat, decimal Total, string Status, int RemindersSent, Guid? RelatedInvoiceId, string? PaymentReference);
 
 public sealed record BillingSummaryView(decimal ToCollect, decimal Overdue, int OverdueCount, decimal PaidThisMonth, decimal IssuedThisMonth);
+
+public sealed record UsageSeriesView(string ModuleId, string Metric, string Kind, decimal Total, List<UsagePointView> Points);
+
+public sealed record UsagePointView(DateOnly Day, decimal Value);
+
+public sealed record TenantUsageView(int? Users, int? MaxUsers, int? ActiveUsers, int ProductiveUnits, int? MaxProductiveUnits, List<UsageSeriesView> Metrics);
+
+public sealed record ServiceHealthView(string Key, string Status, long LatencyMs, string? Detail);
+
+public sealed record ServicesHealthView(string Status, List<ServiceHealthView> Services)
+{
+    public ServiceHealthView Service(string key) => Services.Single(s => s.Key == key);
+}

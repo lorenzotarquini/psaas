@@ -310,7 +310,7 @@
   },
   "breadcrumb": "Percorso",
   "settings": {
-    "subtitle": "Preferenze di questo amministratore, salvate nel browser.",
+    "subtitle": "Preferenze di questo amministratore (salvate nel browser) e stato dei servizi collegati.",
     "preferences": "Preferenze",
     "languageHint": "Lingua dell'interfaccia.",
     "themeHint": "Chiaro o scuro; senza scelta segue il sistema."
@@ -694,5 +694,45 @@
     "cancelReason": "Motivo dell'annullamento",
     "cancelHint": "Verrà emessa una nota di credito dello stesso importo.",
     "confirmCancel": "Annulla ed emetti nota di credito"
+  },
+  "usage": {
+    "users": "Utenti",
+    "activeUsers": "Utenti attivi",
+    "activeHint": "Con un accesso negli ultimi 30 giorni",
+    "units": "Unità produttive",
+    "unlimited": "illimitati",
+    "metrics": "Metriche dei moduli",
+    "days_one": "{{count}} giorno",
+    "days_other": "{{count}} giorni",
+    "noMetrics": "Nessun modulo ha ancora inviato dati di uso per questo cliente.",
+    "kind": {
+      "counter": "totale del periodo",
+      "gauge": "ultimo valore"
+    },
+    "chart": "Andamento di {{metric}} negli ultimi {{days}} giorni"
+  },
+  "services": {
+    "title": "Servizi collegati",
+    "refresh": "Verifica di nuovo",
+    "checkedAt": "Verificati {{when}}",
+    "status": {
+      "Up": "Operativo",
+      "Degraded": "Degradato",
+      "Down": "Non raggiungibile",
+      "NotConfigured": "Non configurato"
+    },
+    "names": {
+      "database": "Database",
+      "keycloak": "Keycloak (accesso)",
+      "keycloak-admin": "API utenti Keycloak",
+      "city-list": "Elenco dei comuni",
+      "module-hooks": "Hook dei moduli",
+      "invoice-transmission": "Trasmissione fatture"
+    },
+    "failedModules_one": "{{count}} modulo in errore di provisioning",
+    "failedModules_other": "{{count}} moduli in errore di provisioning",
+    "notConfigured": {
+      "invoice-transmission": "SDI non configurato: le fatture restano nel portale"
+    }
   }
 }

@@ -36,6 +36,9 @@ public static class DependencyInjection
         services.AddScoped<ITenantListRepository, TenantListRepository>();
         services.AddScoped<PSAAS.Application.Abstractions.Billing.IInvoiceRepository, Billing.InvoiceRepository>();
         services.AddSingleton<PSAAS.Application.Abstractions.Billing.IInvoiceTransmitter, Billing.NoOpInvoiceTransmitter>();
+        services.AddScoped<PSAAS.Application.Abstractions.Usage.IUsageRepository, Usage.UsageRepository>();
+        services.AddScoped<PSAAS.Application.Abstractions.Health.IServiceProbe, Usage.DatabaseProbe>();
+        services.AddScoped<PSAAS.Application.Abstractions.Health.IServiceProbe, Usage.InvoiceTransmissionProbe>();
         services.AddScoped<PSAAS.Application.Abstractions.Views.ISavedViewRepository, Repositories.Views.SavedViewRepository>();
         services.AddScoped<ITenantWriteRepository, TenantWriteRepository>();
         services.AddScoped<ITenantUniquenessChecker, TenantUniquenessChecker>();

@@ -23,6 +23,11 @@ public static class DependencyInjection
         services.AddScoped<UserRules>();
         services.AddScoped<TenantListService>();
         services.AddScoped<Services.Billing.BillingService>();
+        services.AddScoped<Services.Usage.UsageService>();
+        services.AddScoped<Services.Health.ServicesHealthService>();
+        services.AddScoped<Abstractions.Health.IServiceProbe, Services.Health.UserDirectoryProbe>();
+        services.AddScoped<Abstractions.Health.IServiceProbe, Services.Health.CityListProbe>();
+        services.AddScoped<Abstractions.Health.IServiceProbe, Services.Health.ModuleHooksProbe>();
         services.AddSingleton(new Services.Billing.BillingOptions());
         services.AddScoped<Services.Views.SavedViewService>();
         services.AddScoped<UserManagementService>();

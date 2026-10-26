@@ -12,8 +12,6 @@ const tones: Record<TenantStatus, StatusTone> = {
   Ceased: 'neutral',
 }
 
-export const tenantStatusTone = (status: TenantStatus) => tones[status]
-
 export function TenantStatusBadge({ status }: { status: TenantStatus }) {
   const { t } = useTranslation()
   return <StatusBadge tone={tones[status]}>{t(`tenantStatus.${status}`)}</StatusBadge>

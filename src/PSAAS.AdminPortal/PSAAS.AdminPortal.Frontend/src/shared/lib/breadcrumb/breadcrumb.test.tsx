@@ -2,7 +2,7 @@
 import { act, cleanup, render } from '@testing-library/react'
 import { createMemoryRouter, Outlet, RouterProvider } from 'react-router'
 import { afterEach, describe, expect, it } from 'vitest'
-import { BreadcrumbProvider, useBreadcrumb, useCrumbs } from './breadcrumb'
+import { BreadcrumbProvider, useBreadcrumb, useCrumbs } from '.'
 
 function Topbar() {
   return <p data-testid="crumbs">{useCrumbs().crumbs.map((crumb) => crumb.label).join(' > ')}</p>

@@ -1,1 +1,2 @@
-export { applyStoredTheme, ThemeSwitcher } from './ui/ThemeSwitcher'
+export { applyStoredTheme } from './model/theme'
+export { ThemeSwitcher } from './ui/ThemeSwitcher'

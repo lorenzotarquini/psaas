@@ -2,7 +2,7 @@ import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
-import { FormProvider, useFieldArray, useForm } from 'react-hook-form'
+import { FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import type { TenantDetail } from '@/entities/tenant'
@@ -28,6 +28,7 @@ interface UsersStepProps {
 export function UsersStep({ draft, onNext, onCancel, nextLabel }: UsersStepProps) {
   const { t } = useTranslation()
   const form = useForm<Values>({ resolver: zodResolver(schema), defaultValues: { users: [] } })
+  const watchedUsers = useWatch({ control: form.control, name: 'users' })
   const rows = useFieldArray({ control: form.control, name: 'users' })
   const create = useCreateUser()
   const [created, setCreated] = useState<string[]>([])
@@ -89,7 +90,7 @@ export function UsersStep({ draft, onNext, onCancel, nextLabel }: UsersStepProps
                   ) : (
                     draft.profiles.map((profile) => {
                       // Toggled by hand: a single registered checkbox would yield a boolean, not an array.
-                      const chosen = (form.watch(`users.${i}.profileIds`) ?? []).includes(profile.id)
+                      const chosen = (watchedUsers?.[i]?.profileIds ?? []).includes(profile.id)
                       return (
                         <button
                           key={profile.id}

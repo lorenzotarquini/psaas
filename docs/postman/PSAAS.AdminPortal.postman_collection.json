@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "PSAAS Admin Portal",
-    "description": "Admin Portal backend API (docs/use-cases/API.md). Set `token` to a Keycloak access token with the Administrator role of adminportal-api.",
+    "description": "PSAAS Admin Portal API. Run the whole collection in order: it creates its own tenant, plan, user, view and communication with unique names, captures their ids, and checks the expected status of every request. Set token, or keycloakUrl + clientId + clientSecret to get one with client credentials.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -14,115 +14,392 @@
       }
     ]
   },
-  "variable": [
+  "event": [
     {
-      "key": "baseUrl",
-      "value": "http://localhost:5192"
-    },
-    {
-      "key": "token",
-      "value": ""
-    },
-    {
-      "key": "tenantId",
-      "value": ""
-    },
-    {
-      "key": "planId",
-      "value": ""
-    },
-    {
-      "key": "moduleId",
-      "value": "warehouse"
-    },
-    {
-      "key": "userId",
-      "value": ""
-    },
-    {
-      "key": "profileId",
-      "value": ""
-    },
-    {
-      "key": "savedViewId",
-      "value": ""
-    },
-    {
-      "key": "invoiceId",
-      "value": ""
-    },
-    {
-      "key": "communicationId",
-      "value": ""
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// One run = one set of unique values (company name, VAT, PEC, emails, plan code), so the collection can run again.",
+          "if (!pm.collectionVariables.get('runId') || pm.info.iteration === 0 && pm.info.requestName === 'Health') {",
+          "  const runId = String(Math.floor(10000 + Math.random() * 89999));",
+          "  pm.collectionVariables.set('runId', runId);",
+          "  pm.collectionVariables.set('vatNumber', '7' + runId + '00001');",
+          "  pm.collectionVariables.set('draftVatNumber', '7' + runId + '00002');",
+          "  pm.collectionVariables.set('today', new Date().toISOString().slice(0, 10));",
+          "}",
+          "// Settings read from any scope (environment, collection). No token: client credentials of adminportal-api against Keycloak (the service account needs the Administrator role).",
+          "if (!pm.variables.get('token') && pm.variables.get('keycloakUrl')) {",
+          "  pm.sendRequest({",
+          "    url: pm.variables.get('keycloakUrl') + '/protocol/openid-connect/token',",
+          "    method: 'POST',",
+          "    header: { 'Content-Type': 'application/x-www-form-urlencoded' },",
+          "    body: { mode: 'urlencoded', urlencoded: [",
+          "      { key: 'grant_type', value: 'client_credentials' },",
+          "      { key: 'client_id', value: pm.variables.get('clientId') },",
+          "      { key: 'client_secret', value: pm.variables.get('clientSecret') },",
+          "    ] },",
+          "  }, (err, res) => { if (!err && res.code === 200) pm.collectionVariables.set('token', res.json().access_token); });",
+          "}"
+        ]
+      }
     }
   ],
   "item": [
     {
       "name": "Health",
-      "request": {
-        "auth": {
-          "type": "noauth"
+      "item": [
+        {
+          "name": "Health",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
         },
-        "method": "GET",
-        "url": {
-          "raw": "{{baseUrl}}/health",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "health"
+        {
+          "name": "UC8 Me",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "me"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
           ]
         }
-      }
+      ]
     },
     {
-      "name": "UC8 Me",
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "{{baseUrl}}/api/me",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "me"
+      "name": "Catalog",
+      "item": [
+        {
+          "name": "UC15 List modules",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/modules",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "modules"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UC15 Register module",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/modules",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "modules"
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"warehouse\",\n  \"name\": \"Magazzino\",\n  \"version\": \"1.4.0\",\n  \"icon\": \"warehouse\",\n  \"status\": \"Available\",\n  \"requires\": [],\n  \"permissions\": [\n    \"warehouse.stock.read\",\n    \"warehouse.stock.edit\"\n  ],\n  \"provisionUrl\": \"https://warehouse.example.com/hooks/provision\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UC15 Deprecate module",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/api/modules/{{moduleId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "modules",
+                "{{moduleId}}",
+                "status"
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Deprecated\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UC15 Make module available again",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/api/modules/{{moduleId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "modules",
+                "{{moduleId}}",
+                "status"
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Available\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
           ]
         }
-      }
+      ]
+    },
+    {
+      "name": "Plans",
+      "item": [
+        {
+          "name": "UC16 List plans",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/plans",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "plans"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UC16 Create plan",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/plans",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "plans"
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"pm-{{runId}}\",\n  \"name\": \"Pro {{runId}}\",\n  \"description\": \"Per le aziende con più stabilimenti\",\n  \"price\": 1490,\n  \"billingPeriod\": \"Yearly\",\n  \"trialDays\": 30,\n  \"maxUsers\": 100,\n  \"maxProductiveUnits\": 10,\n  \"moduleIds\": [\n    \"warehouse\"\n  ],\n  \"active\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', () => pm.expect(pm.response.code).to.be.oneOf([201]));",
+                  "if (pm.response.code < 300) { const json = pm.response.json(); pm.collectionVariables.set('planId', json.id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UC16 Update plan",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/api/plans/{{planId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "plans",
+                "{{planId}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"pm-{{runId}}\",\n  \"name\": \"Pro {{runId}}\",\n  \"price\": 1590,\n  \"billingPeriod\": \"Yearly\",\n  \"trialDays\": 30,\n  \"maxUsers\": 100,\n  \"maxProductiveUnits\": 10,\n  \"moduleIds\": [\n    \"warehouse\"\n  ],\n  \"active\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "Tenants",
       "item": [
         {
-          "name": "UC1 Search tenants",
+          "name": "UC3 Create tenant",
           "request": {
-            "method": "GET",
+            "method": "POST",
             "url": {
-              "raw": "{{baseUrl}}/api/tenants?search=&page=1&pageSize=20",
+              "raw": "{{baseUrl}}/api/tenants",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "tenants"
-              ],
-              "query": [
-                {
-                  "key": "search",
-                  "value": ""
-                },
-                {
-                  "key": "page",
-                  "value": "1"
-                },
-                {
-                  "key": "pageSize",
-                  "value": "20"
-                }
               ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"companyName\": \"Postman {{runId}}\",\n  \"completeVatNumber\": \"IT{{vatNumber}}\",\n  \"certifiedEmail\": \"postman{{runId}}@pec.it\",\n  \"street\": \"Via Roma 1\",\n  \"city\": \"Roma\",\n  \"postalCode\": \"00118\",\n  \"profiles\": [\n    {\n      \"key\": \"op\",\n      \"name\": \"Operatore\"\n    }\n  ],\n  \"productiveUnits\": [\n    {\n      \"name\": \"Stabilimento\",\n      \"profileKeys\": [\n        \"op\"\n      ]\n    }\n  ]\n}"
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', () => pm.expect(pm.response.code).to.be.oneOf([201]));",
+                  "if (pm.response.code < 300) { const json = pm.response.json(); pm.collectionVariables.set('tenantId', json.id); }",
+                  "if (pm.response.code < 300) { const json = pm.response.json(); pm.collectionVariables.set('profileId', json.profiles[0].id); }"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "UC2 Get tenant",
@@ -139,33 +416,18 @@
                 "{{tenantId}}"
               ]
             }
-          }
-        },
-        {
-          "name": "UC3 Create tenant",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
               }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"companyName\": \"Acme Srl\",\n  \"completeVatNumber\": \"IT12345678901\",\n  \"certifiedEmail\": \"acme@pec.it\",\n  \"street\": \"Via Roma 1\",\n  \"city\": \"Roma\",\n  \"postalCode\": \"00118\",\n  \"profiles\": [ { \"key\": \"op\", \"name\": \"Operatore\" } ],\n  \"productiveUnits\": [ { \"name\": \"Stabilimento\", \"profileKeys\": [ \"op\" ] } ]\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/tenants",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "tenants"
-              ]
             }
-          }
+          ]
         },
         {
           "name": "UC4 Update registry",
@@ -190,7 +452,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"companyName\": \"Acme Spa\",\n  \"completeVatNumber\": \"IT12345678901\",\n  \"certifiedEmail\": \"acme@pec.it\",\n  \"street\": \"Via Roma 2\",\n  \"city\": \"Roma\",\n  \"postalCode\": \"00118\"\n}"
+              "raw": "{\n  \"companyName\": \"Postman {{runId}}\",\n  \"completeVatNumber\": \"IT{{vatNumber}}\",\n  \"certifiedEmail\": \"postman{{runId}}@pec.it\",\n  \"street\": \"Via Roma 2\",\n  \"city\": \"Roma\",\n  \"postalCode\": \"00118\",\n  \"sdiCode\": \"M5UXCR1\",\n  \"accountManager\": \"Marta Russo\"\n}"
             }
           },
           "event": [
@@ -199,7 +461,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
                 ]
               }
             }
@@ -229,7 +491,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"profiles\": [\n    {\n      \"id\": null,\n      \"key\": \"op\",\n      \"name\": \"Operatore\",\n      \"description\": \"Operatore di linea\"\n    }\n  ],\n  \"productiveUnits\": [\n    {\n      \"id\": null,\n      \"name\": \"Stabilimento\",\n      \"description\": null,\n      \"profileKeys\": [\n        \"op\"\n      ]\n    }\n  ]\n}"
+              "raw": "{\n  \"profiles\": [\n    {\n      \"id\": \"{{profileId}}\",\n      \"key\": \"op\",\n      \"name\": \"Operatore\",\n      \"description\": \"Operatore di linea\"\n    }\n  ],\n  \"productiveUnits\": [\n    {\n      \"id\": null,\n      \"name\": \"Stabilimento Nord\",\n      \"description\": null,\n      \"profileKeys\": [\n        \"op\"\n      ]\n    }\n  ]\n}"
             }
           },
           "event": [
@@ -238,7 +500,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
                 ]
               }
             }
@@ -249,7 +511,7 @@
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/api/tenants/field-validation?field=companyName&value=Acme Srl",
+              "raw": "{{baseUrl}}/api/tenants/field-validation?field=companyName&value=Postman {{runId}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -265,7 +527,7 @@
                 },
                 {
                   "key": "value",
-                  "value": "Acme Srl"
+                  "value": "Postman {{runId}}"
                 }
               ]
             }
@@ -276,7 +538,48 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UC1 Search tenants",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/tenants?search=postman&page=1&pageSize=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tenants"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "postman"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
                 ]
               }
             }
@@ -304,7 +607,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"companyName\": \"Bozza Srl\",\n  \"completeVatNumber\": \"IT12345678902\",\n  \"certifiedEmail\": \"bozza@pec.it\",\n  \"street\": \"Via Roma 1\",\n  \"city\": \"Roma\",\n  \"postalCode\": \"00118\",\n  \"sdiCode\": \"M5UXCR1\",\n  \"accountManager\": \"Marta Russo\",\n  \"draft\": true\n}"
+              "raw": "{\n  \"companyName\": \"Bozza {{runId}}\",\n  \"completeVatNumber\": \"IT{{draftVatNumber}}\",\n  \"certifiedEmail\": \"bozza{{runId}}@pec.it\",\n  \"street\": \"Via Roma 1\",\n  \"city\": \"Roma\",\n  \"postalCode\": \"00118\",\n  \"draft\": true\n}"
             }
           },
           "event": [
@@ -313,46 +616,8 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('status 201', () => pm.response.to.have.status(201));"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "UC13 Change status",
-          "request": {
-            "method": "POST",
-            "url": {
-              "raw": "{{baseUrl}}/api/tenants/{{tenantId}}/status",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "tenants",
-                "{{tenantId}}",
-                "status"
-              ]
-            },
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"status\": \"Suspended\",\n  \"reason\": \"Morosità\"\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                  "pm.test('status 201', () => pm.expect(pm.response.code).to.be.oneOf([201]));",
+                  "if (pm.response.code < 300) { const json = pm.response.json(); pm.collectionVariables.set('draftId', json.id); }"
                 ]
               }
             }
@@ -363,14 +628,14 @@
           "request": {
             "method": "DELETE",
             "url": {
-              "raw": "{{baseUrl}}/api/tenants/{{tenantId}}",
+              "raw": "{{baseUrl}}/api/tenants/{{draftId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "tenants",
-                "{{tenantId}}"
+                "{{draftId}}"
               ]
             }
           },
@@ -380,7 +645,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('status 204', () => pm.response.to.have.status(204));"
+                  "pm.test('status 204', () => pm.expect(pm.response.code).to.be.oneOf([204]));"
                 ]
               }
             }
@@ -391,7 +656,7 @@
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/api/tenants?status=Active&planId={{planId}}&province=BO&renewalWithinDays=30&sort=-renewsAt&page=1&pageSize=20",
+              "raw": "{{baseUrl}}/api/tenants?status=Active&province=RM&renewalWithinDays=400&sort=-renewsAt&page=1&pageSize=20",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -405,16 +670,12 @@
                   "value": "Active"
                 },
                 {
-                  "key": "planId",
-                  "value": "{{planId}}"
-                },
-                {
                   "key": "province",
-                  "value": "BO"
+                  "value": "RM"
                 },
                 {
                   "key": "renewalWithinDays",
-                  "value": "30"
+                  "value": "400"
                 },
                 {
                   "key": "sort",
@@ -437,7 +698,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
                 ]
               }
             }
@@ -465,7 +726,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
                 ]
               }
             }
@@ -499,7 +760,139 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Subscriptions",
+      "item": [
+        {
+          "name": "UC17 Subscribe tenant",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/api/tenants/{{tenantId}}/subscription",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tenants",
+                "{{tenantId}}",
+                "subscription"
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"planId\": \"{{planId}}\",\n  \"trial\": false,\n  \"addOnModuleIds\": [],\n  \"autoRenew\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UC17 Get tenant subscription",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/tenants/{{tenantId}}/subscription",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tenants",
+                "{{tenantId}}",
+                "subscription"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UC17 List subscriptions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "subscriptions"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UC18 Retry provisioning",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/tenants/{{tenantId}}/modules/{{moduleId}}/retry",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tenants",
+                "{{tenantId}}",
+                "modules",
+                "{{moduleId}}",
+                "retry"
+              ]
+            },
+            "description": "200 when the module had failed and is retried; 400 (moduleId InvalidValue) when it is already active."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200 or 400', () => pm.expect(pm.response.code).to.be.oneOf([200, 400]));"
                 ]
               }
             }
@@ -511,41 +904,9 @@
       "name": "Users",
       "item": [
         {
-          "name": "UC7 Search users",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/users?search=mario",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "users"
-              ],
-              "query": [
-                {
-                  "key": "search",
-                  "value": "mario"
-                }
-              ]
-            }
-          }
-        },
-        {
           "name": "UC6 Create user",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"firstName\": \"Mario\",\n  \"lastName\": \"Rossi\",\n  \"email\": \"mario.rossi@example.com\",\n  \"birthDate\": \"1980-05-17\",\n  \"profileIds\": []\n}"
-            },
             "url": {
               "raw": "{{baseUrl}}/api/users",
               "host": [
@@ -555,15 +916,37 @@
                 "api",
                 "users"
               ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Mario\",\n  \"lastName\": \"Postman\",\n  \"email\": \"postman.{{runId}}@example.com\",\n  \"birthDate\": \"1980-05-17\",\n  \"profileIds\": [\n    \"{{profileId}}\"\n  ]\n}"
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', () => pm.expect(pm.response.code).to.be.oneOf([201]));",
+                  "if (pm.response.code < 300) { const json = pm.response.json(); pm.collectionVariables.set('userId', json.id); }"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "UC7 Search users with filters",
+          "name": "UC7 Search users",
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/api/users?search=ferri&status=Active&page=1&pageSize=50",
+              "raw": "{{baseUrl}}/api/users?search=postman",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -574,11 +957,44 @@
               "query": [
                 {
                   "key": "search",
-                  "value": "ferri"
+                  "value": "postman"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UC7 Search users with filters",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/users?tenantId={{tenantId}}&status=Invited&page=1&pageSize=50",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "tenantId",
+                  "value": "{{tenantId}}"
                 },
                 {
                   "key": "status",
-                  "value": "Active"
+                  "value": "Invited"
                 },
                 {
                   "key": "page",
@@ -597,7 +1013,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
                 ]
               }
             }
@@ -625,7 +1041,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
                 ]
               }
             }
@@ -654,7 +1070,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstName\": \"Giulia\",\n  \"lastName\": \"Ferri\",\n  \"birthDate\": \"1991-04-12\",\n  \"profileIds\": [\n    \"{{profileId}}\"\n  ],\n  \"mfaRequired\": true\n}"
+              "raw": "{\n  \"firstName\": \"Mario\",\n  \"lastName\": \"Postman\",\n  \"birthDate\": \"1980-05-17\",\n  \"profileIds\": [\n    \"{{profileId}}\"\n  ],\n  \"mfaRequired\": true\n}"
             }
           },
           "event": [
@@ -663,7 +1079,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
                 ]
               }
             }
@@ -692,7 +1108,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
                 ]
               }
             }
@@ -713,7 +1129,8 @@
                 "{{userId}}",
                 "reset-password"
               ]
-            }
+            },
+            "description": "409 here: the user has not activated the account yet (UC19 4a)."
           },
           "event": [
             {
@@ -721,7 +1138,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                  "pm.test('status 409', () => pm.expect(pm.response.code).to.be.oneOf([409]));"
                 ]
               }
             }
@@ -750,7 +1167,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
                 ]
               }
             }
@@ -779,7 +1196,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
                 ]
               }
             }
@@ -808,7 +1225,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"confirm\": false,\n  \"rows\": [\n    {\n      \"firstName\": \"Nina\",\n      \"lastName\": \"Gallo\",\n      \"email\": \"nina.gallo@example.com\",\n      \"birthDate\": \"1995-05-05\",\n      \"profiles\": \"Officine Rinaldi Spa:Operatore\"\n    }\n  ]\n}"
+              "raw": "{\n  \"confirm\": false,\n  \"rows\": [\n    {\n      \"firstName\": \"Nina\",\n      \"lastName\": \"Gallo\",\n      \"email\": \"nina.{{runId}}@example.com\",\n      \"birthDate\": \"1995-05-05\",\n      \"profiles\": \"Postman {{runId}}:Operatore\"\n    }\n  ]\n}"
             }
           },
           "event": [
@@ -817,7 +1234,68 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UC9 Profiles overview",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/profiles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "profiles"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UC10 Search city",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/geography/cities?term=ro",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "geography",
+                "cities"
+              ],
+              "query": [
+                {
+                  "key": "term",
+                  "value": "ro"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
                 ]
               }
             }
@@ -826,68 +1304,157 @@
       ]
     },
     {
-      "name": "UC9 Profiles overview",
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "{{baseUrl}}/api/profiles",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "profiles"
-          ]
-        }
-      }
-    },
-    {
-      "name": "UC10 Search city",
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "{{baseUrl}}/api/geography/cities?term=ro",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "geography",
-            "cities"
-          ],
-          "query": [
-            {
-              "key": "term",
-              "value": "ro"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "name": "Audit",
+      "name": "Saved views",
       "item": [
         {
-          "name": "UC12 Audit log",
+          "name": "UC22 Save view",
           "request": {
-            "method": "GET",
+            "method": "POST",
             "url": {
-              "raw": "{{baseUrl}}/api/audit?action=tenant.&search=&page=1&pageSize=50",
+              "raw": "{{baseUrl}}/api/saved-views",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "audit"
+                "saved-views"
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"area\": \"tenants\",\n  \"name\": \"Vista {{runId}}\",\n  \"query\": \"planId={{planId}}&province=RM\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', () => pm.expect(pm.response.code).to.be.oneOf([201]));",
+                  "if (pm.response.code < 300) { const json = pm.response.json(); pm.collectionVariables.set('savedViewId', json.id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UC22 List saved views",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/saved-views?area=tenants",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "saved-views"
               ],
               "query": [
                 {
-                  "key": "action",
-                  "value": "tenant."
-                },
+                  "key": "area",
+                  "value": "tenants"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UC22 Delete view",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/saved-views/{{savedViewId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "saved-views",
+                "{{savedViewId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 204', () => pm.expect(pm.response.code).to.be.oneOf([204]));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Billing",
+      "item": [
+        {
+          "name": "UC23 Run billing",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/billing/run",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "billing",
+                "run"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UC24 List invoices of the tenant",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices?tenantId={{tenantId}}&page=1&pageSize=50",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "invoices"
+              ],
+              "query": [
                 {
-                  "key": "search",
-                  "value": ""
+                  "key": "tenantId",
+                  "value": "{{tenantId}}"
                 },
                 {
                   "key": "page",
@@ -906,7 +1473,598 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "if (pm.response.code < 300) { const json = pm.response.json(); pm.collectionVariables.set('invoiceId', json.items[0].id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UC24 List overdue invoices",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices?status=Overdue&page=1&pageSize=50",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "invoices"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "Overdue"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "50"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UC24 Billing summary",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/summary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "invoices",
+                "summary"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UC24 Get invoice",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/{{invoiceId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "invoices",
+                "{{invoiceId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UC24 Register payment",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/{{invoiceId}}/payments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "invoices",
+                "{{invoiceId}}",
+                "payments"
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"paidAt\": \"{{today}}\",\n  \"reference\": \"CRO {{runId}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UC24 Cancel invoice",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/{{invoiceId}}/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "invoices",
+                "{{invoiceId}}",
+                "cancel"
+              ]
+            },
+            "description": "409 here: a paid invoice cannot be cancelled (UC24 5a); on an open invoice it answers 200 with the credit note.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Errore di listino\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 409', () => pm.expect(pm.response.code).to.be.oneOf([409]));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Usage",
+      "item": [
+        {
+          "name": "UC25 Report usage (module)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/usage",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "usage"
+              ]
+            },
+            "description": "Modules call it with their own service account (role UsageReporter); an Administrator token works too.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"records\": [\n    {\n      \"tenantId\": \"{{tenantId}}\",\n      \"moduleId\": \"core\",\n      \"metric\": \"documents.created\",\n      \"value\": 12,\n      \"kind\": \"counter\"\n    },\n    {\n      \"tenantId\": \"{{tenantId}}\",\n      \"moduleId\": \"core\",\n      \"metric\": \"storage.mb\",\n      \"value\": 820.5,\n      \"kind\": \"gauge\"\n    }\n  ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 204', () => pm.expect(pm.response.code).to.be.oneOf([204]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UC25 Tenant usage",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/tenants/{{tenantId}}/usage?days=30",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tenants",
+                "{{tenantId}}",
+                "usage"
+              ],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "30"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UC26 Connected services",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/system/services",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "system",
+                "services"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Communications",
+      "item": [
+        {
+          "name": "UC27 Preview recipients",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/communications/preview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "communications",
+                "preview"
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenantIds\": [\n    \"{{tenantId}}\"\n  ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UC27 Send communication",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/communications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "communications"
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subject\": \"Manutenzione programmata\",\n  \"body\": \"Sabato dalle 8 alle 12 la piattaforma non sarà disponibile.\",\n  \"channels\": [\n    \"InApp\",\n    \"Email\"\n  ],\n  \"segment\": {\n    \"tenantIds\": [\n      \"{{tenantId}}\"\n    ]\n  },\n  \"visibleUntil\": null\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', () => pm.expect(pm.response.code).to.be.oneOf([201]));",
+                  "if (pm.response.code < 300) { const json = pm.response.json(); pm.collectionVariables.set('communicationId', json.id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UC27 List communications",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/communications?page=1&pageSize=50",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "communications"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "50"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UC27 Get communication",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/communications/{{communicationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "communications",
+                "{{communicationId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UC28 Things to handle",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "notifications"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Overview",
+      "item": [
+        {
+          "name": "UC29 Overview KPIs",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/overview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "overview"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UC29 Resend stale invitations",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/users/invites/resend",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "invites",
+                "resend"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UC30 Global search",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/search?q=postman",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "postman"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UC12 Audit log",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/audit?action=tenant.&page=1&pageSize=50",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "audit"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "tenant."
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "50"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
                 ]
               }
             }
@@ -947,1024 +2105,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Catalog",
-      "item": [
-        {
-          "name": "UC15 List modules",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/modules",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "modules"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "UC15 Register module",
-          "request": {
-            "method": "POST",
-            "url": {
-              "raw": "{{baseUrl}}/api/modules",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "modules"
-              ]
-            },
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"id\": \"warehouse\",\n  \"name\": \"Magazzino\",\n  \"version\": \"1.4.0\",\n  \"icon\": \"warehouse\",\n  \"status\": \"Available\",\n  \"requires\": [],\n  \"permissions\": [\n    \"warehouse.stock.read\",\n    \"warehouse.stock.edit\"\n  ],\n  \"provisionUrl\": \"https://warehouse.example.com/hooks/provision\"\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "UC15 Deprecate module",
-          "request": {
-            "method": "PUT",
-            "url": {
-              "raw": "{{baseUrl}}/api/modules/{{moduleId}}/status",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "modules",
-                "{{moduleId}}",
-                "status"
-              ]
-            },
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"status\": \"Deprecated\"\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Plans",
-      "item": [
-        {
-          "name": "UC16 List plans",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/plans",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "plans"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "UC16 Create plan",
-          "request": {
-            "method": "POST",
-            "url": {
-              "raw": "{{baseUrl}}/api/plans",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "plans"
-              ]
-            },
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"code\": \"pro\",\n  \"name\": \"Pro\",\n  \"description\": \"Per le aziende con più stabilimenti\",\n  \"price\": 1490,\n  \"billingPeriod\": \"Yearly\",\n  \"trialDays\": 30,\n  \"maxUsers\": 100,\n  \"maxProductiveUnits\": 10,\n  \"moduleIds\": [\n    \"warehouse\"\n  ],\n  \"active\": true\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 201', () => pm.response.to.have.status(201));"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "UC16 Update plan",
-          "request": {
-            "method": "PUT",
-            "url": {
-              "raw": "{{baseUrl}}/api/plans/{{planId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "plans",
-                "{{planId}}"
-              ]
-            },
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"code\": \"pro\",\n  \"name\": \"Pro\",\n  \"price\": 1590,\n  \"billingPeriod\": \"Yearly\",\n  \"trialDays\": 30,\n  \"maxUsers\": 100,\n  \"maxProductiveUnits\": 10,\n  \"moduleIds\": [\n    \"warehouse\"\n  ],\n  \"active\": true\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Subscriptions",
-      "item": [
-        {
-          "name": "UC17 List subscriptions",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/subscriptions",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "subscriptions"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "UC17 Get tenant subscription",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/tenants/{{tenantId}}/subscription",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "tenants",
-                "{{tenantId}}",
-                "subscription"
-              ]
-            }
-          }
-        },
-        {
-          "name": "UC17 Subscribe tenant",
-          "request": {
-            "method": "PUT",
-            "url": {
-              "raw": "{{baseUrl}}/api/tenants/{{tenantId}}/subscription",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "tenants",
-                "{{tenantId}}",
-                "subscription"
-              ]
-            },
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"planId\": \"{{planId}}\",\n  \"trial\": false,\n  \"addOnModuleIds\": [],\n  \"autoRenew\": true\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "UC18 Retry provisioning",
-          "request": {
-            "method": "POST",
-            "url": {
-              "raw": "{{baseUrl}}/api/tenants/{{tenantId}}/modules/{{moduleId}}/retry",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "tenants",
-                "{{tenantId}}",
-                "modules",
-                "{{moduleId}}",
-                "retry"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Saved views",
-      "item": [
-        {
-          "name": "UC22 List saved views",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/saved-views?area=tenants",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "saved-views"
-              ],
-              "query": [
-                {
-                  "key": "area",
-                  "value": "tenants"
-                }
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "UC22 Save view",
-          "request": {
-            "method": "POST",
-            "url": {
-              "raw": "{{baseUrl}}/api/saved-views",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "saved-views"
-              ]
-            },
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"area\": \"tenants\",\n  \"name\": \"Pro a Bologna\",\n  \"query\": \"planId={{planId}}&province=BO\"\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 201', () => pm.response.to.have.status(201));"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "UC22 Delete view",
-          "request": {
-            "method": "DELETE",
-            "url": {
-              "raw": "{{baseUrl}}/api/saved-views/{{savedViewId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "saved-views",
-                "{{savedViewId}}"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 204', () => pm.response.to.have.status(204));"
-                ]
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Billing",
-      "item": [
-        {
-          "name": "UC24 List invoices",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/invoices?status=Overdue&page=1&pageSize=50",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "invoices"
-              ],
-              "query": [
-                {
-                  "key": "status",
-                  "value": "Overdue"
-                },
-                {
-                  "key": "page",
-                  "value": "1"
-                },
-                {
-                  "key": "pageSize",
-                  "value": "50"
-                }
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "UC24 Billing summary",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/invoices/summary",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "invoices",
-                "summary"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "UC24 Get invoice",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/invoices/{{invoiceId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "invoices",
-                "{{invoiceId}}"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "UC24 Register payment",
-          "request": {
-            "method": "POST",
-            "url": {
-              "raw": "{{baseUrl}}/api/invoices/{{invoiceId}}/payments",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "invoices",
-                "{{invoiceId}}",
-                "payments"
-              ]
-            },
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"paidAt\": \"2026-10-22\",\n  \"reference\": \"CRO 1234567890\"\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "UC24 Cancel invoice",
-          "request": {
-            "method": "POST",
-            "url": {
-              "raw": "{{baseUrl}}/api/invoices/{{invoiceId}}/cancel",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "invoices",
-                "{{invoiceId}}",
-                "cancel"
-              ]
-            },
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"reason\": \"Errore di listino\"\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "UC23 Run billing",
-          "request": {
-            "method": "POST",
-            "url": {
-              "raw": "{{baseUrl}}/api/billing/run",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "billing",
-                "run"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Usage",
-      "item": [
-        {
-          "name": "UC25 Report usage (module)",
-          "request": {
-            "method": "POST",
-            "url": {
-              "raw": "{{baseUrl}}/api/usage",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "usage"
-              ]
-            },
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"records\": [\n    {\n      \"tenantId\": \"{{tenantId}}\",\n      \"moduleId\": \"core\",\n      \"metric\": \"documents.created\",\n      \"value\": 12,\n      \"kind\": \"counter\"\n    },\n    {\n      \"tenantId\": \"{{tenantId}}\",\n      \"moduleId\": \"core\",\n      \"metric\": \"storage.mb\",\n      \"value\": 820.5,\n      \"kind\": \"gauge\"\n    }\n  ]\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 204', () => pm.response.to.have.status(204));"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "UC25 Tenant usage",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/tenants/{{tenantId}}/usage?days=30",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "tenants",
-                "{{tenantId}}",
-                "usage"
-              ],
-              "query": [
-                {
-                  "key": "days",
-                  "value": "30"
-                }
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "UC26 Connected services",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/system/services",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "system",
-                "services"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Communications",
-      "item": [
-        {
-          "name": "UC27 Preview recipients",
-          "request": {
-            "method": "POST",
-            "url": {
-              "raw": "{{baseUrl}}/api/communications/preview",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "communications",
-                "preview"
-              ]
-            },
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"statuses\": [\n    \"Active\",\n    \"Trial\"\n  ],\n  \"planIds\": [\n    \"{{planId}}\"\n  ]\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "UC27 Send communication",
-          "request": {
-            "method": "POST",
-            "url": {
-              "raw": "{{baseUrl}}/api/communications",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "communications"
-              ]
-            },
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"subject\": \"Manutenzione programmata\",\n  \"body\": \"Sabato dalle 8 alle 12 la piattaforma non sarà disponibile.\",\n  \"channels\": [\n    \"InApp\",\n    \"Email\"\n  ],\n  \"segment\": {\n    \"statuses\": [\n      \"Active\"\n    ]\n  },\n  \"visibleUntil\": null\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 201', () => pm.response.to.have.status(201));"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "UC27 List communications",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/communications?page=1&pageSize=50",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "communications"
-              ],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "1"
-                },
-                {
-                  "key": "pageSize",
-                  "value": "50"
-                }
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "UC27 Get communication",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/communications/{{communicationId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "communications",
-                "{{communicationId}}"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "UC28 Things to handle",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/notifications",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "notifications"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Overview",
-      "item": [
-        {
-          "name": "UC29 Overview KPIs",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/overview",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "overview"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "UC29 Resend stale invitations",
-          "request": {
-            "method": "POST",
-            "url": {
-              "raw": "{{baseUrl}}/api/users/invites/resend",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "users",
-                "invites",
-                "resend"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "UC30 Global search",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/search?q=rinaldi",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "search"
-              ],
-              "query": [
-                {
-                  "key": "q",
-                  "value": "rinaldi"
-                }
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
                 ]
               }
             }
@@ -1991,7 +2132,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
                 ]
               }
             }
@@ -2013,6 +2154,7 @@
                 "impersonate"
               ]
             },
+            "description": "409 here: the run user has not activated the account (or impersonation is not configured); 200 { url, expiresAt } for an active user.",
             "header": [
               {
                 "key": "Content-Type",
@@ -2030,13 +2172,170 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                  "pm.test('status 409', () => pm.expect(pm.response.code).to.be.oneOf([409]));"
                 ]
               }
             }
           ]
         }
       ]
+    },
+    {
+      "name": "Lifecycle",
+      "item": [
+        {
+          "name": "UC13 Suspend tenant",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/tenants/{{tenantId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tenants",
+                "{{tenantId}}",
+                "status"
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Suspended\",\n  \"reason\": \"Prova Postman\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UC13 Reactivate tenant",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/tenants/{{tenantId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tenants",
+                "{{tenantId}}",
+                "status"
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Active\",\n  \"reason\": null\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5192"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "keycloakUrl",
+      "value": "http://localhost:8080/realms/PSAAS"
+    },
+    {
+      "key": "clientId",
+      "value": "adminportal-api"
+    },
+    {
+      "key": "clientSecret",
+      "value": ""
+    },
+    {
+      "key": "moduleId",
+      "value": "warehouse"
+    },
+    {
+      "key": "runId",
+      "value": ""
+    },
+    {
+      "key": "vatNumber",
+      "value": ""
+    },
+    {
+      "key": "draftVatNumber",
+      "value": ""
+    },
+    {
+      "key": "today",
+      "value": ""
+    },
+    {
+      "key": "tenantId",
+      "value": ""
+    },
+    {
+      "key": "profileId",
+      "value": ""
+    },
+    {
+      "key": "draftId",
+      "value": ""
+    },
+    {
+      "key": "planId",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "savedViewId",
+      "value": ""
+    },
+    {
+      "key": "invoiceId",
+      "value": ""
+    },
+    {
+      "key": "communicationId",
+      "value": ""
     }
   ]
 }

@@ -18,11 +18,11 @@ Piano: `C:\Users\ltarq\.claude\plans\voglio-che-prepari-un-abundant-quail.md` ·
 | 9 Uso e stato dei servizi | ✅ | vedi log |
 | 10 Comunicazioni e notifiche | ✅ | vedi log |
 | 11 Panoramica, ricerca, impersonificazione | ✅ | vedi log |
-| 12 Consolidamento | | |
+| 12 Consolidamento | ✅ | vedi log |
 
 ## Test rossi attesi
 
-Nessuno: dopo la fase 11 tutta la suite è verde (accettazione 267/267, unitari Application 146 e Infrastructure 55, Vitest 68).
+Nessuno. A fine lavoro (fase 12): accettazione 267/267, unitari Application 146, Infrastructure 55, Domain 25, Auth 5; Vitest 68 in 25 file; `tsc` pulito; lint senza avvisi di oxlint (restano 7 suggerimenti "insignificant slice" di steiger, vedi decisione 62). Collection Postman eseguita per intero con newman contro il backend locale: 63/63 asserzioni, ripetibile.
 
 ## Ambiente di sviluppo autonomo (fuori dal repo, nello scratchpad della sessione)
 
@@ -90,8 +90,20 @@ Per verificare l'interfaccia senza il login reale: provider OIDC locale (`devidp
 57. **Scorciatoie**: ⌘K/Ctrl+K, N (nuovo cliente), Esc; J/K per scorrere le righe non implementate (il mock non le mostra).
 58. **Impersonificazione solo dalla scheda cliente** (mock 1d): il pannello utente non la ospita per le regole FSD (una feature non importa un'altra).
 59. **Token exchange "legacy" di Keycloak** (`requested_subject`): richiede la feature `token-exchange` attiva nel realm; la piattaforma deve leggere il token dal frammento `/impersonate#access_token=…`.
+60. **Collection Postman come esecuzione unica**: crea il proprio cliente, piano, utente, vista e comunicazione con nomi unici (`runId`), cattura gli id dalle risposte, ottiene il token con client credentials se `token` è vuoto, e verifica lo stato atteso di ogni richiesta (anche i 409 voluti). Comando: `npx newman run docs/postman/PSAAS.AdminPortal.postman_collection.json --env-var baseUrl=… --env-var keycloakUrl=…/realms/PSAAS --env-var clientSecret=…`.
+61. **Conferma dell'invio delle comunicazioni** con un secondo passo nel modulo (barra scura come quella delle modifiche non salvate), al posto di `window.confirm`.
+62. **Suggerimenti steiger "insignificant slice" lasciati**: entità e feature usate da una sola pagina (comuni, utente corrente, viste salvate, pannelli) restano slice a sé per tenere separati dati, azioni e pagine; si possono accorpare se il designer o il team preferiscono meno cartelle.
 
 ## Da far vedere al designer
 
-- Tema scuro, vista mobile (sidebar a scomparsa, tabelle con scorrimento orizzontale).
-- Pagine senza mock: Profili, Impostazioni, 404 Moduli, Piani, Sottoscrizioni, Audit log, dialog Importa CSV, scheda Utenti del cliente, dialog Cambia piano multiplo, viste salvate, Fatturazione e pannello fattura (e in seguito Comunicazioni).
+Mock coperti: 1a (design system), 1b (Panoramica), 1c (Clienti), 1d (Scheda cliente), 1e (Onboarding), 1f (Utenti).
+
+Disegnati con il sistema 1a, senza mock, da validare:
+- **Pagine**: Moduli, Piani, Sottoscrizioni, Fatturazione (indicatori e pannello fattura), Comunicazioni (composizione e dettaglio), Audit log, Profili, Impostazioni (con i servizi collegati), 404.
+- **Schede del cliente** oltre a Organizzazione: Anagrafica, Abbonamento e moduli, Utenti, Uso (grafici a barre giornalieri), Fatture, Storico.
+- **Dialog e pannelli**: Importa CSV, Cambia piano multiplo, Impersona, palette ⌘K, campanella "Da gestire", viste salvate accanto alle schede.
+- **Tema scuro** (derivato dai token del chiaro) e **vista mobile** (sidebar a scomparsa, tabelle con scorrimento orizzontale).
+
+## Prossimo passo: verifica E2E finale
+
+Su richiesta, dopo la configurazione di Keycloak (checklist nel piano: redirect URI, service account con `view-users`, `manage-users`, `view-events`, `impersonation`, attributi del *User profile*, SMTP, eventi di login, token exchange, ruolo `UsageReporter`): avvio con Aspire, login in Edge, script Playwright su tutte le schermate, screenshot e tabella esiti nella sezione 4 di `ADMIN-PORTAL.md`, confronto con i mock 1b–1f.

@@ -57,6 +57,7 @@ Ogni scenario di accettazione (`UCn-Sm`) scende negli strati interni: qui si ved
 | UC21-S5, S6, S7 | Parametri non validi, utenti contati per la pagina (e niente se Keycloak è giù), CSV con virgolette e formule neutralizzate | `TenantListServiceTests.UC21_*` |
 | UC21-R3 | Provincia salvata con l'indirizzo | `TenantCreateServiceTests.UC3_S1_*`, `TenantRegistryUpdateServiceTests.UC4_S1_*` |
 | UC22 | Nome unico per amministratore senza maiuscole, area valida, lunghezza e numero massimo | `TenantListServiceTests.UC22_*` |
+| – | Entità `User` del dominio (non usata dai casi d'uso: gli utenti vivono in Keycloak, porta `IUserDirectory`) | `UserTests` |
 | UC23-R2, R4, R6 | IVA e scadenza, piano gratuito senza fattura, pro-rata arrotondato al centesimo, rinnovi arretrati recuperati una sola volta | `BillingServiceTests.UC23_*` |
 | UC31-R1 | Motivo e durata verificati prima di Keycloak, durata predefinita 30 minuti, audit; non configurata o utente non attivo = conflitto | `ImpersonationServiceTests.UC31_*` |
 | UC29-R2 | Inviti aperti da più di 5 giorni, solo utenti abilitati | `ImpersonationServiceTests.UC29_*` |

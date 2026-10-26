@@ -1,6 +1,6 @@
 # PSAAS Admin Portal – Funzionalità, verifica E2E e proposta di espansione
 
-*Documento del 22/10/2026 · base: branch `develop`, commit `dd0b7aa`*
+*Documento aggiornato al 26/10/2026 · branch `feature/admin-console` (fasi 0–12 del piano sui mock 1a–1f). La sezione 4 è la verifica E2E del 22/10 sulla versione precedente; la nuova verifica si farà dopo la configurazione di Keycloak.*
 
 ## Indice
 
@@ -19,24 +19,30 @@
 
 PSAAS è un gestionale B2B multi-tenant: una **base comune** estendibile con **moduli** (plugin). Ogni azienda cliente è un **tenant**.
 
-L'**Admin Portal** è il pannello di controllo del gestore della piattaforma. Oggi serve a:
+L'**Admin Portal** è il pannello di controllo del gestore della piattaforma ("Admin console" nei mock del designer). Serve a:
 
-- **gestire i clienti**: cercarli, consultarli, attivarli e (a breve) modificarne anagrafica e organizzazione;
-- **modellare l'organizzazione di ogni cliente**: unità produttive (reparti, filiali) e profili, cioè regole che aprono l'accesso a una o più unità;
-- **gestire gli utenti dei clienti**: crearli in Keycloak con i loro profili, anche di clienti diversi, e cercarli su tutta la piattaforma;
-- **avere una visione d'insieme** dei profili di tutti i clienti.
+- **seguire la giornata**: la Panoramica raccoglie indicatori, cose da gestire con l'azione diretta, servizi collegati e attività recente; la campanella e la ricerca globale ⌘K sono su ogni pagina;
+- **gestire i clienti**: elenco con filtri, viste salvate ed export; onboarding guidato in bozza; scheda a schede (anagrafica, organizzazione, abbonamento e moduli, utenti, uso, fatture, storico); stato del cliente lungo tutto il ciclo di vita;
+- **modellare l'organizzazione di ogni cliente**: unità produttive e profili, con la matrice di accesso;
+- **vendere e attivare i moduli**: catalogo dei moduli da manifest, piani con limiti e prova, sottoscrizioni con add-on e provisioning seguito modulo per modulo;
+- **gestire gli utenti dei clienti** in Keycloak: creazione anche da CSV, stato, inviti, reset password, MFA, disattivazione, profili di più clienti, impersonificazione per il supporto;
+- **incassare**: fatture dei periodi, pro-rata, pagamenti, solleciti e sospensione per morosità (fatturazione interna, senza SDI);
+- **comunicare**: annunci ed email ai clienti per segmento, con esito per cliente;
+- **sapere chi ha fatto cosa**: audit log completo e storico per cliente; uso dei moduli per cliente e stato dei sistemi collegati.
 
-Ha un solo attore, l'**Amministratore** (ruolo Keycloak `Administrator`), e due sistemi esterni: **Keycloak** (identità dell'amministratore e archivio degli utenti dei clienti) e la **lista dei comuni italiani** (validazione di città e CAP).
+Ha un solo attore umano, l'**Amministratore** (ruolo Keycloak `Administrator`); i **moduli** inviano l'uso con il proprio service account (ruolo `UsageReporter`). Sistemi esterni: **Keycloak** (identità, archivio utenti, eventi di login, token exchange), **lista dei comuni italiani**, **hook di provisioning dei moduli**, **SMTP**; la trasmissione delle fatture (SDI) è una porta pronta ma non collegata.
 
-Fuori ambito oggi, come dichiarato in [`docs/use-cases/README.md`](../use-cases/README.md): disattivazione o cancellazione dei clienti, comunicazioni, licenze, abbonamenti, fatturazione, report, storico delle modifiche, ruoli con permessi ridotti, modifica e cancellazione degli utenti. La [sezione 6](#6-proposta-di-espansione-analisi-di-business) parte proprio da qui.
+Restano fuori, come proposte nella [sezione 6](#6-proposta-di-espansione-analisi-di-business): permessi per modulo sui profili (EXP-05), configurazione per cliente e modulo (EXP-07), ruoli del portale (EXP-13), KPI di business (EXP-14), API per i clienti (EXP-15), rilascio graduale dei moduli (EXP-16), conformità (EXP-17).
 
 ## 2. Architettura in breve
 
 | Parte | Tecnologia | Responsabilità |
 |---|---|---|
 | Frontend | React 19, Vite, TypeScript, Tailwind + daisyUI, TanStack Query, react-hook-form + zod, i18next (it/en) | UI dell'amministratore; login Keycloak con PKCE; validazione lato client con gli stessi codici d'errore del backend |
-| Backend | ASP.NET Core (.NET 10), clean architecture: Domain, Application, Infrastructure, AdminPortal.Backend | API REST `/api/*`, tutte protette dal ruolo `Administrator` |
-| Dati | PostgreSQL (EF Core) | Clienti, profili, unità produttive e loro collegamenti |
+| Backend | ASP.NET Core (.NET 10), clean architecture: Domain, Application, Infrastructure, AdminPortal.Backend | API REST `/api/*`, protette dal ruolo `Administrator`; `POST /api/usage` dal ruolo `UsageReporter` |
+| Dati | PostgreSQL (EF Core, migrazioni in `PSAAS.Infrastructure/Data/Migrations`) | Clienti e organizzazione, audit, catalogo, piani e sottoscrizioni, fatture, uso giornaliero, comunicazioni, viste salvate |
+| Processi in background | `BackgroundService` del backend | Riprova del provisioning (`Provisioning:RetryMinutes`), fatturazione giornaliera (`Billing:RunHours`) |
+| Integrazioni dietro porte | `IUserDirectory`, `IModuleProvisioner`, `IEmailSender`, `IInvoiceTransmitter`, `IImpersonationGateway`, `IServiceProbe` | Keycloak, hook dei moduli, SMTP, SDI (non collegato), token exchange; simulate nei test di accettazione |
 | Identità | Keycloak (realm `PSAAS`) | Login dell'amministratore; utenti dei clienti con attributi `birthDate`, `profileIds`, `mfaRequired`, `createdBy`, `invitesSent`, `lastInviteAt`; eventi di login per l'ultimo accesso |
 | Orchestrazione locale | .NET Aspire (AppHost) | Avvia Postgres, backend e frontend |
 | Qualità | xUnit con Testcontainers (accettazione), test unitari per strato, Vitest | Uno o più test per ogni scenario Gherkin |
@@ -71,6 +77,12 @@ Stato rilevato dal codice e dalla suite di test di accettazione (aggiornato a og
 | [UC12](../use-cases/UC12-audit-log.md) | Audit log e storico (EXP-10) | Chi, cosa, quando, su quale cliente; prima/dopo per l'anagrafica; aggiunte e rimozioni per l'organizzazione; filtri e pagine | `GET /api/audit` | Pagina Audit log con filtri nell'URL; scheda Storico e card Storico nella scheda cliente | ✅ |
 | [UC13](../use-cases/UC13-stato-cliente.md) | Stato del cliente (EXP-04) | Onboarding, Trial, Attivo, Sospeso, In disdetta, Cessato; transizioni consentite; motivo per sospensione, disdetta, cessazione | `POST /api/tenants/{id}/status` | Badge di stato, codice `tn_…`, "Cliente dal" e menu "…" con dialog del motivo nella scheda | ✅ |
 | [UC14](../use-cases/UC14-onboarding-cliente.md) | Onboarding guidato (EXP-04, mock 1e) | Bozza salvata al primo passo, ripresa e annullamento; codice SDI e referente | `POST /api/tenants` (`draft`), `DELETE /api/tenants/{id}` | Wizard a 5 passi con pannello Controlli, combobox comuni con CAP dal comune, "Bozza salvata alle…"; passo 2 con scelta di piano, prova e add-on | ✅ |
+| [UC15](../use-cases/UC15-catalogo-moduli.md) | Catalogo dei moduli (EXP-01) | Core sempre presente; registrazione da manifest JSON con versione semantica, dipendenze e permessi; nuova versione = stesso id; deprecazione | `GET/POST /api/modules`, `PUT /api/modules/{id}/status` | Pagina Moduli con manifest da incollare, stati e numero di clienti | ✅ |
+| [UC16](../use-cases/UC16-piani.md) | Piani commerciali (EXP-02) | Codice unico, prezzo e periodicità, prova 0–90 giorni, limiti di utenti e unità, moduli inclusi | `GET/POST/PUT /api/plans` | Pagina Piani con form di creazione e modifica | ✅ |
+| [UC17](../use-cases/UC17-sottoscrizione.md) | Sottoscrizione del cliente (EXP-03) | Piano con prova e add-on; moduli con dipendenze; limiti del piano anche per i nuovi utenti (UC6); prezzo bloccato | `GET/PUT /api/tenants/{id}/subscription`, `GET /api/subscriptions` | Scheda "Abbonamento e moduli", badge del piano nell'intestazione, pagina Sottoscrizioni, passo 2 del wizard | ✅ |
+| [UC18](../use-cases/UC18-provisioning.md) | Provisioning dei moduli (EXP-03) | Hook del manifest; stato per modulo con errore e tentativi; riprova manuale e automatica (3 tentativi) | `POST /api/tenants/{id}/modules/{moduleId}/retry`, job `ProvisioningRetryJob` | Card "Moduli attivi" (mock 1d), pulsante Riprova, conteggio dei falliti in Sottoscrizioni | ✅ |
+| [UC19](../use-cases/UC19-gestire-utente.md) | Gestire un utente (EXP-06, mock 1f) | Stati Invito inviato / Attivo / Sospeso / Disattivato; modifica di dati, profili ed MFA; reinvio invito, reset password, disattiva/riattiva; tutto nello storico | `GET/PUT /api/users/{id}`, `POST /api/users/{id}/invite\|reset-password\|disable\|enable` | Pannello laterale con azioni, profili raggruppati per cliente cliccabili e dettagli | ✅ (richiede la configurazione Keycloak) |
+| [UC20](../use-cases/UC20-importare-utenti.md) | Importare utenti da CSV (EXP-06) | Anteprima con errori per riga (codici di UC6), poi creazione delle righe valide; max 500 righe | `POST /api/users/import` | Dialog "Importa CSV" con modello scaricabile | ✅ |
 | [UC21](../use-cases/UC21-elenco-clienti.md) | Filtrare, ordinare ed esportare i clienti (mock 1c) | Schede con conteggi (Tutti, Attivi, Trial, Onboarding, Sospesi, Rinnovo < 30 gg); filtri per stato, piano, modulo, provincia, rinnovo; ordinamento; utenti rispetto al limite; export CSV | `GET /api/tenants`, `/counts`, `/export` | Schede, chip dei filtri, scelta colonne, selezione multipla con Cambia piano ed Esporta, "Esc per deselezionare" | ✅ |
 | [UC22](../use-cases/UC22-viste-salvate.md) | Viste salvate (mock 1c) | Viste personali per amministratore, nome unico, max 20 | `GET/POST/DELETE /api/saved-views` | "+ Salva vista" accanto alle schede | ✅ |
 | [UC23](../use-cases/UC23-fatturazione.md) | Fatturare i periodi (EXP-08) | Prima fattura alla sottoscrizione, rinnovi, fine prova, pro-rata sul cambio piano, numerazione annuale, IVA 22%, scadenza 30 gg; trasmissione dietro porta (oggi interna, senza SDI) | `POST /api/billing/run`, job `BillingJob` | Pulsante "Esegui fatturazione" | ✅ |
@@ -82,13 +94,7 @@ Stato rilevato dal codice e dalla suite di test di accettazione (aggiornato a og
 | [UC29](../use-cases/UC29-panoramica.md) | Panoramica del giorno (mock 1b) | Indicatori, coda "Da gestire" con azioni dirette (riprova, apri fattura, converti, proponi upgrade, reinvia inviti), servizi, attività recente | `GET /api/overview`, `GET /api/notifications`, `POST /api/users/invites/resend` | Pagina iniziale del mock 1b | ✅ |
 | [UC30](../use-cases/UC30-ricerca-globale.md) | Ricerca globale ⌘K | Clienti e utenti insieme, azioni rapide, scorciatoie ⌘K/Ctrl+K, N, Esc | `GET /api/search` | Barra di ricerca nell'intestazione e palette | ✅ |
 | [UC31](../use-cases/UC31-impersonificazione.md) | Impersonificazione (EXP-12) | Utente attivo, motivo, 5–60 minuti, audit; token nel frammento dell'indirizzo | `GET /api/impersonation`, `POST /api/users/{id}/impersonate` | Pulsante "Impersona" nella scheda cliente (mock 1d), disattivato se non configurata | ✅ (richiede token exchange in Keycloak) |
-| [UC19](../use-cases/UC19-gestire-utente.md) | Gestire un utente (EXP-06, mock 1f) | Stati Invito inviato / Attivo / Sospeso / Disattivato; modifica di dati, profili ed MFA; reinvio invito, reset password, disattiva/riattiva; tutto nello storico | `GET/PUT /api/users/{id}`, `POST /api/users/{id}/invite\|reset-password\|disable\|enable` | Pannello laterale con azioni, profili raggruppati per cliente cliccabili e dettagli | ✅ (richiede la configurazione Keycloak) |
-| [UC20](../use-cases/UC20-importare-utenti.md) | Importare utenti da CSV (EXP-06) | Anteprima con errori per riga (codici di UC6), poi creazione delle righe valide; max 500 righe | `POST /api/users/import` | Dialog "Importa CSV" con modello scaricabile | ✅ |
-| [UC15](../use-cases/UC15-catalogo-moduli.md) | Catalogo dei moduli (EXP-01) | Core sempre presente; registrazione da manifest JSON con versione semantica, dipendenze e permessi; nuova versione = stesso id; deprecazione | `GET/POST /api/modules`, `PUT /api/modules/{id}/status` | Pagina Moduli con manifest da incollare, stati e numero di clienti | ✅ |
-| [UC16](../use-cases/UC16-piani.md) | Piani commerciali (EXP-02) | Codice unico, prezzo e periodicità, prova 0–90 giorni, limiti di utenti e unità, moduli inclusi | `GET/POST/PUT /api/plans` | Pagina Piani con form di creazione e modifica | ✅ |
-| [UC17](../use-cases/UC17-sottoscrizione.md) | Sottoscrizione del cliente (EXP-03) | Piano con prova e add-on; moduli con dipendenze; limiti del piano anche per i nuovi utenti (UC6); prezzo bloccato | `GET/PUT /api/tenants/{id}/subscription`, `GET /api/subscriptions` | Scheda "Abbonamento e moduli", badge del piano nell'intestazione, pagina Sottoscrizioni, passo 2 del wizard | ✅ |
-| [UC18](../use-cases/UC18-provisioning.md) | Provisioning dei moduli (EXP-03) | Hook del manifest; stato per modulo con errore e tentativi; riprova manuale e automatica (3 tentativi) | `POST /api/tenants/{id}/modules/{moduleId}/retry`, job `ProvisioningRetryJob` | Card "Moduli attivi" (mock 1d), pulsante Riprova, conteggio dei falliti in Sottoscrizioni | ✅ |
-| GEN | Sicurezza | Ogni operazione richiede autenticazione e ruolo `Administrator`; `/health` anonimo | Policy globale sui controller | Login obbligatorio, logout | ✅ |
+| GEN | Sicurezza | Ogni operazione richiede autenticazione e ruolo `Administrator` (l'invio dell'uso anche `UsageReporter`); `/health` anonimo | Policy globale sui controller | Login obbligatorio, logout | ✅ |
 
 Funzionalità trasversali già presenti:
 
@@ -97,9 +103,14 @@ Funzionalità trasversali già presenti:
 - **Layout responsive**, con menu laterale richiudibile.
 - **Errori di validazione per campo**: gli stessi codici (`Required`, `InvalidFormat`, `MaxLengthExceeded`, `NotUnique`, `InvalidValue`) arrivano dal backend e vengono tradotti dal frontend.
 - **Log strutturati** NLog in JSON, con traceId e utente.
-- **Health check** su `/health`.
+- **Health check** su `/health` e stato dei servizi collegati (UC26).
+- **Ricerca globale** ⌘K/Ctrl+K e scorciatoia **N** per il nuovo cliente (UC30).
+- **Campanella** con le cose da gestire, anche come numero sulla Panoramica (UC28).
+- **URL come stato**: filtri, pagine, pannelli aperti e schede sono nell'indirizzo, quindi condivisibili e salvabili come viste (UC22).
 
 ## 4. Verifica end-to-end con screenshot
+
+> Questa verifica è stata fatta **prima** del lavoro sui mock: molti KO sono stati risolti nelle fasi successive (vedi la colonna Stato della sezione 5). La nuova verifica E2E di tutte le schermate si farà con il Keycloak configurato (checklist nel piano di lavoro).
 
 **Come è stata fatta.** Il 22/10/2026 l'ambiente locale è stato avviato con Aspire (Postgres in container, backend, frontend su `localhost:5173`) e collegato al Keycloak reale (`auth.fin-horizon.com`, realm `PSAAS`). Lo script Playwright (Microsoft Edge, 1440×900) ha usato l'applicazione come un amministratore: login manuale, poi navigazione dai link interni. Per ogni passo ha salvato uno screenshot, l'esito, gli avvisi mostrati e le chiamate `/api` con il loro stato HTTP. Gli esiti sono stati poi ricontrollati sugli screenshot.
 
@@ -334,14 +345,16 @@ Oggi esiste solo `Administrator`.
 
 | Funzionalità attuale | Evoluzione |
 |---|---|
-| UC1 Cercare clienti | Filtri per stato (EXP-04), piano (EXP-02), modulo attivo (EXP-03); colonne con piano e scadenza |
-| UC2 Scheda cliente | Diventa a schede: Anagrafica · Organizzazione · Abbonamento e moduli · Utenti · Uso · Fatture · Storico |
-| UC3 Attivare cliente | Diventa il primo passo del wizard di onboarding (EXP-04) |
+| UC1 Cercare clienti | ✅ fatto con UC21: filtri per stato, piano, modulo, provincia, rinnovo; colonne con piano, utenti e scadenza |
+| UC2 Scheda cliente | ✅ fatto: Panoramica · Anagrafica · Organizzazione · Abbonamento e moduli · Utenti · Uso · Fatture · Storico |
+| UC3 Attivare cliente | ✅ fatto: primo passo del wizard di onboarding (UC14) |
 | UC5 Organizzazione | I profili guadagnano i permessi per modulo (EXP-05) |
-| UC6/UC7 Utenti | Ciclo di vita completo (EXP-06) e limiti del piano (EXP-02) |
+| UC6/UC7 Utenti | ✅ fatto: ciclo di vita completo (UC19, UC20) e limiti del piano |
 | UC9 Panoramica profili | Profili modello riutilizzabili (EXP-05) |
 
 ## 7. Roadmap proposta
+
+Stato al 26/10/2026: le fasi 0, 1 e 3 sono complete, così come EXP-06, EXP-11 ed EXP-12; restano EXP-05, EXP-07, EXP-13–17.
 
 | Fase | Contenuto | Risultato |
 |---|---|---|
@@ -360,14 +373,21 @@ Oggi esiste solo `Administrator`.
 
 | Epica | Use case derivati | Stato |
 |---|---|---|
-| EXP-01 | UC15 | ✅ implementata (senza marketplace) |
-| EXP-04 | UC13, UC14 | ✅ implementata |
-| EXP-10 | UC12 | ✅ implementata |
-| EXP-02 | UC16, UC17-S3/S6 | ✅ implementata (senza versioni dei piani: il prezzo è copiato nella sottoscrizione) |
-| EXP-03 | UC17, UC18 | ✅ implementata |
-| EXP-12 | UC31 | ✅ implementata (token exchange Keycloak dietro porta; la piattaforma deve leggere il token dal frammento `/impersonate`) |
-| EXP-11 | UC27, UC28 | ✅ implementata (email via SMTP dietro porta; l'annuncio nella piattaforma è registrato, la sua lettura dai moduli arriverà con il core) |
-| EXP-09 | UC25, UC26 | ✅ implementata (metriche dei moduli via API; niente consumi a pagamento) |
-| EXP-08 | UC23, UC24 | ✅ implementata (interna: senza SDI né pagamenti online, porta `IInvoiceTransmitter` pronta) |
-| EXP-06 | UC7 (filtri), UC19, UC20 | ✅ implementata (senza ultimo accesso storico oltre gli eventi conservati da Keycloak) |
-| … | | |
+| EXP-01 Catalogo dei moduli | UC15 | ✅ implementata (senza marketplace) |
+| EXP-02 Piani | UC16, UC17-S3/S6 | ✅ implementata (senza versioni dei piani: il prezzo è copiato nella sottoscrizione) |
+| EXP-03 Sottoscrizioni e provisioning | UC17, UC18 | ✅ implementata |
+| EXP-04 Ciclo di vita e onboarding | UC13, UC14 | ✅ implementata |
+| EXP-05 Permessi per modulo | – | proposta |
+| EXP-06 Utenti completi | UC7 (filtri), UC19, UC20 | ✅ implementata (ultimo accesso limitato agli eventi conservati da Keycloak) |
+| EXP-07 Configurazione per cliente e modulo | – | proposta |
+| EXP-08 Fatturazione | UC23, UC24 | ✅ implementata (interna: senza SDI né pagamenti online, porta `IInvoiceTransmitter` pronta) |
+| EXP-09 Uso e salute | UC25, UC26 | ✅ implementata (metriche dei moduli via API; niente consumi a pagamento) |
+| EXP-10 Audit e storico | UC12 | ✅ implementata |
+| EXP-11 Comunicazioni | UC27, UC28 | ✅ implementata (email via SMTP dietro porta; la lettura degli annunci dai moduli arriverà con il core) |
+| EXP-12 Supporto (impersonificazione) | UC31 | ✅ implementata (token exchange Keycloak dietro porta; la piattaforma deve leggere il token dal frammento `/impersonate`) |
+| EXP-13 Ruoli del portale | – | proposta |
+| EXP-14 KPI di business | UC29 (indicatori operativi) | in parte: la Panoramica ha gli indicatori operativi, non i KPI economici (MRR, churn) |
+| EXP-15 API per i clienti | – | proposta |
+| EXP-16 Rilascio graduale | – | proposta |
+| EXP-17 Conformità | – | proposta |
+| Elenco e ricerca (mock 1b–1c) | UC21, UC22, UC29, UC30 | ✅ implementati |

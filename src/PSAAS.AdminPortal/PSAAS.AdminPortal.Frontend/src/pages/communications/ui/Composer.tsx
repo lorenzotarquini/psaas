@@ -22,6 +22,7 @@ export function Composer({ selection, onSent, onClose }: { selection: string[]; 
   const [body, setBody] = useState('')
   const [channels, setChannels] = useState<Channel[]>(['InApp', 'Email'])
   const [useSelection, setUseSelection] = useState(selection.length > 0)
+  const [confirming, setConfirming] = useState(false)
   const [filters, setFilters] = useState<Required<Pick<CommunicationSegment, 'statuses' | 'planIds'>> & { moduleId?: string }>({ statuses: ['Active', 'Trial'], planIds: [] })
   const segment: CommunicationSegment = useSelection ? { tenantIds: selection } : filters
   // Debounced as JSON: the segment object is new on every render.
@@ -32,11 +33,12 @@ export function Composer({ selection, onSent, onClose }: { selection: string[]; 
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!window.confirm(t('communications.confirm', { count: preview?.count ?? 0 }))) return
+    if (!confirming) return setConfirming(true)
     try {
       onSent((await send.mutateAsync({ subject, body, channels, segment, visibleUntil: null })).id)
     } catch {
       // Shown from send.error.
+      setConfirming(false)
     }
   }
 
@@ -123,15 +125,29 @@ export function Composer({ selection, onSent, onClose }: { selection: string[]; 
         {error('segment')}
       </fieldset>
 
-      <div className="flex justify-end gap-2">
-        <button type="button" className="btn btn-ghost btn-sm" onClick={onClose}>
-          {t('unsaved.discard')}
-        </button>
-        <button type="submit" className="btn btn-primary btn-sm" disabled={send.isPending || !preview?.count}>
-          {send.isPending ? <span className="loading loading-spinner loading-xs" /> : <FontAwesomeIcon icon={faPaperPlane} />}
-          {t('communications.send')}
-        </button>
-      </div>
+      {confirming ? (
+        // Second step before sending: emails cannot be taken back.
+        <div role="alertdialog" aria-live="assertive" className="flex flex-wrap items-center justify-end gap-3 rounded-box bg-neutral px-4 py-2.5 text-neutral-content">
+          <span className="mr-auto font-semibold text-white">{t('communications.confirm', { count: preview?.count ?? 0 })}</span>
+          <button type="button" className="btn btn-ghost btn-sm text-neutral-content" onClick={() => setConfirming(false)}>
+            {t('unsaved.discard')}
+          </button>
+          <button type="submit" autoFocus className="btn btn-primary btn-sm" disabled={send.isPending}>
+            {send.isPending ? <span className="loading loading-spinner loading-xs" /> : <FontAwesomeIcon icon={faPaperPlane} />}
+            {t('communications.confirmSend')}
+          </button>
+        </div>
+      ) : (
+        <div className="flex justify-end gap-2">
+          <button type="button" className="btn btn-ghost btn-sm" onClick={onClose}>
+            {t('unsaved.discard')}
+          </button>
+          <button type="submit" className="btn btn-primary btn-sm" disabled={!preview?.count}>
+            <FontAwesomeIcon icon={faPaperPlane} />
+            {t('communications.send')}
+          </button>
+        </div>
+      )}
     </form>
   )
 }

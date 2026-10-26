@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMemo } from 'react'
-import { FormProvider, useForm } from 'react-hook-form'
+import { FormProvider, useForm, useWatch } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { useUpdateTenantOrganization, type TenantDetail } from '@/entities/tenant'
 import {
@@ -8,6 +8,7 @@ import {
   OrganizationMatrix,
   organizationFromTenant,
   organizationSchema,
+  type OrganizationValues,
   removedSavedProfiles,
   toOrganizationRequest,
 } from '@/features/organization-editor'
@@ -23,7 +24,7 @@ export function OrganizationTab({ tenant }: { tenant: TenantDetail }) {
   const update = useUpdateTenantOrganization(tenant.id)
   const original = useMemo(() => organizationFromTenant(tenant), [tenant])
   const form = useForm({ resolver: zodResolver(organizationSchema), defaultValues: original })
-  const values = form.watch()
+  const values = useWatch({ control: form.control }) as OrganizationValues
   const userCounts = Object.fromEntries(tenant.profiles.map((p) => [p.id, p.userCount]))
 
   // UC5-R4: the bar says who loses what before saving (mock 1d).

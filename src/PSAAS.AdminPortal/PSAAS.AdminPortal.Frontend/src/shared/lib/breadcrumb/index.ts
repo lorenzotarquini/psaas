@@ -1,1 +1,2 @@
-export { BreadcrumbProvider, useBreadcrumb, useCrumbs, type Crumb } from './breadcrumb'
+export { BreadcrumbProvider } from './breadcrumb'
+export { useBreadcrumb, useCrumbs, type Crumb } from './context'

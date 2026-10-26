@@ -779,7 +779,8 @@
       "Sent": "Sent",
       "Failed": "Error",
       "Skipped": "Not sent"
-    }
+    },
+    "confirmSend": "Confirm and send"
   },
   "notifications": {
     "title": "To handle",

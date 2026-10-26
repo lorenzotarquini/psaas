@@ -24,4 +24,4 @@ export {
   type TenantSummary,
   type UniqueTenantField,
 } from './api/tenantApi'
-export { TenantStatusBadge, tenantStatusTone } from './ui/TenantStatusBadge'
+export { TenantStatusBadge } from './ui/TenantStatusBadge'

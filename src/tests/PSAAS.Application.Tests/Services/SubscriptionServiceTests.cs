@@ -1,6 +1,7 @@
 using PSAAS.Application.Abstractions.Tenants;
 using PSAAS.Application.Abstractions.Users;
 using PSAAS.Application.Contracts.Catalog;
+using PSAAS.Application.Services.Billing;
 using PSAAS.Application.Services.Catalog;
 using PSAAS.Application.Services.Tenants;
 using PSAAS.Domain;
@@ -23,9 +24,13 @@ public sealed class SubscriptionServiceTests
     public SubscriptionServiceTests() =>
         _tenants.Tenant = Tenant.Create("Alfa Srl", "11111111111", "IT11111111111", "alfa@pec.it", new Address("Via Roma 1", "Roma", "00118", "IT"));
 
+    private readonly FakeInvoiceRepository _invoices = new();
+
+    private TenantLifecycleService Lifecycle => new(_tenants, new FakeTenantWriteRepository(), _audit, TimeProvider.System, _subscriptions);
+
     private SubscriptionService Service => new(
-        _tenants, _catalog, _subscriptions, _provisioner, _users,
-        new TenantLifecycleService(_tenants, new FakeTenantWriteRepository(), _audit, TimeProvider.System, _subscriptions),
+        _tenants, _catalog, _subscriptions, _provisioner, _users, Lifecycle,
+        new BillingService(_invoices, new FakeInvoiceTransmitter(), _subscriptions, _tenants, Lifecycle, _audit, new BillingOptions(), TimeProvider.System),
         _audit, TimeProvider.System);
 
     private PlanReadModel GivenPlan(int? maxUsers = null, int trialDays = 0, params string[] modules)

@@ -2,6 +2,7 @@ using NLog;
 using NLog.Extensions.Logging;
 using NLog.Web;
 using PSAAS.Application;
+using PSAAS.Application.Services.Billing;
 using PSAAS.AdminPortal.Backend.Infrastructure;
 using PSAAS.AdminPortal.Backend.Jobs;
 using PSAAS.Application.Abstractions.Audit;
@@ -30,6 +31,8 @@ try
     builder.Services.AddPsaasInfrastructure(builder.Configuration);
     builder.Services.AddScoped<ICurrentActor, HttpCurrentActor>();
     builder.Services.AddHostedService<ProvisioningRetryJob>();
+    builder.Services.AddHostedService<BillingJob>();
+    builder.Services.AddSingleton(new BillingOptions(builder.Configuration.GetValue("Billing:SuspendAfterDays", 30)));
     // UC6/UC7: users live in Keycloak, reached through its admin API with this client's service account
     // (Keycloak:ClientSecret, roles view-users and manage-users of realm-management).
     builder.Services.AddTransient<KeycloakClientCredentialsHandler>();

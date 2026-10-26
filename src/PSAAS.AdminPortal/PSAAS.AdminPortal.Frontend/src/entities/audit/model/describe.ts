@@ -18,6 +18,9 @@ const counts = (t: TFunction, profiles: number, units: number) =>
 
 const list = (value: unknown) => (Array.isArray(value) ? (value as unknown[]) : [])
 
+// Amounts in the audit details are plain numbers in euro.
+const money = (value: unknown) => `${Number(value).toFixed(2).replace('.', ',')} €`
+
 // One function per action code; an unknown code still reads as a sentence with the code itself.
 export function describeAuditEvent(event: AuditEvent, t: TFunction): AuditSentence {
   const d = event.details ?? {}
@@ -108,6 +111,20 @@ export function describeAuditEvent(event: AuditEvent, t: TFunction): AuditSenten
         ].join(' · '),
       }
     }
+    case 'invoice.issued':
+      return {
+        what: t(d.kind === 'CreditNote' ? 'audit.actions.invoice.creditNote' : 'audit.actions.invoice.issued'),
+        detail: money(d.total),
+      }
+    // The object of the sentence is the invoice number (targetName); the detail adds amounts and references.
+    case 'invoice.paid':
+      return { what: t('audit.actions.invoice.paid'), detail: [money(d.total), d.reference ? String(d.reference) : ''].filter(Boolean).join(' · ') }
+    case 'invoice.reminder.sent':
+      return { what: t('audit.actions.invoice.reminder'), detail: `${t('audit.details.reminder', { count: Number(d.reminder) })} · ${money(d.total)}` }
+    case 'invoice.cancelled':
+      return { what: t('audit.actions.invoice.cancelled'), detail: `${t('audit.details.creditNoteOf', { number: String(d.creditNote) })} · ${String(d.reason)}` }
+    case 'subscription.expired':
+      return { what: t('audit.actions.subscription.expired'), detail: String(d.plan) }
     case 'module.provisioned':
       return { what: t('audit.actions.module.provisioned'), detail: `${String(d.module)} v${String(d.version)}` }
     case 'module.provisioning.failed':

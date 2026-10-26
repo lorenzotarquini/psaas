@@ -85,3 +85,9 @@ public sealed record SubscriptionView(
 public sealed record TenantModuleView(string ModuleId, string Status, int Attempts, string? LastError);
 
 public sealed record ImportRowView(int Row, string Email, Dictionary<string, string> Errors, UserView? Created);
+
+public sealed record InvoiceView(
+    Guid Id, string Number, string Kind, Guid TenantId, DateTimeOffset IssuedAt, DateTimeOffset DueAt,
+    decimal Net, decimal Vat, decimal Total, string Status, int RemindersSent, Guid? RelatedInvoiceId, string? PaymentReference);
+
+public sealed record BillingSummaryView(decimal ToCollect, decimal Overdue, int OverdueCount, decimal PaidThisMonth, decimal IssuedThisMonth);

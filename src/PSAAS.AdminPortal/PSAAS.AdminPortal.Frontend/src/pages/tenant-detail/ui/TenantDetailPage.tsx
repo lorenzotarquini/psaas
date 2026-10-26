@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useParams, useSearchParams } from 'react-router'
 import { useTenantSubscription } from '@/entities/catalog'
+import { useInvoices } from '@/entities/invoice'
 import { TenantStatusBadge, useTenant, type TenantDetail } from '@/entities/tenant'
 import { useUsers } from '@/entities/user'
 import { ApiError } from '@/shared/api'
@@ -20,9 +21,10 @@ import { RegistryCard } from './RegistryCard'
 import { RegistryTab } from './RegistryTab'
 import { StatusActions } from './StatusActions'
 import { SubscriptionTab } from './SubscriptionTab'
+import { InvoicesTab } from './InvoicesTab'
 import { UsersTab } from './UsersTab'
 
-const tabs: TenantTab[] = ['overview', 'registry', 'organization', 'subscription', 'users', 'history']
+const tabs: TenantTab[] = ['overview', 'registry', 'organization', 'subscription', 'users', 'invoices', 'history']
 
 // UC2 (mock 1d): everything about a tenant, one tab per area; registry (UC4) and organization (UC5) edit in place.
 export function TenantDetailPage() {
@@ -52,6 +54,7 @@ function TenantView({ tenant }: { tenant: TenantDetail }) {
   const { data: subscription } = useTenantSubscription(tenant.id)
   // Only the count of the tab: one row is enough.
   const userCount = useUsers({ search: '', tenantId: tenant.id, page: 1, pageSize: 1 }).data?.totalCount
+  const invoiceCount = useInvoices({ tenantId: tenant.id, page: 1, pageSize: 1 }).data?.totalCount
 
   const content: Record<string, ReactNode> = {
     overview: <OrganizationCard tenant={tenant} />,
@@ -60,6 +63,7 @@ function TenantView({ tenant }: { tenant: TenantDetail }) {
     organization: <OrganizationTab tenant={tenant} />,
     subscription: <SubscriptionTab tenantId={tenant.id} subscription={subscription ?? null} />,
     users: <UsersTab tenantId={tenant.id} />,
+    invoices: <InvoicesTab tenantId={tenant.id} />,
     history: <HistoryCard tenantId={tenant.id} full />,
   }
 
@@ -104,7 +108,7 @@ function TenantView({ tenant }: { tenant: TenantDetail }) {
               key,
               label: t(`tenantDetail.tabs.${key}`),
               to: tenantPath(tenant.id, key),
-              count: key === 'users' ? userCount : undefined,
+              count: key === 'users' ? userCount : key === 'invoices' ? invoiceCount : undefined,
             }))}
           />
         </div>

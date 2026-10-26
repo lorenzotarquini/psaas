@@ -28,6 +28,8 @@ public sealed class PsaasDbContext(DbContextOptions<PsaasDbContext> options) : D
 
     public DbSet<SavedViewDbModel> SavedViews => Set<SavedViewDbModel>();
 
+    public DbSet<Billing.InvoiceDbModel> Invoices => Set<Billing.InvoiceDbModel>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<TenantDbModel>(entityBuilder =>
@@ -195,6 +197,28 @@ public sealed class PsaasDbContext(DbContextOptions<PsaasDbContext> options) : D
             entityBuilder.Property(view => view.Name).IsRequired().HasMaxLength(40);
             entityBuilder.Property(view => view.Query).IsRequired().HasMaxLength(2000);
             entityBuilder.HasIndex(view => new { view.OwnerId, view.Area });
+        });
+
+        // EXP-08: invoices and credit notes, numbered per year (UC23-R1).
+        modelBuilder.Entity<Billing.InvoiceDbModel>(entityBuilder =>
+        {
+            entityBuilder.ToTable("Invoices");
+            entityBuilder.HasKey(invoice => invoice.Id);
+            entityBuilder.HasIndex(invoice => new { invoice.Year, invoice.Sequence }).IsUnique();
+            entityBuilder.HasIndex(invoice => invoice.TenantId);
+            entityBuilder.HasIndex(invoice => invoice.Status);
+            entityBuilder.Property(invoice => invoice.Kind).IsRequired().HasMaxLength(20);
+            entityBuilder.Property(invoice => invoice.Status).IsRequired().HasMaxLength(20);
+            entityBuilder.Property(invoice => invoice.TenantName).IsRequired().HasMaxLength(200);
+            entityBuilder.Property(invoice => invoice.Lines).HasColumnType("jsonb");
+            entityBuilder.Property(invoice => invoice.PaymentReference).HasMaxLength(100);
+            foreach (var amount in new[] { nameof(Billing.InvoiceDbModel.Net), nameof(Billing.InvoiceDbModel.Vat), nameof(Billing.InvoiceDbModel.Total) })
+            {
+                entityBuilder.Property<decimal>(amount).HasPrecision(12, 2);
+            }
+
+            entityBuilder.Property(invoice => invoice.VatRate).HasPrecision(5, 4);
+            entityBuilder.HasOne<TenantDbModel>().WithMany().HasForeignKey(invoice => invoice.TenantId).OnDelete(DeleteBehavior.Restrict);
         });
 
         base.OnModelCreating(modelBuilder);

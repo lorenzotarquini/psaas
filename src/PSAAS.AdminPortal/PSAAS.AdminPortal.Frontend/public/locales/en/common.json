@@ -381,7 +381,8 @@
       },
       "subscription": {
         "created": "subscribed a plan for",
-        "changed": "changed the plan of"
+        "changed": "changed the plan of",
+        "expired": "saw the subscription expire for"
       },
       "module": {
         "provisioned": "activated a module for",
@@ -392,6 +393,13 @@
       "plan": {
         "created": "created the plan",
         "updated": "updated the plan"
+      },
+      "invoice": {
+        "issued": "issued the invoice",
+        "creditNote": "issued the credit note",
+        "paid": "registered the payment of the invoice",
+        "reminder": "sent a payment reminder for the invoice",
+        "cancelled": "cancelled the invoice"
       }
     },
     "fields": {
@@ -424,7 +432,10 @@
       "modulesAdded": "modules added: {{names}}",
       "modulesRemoved": "modules removed: {{names}}",
       "profilesAdded": "profiles added: {{names}}",
-      "profilesRemoved": "profiles removed: {{names}}"
+      "profilesRemoved": "profiles removed: {{names}}",
+      "reminder_one": "reminder {{count}}",
+      "reminder_other": "reminder {{count}}",
+      "creditNoteOf": "credit note {{number}}"
     },
     "history": "History",
     "historyAll": "Whole history"
@@ -628,5 +639,60 @@
     "units_one": "{{count}} unit",
     "units_other": "{{count}} units",
     "unitsUnlimited": "unlimited units"
+  },
+  "billing": {
+    "subtitle": "Invoices of subscription periods, payments and reminders",
+    "run": "Run billing",
+    "runHint": "Renewals, trial ends, due dates, reminders and suspensions: runs by itself every day",
+    "runResult": "Billing done: {{issued}} invoices issued, {{expired}} subscriptions expired, {{reminders}} reminders, {{suspended}} tenants suspended.",
+    "kpi": {
+      "toCollect": "To collect",
+      "overdue": "Overdue",
+      "paidThisMonth": "Collected this month",
+      "issuedThisMonth": "Invoiced this month",
+      "overdueCount_one": "{{count}} overdue invoice",
+      "overdueCount_other": "{{count}} overdue invoices"
+    },
+    "all": "All",
+    "status": {
+      "Issued": "Issued",
+      "Overdue": "Overdue",
+      "Paid": "Paid",
+      "Cancelled": "Cancelled"
+    },
+    "kind": {
+      "Invoice": "Invoice",
+      "CreditNote": "Credit note"
+    },
+    "searchPlaceholder": "Tenant or number",
+    "empty": "No invoices.",
+    "noTenantInvoices": "No invoices for this tenant.",
+    "number": "Number",
+    "customer": "Tenant",
+    "issuedAt": "Issued on",
+    "dueAt": "Due",
+    "period": "Period",
+    "total": "Total",
+    "net": "Net",
+    "vat": "VAT {{rate}}%",
+    "statusLabel": "Status",
+    "description": "Description",
+    "amount": "Amount",
+    "reminders_one": "{{count}} reminder",
+    "reminders_other": "{{count}} reminders",
+    "panel": "Invoice detail",
+    "closePanel": "Close the invoice",
+    "cancels": "Cancels",
+    "creditNote": "Credit note",
+    "reason": "Reason",
+    "paidAt": "Paid on",
+    "registerPayment": "Register payment",
+    "paymentDate": "Payment date",
+    "reference": "Reference",
+    "markPaid": "Mark as paid",
+    "cancel": "Cancel invoice",
+    "cancelReason": "Reason for cancelling",
+    "cancelHint": "A credit note of the same amount will be issued.",
+    "confirmCancel": "Cancel and issue credit note"
   }
 }

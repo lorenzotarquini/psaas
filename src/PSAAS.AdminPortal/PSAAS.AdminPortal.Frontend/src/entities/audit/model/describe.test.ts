@@ -70,6 +70,13 @@ describe('describeAuditEvent', () => {
     expect(sentence.detail).toBe('Cognome: Rossi → Russo · profili aggiunti: Revisore · Beta Snc')
   })
 
+  // UC24: payments name the invoice, the amount and the reference.
+  it('tells a payment', () => {
+    const sentence = describeAuditEvent(event('invoice.paid', { number: '2026/0001', total: 122, reference: 'CRO 123' }), i18next.t)
+    expect(sentence.what).toBe('ha registrato il pagamento della fattura')
+    expect(sentence.detail).toBe('122,00 € · CRO 123')
+  })
+
   // UC18-S3: a failed provisioning names the module and the error.
   it('tells a failed provisioning with its error', () => {
     const sentence = describeAuditEvent(event('module.provisioning.failed', { module: 'Magazzino', version: '1.4.0', error: 'timeout' }), i18next.t)

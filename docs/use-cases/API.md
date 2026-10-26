@@ -27,6 +27,8 @@ Errori di validazione: `400` `ValidationProblem` con un codice per campo in `err
 | UC19 | `GET/PUT /api/users/{id}` · `POST /api/users/{id}/invite|reset-password|disable|enable` | esiste |
 | UC20 | `POST /api/users/import` | esiste |
 | UC22 | `GET /api/saved-views?area=` · `POST /api/saved-views` · `DELETE /api/saved-views/{id}` | esiste |
+| UC23 | `POST /api/billing/run` (e fatture emesse da UC17) | esiste |
+| UC24 | `GET /api/invoices?tenantId=&status=&search=&page=&pageSize=` · `GET /api/invoices/summary` · `GET /api/invoices/{id}` · `POST /api/invoices/{id}/payments` · `POST /api/invoices/{id}/cancel` | esiste |
 
 ## Contratti esistenti (sintesi)
 
@@ -84,6 +86,20 @@ Risposta: `{ items: [utente], totalCount, page, pageSize }` con utente = `{ id, 
 - `GET /api/saved-views?area=tenants` → `[{ id, area, name, query, createdAt }]` dell'amministratore del token.
 - `POST /api/saved-views` `{ area, name, query }` → `201` + vista · `400` (`area` `InvalidValue` se non è `tenants` o `users`; `name` `Required`, `MaxLengthExceeded` oltre 40, `NotUnique` tra le proprie viste senza maiuscole, `LimitExceeded` oltre 20 viste).
 - `DELETE /api/saved-views/{id}` → `204`, `404` se la vista non esiste o è di un altro amministratore.
+
+### UC23 – Fatturazione dei periodi
+- Fattura = `{ id, number: "2026/0001", kind: Invoice|CreditNote, tenantId, tenantName, tenantVatNumber, tenantCertifiedEmail, tenantSdiCode, issuedAt, dueAt, periodFrom, periodTo, lines: [{ description, quantity, unitPrice, amount }], net, vatRate, vat, total, status: Issued|Overdue|Paid|Cancelled, paidAt, paymentReference, remindersSent, lastReminderAt, relatedInvoiceId, relatedNumber, cancelReason }`. I dati del cliente sono quelli al momento dell'emissione.
+- UC17 emette la fattura del primo periodo pagato (non in prova, prezzo > 0) e, a periodo in corso, la differenza pro-rata del cambio di piano (nota di credito se negativa).
+- `POST /api/billing/run` → `200` `{ issued, expired, reminders, suspended }`: rinnovi (anche arretrati), fine prova, scadenze, solleciti, sospensioni. Lo stesso processo gira ogni `Billing:RunHours` ore (default 24, 0 = spento); ripeterlo non crea doppioni.
+- Audit: `invoice.issued` (`{ number, kind, total }`), `subscription.expired` (`{ plan }`).
+
+### UC24 – Incassi, solleciti, annullamenti
+- `GET /api/invoices` dal più recente; `status` sconosciuto, `page` < 1 o `pageSize` fuori 1–200 → `400`. `search` cerca nella ragione sociale e nel numero.
+- `GET /api/invoices/summary` → `{ toCollect, overdue, overdueCount, paidThisMonth, issuedThisMonth }` (totali IVA inclusa; il mese è quello UTC corrente).
+- `POST /api/invoices/{id}/payments` `{ paidAt: "YYYY-MM-DD", reference }` → `200` + fattura · `400` (`paidAt` `Required`, `InvalidValue` se non è una data o è futura; `reference` `MaxLengthExceeded` oltre 100) · `409` se non è aperta · `404`.
+- `POST /api/invoices/{id}/cancel` `{ reason }` → `200` + fattura annullata con `relatedInvoiceId` della nota di credito · `400` (`reason` `Required`) · `409` se pagata, annullata o è una nota di credito · `404`.
+- Processo giornaliero: fatture oltre la scadenza → `Overdue`, sollecito ogni 7 giorni, sospensione del cliente attivo o in prova scaduto da più di `Billing:SuspendAfterDays` giorni (default 30, 0 = mai) con motivo "Morosità: fattura N".
+- Audit: `invoice.paid` (`{ number, total, reference }`), `invoice.reminder.sent` (`{ number, reminder, total }`), `invoice.cancelled` (`{ number, reason, creditNote }`), `tenant.status.changed` per la sospensione.
 
 ### UC19 – Gestire un utente
 - `GET /api/users/{id}` → utente (come in UC7) · `404`.
@@ -148,4 +164,5 @@ Audit log, dal più recente: `{ items: [{ id, occurredAt, actorId, actorName, ac
   - Keycloak come archivio utenti: porta `IUserDirectory` sostituita da un archivio in memoria.
   - Lista comuni: porta `IItalianCityProvider` sostituita da una lista fissa.
   - Hook di provisioning dei moduli: porta `IModuleProvisioner` sostituita da hook simulati (`FakeModuleHooks.Failing`).
+  - Tempo: `TimeProvider` sostituito da un orologio che gli scenari spostano in avanti (`DaysPassAsync`) per scadenze e rinnovi; i token restano validati con l'ora reale.
 - Quello che i simulatori nascondono (chiamate HTTP verso Keycloak e verso la lista comuni, ordinamento e limite dei comuni) è verificato dai test unitari di Infrastructure.

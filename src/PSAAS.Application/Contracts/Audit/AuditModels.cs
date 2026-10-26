@@ -24,6 +24,11 @@ public static class AuditActions
     public const string SubscriptionChanged = "subscription.changed";
     public const string ModuleProvisioned = "module.provisioned";
     public const string ModuleProvisioningFailed = "module.provisioning.failed";
+    public const string SubscriptionExpired = "subscription.expired";
+    public const string InvoiceIssued = "invoice.issued";
+    public const string InvoicePaid = "invoice.paid";
+    public const string InvoiceReminderSent = "invoice.reminder.sent";
+    public const string InvoiceCancelled = "invoice.cancelled";
 }
 
 public static class AuditTargets
@@ -32,6 +37,7 @@ public static class AuditTargets
     public const string User = "user";
     public const string Module = "module";
     public const string Plan = "plan";
+    public const string Invoice = "invoice";
 }
 
 /// <summary>What happened, without the actor (added by the audit log from the current request).</summary>

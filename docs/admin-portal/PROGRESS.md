@@ -14,7 +14,7 @@ Piano: `C:\Users\ltarq\.claude\plans\voglio-che-prepari-un-abundant-quail.md` ·
 | 5 Moduli, piani, sottoscrizioni | ✅ | vedi log |
 | 6 Gestione utenti completa | ✅ | vedi log |
 | 7 Elenco clienti avanzato | ✅ | vedi log |
-| 8 Fatturazione interna | | |
+| 8 Fatturazione interna | ✅ | vedi log |
 | 9 Uso e stato dei servizi | | |
 | 10 Comunicazioni e notifiche | | |
 | 11 Panoramica, ricerca, impersonificazione | | |
@@ -22,7 +22,7 @@ Piano: `C:\Users\ltarq\.claude\plans\voglio-che-prepari-un-abundant-quail.md` ·
 
 ## Test rossi attesi
 
-Nessuno: dopo la fase 7 tutta la suite è verde (accettazione 195/195, unitari Application 114 e Infrastructure 55, Vitest 57).
+Nessuno: dopo la fase 8 tutta la suite è verde (accettazione 216/216, unitari Application 123 e Infrastructure 55, Vitest 59).
 
 ## Ambiente di sviluppo autonomo (fuori dal repo, nello scratchpad della sessione)
 
@@ -66,8 +66,15 @@ Per verificare l'interfaccia senza il login reale: provider OIDC locale (`devidp
 33. **Colonne scelte** salvate nel browser (`psaas-tenant-columns`); le viste salvate (UC22) sono invece sul server, per amministratore.
 34. **Export senza conteggio utenti** (eviterebbe migliaia di chiamate a Keycloak); valori che iniziano con `=+-@` neutralizzati contro la formula injection.
 35. **Utenti nell'elenco** contati con Keycloak solo per la pagina visibile (shortcut annotato); niente ordinamento per utenti.
+36. **Fatture emesse "oggi"** anche per periodi arretrati recuperati dal processo giornaliero: la scadenza parte dall'emissione.
+37. **Pro-rata su base giornaliera** (prezzo / 30 o 365 giorni) per i giorni che restano; nessuna fattura sotto il centesimo; gli add-on non hanno prezzo.
+38. **Note di credito già "Pagate"** (compensate) e importi sempre positivi: è il tipo a dire che è uno storno.
+39. **Niente riattivazione automatica** dopo il pagamento di un cliente sospeso per morosità: resta all'amministratore (UC13).
+40. **Solleciti registrati** sulla fattura e nello storico; l'email partirà con le comunicazioni (fase 10).
+41. **Orologio dei test di accettazione** spostabile (`FakeTimeProvider`); i token JWT restano validati sull'ora reale.
+42. **Pagina Fatturazione** disegnata con il sistema 1a (non c'è un mock): da far vedere al designer.
 
 ## Da far vedere al designer
 
 - Tema scuro, vista mobile (sidebar a scomparsa, tabelle con scorrimento orizzontale).
-- Pagine senza mock: Profili, Impostazioni, 404 Moduli, Piani, Sottoscrizioni, Audit log, dialog Importa CSV, scheda Utenti del cliente, dialog Cambia piano multiplo, viste salvate (e in seguito Fatturazione, Comunicazioni).
+- Pagine senza mock: Profili, Impostazioni, 404 Moduli, Piani, Sottoscrizioni, Audit log, dialog Importa CSV, scheda Utenti del cliente, dialog Cambia piano multiplo, viste salvate, Fatturazione e pannello fattura (e in seguito Comunicazioni).

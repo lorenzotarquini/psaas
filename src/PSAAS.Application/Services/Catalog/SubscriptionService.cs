@@ -6,6 +6,7 @@ using PSAAS.Application.Abstractions.Users;
 using PSAAS.Application.Contracts.Audit;
 using PSAAS.Application.Contracts.Catalog;
 using PSAAS.Application.Contracts.Tenants;
+using PSAAS.Application.Services.Billing;
 using PSAAS.Application.Services.Tenants;
 using PSAAS.Domain;
 
@@ -23,6 +24,7 @@ public sealed class SubscriptionService(
     IModuleProvisioner provisioner,
     IUserDirectory users,
     TenantLifecycleService lifecycle,
+    BillingService billing,
     IAuditLog audit,
     TimeProvider clock)
 {
@@ -77,6 +79,13 @@ public sealed class SubscriptionService(
         if (!trial && tenant.Lifecycle.Status == TenantStatus.Trial)
         {
             await lifecycle.ChangeStatusAsync(tenantId, new TenantStatusChangeRequest(nameof(TenantStatus.Active), null), cancellationToken);
+        }
+
+        // UC23: a first paid period is invoiced; a change of plan in a paid period pays (or credits) the difference.
+        if (!trial)
+        {
+            if (current is { Status: SubscriptionStatuses.Active }) await billing.InvoicePlanChangeAsync(current, subscription, cancellationToken);
+            else await billing.InvoicePeriodAsync(subscription, now, cancellationToken);
         }
 
         var before = current?.Modules.Where(m => m.Status == ProvisioningStatuses.Active).Select(m => m.ModuleId).ToHashSet() ?? [];

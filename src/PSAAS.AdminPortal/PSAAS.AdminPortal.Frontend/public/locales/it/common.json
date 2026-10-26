@@ -381,7 +381,8 @@
       },
       "subscription": {
         "created": "ha sottoscritto un piano per",
-        "changed": "ha cambiato il piano di"
+        "changed": "ha cambiato il piano di",
+        "expired": "ha visto scadere la sottoscrizione di"
       },
       "module": {
         "provisioned": "ha attivato un modulo per",
@@ -392,6 +393,13 @@
       "plan": {
         "created": "ha creato il piano",
         "updated": "ha modificato il piano"
+      },
+      "invoice": {
+        "issued": "ha emesso la fattura",
+        "creditNote": "ha emesso la nota di credito",
+        "paid": "ha registrato il pagamento della fattura",
+        "reminder": "ha sollecitato il pagamento della fattura",
+        "cancelled": "ha annullato la fattura"
       }
     },
     "fields": {
@@ -424,7 +432,10 @@
       "modulesAdded": "moduli aggiunti: {{names}}",
       "modulesRemoved": "moduli tolti: {{names}}",
       "profilesAdded": "profili aggiunti: {{names}}",
-      "profilesRemoved": "profili tolti: {{names}}"
+      "profilesRemoved": "profili tolti: {{names}}",
+      "reminder_one": "{{count}}° sollecito",
+      "reminder_other": "{{count}}° sollecito",
+      "creditNoteOf": "nota di credito {{number}}"
     },
     "history": "Storico",
     "historyAll": "Tutto lo storico"
@@ -628,5 +639,60 @@
     "units_one": "{{count}} unità",
     "units_other": "{{count}} unità",
     "unitsUnlimited": "unità illimitate"
+  },
+  "billing": {
+    "subtitle": "Fatture dei periodi delle sottoscrizioni, incassi e solleciti",
+    "run": "Esegui fatturazione",
+    "runHint": "Rinnovi, fine prova, scadenze, solleciti e sospensioni: gira da sola ogni giorno",
+    "runResult": "Fatturazione eseguita: {{issued}} fatture emesse, {{expired}} sottoscrizioni scadute, {{reminders}} solleciti, {{suspended}} clienti sospesi.",
+    "kpi": {
+      "toCollect": "Da incassare",
+      "overdue": "Scaduto",
+      "paidThisMonth": "Incassato nel mese",
+      "issuedThisMonth": "Fatturato nel mese",
+      "overdueCount_one": "{{count}} fattura scaduta",
+      "overdueCount_other": "{{count}} fatture scadute"
+    },
+    "all": "Tutte",
+    "status": {
+      "Issued": "Emessa",
+      "Overdue": "Scaduta",
+      "Paid": "Pagata",
+      "Cancelled": "Annullata"
+    },
+    "kind": {
+      "Invoice": "Fattura",
+      "CreditNote": "Nota di credito"
+    },
+    "searchPlaceholder": "Cliente o numero",
+    "empty": "Nessuna fattura.",
+    "noTenantInvoices": "Nessuna fattura per questo cliente.",
+    "number": "Numero",
+    "customer": "Cliente",
+    "issuedAt": "Emessa il",
+    "dueAt": "Scadenza",
+    "period": "Periodo",
+    "total": "Totale",
+    "net": "Imponibile",
+    "vat": "IVA {{rate}}%",
+    "statusLabel": "Stato",
+    "description": "Descrizione",
+    "amount": "Importo",
+    "reminders_one": "{{count}} sollecito",
+    "reminders_other": "{{count}} solleciti",
+    "panel": "Dettaglio fattura",
+    "closePanel": "Chiudi la fattura",
+    "cancels": "Storna",
+    "creditNote": "Nota di credito",
+    "reason": "Motivo",
+    "paidAt": "Pagata il",
+    "registerPayment": "Registra pagamento",
+    "paymentDate": "Data del pagamento",
+    "reference": "Riferimento",
+    "markPaid": "Segna come pagata",
+    "cancel": "Annulla fattura",
+    "cancelReason": "Motivo dell'annullamento",
+    "cancelHint": "Verrà emessa una nota di credito dello stesso importo.",
+    "confirmCancel": "Annulla ed emetti nota di credito"
   }
 }

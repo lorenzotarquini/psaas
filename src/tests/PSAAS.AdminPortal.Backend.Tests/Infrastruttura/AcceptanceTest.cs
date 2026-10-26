@@ -25,6 +25,13 @@ public abstract class AcceptanceTest(PostgresFixture database) : IAsyncLifetime
 
     protected FakeItalianCityList CityList => Host.CityList;
 
+    /// <summary>Moves the backend clock forward and runs the daily billing (UC23-R6).</summary>
+    protected async Task DaysPassAsync(int days)
+    {
+        Host.Clock.Advance(TimeSpan.FromDays(days));
+        (await Admin.PostAsync("/api/billing/run", null)).EnsureSuccessStatusCode();
+    }
+
     public async Task InitializeAsync()
     {
         await database.ResetAsync();
@@ -103,6 +110,19 @@ public abstract class AcceptanceTest(PostgresFixture database) : IAsyncLifetime
 
     protected Task<HttpResponseMessage> SubscribeAsync(Guid tenantId, Guid planId, bool trial = false) =>
         Admin.PutAsJsonAsync($"/api/tenants/{tenantId}/subscription", new { planId, trial });
+
+    // ---- Steps: billing ----
+
+    protected async Task<List<InvoiceView>> InvoicesOfAsync(Guid tenantId) =>
+        (await GetOkAsync<PageView<InvoiceView>>($"/api/invoices?tenantId={tenantId}")).Items;
+
+    /// <summary>"Alfa Srl" subscribed to a monthly plan at the given price: its first invoice is issued.</summary>
+    protected async Task<(TenantDetail Tenant, InvoiceView Invoice)> GivenInvoicedTenantAsync(string name = "Alfa Srl", decimal price = 100)
+    {
+        var tenant = await GivenTenantAsync(name);
+        (await SubscribeAsync(tenant.Id, (await GivenPlanAsync($"p{Guid.NewGuid():N}"[..10], price)).Id)).EnsureSuccessStatusCode();
+        return (tenant, (await InvoicesOfAsync(tenant.Id)).Single());
+    }
 
     // ---- Steps: HTTP ----
 

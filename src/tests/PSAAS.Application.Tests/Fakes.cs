@@ -1,4 +1,5 @@
 using PSAAS.Application.Abstractions.Audit;
+using PSAAS.Application.Abstractions.Billing;
 using PSAAS.Application.Abstractions.Catalog;
 using PSAAS.Application.Abstractions.Geography;
 using PSAAS.Application.Abstractions.Profiles;
@@ -6,6 +7,7 @@ using PSAAS.Application.Abstractions.Tenants;
 using PSAAS.Application.Abstractions.Users;
 using PSAAS.Application.Contracts;
 using PSAAS.Application.Contracts.Audit;
+using PSAAS.Application.Contracts.Billing;
 using PSAAS.Application.Contracts.Catalog;
 using PSAAS.Application.Contracts.Profiles;
 using PSAAS.Application.Contracts.Tenants;
@@ -368,5 +370,48 @@ public sealed class FakeModuleProvisioner : IModuleProvisioner
     {
         Provisioned.Add(module.Id);
         return Task.FromResult(Failing.Contains(module.Id) ? new ProvisioningOutcome(false, "timeout") : new ProvisioningOutcome(true, null));
+    }
+}
+
+/// <summary>Invoices in memory, numbered per year like the real repository.</summary>
+public sealed class FakeInvoiceRepository : IInvoiceRepository
+{
+    public List<Invoice> Invoices { get; } = [];
+
+    public Task<Invoice> AddAsync(Invoice invoice, CancellationToken cancellationToken = default)
+    {
+        var numbered = invoice with { Number = $"{invoice.IssuedAt.Year}/{Invoices.Count(i => i.IssuedAt.Year == invoice.IssuedAt.Year) + 1:0000}" };
+        Invoices.Add(numbered);
+        return Task.FromResult(numbered);
+    }
+
+    public Task UpdateAsync(Invoice invoice, CancellationToken cancellationToken = default)
+    {
+        Invoices[Invoices.FindIndex(i => i.Id == invoice.Id)] = invoice;
+        return Task.CompletedTask;
+    }
+
+    public Task<Invoice?> GetAsync(Guid id, CancellationToken cancellationToken = default) => Task.FromResult(Invoices.FirstOrDefault(i => i.Id == id));
+
+    public Task<PagedResult<Invoice>> GetPageAsync(InvoiceQuery query, CancellationToken cancellationToken = default) =>
+        Task.FromResult(new PagedResult<Invoice>(Invoices, Invoices.Count, 1, Invoices.Count));
+
+    public Task<IReadOnlyList<Invoice>> GetOpenAsync(CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyList<Invoice>>(Invoices.Where(i => i.Kind == InvoiceKinds.Invoice && InvoiceStatuses.IsOpen(i.Status)).ToArray());
+
+    public Task<bool> ExistsForPeriodAsync(Guid tenantId, DateTimeOffset periodFrom, CancellationToken cancellationToken = default) =>
+        Task.FromResult(Invoices.Any(i => i.TenantId == tenantId && i.PeriodFrom == periodFrom && i.Kind == InvoiceKinds.Invoice && i.Status != InvoiceStatuses.Cancelled));
+
+    public Task<BillingSummary> GetSummaryAsync(DateTimeOffset monthStart, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+}
+
+public sealed class FakeInvoiceTransmitter : IInvoiceTransmitter
+{
+    public List<string> Transmitted { get; } = [];
+
+    public Task TransmitAsync(Invoice invoice, CancellationToken cancellationToken = default)
+    {
+        Transmitted.Add(invoice.Number);
+        return Task.CompletedTask;
     }
 }

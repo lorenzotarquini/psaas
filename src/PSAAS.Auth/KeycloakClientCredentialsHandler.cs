@@ -78,13 +78,20 @@ public sealed class KeycloakClientCredentialsHandler : DelegatingHandler
                 if (!response.IsSuccessStatusCode)
                 {
                     Logger.Error("Keycloak token endpoint returned status code {StatusCode}.", (int)response.StatusCode);
+                    if ((int)response.StatusCode is >= 400 and < 500)
+                    {
+                        // Wrong secret, client without service account or unknown client: retrying will not help.
+                        throw new InvalidOperationException(
+                            $"Keycloak refused the client credentials of '{clientId}' (HTTP {(int)response.StatusCode}): check the client secret and that Service accounts is enabled.");
+                    }
+
                     response.EnsureSuccessStatusCode();
                 }
 
                 await CacheTokenAsync(response, cancellationToken).ConfigureAwait(false);
                 return;
             }
-            catch (Exception ex) when (attempt < _options.ClientCredentials.RetryCount)
+            catch (Exception ex) when (ex is not InvalidOperationException && attempt < _options.ClientCredentials.RetryCount)
             {
                 Logger.Warn(ex, "Keycloak token acquisition attempt {Attempt} failed. Retrying.", attempt + 1);
             }

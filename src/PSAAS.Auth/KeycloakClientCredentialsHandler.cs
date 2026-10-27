@@ -77,13 +77,17 @@ public sealed class KeycloakClientCredentialsHandler : DelegatingHandler
                 using var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false);
                 if (!response.IsSuccessStatusCode)
                 {
-                    Logger.Error("Keycloak token endpoint returned status code {StatusCode}.", (int)response.StatusCode);
                     if ((int)response.StatusCode is >= 400 and < 500)
                     {
                         // Wrong secret, client without service account or unknown client: retrying will not help.
+                        // Keycloak's body ({"error":"invalid_client",...}) says which one and holds no secret.
+                        var reason = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+                        Logger.Error("Keycloak token endpoint refused client {ClientId} with status code {StatusCode}: {Reason}", clientId, (int)response.StatusCode, reason);
                         throw new InvalidOperationException(
                             $"Keycloak refused the client credentials of '{clientId}' (HTTP {(int)response.StatusCode}): check the client secret and that Service accounts is enabled.");
                     }
+
+                    Logger.Error("Keycloak token endpoint returned status code {StatusCode}.", (int)response.StatusCode);
 
                     response.EnsureSuccessStatusCode();
                 }

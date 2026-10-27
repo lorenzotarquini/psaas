@@ -68,7 +68,7 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
                 throw new UserEmailConflictException($"Keycloak already has a user with email {user.Email}");
             }
 
-            EnsureSuccess(response, "create user");
+            await EnsureSuccessAsync(response, "create user");
             return response.Headers.Location?.Segments[^1]
                 ?? throw new InvalidOperationException("Keycloak created a user without returning its location");
         }, cancellationToken);
@@ -80,7 +80,7 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
             {
                 using var response = await http.PutAsJsonAsync(
                     $"users/{Uri.EscapeDataString(id)}/execute-actions-email", PasswordSetupActions, cancellationToken);
-                EnsureSuccess(response, "send the password setup email");
+                await EnsureSuccessAsync(response, "send the password setup email");
                 return true;
             }, cancellationToken);
         }
@@ -107,7 +107,7 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
         var users = await CallAsync(async () =>
         {
             using var response = await http.GetAsync(url, cancellationToken);
-            EnsureSuccess(response, "search users");
+            await EnsureSuccessAsync(response, "search users");
             return await response.Content.ReadFromJsonAsync<UserRepresentation[]>(cancellationToken) ?? [];
         }, cancellationToken);
 
@@ -127,7 +127,7 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
             counts[profileId] = await CallAsync(async () =>
             {
                 using var response = await http.GetAsync($"users/count?q={ProfileQuery(profileId)}", cancellationToken);
-                EnsureSuccess(response, "count users");
+                await EnsureSuccessAsync(response, "count users");
                 return await response.Content.ReadFromJsonAsync<int>(cancellationToken);
             }, cancellationToken);
         }
@@ -146,7 +146,7 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
             {
                 using var response = await http.GetAsync(
                     $"users?briefRepresentation=true&max={MaxProfileUsers}&q={ProfileQuery(profileId)}", cancellationToken);
-                EnsureSuccess(response, "find the users of a profile");
+                await EnsureSuccessAsync(response, "find the users of a profile");
                 return await response.Content.ReadFromJsonAsync<UserRepresentation[]>(cancellationToken) ?? [];
             }, cancellationToken);
             ids.UnionWith(users.Select(user => user.Id!));
@@ -165,7 +165,7 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
             {
                 using var response = await http.GetAsync(
                     $"users?briefRepresentation=false&max={MaxProfileUsers}&q={ProfileQuery(profileId)}", cancellationToken);
-                EnsureSuccess(response, "find the users of a profile");
+                await EnsureSuccessAsync(response, "find the users of a profile");
                 return await response.Content.ReadFromJsonAsync<UserRepresentation[]>(cancellationToken) ?? [];
             }, cancellationToken);
 
@@ -179,7 +179,7 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
                 await CallAsync(async () =>
                 {
                     using var response = await http.PutAsJsonAsync($"users/{Uri.EscapeDataString(user.Id!)}", user, cancellationToken);
-                    EnsureSuccess(response, "update the profiles of a user");
+                    await EnsureSuccessAsync(response, "update the profiles of a user");
                     return true;
                 }, cancellationToken);
             }
@@ -272,7 +272,7 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
         {
             using var response = await http.GetAsync($"users/{Uri.EscapeDataString(id)}", cancellationToken);
             if (response.StatusCode == HttpStatusCode.NotFound) return null;
-            EnsureSuccess(response, "read a user");
+            await EnsureSuccessAsync(response, "read a user");
             return await response.Content.ReadFromJsonAsync<UserRepresentation>(cancellationToken);
         }, cancellationToken);
 
@@ -281,7 +281,7 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
         CallAsync(async () =>
         {
             using var response = await http.PutAsJsonAsync($"users/{Uri.EscapeDataString(user.Id!)}", user, cancellationToken);
-            EnsureSuccess(response, operation);
+            await EnsureSuccessAsync(response, operation);
             return true;
         }, cancellationToken);
 
@@ -291,7 +291,7 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
         {
             using var response = await http.PutAsJsonAsync(
                 $"users/{Uri.EscapeDataString(id)}/execute-actions-email", PasswordSetupActions, cancellationToken);
-            EnsureSuccess(response, "send the password email");
+            await EnsureSuccessAsync(response, "send the password email");
             return true;
         }, cancellationToken);
 
@@ -346,12 +346,16 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
         }
     }
 
-    private static void EnsureSuccess(HttpResponseMessage response, string operation)
+    private static async Task EnsureSuccessAsync(HttpResponseMessage response, string operation)
     {
         if (response.IsSuccessStatusCode)
         {
             return;
         }
+
+        // Keycloak says why in the body ({"errorMessage":"Failed to send execute actions email"}): no secrets in it.
+        var reason = await response.Content.ReadAsStringAsync();
+        Logger.Error("Keycloak could not {Operation}: HTTP {StatusCode} {Reason}", operation, (int)response.StatusCode, reason);
 
         if ((int)response.StatusCode >= 500)
         {
@@ -367,7 +371,7 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
         try
         {
             using var response = await http.DeleteAsync($"users/{Uri.EscapeDataString(id)}", CancellationToken.None);
-            EnsureSuccess(response, "delete user");
+            await EnsureSuccessAsync(response, "delete user");
         }
         catch (Exception exception)
         {

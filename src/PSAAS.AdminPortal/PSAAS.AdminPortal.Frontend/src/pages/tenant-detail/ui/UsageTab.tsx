@@ -53,7 +53,7 @@ function Gauge({ label, value, max, hint }: { label: string; value: number | nul
   const ratio = value !== null && max ? value / max : null
   return (
     <div className="panel px-4 py-3">
-      <div className="eyebrow text-base-content/55">{label}</div>
+      <div className="text-[12.5px] text-base-content/60">{label}</div>
       <div className="data mt-1 text-[22px] font-semibold">
         {value ?? '–'}
         <span className="text-[14px] font-normal text-base-content/55"> / {max ?? t('usage.unlimited')}</span>

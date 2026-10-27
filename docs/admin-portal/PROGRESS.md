@@ -22,7 +22,7 @@ Piano: `C:\Users\ltarq\.claude\plans\voglio-che-prepari-un-abundant-quail.md` ·
 
 ## Test rossi attesi
 
-Nessuno. A fine lavoro (fase 12): accettazione 267/267, unitari Application 146, Infrastructure 55, Domain 25, Auth 5; Vitest 68 in 25 file; `tsc` pulito; lint senza avvisi di oxlint (restano 7 suggerimenti "insignificant slice" di steiger, vedi decisione 62). Collection Postman eseguita per intero con newman contro il backend locale: 63/63 asserzioni, ripetibile.
+Nessuno. A fine lavoro (fase 12): accettazione 267/267, unitari Application 146, Infrastructure 55, Domain 25, Auth 5; Vitest 69 in 26 file; `tsc` pulito; lint senza avvisi di oxlint (restano 7 suggerimenti "insignificant slice" di steiger, vedi decisione 62). Collection Postman eseguita per intero con newman contro il backend locale: 63/63 asserzioni, ripetibile.
 
 ## Ambiente di sviluppo autonomo (fuori dal repo, nello scratchpad della sessione)
 
@@ -93,6 +93,7 @@ Per verificare l'interfaccia senza il login reale: provider OIDC locale (`devidp
 60. **Collection Postman come esecuzione unica**: crea il proprio cliente, piano, utente, vista e comunicazione con nomi unici (`runId`), cattura gli id dalle risposte, ottiene il token con client credentials se `token` è vuoto, e verifica lo stato atteso di ogni richiesta (anche i 409 voluti). Comando: `npx newman run docs/postman/PSAAS.AdminPortal.postman_collection.json --env-var baseUrl=… --env-var keycloakUrl=…/realms/PSAAS --env-var clientSecret=…`.
 61. **Conferma dell'invio delle comunicazioni** con un secondo passo nel modulo (barra scura come quella delle modifiche non salvate), al posto di `window.confirm`.
 62. **Suggerimenti steiger "insignificant slice" lasciati**: entità e feature usate da una sola pagina (comuni, utente corrente, viste salvate, pannelli) restano slice a sé per tenere separati dati, azioni e pagine; si possono accorpare se il designer o il team preferiscono meno cartelle.
+63. **Giro visivo sui mock (27/10, ambiente locale con OIDC di sviluppo)**: confronto schermata per schermata con 1b–1f e controllo delle pagine senza mock, tema scuro e mobile. Corretti: pulsanti secondari bianchi con bordo come nei mock (regola nel layer `utilities`, perché daisyUI sta in un layer annidato lì dentro); righe dell'elenco clienti su una riga e checkbox da 16 px; contatore caratteri allineato a destra; etichette delle card numeriche di Fatturazione e Uso come in 1b; badge "Nessun profilo" col bordo chiaro; badge grigio leggibile nel tema scuro; etichette `sdiCode` e `accountManager` nell'audit. **Bug**: "Annulla" nella conferma d'invio delle comunicazioni la riapriva (React riusava il pulsante cliccato come pulsante di invio durante lo stesso clic); risolto con `key` distinte, verificato con Playwright (jsdom non riproduce il caso).
 
 ## Da far vedere al designer
 

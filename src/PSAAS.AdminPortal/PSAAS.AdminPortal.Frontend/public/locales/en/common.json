@@ -415,7 +415,9 @@
       "firstName": "First name",
       "lastName": "Last name",
       "birthDate": "Birth date",
-      "mfaRequired": "MFA required"
+      "mfaRequired": "MFA required",
+      "sdiCode": "SDI code",
+      "accountManager": "Account manager"
     },
     "details": {
       "profileAdded": "added profile \"{{name}}\"",

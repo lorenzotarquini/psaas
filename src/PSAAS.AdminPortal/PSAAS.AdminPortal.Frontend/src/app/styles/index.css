@@ -130,3 +130,16 @@
     @apply font-mono text-[10.5px] font-medium tracking-[0.08em] uppercase;
   }
 }
+
+@layer utilities {
+  /* Secondary buttons of the mocks ("Impersona", "Riprova"): white with a border, not filled.
+     In utilities, so it beats daisyUI, which sits in a layer nested inside it. */
+  .btn:not(.btn-primary, .btn-secondary, .btn-accent, .btn-neutral, .btn-info, .btn-success, .btn-warning, .btn-error, .btn-ghost, .btn-link, .btn-soft, .btn-outline, .btn-dash) {
+    --btn-bg: var(--color-base-100);
+    --btn-border: var(--color-base-300);
+
+    &:hover:not(:disabled) {
+      --btn-bg: var(--color-base-200);
+    }
+  }
+}

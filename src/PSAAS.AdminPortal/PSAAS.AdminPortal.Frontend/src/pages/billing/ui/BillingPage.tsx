@@ -67,7 +67,7 @@ export function BillingPage() {
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {kpis.map((kpi) => (
             <div key={kpi.key} className="panel px-4 py-3">
-              <div className="eyebrow text-base-content/55">{t(`billing.kpi.${kpi.key}`)}</div>
+              <div className="text-[12.5px] text-base-content/60">{t(`billing.kpi.${kpi.key}`)}</div>
               <div className={`data mt-1 text-[22px] font-semibold ${kpi.tone}`}>{kpi.value}</div>
               {kpi.note && <div className="text-[12px] text-base-content/60">{kpi.note}</div>}
             </div>

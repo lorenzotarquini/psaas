@@ -35,7 +35,7 @@ export function TextField({
 
   return (
     <div className={`fieldset py-1.5 ${className}`}>
-      <label htmlFor={id} className="fieldset-legend flex justify-between py-1 text-[12px] font-medium text-base-content/80">
+      <label htmlFor={id} className="fieldset-legend flex w-full justify-between py-1 text-[12px] font-medium text-base-content/80">
         {label}
         {counter && maxLength && (
           <span className="data text-[11px] font-normal text-base-content/50">

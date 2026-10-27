@@ -415,7 +415,9 @@
       "firstName": "Nome",
       "lastName": "Cognome",
       "birthDate": "Data di nascita",
-      "mfaRequired": "MFA richiesta"
+      "mfaRequired": "MFA richiesta",
+      "sdiCode": "Codice SDI",
+      "accountManager": "Referente commerciale"
     },
     "details": {
       "profileAdded": "aggiunto il profilo \"{{name}}\"",

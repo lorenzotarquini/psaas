@@ -46,7 +46,7 @@ export function TenantsTable({ tenants, columns, sort, onSort, selected, onSelec
             <th className="w-10">
               <input
                 type="checkbox"
-                className="checkbox checkbox-sm"
+                className="checkbox checkbox-xs"
                 aria-label={t('tenants.selectPage')}
                 checked={allSelected}
                 onChange={() => onSelected(allSelected ? selected.filter((id) => !tenants.some((t) => t.id === id)) : [...new Set([...selected, ...tenants.map((t) => t.id)])])}
@@ -70,16 +70,16 @@ export function TenantsTable({ tenants, columns, sort, onSort, selected, onSelec
             return (
               <tr key={tenant.id} className={isSelected ? 'bg-primary/6' : 'hover:bg-base-200/60'}>
                 <td>
-                  <input type="checkbox" className="checkbox checkbox-sm" aria-label={t('tenants.select', { name: tenant.companyName })} checked={isSelected} onChange={() => toggle(tenant.id)} />
+                  <input type="checkbox" className="checkbox checkbox-xs" aria-label={t('tenants.select', { name: tenant.companyName })} checked={isSelected} onChange={() => toggle(tenant.id)} />
                 </td>
-                <td>
+                <td className="leading-tight whitespace-nowrap">
                   <Link to={tenantPath(tenant.id)} state={returnState} className="link link-hover font-semibold">
                     {tenant.companyName}
                   </Link>
                   <span className="data block text-[11.5px] text-base-content/55">{tenant.completeVatNumber}</span>
                 </td>
-                {show('certifiedEmail') && <td className="break-all">{tenant.certifiedEmail.toLowerCase()}</td>}
-                {show('city') && <td>{tenant.city}</td>}
+                {show('certifiedEmail') && <td className="whitespace-nowrap">{tenant.certifiedEmail.toLowerCase()}</td>}
+                {show('city') && <td className="whitespace-nowrap">{tenant.city}</td>}
                 {show('status') && (
                   <td>
                     <TenantStatusBadge status={tenant.status} />

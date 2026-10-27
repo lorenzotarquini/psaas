@@ -52,7 +52,7 @@ export function Composer({ selection, onSent, onClose }: { selection: string[]; 
         {error('subject')}
       </label>
       <label className="fieldset py-0">
-        <span className="fieldset-legend flex justify-between py-1 text-[12px]">
+        <span className="fieldset-legend flex w-full justify-between py-1 text-[12px]">
           {t('communications.body')}
           <span className="data text-base-content/50">{body.length}/5000</span>
         </span>
@@ -126,8 +126,9 @@ export function Composer({ selection, onSent, onClose }: { selection: string[]; 
       </fieldset>
 
       {confirming ? (
-        // Second step before sending: emails cannot be taken back.
-        <div role="alertdialog" aria-live="assertive" className="flex flex-wrap items-center justify-end gap-3 rounded-box bg-neutral px-4 py-2.5 text-neutral-content">
+        // Second step before sending: emails cannot be taken back. Keys keep React from turning
+        // the clicked "Annulla" into the submit button of the other branch during the same click.
+        <div key="confirm" role="alertdialog" aria-live="assertive" className="flex flex-wrap items-center justify-end gap-3 rounded-box bg-neutral px-4 py-2.5 text-neutral-content">
           <span className="mr-auto font-semibold text-white">{t('communications.confirm', { count: preview?.count ?? 0 })}</span>
           <button type="button" className="btn btn-ghost btn-sm text-neutral-content" onClick={() => setConfirming(false)}>
             {t('unsaved.discard')}
@@ -138,7 +139,7 @@ export function Composer({ selection, onSent, onClose }: { selection: string[]; 
           </button>
         </div>
       ) : (
-        <div className="flex justify-end gap-2">
+        <div key="actions" className="flex justify-end gap-2">
           <button type="button" className="btn btn-ghost btn-sm" onClick={onClose}>
             {t('unsaved.discard')}
           </button>

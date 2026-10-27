@@ -132,7 +132,7 @@ export function AddressFields() {
           label={t('tenantForm.postalCode')}
           inputMode="numeric"
           autoComplete="off"
-          className="[&_input]:font-mono"
+          className="[&_input]:font-mono [&_input]:placeholder:font-sans"
           placeholder={t('tenantForm.postalCodeFromCity')}
           // Filled from the city; editable only when the city list cannot tell (free text, list down).
           readOnly={Boolean(singleCode)}

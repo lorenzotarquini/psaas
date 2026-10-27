@@ -8,7 +8,8 @@ const toneClasses: Record<StatusTone, string> = {
   warning: 'badge-warning',
   error: 'badge-error',
   info: 'badge-info',
-  neutral: 'badge-neutral',
+  // Soft with no color follows base-content: badge-neutral would be the sidebar ink, unreadable in dark.
+  neutral: '',
 }
 
 export function StatusBadge({ tone, children }: { tone: StatusTone; children: ReactNode }) {

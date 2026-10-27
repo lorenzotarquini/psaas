@@ -59,7 +59,7 @@ export function UsersTable({ query, onQueryChange, selectedId, onSelect, emptyTe
                   <td>
                     <div className="flex flex-col items-start gap-1">
                       {user.profiles.length === 0 ? (
-                        <span className="badge badge-outline badge-sm font-semibold">{t('users.noProfiles')}</span>
+                        <span className="badge badge-sm border-base-300 bg-base-100 font-semibold">{t('users.noProfiles')}</span>
                       ) : (
                         user.profiles.map((p) => (
                           <span key={p.id} className="badge badge-outline badge-sm gap-1.5 rounded-md border-base-300">

@@ -140,5 +140,29 @@ public sealed class KeycloakClientCredentialsHandler : DelegatingHandler
         _cachedToken = token;
         _expiresAt = DateTimeOffset.UtcNow.AddSeconds(expiresIn).Subtract(ExpirationMargin);
         Logger.Debug("Keycloak client credentials token acquired. Expires in {ExpiresInSeconds} seconds.", expiresIn);
+        // A 403 from the admin API means these lack realm-management roles: logged once per token, no secret in it.
+        Logger.Info("Service account token roles: {Roles}", DescribeClientRoles(token));
+    }
+
+    /// <summary>The client roles of a JWT ("realm-management: view-users, manage-users"), read from its payload.</summary>
+    internal static string DescribeClientRoles(string token)
+    {
+        try
+        {
+            var payload = token.Split('.')[1].Replace('-', '+').Replace('_', '/');
+            payload = payload.PadRight(payload.Length + (4 - payload.Length % 4) % 4, '=');
+            using var claims = JsonDocument.Parse(Convert.FromBase64String(payload));
+            if (!claims.RootElement.TryGetProperty("resource_access", out var access))
+            {
+                return "none";
+            }
+
+            return string.Join("; ", access.EnumerateObject().Select(client =>
+                $"{client.Name}: {string.Join(", ", client.Value.TryGetProperty("roles", out var roles) ? roles.EnumerateArray().Select(role => role.GetString()) : [])}"));
+        }
+        catch (Exception exception) when (exception is FormatException or JsonException or IndexOutOfRangeException)
+        {
+            return "unreadable";
+        }
     }
 }

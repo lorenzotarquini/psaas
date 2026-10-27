@@ -29,6 +29,16 @@ public sealed class KeycloakClientCredentialsHandlerTests
         Assert.Equal(3, tokenEndpoint.Calls);
     }
 
+    [Fact]
+    public void DescribeClientRoles_ListsTheRolesOfEveryClient()
+    {
+        var payload = Convert.ToBase64String("""{"resource_access":{"realm-management":{"roles":["view-users","manage-users"]},"account":{"roles":["view-profile"]}}}"""u8.ToArray())
+            .TrimEnd('=').Replace('+', '-').Replace('/', '_');
+
+        Assert.Equal("realm-management: view-users, manage-users; account: view-profile", KeycloakClientCredentialsHandler.DescribeClientRoles($"header.{payload}.signature"));
+        Assert.Equal("unreadable", KeycloakClientCredentialsHandler.DescribeClientRoles("not-a-jwt"));
+    }
+
     private static HttpClient CreateClient(HttpMessageHandler tokenEndpoint)
     {
         var options = Options.Create(new KeycloakOptions

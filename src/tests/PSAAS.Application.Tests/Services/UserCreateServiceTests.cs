@@ -18,10 +18,10 @@ public sealed class UserCreateServiceTests
 
     private UserRules Rules => new(_profiles, _directory, _subscriptions, _tenants, _audit);
 
-    private UserCreateService Service => new(Rules, _directory, new FakeCurrentActor(), TimeProvider.System);
+    private UserCreateService Service => new(Rules, _directory, TimeProvider.System);
 
     private static UserCreateRequest Valid(params string[] profileIds) =>
-        new(" Mario ", " Rossi ", " Mario.Rossi@Example.com ", "1980-05-17", profileIds);
+        new(" Mario ", " Rossi ", " Mario.Rossi@Example.com ", profileIds);
 
     [Fact]
     public async Task UC6_S1_ValidRequest_CreatesTheUserWithTrimmedValuesAndProfilesOfDifferentTenants()
@@ -34,8 +34,8 @@ public sealed class UserCreateServiceTests
         Assert.True(result.Succeeded);
         var created = _directory.Created!;
         Assert.Equal(
-            ("Mario", "Rossi", "mario.rossi@example.com", new DateOnly(1980, 5, 17)),
-            (created.FirstName, created.LastName, created.Email, created.BirthDate));
+            ("Mario", "Rossi", "mario.rossi@example.com"),
+            (created.FirstName, created.LastName, created.Email));
         Assert.Equal(["p1", "p2"], created.ProfileIds);
         Assert.Equal(["Alfa Srl", "Beta Snc"], result.User!.Profiles.Select(profile => profile.TenantCompanyName));
     }
@@ -52,25 +52,20 @@ public sealed class UserCreateServiceTests
     [Fact]
     public async Task UC6_S3_MissingValues_AreRequiredAndNothingIsCreated()
     {
-        var result = await Service.CreateAsync(new UserCreateRequest(" ", null, "", null));
+        var result = await Service.CreateAsync(new UserCreateRequest(" ", null, ""));
 
         Assert.Equal(
-            ["birthDate", "email", "firstName", "lastName"],
+            ["email", "firstName", "lastName"],
             result.Errors.Where(error => error.Value == "Required").Select(error => error.Key).Order());
         Assert.Null(_directory.Created);
     }
 
-    [Theory]
-    [InlineData("email", "non-una-email")]
-    [InlineData("birthDate", "17/05/1980")]
-    [InlineData("birthDate", "1980-02-30")]
-    public async Task UC6_S4_MalformedValues_AreInvalidFormat(string field, string value)
+    [Fact]
+    public async Task UC6_S4_MalformedEmail_IsInvalidFormat()
     {
-        var request = field == "email" ? Valid() with { Email = value } : Valid() with { BirthDate = value };
+        var result = await Service.CreateAsync(Valid() with { Email = "non-una-email" });
 
-        var result = await Service.CreateAsync(request);
-
-        Assert.Equal("InvalidFormat", result.Errors[field]);
+        Assert.Equal("InvalidFormat", result.Errors["email"]);
         Assert.Null(_directory.Created);
     }
 
@@ -122,7 +117,7 @@ public sealed class UserCreateServiceTests
         var tenantId = Guid.NewGuid();
         _profiles.Profiles.Add(new("p1", "Operatore", tenantId.ToString(), "Alfa Srl"));
         _tenants.Structure = new([new("p1", "Operatore", null)], []);
-        _directory.Users.Add(new("u1", "Anna", "Bianchi", "anna@example.com", null, ["p1"]));
+        _directory.Users.Add(new("u1", "Anna", "Bianchi", "anna@example.com", ["p1"]));
         _subscriptions.Subscriptions[tenantId] = new(
             tenantId, "Alfa Srl", Guid.NewGuid(), "Base", "Active", 10, "Monthly", 1, null,
             DateTimeOffset.UtcNow, null, DateTimeOffset.UtcNow, true, [], []);

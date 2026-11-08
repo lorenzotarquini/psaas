@@ -1,4 +1,3 @@
-using System.Globalization;
 using NLog;
 using PSAAS.Application.Abstractions.Audit;
 using PSAAS.Application.Abstractions.Catalog;
@@ -49,25 +48,6 @@ public sealed class UserRules(
         }
 
         return email;
-    }
-
-    /// <summary>UC6-R3: any valid calendar date, "YYYY-MM-DD".</summary>
-    public static DateOnly? ValidateBirthDate(string? value, Dictionary<string, string> errors)
-    {
-        var birthDate = Trim(value);
-        if (birthDate.Length == 0)
-        {
-            errors["birthDate"] = TenantFieldValidationErrorCodes.Required;
-            return null;
-        }
-
-        if (DateOnly.TryParseExact(birthDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed))
-        {
-            return parsed;
-        }
-
-        errors["birthDate"] = TenantFieldValidationErrorCodes.InvalidFormat;
-        return null;
     }
 
     /// <summary>

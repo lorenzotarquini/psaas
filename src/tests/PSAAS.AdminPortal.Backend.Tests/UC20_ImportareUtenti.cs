@@ -9,7 +9,7 @@ namespace PSAAS.AdminPortal.Backend.Tests;
 public sealed class UC20_ImportareUtenti(PostgresFixture database) : AcceptanceTest(database)
 {
     private static object Row(string email, string profiles = "Alfa Srl:Operatore") =>
-        new { firstName = "Mario", lastName = "Rossi", email, birthDate = "1980-01-01", profiles };
+        new { firstName = "Mario", lastName = "Rossi", email, profiles };
 
     private async Task<List<ImportRowView>> ImportAsync(bool confirm, params object[] rows) =>
         await ReadAsync<List<ImportRowView>>(await Admin.PostAsJsonAsync("/api/users/import", new { rows, confirm }), HttpStatusCode.OK);

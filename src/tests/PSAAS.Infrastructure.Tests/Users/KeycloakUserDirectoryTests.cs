@@ -27,7 +27,7 @@ public sealed class KeycloakUserDirectoryTests
         new(new HttpClient(handler) { BaseAddress = new Uri(BaseUrl) });
 
     private static readonly NewDirectoryUser Mario =
-        new("Mario", "Rossi", "mario.rossi@example.com", new DateOnly(1980, 5, 17), ["p1", "p2"]);
+        new("Mario", "Rossi", "mario.rossi@example.com", ["p1", "p2"]);
 
     private static HttpResponseMessage Created(string id) =>
         new(HttpStatusCode.Created) { Headers = { Location = new Uri($"{BaseUrl}users/{id}") } };
@@ -44,7 +44,6 @@ public sealed class KeycloakUserDirectoryTests
         Assert.Equal((HttpMethod.Post, $"{BaseUrl}users"), (method, url));
         var json = JsonDocument.Parse(body!).RootElement;
         Assert.Equal("mario.rossi@example.com", json.GetProperty("username").GetString());
-        Assert.Equal("1980-05-17", json.GetProperty("attributes").GetProperty("birthDate")[0].GetString());
         Assert.Equal(2, json.GetProperty("attributes").GetProperty("profileIds").GetArrayLength());
         Assert.Equal(
             (HttpMethod.Put, $"{BaseUrl}users/kc-1/execute-actions-email", """["UPDATE_PASSWORD"]"""),
@@ -84,7 +83,7 @@ public sealed class KeycloakUserDirectoryTests
     {
         const string Json = """
             [{"id":"kc-1","username":"mario.rossi@example.com","email":"mario.rossi@example.com","firstName":"Mario","lastName":"Rossi",
-              "attributes":{"birthDate":["1980-05-17"],"profileIds":["p1","p2"]}},
+              "attributes":{"profileIds":["p1","p2"]}},
              {"id":"kc-2","username":"admin","firstName":"Ada"}]
             """;
         var handler = new Handler(_ => new(HttpStatusCode.OK) { Content = new StringContent(Json) });
@@ -92,10 +91,9 @@ public sealed class KeycloakUserDirectoryTests
         var users = await Directory(handler).SearchAsync(" mario ");
 
         Assert.Equal($"{BaseUrl}users?briefRepresentation=false&max=1000&search=%2Amario%2A", handler.Requests[0].Url);
-        Assert.Equal(new DateOnly(1980, 5, 17), users[0].BirthDate);
         Assert.Equal(["p1", "p2"], users[0].ProfileIds);
         // Users created outside the portal: no attributes, no email.
-        Assert.Equal(("admin", null), (users[1].Email, users[1].BirthDate));
+        Assert.Equal("admin", users[1].Email);
         Assert.Empty(users[1].ProfileIds);
     }
 
@@ -153,7 +151,7 @@ public sealed class KeycloakUserDirectoryTests
     [Fact]
     public async Task UC5_S4_RemoveProfiles_KeepsTheOtherProfilesAndAttributes()
     {
-        const string Json = """[{"id":"kc-1","username":"mario","enabled":true,"attributes":{"birthDate":["1980-05-17"],"profileIds":["p1","p2"]}}]""";
+        const string Json = """[{"id":"kc-1","username":"mario","enabled":true,"attributes":{"mfaRequired":["true"],"profileIds":["p1","p2"]}}]""";
         var handler = new Handler(request => request.Method == HttpMethod.Get
             ? new(HttpStatusCode.OK) { Content = new StringContent(Json) }
             : new(HttpStatusCode.NoContent));
@@ -164,24 +162,25 @@ public sealed class KeycloakUserDirectoryTests
         Assert.Equal((HttpMethod.Put, $"{BaseUrl}users/kc-1"), (method, url));
         var attributes = JsonDocument.Parse(body!).RootElement.GetProperty("attributes");
         Assert.Equal(["p2"], attributes.GetProperty("profileIds").EnumerateArray().Select(e => e.GetString()));
-        Assert.Equal("1980-05-17", attributes.GetProperty("birthDate")[0].GetString());
+        Assert.Equal("true", attributes.GetProperty("mfaRequired")[0].GetString());
         Assert.True(JsonDocument.Parse(body!).RootElement.GetProperty("enabled").GetBoolean());
     }
 
     private const string StoredUser = """
         { "id": "kc-1", "username": "mario@example.com", "email": "mario@example.com", "firstName": "Mario", "lastName": "Rossi",
           "enabled": true, "createdTimestamp": 1760000000000, "requiredActions": ["UPDATE_PASSWORD"],
-          "attributes": { "profileIds": ["p1"], "invitesSent": ["2"], "createdBy": ["Marta Russo"], "mfaRequired": ["true"] } }
+          "attributes": { "profileIds": ["p1"], "lastInviteAt": ["2026-10-01T09:00:00.0000000+00:00"], "mfaRequired": ["true"] } }
         """;
 
     private static HttpResponseMessage Json(string json) => new(HttpStatusCode.OK) { Content = new StringContent(json) };
 
     [Fact]
-    public async Task UC19_Get_ReadsStatusInvitesAndMfa()
+    public async Task UC19_Get_ReadsStatusLastInviteAndMfa()
     {
         var user = await Directory(new Handler(_ => Json(StoredUser))).GetAsync("kc-1");
 
-        Assert.Equal((true, true, 2, "Marta Russo"), (user!.PasswordPending, user.MfaRequired, user.InvitesSent, user.CreatedBy));
+        Assert.Equal((true, true), (user!.PasswordPending, user.MfaRequired));
+        Assert.Equal(new DateTimeOffset(2026, 10, 1, 9, 0, 0, TimeSpan.Zero), user.LastInviteAt);
         Assert.Equal(DateTimeOffset.FromUnixTimeMilliseconds(1760000000000), user.CreatedAt);
     }
 
@@ -196,23 +195,23 @@ public sealed class KeycloakUserDirectoryTests
     {
         var handler = new Handler(request => request.Method == HttpMethod.Get ? Json(StoredUser) : new(HttpStatusCode.NoContent));
 
-        Assert.True(await Directory(handler).UpdateAsync("kc-1", new("Mario", "Russo", new DateOnly(1980, 1, 1), ["p2"], true)));
+        Assert.True(await Directory(handler).UpdateAsync("kc-1", new("Mario", "Russo", ["p2"], true)));
 
         var body = JsonDocument.Parse(handler.Requests[1].Body!).RootElement;
         Assert.Equal(("Russo", "mario@example.com"), (body.GetProperty("lastName").GetString(), body.GetProperty("email").GetString()));
         Assert.Equal(["UPDATE_PASSWORD", "CONFIGURE_TOTP"], body.GetProperty("requiredActions").EnumerateArray().Select(e => e.GetString()));
-        Assert.Equal("Marta Russo", body.GetProperty("attributes").GetProperty("createdBy")[0].GetString());
+        Assert.Equal("2026-10-01T09:00:00.0000000+00:00", body.GetProperty("attributes").GetProperty("lastInviteAt")[0].GetString());
     }
 
     [Fact]
-    public async Task UC19_S4_Invite_EmailsTheLinkAndCountsIt()
+    public async Task UC19_S4_Invite_EmailsTheLinkAndRecordsWhen()
     {
         var handler = new Handler(request => request.Method == HttpMethod.Get ? Json(StoredUser) : new(HttpStatusCode.NoContent));
 
         await Directory(handler).SendInviteAsync("kc-1", DateTimeOffset.UnixEpoch);
 
         Assert.Equal((HttpMethod.Put, $"{BaseUrl}users/kc-1/execute-actions-email"), (handler.Requests[0].Method, handler.Requests[0].Url));
-        Assert.Equal("3", JsonDocument.Parse(handler.Requests[2].Body!).RootElement.GetProperty("attributes").GetProperty("invitesSent")[0].GetString());
+        Assert.Equal(DateTimeOffset.UnixEpoch.ToString("O"), JsonDocument.Parse(handler.Requests[2].Body!).RootElement.GetProperty("attributes").GetProperty("lastInviteAt")[0].GetString());
     }
 
     [Fact]

@@ -6,8 +6,8 @@ using PSAAS.Application.Contracts.Users;
 
 namespace PSAAS.Application.Services.Users;
 
-/// <summary>UC19 edit body. BirthDate is "YYYY-MM-DD" (a string, for a field code instead of a binding error).</summary>
-public sealed record UserUpdateRequest(string? FirstName, string? LastName, string? BirthDate, IReadOnlyList<string>? ProfileIds, bool MfaRequired);
+/// <summary>UC19 edit body.</summary>
+public sealed record UserUpdateRequest(string? FirstName, string? LastName, IReadOnlyList<string>? ProfileIds, bool MfaRequired);
 
 /// <param name="Conflict">The action is not allowed in the current status (UC19 4a).</param>
 public sealed record UserActionResult(UserReadModel? User, bool Found, bool Conflict, IReadOnlyDictionary<string, string> Errors)
@@ -43,7 +43,6 @@ public sealed class UserManagementService(IUserDirectory directory, IProfileRead
         var lastName = UserRules.Trim(request.LastName);
         UserRules.Required(errors, "firstName", firstName);
         UserRules.Required(errors, "lastName", lastName);
-        var birthDate = UserRules.ValidateBirthDate(request.BirthDate, errors);
         var profileIds = (request.ProfileIds ?? []).Select(UserRules.Trim).ToArray();
         // The tenants the user already belongs to do not count against their plan limit again.
         var memberOf = current.Profiles.Select(p => p.TenantId).ToHashSet();
@@ -54,7 +53,7 @@ public sealed class UserManagementService(IUserDirectory directory, IProfileRead
             return new UserActionResult(null, true, false, errors);
         }
 
-        var update = new DirectoryUserUpdate(firstName, lastName, birthDate!.Value, profileIds.Distinct(StringComparer.Ordinal).ToArray(), request.MfaRequired);
+        var update = new DirectoryUserUpdate(firstName, lastName, profileIds.Distinct(StringComparer.Ordinal).ToArray(), request.MfaRequired);
         if (!await directory.UpdateAsync(id, update, cancellationToken)) return UserActionResult.NotFound;
 
         var updated = (await GetAsync(id, cancellationToken))!;
@@ -144,7 +143,6 @@ public sealed class UserManagementService(IUserDirectory directory, IProfileRead
 
         Compare("firstName", before.FirstName, after.FirstName);
         Compare("lastName", before.LastName, after.LastName);
-        Compare("birthDate", before.BirthDate?.ToString("yyyy-MM-dd"), after.BirthDate?.ToString("yyyy-MM-dd"));
         Compare("mfaRequired", before.MfaRequired, after.MfaRequired);
         string Label(UserProfileReadModel p) => $"{p.Name} · {p.TenantCompanyName}";
         var added = after.Profiles.ExceptBy(before.Profiles.Select(p => p.Id), p => p.Id).Select(Label).ToArray();

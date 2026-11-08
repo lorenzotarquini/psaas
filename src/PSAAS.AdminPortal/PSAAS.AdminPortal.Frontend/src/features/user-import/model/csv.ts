@@ -40,7 +40,6 @@ const columns: Record<keyof UserImportRow, string[]> = {
   firstName: ['nome', 'firstname'],
   lastName: ['cognome', 'lastname'],
   email: ['email'],
-  birthDate: ['datanascita', 'birthdate'],
   profiles: ['profili', 'profiles'],
 }
 
@@ -57,9 +56,8 @@ export function readUserRows(text: string): UserImportRow[] | null {
     firstName: line[index.firstName]?.trim() ?? '',
     lastName: line[index.lastName]?.trim() ?? '',
     email: line[index.email]?.trim() ?? '',
-    birthDate: line[index.birthDate]?.trim() ?? '',
     profiles: index.profiles < 0 ? '' : (line[index.profiles]?.trim() ?? ''),
   }))
 }
 
-export const csvTemplate = 'nome,cognome,email,dataNascita,profili\nGiulia,Ferri,giulia.ferri@example.com,1991-04-12,Officine Rinaldi Spa:Capoturno|Ceramiche Bassi Srl:Operatore\n'
+export const csvTemplate = 'nome,cognome,email,profili\nGiulia,Ferri,giulia.ferri@example.com,Officine Rinaldi Spa:Capoturno|Ceramiche Bassi Srl:Operatore\n'

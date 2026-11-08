@@ -59,14 +59,11 @@ public sealed record NewDirectoryUser(
     string FirstName,
     string LastName,
     string Email,
-    DateOnly BirthDate,
     IReadOnlyList<string> ProfileIds,
-    string? CreatedBy = null,
     DateTimeOffset? InvitedAt = null);
 
-public sealed record DirectoryUserUpdate(string FirstName, string LastName, DateOnly BirthDate, IReadOnlyList<string> ProfileIds, bool MfaRequired);
+public sealed record DirectoryUserUpdate(string FirstName, string LastName, IReadOnlyList<string> ProfileIds, bool MfaRequired);
 
-/// <param name="BirthDate">Null for users created outside the portal, which may lack the attribute.</param>
 /// <param name="ProfileIds">As stored on the user: may still contain profiles deleted since.</param>
 /// <param name="PasswordPending">The user has not set a password yet: the invitation is still open.</param>
 public sealed record DirectoryUser(
@@ -74,14 +71,11 @@ public sealed record DirectoryUser(
     string FirstName,
     string LastName,
     string Email,
-    DateOnly? BirthDate,
     IReadOnlyList<string> ProfileIds,
     bool Enabled = true,
     bool PasswordPending = false,
     bool MfaRequired = false,
     DateTimeOffset? CreatedAt = null,
-    string? CreatedBy = null,
-    int InvitesSent = 0,
     DateTimeOffset? LastInviteAt = null);
 
 public sealed class UserEmailConflictException(string message, Exception? innerException = null)

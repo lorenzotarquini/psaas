@@ -12,24 +12,19 @@ export interface User {
   firstName: string
   lastName: string
   email: string
-  /** null for users created outside the portal (directly in Keycloak). */
-  birthDate: string | null
   profiles: { id: string; name: string; tenantId: string; tenantCompanyName: string }[]
   status: UserStatus
   mfaRequired: boolean
   lastLoginAt: string | null
   createdAt: string | null
-  createdBy: string | null
-  invitesSent: number
   lastInviteAt: string | null
 }
 
-/** UC6 body. birthDate is "YYYY-MM-DD"; Keycloak emails the user to set the password. */
+/** UC6 body; Keycloak emails the user to set the password. */
 export interface CreateUserRequest {
   firstName: string
   lastName: string
   email: string
-  birthDate: string
   profileIds: string[]
 }
 
@@ -37,7 +32,6 @@ export interface CreateUserRequest {
 export interface UpdateUserRequest {
   firstName: string
   lastName: string
-  birthDate: string
   profileIds: string[]
   mfaRequired: boolean
 }
@@ -56,7 +50,6 @@ export interface UserImportRow {
   firstName: string
   lastName: string
   email: string
-  birthDate: string
   profiles: string
 }
 

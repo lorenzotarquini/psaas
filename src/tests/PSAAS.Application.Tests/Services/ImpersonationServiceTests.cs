@@ -42,7 +42,7 @@ public sealed class ImpersonationServiceTests
     [InlineData("Verifica segnalazione", 61, "minutes")]
     public async Task UC31_R1_ReasonAndDuration_AreCheckedBeforeKeycloak(string reason, int minutes, string field)
     {
-        _directory.Users.Add(new("u1", "Mario", "Rossi", "m@x.it", null, []));
+        _directory.Users.Add(new("u1", "Mario", "Rossi", "m@x.it", []));
 
         var result = await Service.StartAsync("u1", new(reason, minutes));
 
@@ -53,7 +53,7 @@ public sealed class ImpersonationServiceTests
     [Fact]
     public async Task UC31_DefaultDurationIs30Minutes_AndTheImpersonationIsAudited()
     {
-        _directory.Users.Add(new("u1", "Mario", "Rossi", "m@x.it", null, []));
+        _directory.Users.Add(new("u1", "Mario", "Rossi", "m@x.it", []));
 
         var result = await Service.StartAsync("u1", new("Verifica segnalazione 4521", null));
 
@@ -65,8 +65,8 @@ public sealed class ImpersonationServiceTests
     [Fact]
     public async Task UC31_1a_1b_NotConfiguredOrDisabledUser_IsAConflict()
     {
-        _directory.Users.Add(new("u1", "Mario", "Rossi", "m@x.it", null, [], Enabled: false));
-        _directory.Users.Add(new("u2", "Anna", "Bianchi", "a@x.it", null, []));
+        _directory.Users.Add(new("u1", "Mario", "Rossi", "m@x.it", [], Enabled: false));
+        _directory.Users.Add(new("u2", "Anna", "Bianchi", "a@x.it", []));
 
         var disabled = await Service.StartAsync("u1", new("Verifica segnalazione", 10));
         _gateway.IsConfigured = false;
@@ -82,7 +82,7 @@ public sealed class ImpersonationServiceTests
     {
         var now = new DateTimeOffset(2026, 10, 20, 9, 0, 0, TimeSpan.Zero);
         DirectoryUser User(string id, int daysAgo, bool pending = true, bool enabled = true) =>
-            new(id, id, id, $"{id}@x.it", null, [], enabled, pending, LastInviteAt: now.AddDays(-daysAgo));
+            new(id, id, id, $"{id}@x.it", [], enabled, pending, LastInviteAt: now.AddDays(-daysAgo));
 
         var stale = UserManagementService.StaleInvites([User("old", 6), User("new", 1), User("active", 9, pending: false), User("off", 9, enabled: false)], now);
 

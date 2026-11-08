@@ -39,7 +39,6 @@ export function UserCreatePage() {
               <TextField name="firstName" label={t('userForm.firstName')} autoComplete="off" />
               <TextField name="lastName" label={t('userForm.lastName')} autoComplete="off" />
               <TextField name="email" label={t('users.email')} type="email" autoComplete="off" />
-              <TextField name="birthDate" label={t('users.birthDate')} type="date" />
             </div>
             <div role="note" className="alert alert-info alert-soft mt-2">
               <FontAwesomeIcon icon={faCircleInfo} />

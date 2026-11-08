@@ -16,12 +16,11 @@ public sealed class UserSearchServiceTests
     public async Task UC7_S1_S4_ProfilesComeWithTheirTenant_DeletedOnesAreLeftOut()
     {
         _profiles.Profiles.Add(new("p1", "Operatore", "t1", "Alfa Srl"));
-        _directory.Users.Add(new("kc-1", "Mario", "Rossi", "mario.rossi@example.com", null, ["p1", "deleted"]));
+        _directory.Users.Add(new("kc-1", "Mario", "Rossi", "mario.rossi@example.com", ["p1", "deleted"]));
 
         var mario = Assert.Single((await Service.SearchAsync(new UserQuery("mario", null, null, null))).Items);
 
         Assert.Equal(("Operatore", "Alfa Srl"), (Assert.Single(mario.Profiles).Name, mario.Profiles[0].TenantCompanyName));
-        Assert.Null(mario.BirthDate);
     }
 
     [Fact]

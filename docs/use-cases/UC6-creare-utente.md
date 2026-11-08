@@ -5,7 +5,7 @@
 **Obiettivo:** dare accesso a PSAAS a una persona.
 
 ## Flusso principale
-1. L'amministratore inserisce nome, cognome, email e data di nascita della persona.
+1. L'amministratore inserisce nome, cognome ed email della persona.
 2. Sceglie zero o più profili, anche di clienti diversi.
 3. Il sistema verifica i dati e crea l'utente in Keycloak.
 4. Keycloak invia alla persona un'email per impostare la password.
@@ -18,9 +18,9 @@
 - **3d. Keycloak non è raggiungibile:** il sistema non crea nulla e segnala che il servizio non è disponibile.
 
 ## Regole
-- R1. Nome, cognome, email e data di nascita sono obbligatori.
+- R1. Nome, cognome ed email sono obbligatori.
 - R2. L'email è anche lo username ed è unica su tutta la piattaforma.
-- R3. Nessun vincolo sulla data di nascita oltre a essere una data valida.
+- R3. (Rimossa: la data di nascita non viene più raccolta.)
 - R4. I profili sono facoltativi; un utente può avere profili di clienti diversi.
 - R5. In Keycloak si salvano solo i profili dell'utente (attributo `profileIds`); i suoi clienti si ricavano dai profili.
 - R6. La password non passa mai dall'Admin Portal.
@@ -68,7 +68,7 @@ Funzionalità: Creare un utente
 
 Scenario: Dati obbligatori mancanti
   Quando l'amministratore crea un utente senza compilare nessun campo
-  Allora la richiesta è rifiutata con "Required" su nome, cognome, email e data di nascita
+  Allora la richiesta è rifiutata con "Required" su nome, cognome ed email
   E nessun utente è stato creato in Keycloak
 ```
 

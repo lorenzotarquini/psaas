@@ -153,7 +153,7 @@ public sealed class FakeUserDirectory : IUserDirectory
         if (Unavailable) throw new UserDirectoryUnavailableException("down");
         if (EmailTaken) throw new UserEmailConflictException("taken");
         Created = user;
-        var created = new DirectoryUser("kc-1", user.FirstName, user.LastName, user.Email, user.BirthDate, user.ProfileIds, PasswordPending: true, CreatedBy: user.CreatedBy, InvitesSent: 1);
+        var created = new DirectoryUser("kc-1", user.FirstName, user.LastName, user.Email, user.ProfileIds, PasswordPending: true, LastInviteAt: user.InvitedAt);
         Users.Add(created);
         return Task.FromResult(created);
     }
@@ -201,7 +201,6 @@ public sealed class FakeUserDirectory : IUserDirectory
         {
             FirstName = update.FirstName,
             LastName = update.LastName,
-            BirthDate = update.BirthDate,
             ProfileIds = update.ProfileIds,
             MfaRequired = update.MfaRequired,
         };
@@ -212,7 +211,7 @@ public sealed class FakeUserDirectory : IUserDirectory
     {
         ThrowIfDown();
         var index = Users.FindIndex(user => user.Id == id);
-        Users[index] = Users[index] with { InvitesSent = Users[index].InvitesSent + 1, LastInviteAt = sentAt };
+        Users[index] = Users[index] with { LastInviteAt = sentAt };
         ActionEmails.Add((id, "invite"));
         return Task.CompletedTask;
     }

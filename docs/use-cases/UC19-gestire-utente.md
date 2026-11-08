@@ -7,8 +7,8 @@
 
 ## Flusso principale
 1. Dalla vista utenti (UC7) l'amministratore apre un utente nel pannello laterale.
-2. Vede stato, ultimo accesso, profili raggruppati per cliente e dettagli (ID Keycloak, data di nascita, creato il/da, inviti inviati).
-3. Modifica nome, cognome, data di nascita, profili (anche di altri clienti) e l'obbligo di MFA, e salva.
+2. Vede stato, ultimo accesso, profili raggruppati per cliente e dettagli (ID Keycloak, data di creazione, ultimo invito).
+3. Modifica nome, cognome, profili (anche di altri clienti) e l'obbligo di MFA, e salva.
 4. Oppure reinvia l'invito, chiede il reset della password, disattiva o riattiva l'utente.
 
 ## Flussi alternativi

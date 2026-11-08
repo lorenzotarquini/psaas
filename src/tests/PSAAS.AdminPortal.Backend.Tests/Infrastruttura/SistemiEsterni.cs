@@ -22,14 +22,14 @@ public sealed class FakeKeycloakUsers : IUserDirectory
     /// <summary>A user who has not set the password yet, invited at the given time.</summary>
     public DirectoryUser AddInvited(string firstName, string lastName, string email, DateTimeOffset invitedAt)
     {
-        var user = Add(firstName, lastName, email) with { PasswordPending = true, InvitesSent = 1, CreatedAt = invitedAt, LastInviteAt = invitedAt };
+        var user = Add(firstName, lastName, email) with { PasswordPending = true, CreatedAt = invitedAt, LastInviteAt = invitedAt };
         Users[^1] = user;
         return user;
     }
 
     public DirectoryUser Add(string firstName, string lastName, string email, params string[] profileIds)
     {
-        var user = new DirectoryUser($"kc-user-{++_nextId}", firstName, lastName, email, new DateOnly(1980, 1, 1), profileIds);
+        var user = new DirectoryUser($"kc-user-{++_nextId}", firstName, lastName, email, profileIds);
         Users.Add(user);
         return user;
     }
@@ -43,8 +43,8 @@ public sealed class FakeKeycloakUsers : IUserDirectory
         }
 
         var created = new DirectoryUser(
-            $"kc-user-{++_nextId}", user.FirstName, user.LastName, user.Email, user.BirthDate, user.ProfileIds,
-            PasswordPending: true, CreatedAt: user.InvitedAt, CreatedBy: user.CreatedBy, InvitesSent: 1, LastInviteAt: user.InvitedAt);
+            $"kc-user-{++_nextId}", user.FirstName, user.LastName, user.Email, user.ProfileIds,
+            PasswordPending: true, CreatedAt: user.InvitedAt, LastInviteAt: user.InvitedAt);
         Users.Add(created);
         PasswordSetupEmails.Add(user.Email);
         return Task.FromResult(created);
@@ -108,7 +108,6 @@ public sealed class FakeKeycloakUsers : IUserDirectory
         {
             FirstName = update.FirstName,
             LastName = update.LastName,
-            BirthDate = update.BirthDate,
             ProfileIds = update.ProfileIds,
             MfaRequired = update.MfaRequired,
         };
@@ -119,7 +118,7 @@ public sealed class FakeKeycloakUsers : IUserDirectory
     {
         ThrowIfUnavailable();
         var index = Users.FindIndex(user => user.Id == id);
-        Users[index] = Users[index] with { InvitesSent = Users[index].InvitesSent + 1, LastInviteAt = sentAt };
+        Users[index] = Users[index] with { LastInviteAt = sentAt };
         ActionEmails.Add((id, "invite"));
         return Task.CompletedTask;
     }

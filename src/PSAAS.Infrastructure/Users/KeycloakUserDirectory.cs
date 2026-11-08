@@ -12,20 +12,16 @@ namespace PSAAS.Infrastructure.Users;
 /// (e.g. https://kc/admin/realms/PSAAS/) as base address and sends the service account token.
 /// </summary>
 /// <remarks>
-/// The realm user profile must declare the attributes birthDate, profileIds, mfaRequired, createdBy, invitesSent and
-/// lastInviteAt (or allow unmanaged attributes): since Keycloak 24 undeclared attributes are silently dropped.
+/// The realm user profile must declare the attributes profileIds, mfaRequired and lastInviteAt, editable by admins only:
+/// since Keycloak 24 undeclared attributes are silently dropped.
 /// Last logins need user events (LOGIN) saved in the realm and the view-events role.
 /// </remarks>
 public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    private const string BirthDateAttribute = "birthDate";
     private const string ProfileIdsAttribute = "profileIds";
-    private const string BirthDateFormat = "yyyy-MM-dd";
     private const string MfaRequiredAttribute = "mfaRequired";
-    private const string CreatedByAttribute = "createdBy";
-    private const string InvitesSentAttribute = "invitesSent";
     private const string LastInviteAtAttribute = "lastInviteAt";
     private const string UpdatePasswordAction = "UPDATE_PASSWORD";
     private const string ConfigureTotpAction = "CONFIGURE_TOTP";
@@ -52,10 +48,7 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
             RequiredActions = [UpdatePasswordAction],
             Attributes = new Dictionary<string, string[]>
             {
-                [BirthDateAttribute] = [user.BirthDate.ToString(BirthDateFormat, CultureInfo.InvariantCulture)],
                 [ProfileIdsAttribute] = user.ProfileIds.ToArray(),
-                [CreatedByAttribute] = user.CreatedBy is null ? [] : [user.CreatedBy],
-                [InvitesSentAttribute] = ["1"],
                 [LastInviteAtAttribute] = [(user.InvitedAt ?? DateTimeOffset.UtcNow).ToString("O", CultureInfo.InvariantCulture)]
             }
         };
@@ -93,8 +86,8 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
 
         Logger.Info("Created Keycloak user {KeycloakUserId} and sent the password setup email", id);
         return new DirectoryUser(
-            id, user.FirstName, user.LastName, user.Email, user.BirthDate, user.ProfileIds,
-            PasswordPending: true, CreatedAt: user.InvitedAt, CreatedBy: user.CreatedBy, InvitesSent: 1, LastInviteAt: user.InvitedAt);
+            id, user.FirstName, user.LastName, user.Email, user.ProfileIds,
+            PasswordPending: true, CreatedAt: user.InvitedAt, LastInviteAt: user.InvitedAt);
     }
 
     public async Task<IReadOnlyList<DirectoryUser>> SearchAsync(string? search, CancellationToken cancellationToken = default)
@@ -203,7 +196,6 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
         user.FirstName = update.FirstName;
         user.LastName = update.LastName;
         var attributes = user.Attributes ?? [];
-        attributes[BirthDateAttribute] = [update.BirthDate.ToString(BirthDateFormat, CultureInfo.InvariantCulture)];
         attributes[ProfileIdsAttribute] = update.ProfileIds.ToArray();
         attributes[MfaRequiredAttribute] = [update.MfaRequired ? "true" : "false"];
         user.Attributes = attributes;
@@ -222,11 +214,9 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
         var user = await FindAsync(id, cancellationToken)
             ?? throw new InvalidOperationException($"Keycloak user {id} disappeared while inviting it");
         var attributes = user.Attributes ?? [];
-        var sent = int.TryParse(attributes.GetValueOrDefault(InvitesSentAttribute)?.FirstOrDefault(), CultureInfo.InvariantCulture, out var count) ? count : 1;
-        attributes[InvitesSentAttribute] = [(sent + 1).ToString(CultureInfo.InvariantCulture)];
         attributes[LastInviteAtAttribute] = [sentAt.ToString("O", CultureInfo.InvariantCulture)];
         user.Attributes = attributes;
-        await PutAsync(user, "count the invitations", cancellationToken);
+        await PutAsync(user, "record the invitation", cancellationToken);
     }
 
     public Task SendPasswordResetAsync(string id, CancellationToken cancellationToken = default) =>
@@ -300,24 +290,17 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
     private static DirectoryUser ToDirectoryUser(UserRepresentation user)
     {
         var attributes = user.Attributes ?? [];
-        var birthDate = attributes.TryGetValue(BirthDateAttribute, out var values)
-            && DateOnly.TryParseExact(values.FirstOrDefault(), BirthDateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed)
-                ? parsed
-                : (DateOnly?)null;
         string? First(string name) => attributes.TryGetValue(name, out var v) ? v.FirstOrDefault() : null;
         return new DirectoryUser(
             user.Id ?? string.Empty,
             user.FirstName ?? string.Empty,
             user.LastName ?? string.Empty,
             user.Email ?? user.Username ?? string.Empty,
-            birthDate,
             attributes.TryGetValue(ProfileIdsAttribute, out var profileIds) ? profileIds : [],
             user.Enabled,
             (user.RequiredActions ?? []).Contains(UpdatePasswordAction),
             First(MfaRequiredAttribute) == "true",
             user.CreatedTimestamp is { } created ? DateTimeOffset.FromUnixTimeMilliseconds(created) : null,
-            First(CreatedByAttribute),
-            int.TryParse(First(InvitesSentAttribute), CultureInfo.InvariantCulture, out var invites) ? invites : 0,
             DateTimeOffset.TryParse(First(LastInviteAtAttribute), CultureInfo.InvariantCulture, DateTimeStyles.None, out var invitedAt) ? invitedAt : null);
     }
 

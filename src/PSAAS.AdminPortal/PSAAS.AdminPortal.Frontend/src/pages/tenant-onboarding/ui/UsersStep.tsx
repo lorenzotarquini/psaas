@@ -53,7 +53,7 @@ export function UsersStep({ draft, onNext, onCancel, nextLabel }: UsersStepProps
     onNext(draft)
   })
 
-  const field = (index: number, name: 'firstName' | 'lastName' | 'email' | 'birthDate', type = 'text') => (
+  const field = (index: number, name: 'firstName' | 'lastName' | 'email', type = 'text') => (
     <label className="flex flex-col gap-0.5">
       <span className="text-[11.5px] text-base-content/60">{t(`onboarding.userFields.${name}`)}</span>
       <input type={type} className="input input-sm w-full" {...form.register(`users.${index}.${name}`)} />
@@ -76,15 +76,14 @@ export function UsersStep({ draft, onNext, onCancel, nextLabel }: UsersStepProps
           <section className="panel flex flex-col divide-y divide-base-300">
             {rows.fields.length === 0 && <p className="px-4 py-6 text-center text-base-content/60">{t('onboarding.noUsers')}</p>}
             {rows.fields.map((row, i) => (
-              <div key={row.id} className="grid gap-2 px-4 py-3 md:grid-cols-[1fr_1fr_1.4fr_9rem_auto]">
+              <div key={row.id} className="grid gap-2 px-4 py-3 md:grid-cols-[1fr_1fr_1.4fr_auto]">
                 {field(i, 'firstName')}
                 {field(i, 'lastName')}
                 {field(i, 'email', 'email')}
-                {field(i, 'birthDate', 'date')}
                 <button type="button" className="btn btn-ghost btn-sm self-end" aria-label={t('onboarding.removeUser')} onClick={() => rows.remove(i)}>
                   <FontAwesomeIcon icon={faTrash} />
                 </button>
-                <div className="flex flex-wrap gap-1.5 md:col-span-5">
+                <div className="flex flex-wrap gap-1.5 md:col-span-4">
                   {draft.profiles.length === 0 ? (
                     <span className="text-[12px] text-base-content/50">{t('onboarding.noProfilesYet')}</span>
                   ) : (

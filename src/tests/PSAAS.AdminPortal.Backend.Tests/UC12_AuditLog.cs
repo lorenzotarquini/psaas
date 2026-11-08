@@ -60,7 +60,6 @@ public sealed class UC12_AuditLog(PostgresFixture database) : AcceptanceTest(dat
             firstName = "Mario",
             lastName = "Rossi",
             email = "mario.rossi@example.com",
-            birthDate = "1980-05-17",
             profileIds = new[] { alfa.Profile("Operatore").Id, beta.Profile("Revisore").Id },
         });
 
@@ -97,7 +96,6 @@ public sealed class UC12_AuditLog(PostgresFixture database) : AcceptanceTest(dat
             firstName = "Mario",
             lastName = "Rossi",
             email = "mario.rossi@example.com",
-            birthDate = "1980-05-17",
             profileIds = Array.Empty<string>(),
         });
 

@@ -19,7 +19,7 @@ public sealed class UserManagementServiceTests
 
     private DirectoryUser GivenUser(params string[] profileIds)
     {
-        var user = new DirectoryUser("u1", "Mario", "Rossi", "mario@example.com", new DateOnly(1980, 1, 1), profileIds);
+        var user = new DirectoryUser("u1", "Mario", "Rossi", "mario@example.com", profileIds);
         _directory.Users.Add(user);
         return user;
     }
@@ -32,7 +32,7 @@ public sealed class UserManagementServiceTests
     [InlineData(true, false, "Active", "Active")]
     public void UC19_R1_StatusFromKeycloakAndTenant(bool enabled, bool passwordPending, string tenantStatus, string expected)
     {
-        var user = new DirectoryUser("u1", "M", "R", "m@x.it", null, ["p1"], enabled, passwordPending);
+        var user = new DirectoryUser("u1", "M", "R", "m@x.it", ["p1"], enabled, passwordPending);
         var profiles = new Dictionary<string, UserProfileReadModel> { ["p1"] = new("p1", "Operatore", "t1", "Alfa Srl", tenantStatus) };
 
         Assert.Equal(expected, UserReadModel.From(user, profiles).Status);
@@ -45,7 +45,7 @@ public sealed class UserManagementServiceTests
         _profiles.Profiles.Add(new("p2", "Revisore", "t2", "Beta Snc"));
         GivenUser("p1");
 
-        var result = await Service.UpdateAsync("u1", new("Mario", " Russo ", "1980-01-01", ["p2"], true));
+        var result = await Service.UpdateAsync("u1", new("Mario", " Russo ", ["p2"], true));
 
         Assert.Equal(("Russo", true), (result.User!.LastName, result.User.MfaRequired));
         Assert.Equal(["t1", "t2"], _audit.Records.Select(r => r.TenantId).Order());
@@ -57,7 +57,7 @@ public sealed class UserManagementServiceTests
     {
         GivenUser();
 
-        await Service.UpdateAsync("u1", new("Mario", "Rossi", "1980-01-01", [], false));
+        await Service.UpdateAsync("u1", new("Mario", "Rossi", [], false));
 
         Assert.Empty(_audit.Records);
     }
@@ -72,7 +72,7 @@ public sealed class UserManagementServiceTests
             DateTimeOffset.UtcNow, null, DateTimeOffset.UtcNow, true, [], []);
         GivenUser("p1");
 
-        var result = await Service.UpdateAsync("u1", new("Mario", "Rossi", "1980-01-01", ["p1"], false));
+        var result = await Service.UpdateAsync("u1", new("Mario", "Rossi", ["p1"], false));
 
         Assert.True(result.Succeeded);
     }
@@ -80,13 +80,13 @@ public sealed class UserManagementServiceTests
     [Fact]
     public async Task UC19_S4_S5_InviteOnlyWhileTheInvitationIsOpen()
     {
-        _directory.Users.Add(new("u1", "Giulia", "Ferri", "g@x.it", null, [], PasswordPending: true, InvitesSent: 1));
-        _directory.Users.Add(new("u2", "Mario", "Rossi", "m@x.it", null, []));
+        _directory.Users.Add(new("u1", "Giulia", "Ferri", "g@x.it", [], PasswordPending: true));
+        _directory.Users.Add(new("u2", "Mario", "Rossi", "m@x.it", []));
 
         var invited = await Service.InviteAsync("u1");
         var refused = await Service.InviteAsync("u2");
 
-        Assert.Equal(2, invited.User!.InvitesSent);
+        Assert.NotNull(invited.User!.LastInviteAt);
         Assert.True(refused.Conflict);
         Assert.Equal([("u1", "invite")], _directory.ActionEmails);
     }
@@ -106,8 +106,8 @@ public sealed class UserManagementServiceTests
     {
         _profiles.All.Add(new("p1", "t1", "Alfa Srl", "Operatore", null));
         _profiles.Profiles.Add(new("p1", "Operatore", "t1", "Alfa Srl"));
-        var import = new UserImportService(_profiles, new UserCreateService(Rules, _directory, new FakeCurrentActor(), TimeProvider.System));
-        UserImportRow Row(string email, string profiles) => new("Mario", "Rossi", email, "1980-01-01", profiles);
+        var import = new UserImportService(_profiles, new UserCreateService(Rules, _directory, TimeProvider.System));
+        UserImportRow Row(string email, string profiles) => new("Mario", "Rossi", email, profiles);
 
         var rows = await import.ImportAsync(new([Row("m@x.it", " alfa srl : OPERATORE "), Row("M@x.it", ""), Row("a@x.it", "Alfa Srl:Nessuno")], false));
 
@@ -120,9 +120,9 @@ public sealed class UserManagementServiceTests
     [Fact]
     public async Task UC20_R3_EmptyOrTooLongFile_IsRejected()
     {
-        var import = new UserImportService(_profiles, new UserCreateService(Rules, _directory, new FakeCurrentActor(), TimeProvider.System));
+        var import = new UserImportService(_profiles, new UserCreateService(Rules, _directory, TimeProvider.System));
 
         Assert.Null(await import.ImportAsync(new([], false)));
-        Assert.Null(await import.ImportAsync(new(Enumerable.Repeat(new UserImportRow("a", "b", "c@x.it", "1980-01-01", ""), 501).ToArray(), false)));
+        Assert.Null(await import.ImportAsync(new(Enumerable.Repeat(new UserImportRow("a", "b", "c@x.it", ""), 501).ToArray(), false)));
     }
 }

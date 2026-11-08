@@ -217,7 +217,6 @@
     "empty": "There are no users.",
     "name": "Name",
     "email": "Email",
-    "birthDate": "Birth date",
     "noProfiles": "No profiles",
     "user": "User",
     "profilesTenant": "Profiles · tenant",
@@ -261,14 +260,11 @@
     "details": "Details",
     "username": "Username",
     "createdAt": "Created",
-    "by": "by {{name}}",
-    "invite": "Invitation",
-    "invitesSent_one": "sent {{count}} time · last {{last}}",
-    "invitesSent_other": "sent {{count}} times · last {{last}}",
+    "invite": "Last invitation",
     "import": {
       "button": "Import CSV",
       "title": "Import users from CSV",
-      "hint": "Columns: nome, cognome, email, dataNascita (YYYY-MM-DD), profili (Tenant:Profile separated by |). Check the preview, then confirm.",
+      "hint": "Columns: nome, cognome, email, profili (Tenant:Profile separated by |). Check the preview, then confirm.",
       "choose": "Choose file",
       "template": "Download the template",
       "badFile": "The file lacks the required columns or has no rows.",
@@ -286,7 +282,6 @@
         "firstName": "First name",
         "lastName": "Last name",
         "email": "Email",
-        "birthDate": "Birth date",
         "profiles": "Profiles"
       }
     }
@@ -414,7 +409,6 @@
       "postalCode": "Postal code",
       "firstName": "First name",
       "lastName": "Last name",
-      "birthDate": "Birth date",
       "mfaRequired": "MFA required",
       "sdiCode": "SDI code",
       "accountManager": "Account manager"
@@ -511,8 +505,7 @@
     "userFields": {
       "firstName": "First name",
       "lastName": "Last name",
-      "email": "Email",
-      "birthDate": "Date of birth"
+      "email": "Email"
     },
     "summaryHint": "Check the data and activate the customer.",
     "organizationSummary": "{{profiles}} profiles, {{units}} productive units",

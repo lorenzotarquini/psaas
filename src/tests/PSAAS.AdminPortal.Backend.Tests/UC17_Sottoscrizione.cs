@@ -86,7 +86,7 @@ public sealed class UC17_Sottoscrizione(PostgresFixture database) : AcceptanceTe
 
         var errors = await ErrorsAsync(await Admin.PostAsJsonAsync("/api/users", new
         {
-            firstName = "Anna", lastName = "Bianchi", email = "anna@example.com", birthDate = "1990-01-01",
+            firstName = "Anna", lastName = "Bianchi", email = "anna@example.com",
             profileIds = new[] { alfa.Profile("Operatore").Id },
         }));
 

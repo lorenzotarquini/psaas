@@ -6,7 +6,7 @@ using PSAAS.Application.Contracts.Users;
 namespace PSAAS.Application.Services.Users;
 
 /// <summary>A row of the UC20 file. Profiles: "Cliente:Profilo" pairs separated by "|".</summary>
-public sealed record UserImportRow(string? FirstName, string? LastName, string? Email, string? BirthDate, string? Profiles);
+public sealed record UserImportRow(string? FirstName, string? LastName, string? Email, string? Profiles);
 
 public sealed record UserImportRequest(IReadOnlyList<UserImportRow>? Rows, bool Confirm);
 
@@ -41,7 +41,7 @@ public sealed class UserImportService(IProfileReadRepository profiles, UserCreat
             var ids = pairs.Select(pair => pair.Split(':', 2, StringSplitOptions.TrimEntries))
                 .Select(parts => parts.Length == 2 ? byName[Key(parts[0], parts[1])].FirstOrDefault() : null)
                 .ToArray();
-            var createRequest = new UserCreateRequest(row.FirstName, row.LastName, row.Email, row.BirthDate, ids.OfType<string>().ToArray());
+            var createRequest = new UserCreateRequest(row.FirstName, row.LastName, row.Email, ids.OfType<string>().ToArray());
             var (_, _, errors) = await create.ValidateAsync(createRequest, cancellationToken);
             // profileIds[i] errors read better on the column of the file.
             foreach (var key in errors.Keys.Where(k => k.StartsWith("profileIds", StringComparison.Ordinal)).ToArray())

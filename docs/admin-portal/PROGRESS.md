@@ -53,7 +53,7 @@ Per verificare l'interfaccia senza il login reale: provider OIDC locale (`devidp
 20. **Cambio piano**: i moduli non più inclusi vengono tolti subito (nessun hook di deprovisioning chiamato per ora: `deprovisionUrl` è solo registrato).
 21. **Icone dei moduli**: il manifest indica un nome (`warehouse`, `hr`, `maintenance`…), mappato su icone Font Awesome; nomi sconosciuti → pezzo di puzzle.
 22. **Stato "Sospeso" dell'utente** calcolato: attivo in Keycloak ma tutti i clienti dei suoi profili sono sospesi o cessati. Nessuna sospensione manuale (il mock ha solo "Disattiva").
-23. **Invito in sospeso** = azione richiesta `UPDATE_PASSWORD` impostata alla creazione; contatore inviti e autore negli attributi Keycloak (`invitesSent`, `lastInviteAt`, `createdBy`): vanno dichiarati nel *User profile*.
+23. **Invito in sospeso** = azione richiesta `UPDATE_PASSWORD` impostata alla creazione; data dell'ultimo invito nell'attributo Keycloak `lastInviteAt`: va dichiarato nel *User profile*.
 24. **Azioni del pannello sempre visibili** (come nel mock), disabilitate quando lo stato non le consente; il backend risponde `409`.
 25. **Filtri e pagine utenti in memoria** sui primi 1000 risultati di Keycloak (shortcut annotato nel codice).
 26. **Ultimo accesso** dagli eventi `LOGIN` di Keycloak, una richiesta per utente della pagina; se gli eventi sono spenti resta "mai" senza errori.

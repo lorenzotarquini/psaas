@@ -925,7 +925,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstName\": \"Mario\",\n  \"lastName\": \"Postman\",\n  \"email\": \"postman.{{runId}}@example.com\",\n  \"birthDate\": \"1980-05-17\",\n  \"profileIds\": [\n    \"{{profileId}}\"\n  ]\n}"
+              "raw": "{\n  \"firstName\": \"Mario\",\n  \"lastName\": \"Postman\",\n  \"email\": \"postman.{{runId}}@example.com\",\n  \"profileIds\": [\n    \"{{profileId}}\"\n  ]\n}"
             }
           },
           "event": [
@@ -1070,7 +1070,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstName\": \"Mario\",\n  \"lastName\": \"Postman\",\n  \"birthDate\": \"1980-05-17\",\n  \"profileIds\": [\n    \"{{profileId}}\"\n  ],\n  \"mfaRequired\": true\n}"
+              "raw": "{\n  \"firstName\": \"Mario\",\n  \"lastName\": \"Postman\",\n  \"profileIds\": [\n    \"{{profileId}}\"\n  ],\n  \"mfaRequired\": true\n}"
             }
           },
           "event": [
@@ -1225,7 +1225,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"confirm\": false,\n  \"rows\": [\n    {\n      \"firstName\": \"Nina\",\n      \"lastName\": \"Gallo\",\n      \"email\": \"nina.{{runId}}@example.com\",\n      \"birthDate\": \"1995-05-05\",\n      \"profiles\": \"Postman {{runId}}:Operatore\"\n    }\n  ]\n}"
+              "raw": "{\n  \"confirm\": false,\n  \"rows\": [\n    {\n      \"firstName\": \"Nina\",\n      \"lastName\": \"Gallo\",\n      \"email\": \"nina.{{runId}}@example.com\",\n      \"profiles\": \"Postman {{runId}}:Operatore\"\n    }\n  ]\n}"
             }
           },
           "event": [

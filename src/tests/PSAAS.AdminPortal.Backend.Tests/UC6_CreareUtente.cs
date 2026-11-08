@@ -15,11 +15,10 @@ public sealed class UC6_CreareUtente(PostgresFixture database) : AcceptanceTest(
         var beta = await GivenTenantAsync("Beta Snc", profiles: new[] { new { key = "rev", name = "Revisore" } });
 
         var created = await ReadAsync<UserView>(await CreateAsync(UserBody(
-            "Mario", "Rossi", "mario.rossi@example.com", "1980-05-17",
+            "Mario", "Rossi", "mario.rossi@example.com",
             alfa.Profile("Operatore").Id, beta.Profile("Revisore").Id)), HttpStatusCode.Created);
 
         Assert.Equal("mario.rossi@example.com", created.Email);
-        Assert.Equal(new DateOnly(1980, 5, 17), created.BirthDate);
         Assert.Equal(
             [("Operatore", "Alfa Srl"), ("Revisore", "Beta Snc")],
             created.Profiles.Select(profile => (profile.Name, profile.TenantCompanyName)).Order());
@@ -32,7 +31,7 @@ public sealed class UC6_CreareUtente(PostgresFixture database) : AcceptanceTest(
     public async Task S2_UtenteSenzaProfili()
     {
         var created = await ReadAsync<UserView>(
-            await CreateAsync(UserBody("Anna", "Bianchi", "anna.bianchi@example.com", "1990-01-31")),
+            await CreateAsync(UserBody("Anna", "Bianchi", "anna.bianchi@example.com")),
             HttpStatusCode.Created);
 
         Assert.Empty(created.Profiles);
@@ -44,7 +43,7 @@ public sealed class UC6_CreareUtente(PostgresFixture database) : AcceptanceTest(
     {
         var errors = await ErrorsAsync(await CreateAsync(new { }));
 
-        foreach (var field in new[] { "firstName", "lastName", "email", "birthDate" })
+        foreach (var field in new[] { "firstName", "lastName", "email" })
         {
             Assert.Equal("Required", errors[field]);
         }
@@ -55,7 +54,7 @@ public sealed class UC6_CreareUtente(PostgresFixture database) : AcceptanceTest(
     [Fact, Trait("Scenario", "UC6-S4")]
     public async Task S4_EmailNonValida()
     {
-        var errors = await ErrorsAsync(await CreateAsync(UserBody("Mario", "Rossi", "non-una-email", "1980-05-17")));
+        var errors = await ErrorsAsync(await CreateAsync(UserBody("Mario", "Rossi", "non-una-email")));
 
         Assert.Equal("InvalidFormat", errors["email"]);
     }
@@ -65,7 +64,7 @@ public sealed class UC6_CreareUtente(PostgresFixture database) : AcceptanceTest(
     {
         KeycloakUsers.Add("Mario", "Rossi", "mario.rossi@example.com");
 
-        var errors = await ErrorsAsync(await CreateAsync(UserBody("Mario", "Rossi", "MARIO.ROSSI@example.com", "1980-05-17")));
+        var errors = await ErrorsAsync(await CreateAsync(UserBody("Mario", "Rossi", "MARIO.ROSSI@example.com")));
 
         Assert.Equal("NotUnique", errors["email"]);
         Assert.Single(KeycloakUsers.Users);
@@ -75,7 +74,7 @@ public sealed class UC6_CreareUtente(PostgresFixture database) : AcceptanceTest(
     public async Task S6_ProfiloInesistente()
     {
         var errors = await ErrorsAsync(await CreateAsync(UserBody(
-            "Mario", "Rossi", "mario.rossi@example.com", "1980-05-17", Guid.NewGuid().ToString())));
+            "Mario", "Rossi", "mario.rossi@example.com", Guid.NewGuid().ToString())));
 
         Assert.Equal("InvalidValue", errors["profileIds[0]"]);
         Assert.Empty(KeycloakUsers.Users);
@@ -86,13 +85,13 @@ public sealed class UC6_CreareUtente(PostgresFixture database) : AcceptanceTest(
     {
         KeycloakUsers.Unavailable = true;
 
-        var response = await CreateAsync(UserBody("Mario", "Rossi", "mario.rossi@example.com", "1980-05-17"));
+        var response = await CreateAsync(UserBody("Mario", "Rossi", "mario.rossi@example.com"));
 
         Assert.Equal(HttpStatusCode.ServiceUnavailable, response.StatusCode);
     }
 
-    private static object UserBody(string firstName, string lastName, string email, string birthDate, params string[] profileIds) =>
-        new { firstName, lastName, email, birthDate, profileIds };
+    private static object UserBody(string firstName, string lastName, string email, params string[] profileIds) =>
+        new { firstName, lastName, email, profileIds };
 
     private Task<HttpResponseMessage> CreateAsync(object body) => Admin.PostAsJsonAsync("/api/users", body);
 }

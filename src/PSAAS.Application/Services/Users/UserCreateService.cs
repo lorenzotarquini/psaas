@@ -1,5 +1,4 @@
 using NLog;
-using PSAAS.Application.Abstractions.Audit;
 using PSAAS.Application.Abstractions.Users;
 using PSAAS.Application.Contracts.Audit;
 using PSAAS.Application.Contracts.Tenants;
@@ -11,7 +10,7 @@ namespace PSAAS.Application.Services.Users;
 /// UC6: creates a user in the identity provider, which emails them to set the password.
 /// Nothing is created unless every value is valid; errors are reported per field.
 /// </summary>
-public sealed class UserCreateService(UserRules rules, IUserDirectory directory, ICurrentActor actor, TimeProvider clock)
+public sealed class UserCreateService(UserRules rules, IUserDirectory directory, TimeProvider clock)
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -27,15 +26,13 @@ public sealed class UserCreateService(UserRules rules, IUserDirectory directory,
         UserRules.Required(errors, "firstName", firstName);
         UserRules.Required(errors, "lastName", lastName);
         var email = UserRules.ValidateEmail(request.Email, errors);
-        var birthDate = UserRules.ValidateBirthDate(request.BirthDate, errors);
         var profileIds = (request.ProfileIds ?? []).Select(UserRules.Trim).ToArray();
         var existingProfiles = await rules.ValidateProfilesAsync(profileIds, errors, null, cancellationToken);
 
         var user = errors.Count > 0
             ? null
             : new NewDirectoryUser(
-                firstName, lastName, email, birthDate!.Value, profileIds.Distinct(StringComparer.Ordinal).ToArray(),
-                actor.Name, clock.GetUtcNow());
+                firstName, lastName, email, profileIds.Distinct(StringComparer.Ordinal).ToArray(), clock.GetUtcNow());
         return (user, existingProfiles, errors);
     }
 

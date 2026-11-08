@@ -15,7 +15,8 @@ public sealed class UC19_GestireUtente(PostgresFixture database) : AcceptanceTes
 
         var detail = await GetOkAsync<UserView>($"/api/users/{giulia.Id}");
 
-        Assert.Equal(("Invited", 1, "admin.psaas"), (detail.Status, detail.InvitesSent, detail.CreatedBy));
+        Assert.Equal("Invited", detail.Status);
+        Assert.NotNull(detail.LastInviteAt);
     }
 
     [Fact, Trait("Scenario", "UC19-S2")]
@@ -27,7 +28,7 @@ public sealed class UC19_GestireUtente(PostgresFixture database) : AcceptanceTes
 
         var updated = await ReadAsync<UserView>(await Admin.PutAsJsonAsync($"/api/users/{mario.Id}", new
         {
-            firstName = "Mario", lastName = "Russo", birthDate = "1980-01-01", mfaRequired = true,
+            firstName = "Mario", lastName = "Russo", mfaRequired = true,
             profileIds = new[] { alfa.Profile("Operatore").Id, beta.Profile("Revisore").Id },
         }), HttpStatusCode.OK);
 
@@ -47,7 +48,7 @@ public sealed class UC19_GestireUtente(PostgresFixture database) : AcceptanceTes
 
         var errors = await ErrorsAsync(await Admin.PutAsJsonAsync($"/api/users/{mario.Id}", new
         {
-            firstName = " ", lastName = "Rossi", birthDate = "1980-01-01", mfaRequired = false, profileIds = new[] { "nope" },
+            firstName = " ", lastName = "Rossi", mfaRequired = false, profileIds = new[] { "nope" },
         }));
 
         Assert.Equal(("Required", "InvalidValue"), (errors["firstName"], errors["profileIds[0]"]));
@@ -60,7 +61,7 @@ public sealed class UC19_GestireUtente(PostgresFixture database) : AcceptanceTes
 
         var invited = await ReadAsync<UserView>(await Admin.PostAsync($"/api/users/{giulia.Id}/invite", null), HttpStatusCode.OK);
 
-        Assert.Equal(2, invited.InvitesSent);
+        Assert.True(invited.LastInviteAt >= giulia.LastInviteAt);
         Assert.Contains((giulia.Id, "invite"), KeycloakUsers.ActionEmails);
     }
 
@@ -111,5 +112,5 @@ public sealed class UC19_GestireUtente(PostgresFixture database) : AcceptanceTes
     }
 
     private Task<HttpResponseMessage> CreateUserAsync(string firstName, string lastName, string email) =>
-        Admin.PostAsJsonAsync("/api/users", new { firstName, lastName, email, birthDate = "1991-04-12", profileIds = Array.Empty<string>() });
+        Admin.PostAsJsonAsync("/api/users", new { firstName, lastName, email, profileIds = Array.Empty<string>() });
 }

@@ -48,8 +48,8 @@ public sealed record CityView(string Name, string ProvinceCode, List<string> Pos
 public sealed record MeView(string? KeycloakId, string? Name, string? Email, List<string> Roles);
 
 public sealed record UserView(
-    string Id, string FirstName, string LastName, string Email, DateOnly BirthDate, List<UserProfileView> Profiles,
-    string Status = "Active", bool MfaRequired = false, DateTimeOffset? LastLoginAt = null, string? CreatedBy = null, int InvitesSent = 0);
+    string Id, string FirstName, string LastName, string Email, List<UserProfileView> Profiles,
+    string Status = "Active", bool MfaRequired = false, DateTimeOffset? LastLoginAt = null, DateTimeOffset? LastInviteAt = null);
 
 public sealed record UserProfileView(string Id, string Name, string TenantId, string TenantCompanyName);
 

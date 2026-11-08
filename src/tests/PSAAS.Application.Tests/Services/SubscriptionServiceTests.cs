@@ -80,8 +80,8 @@ public sealed class SubscriptionServiceTests
     public async Task UC17_S3_MoreUsersThanThePlanAllows_IsLimitExceeded()
     {
         _tenants.Structure = new([new("p1", "Operatore", null)], []);
-        _users.Users.Add(new("u1", "Mario", "Rossi", "m@x.it", null, ["p1"]));
-        _users.Users.Add(new("u2", "Anna", "Bianchi", "a@x.it", null, ["p1"]));
+        _users.Users.Add(new("u1", "Mario", "Rossi", "m@x.it", ["p1"]));
+        _users.Users.Add(new("u2", "Anna", "Bianchi", "a@x.it", ["p1"]));
         var plan = GivenPlan(maxUsers: 1);
 
         var result = await Service.SubscribeAsync(TenantId, new(plan.Id));

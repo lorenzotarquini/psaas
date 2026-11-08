@@ -217,7 +217,6 @@
     "empty": "Non ci sono utenti.",
     "name": "Nome",
     "email": "Email",
-    "birthDate": "Data di nascita",
     "noProfiles": "Nessun profilo",
     "user": "Utente",
     "profilesTenant": "Profili · cliente",
@@ -261,14 +260,11 @@
     "details": "Dettagli",
     "username": "Username",
     "createdAt": "Creato",
-    "by": "da {{name}}",
-    "invite": "Invito",
-    "invitesSent_one": "inviato {{count}} volta · ultimo {{last}}",
-    "invitesSent_other": "inviato {{count}} volte · ultimo {{last}}",
+    "invite": "Ultimo invito",
     "import": {
       "button": "Importa CSV",
       "title": "Importa utenti da CSV",
-      "hint": "Colonne: nome, cognome, email, dataNascita (AAAA-MM-GG), profili (Cliente:Profilo separati da |). Prima vedi l'anteprima, poi confermi.",
+      "hint": "Colonne: nome, cognome, email, profili (Cliente:Profilo separati da |). Prima vedi l'anteprima, poi confermi.",
       "choose": "Scegli file",
       "template": "Scarica il modello",
       "badFile": "Il file non ha le colonne richieste o non contiene righe.",
@@ -286,7 +282,6 @@
         "firstName": "Nome",
         "lastName": "Cognome",
         "email": "Email",
-        "birthDate": "Data di nascita",
         "profiles": "Profili"
       }
     }
@@ -414,7 +409,6 @@
       "postalCode": "CAP",
       "firstName": "Nome",
       "lastName": "Cognome",
-      "birthDate": "Data di nascita",
       "mfaRequired": "MFA richiesta",
       "sdiCode": "Codice SDI",
       "accountManager": "Referente commerciale"
@@ -511,8 +505,7 @@
     "userFields": {
       "firstName": "Nome",
       "lastName": "Cognome",
-      "email": "Email",
-      "birthDate": "Data di nascita"
+      "email": "Email"
     },
     "summaryHint": "Controlla i dati e attiva il cliente.",
     "organizationSummary": "{{profiles}} profili, {{units}} unità produttive",

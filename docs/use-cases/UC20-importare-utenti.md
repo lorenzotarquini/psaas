@@ -6,7 +6,7 @@
 **Obiettivo:** creare molti utenti in una volta, vedendo prima quali righe sono valide.
 
 ## Flusso principale
-1. L'amministratore sceglie un file CSV con le colonne `nome, cognome, email, dataNascita, profili`.
+1. L'amministratore sceglie un file CSV con le colonne `nome, cognome, email, profili`.
 2. Il sistema mostra l'anteprima: per ogni riga i valori letti e gli errori, con gli stessi codici di UC6.
 3. L'amministratore conferma: il sistema crea gli utenti delle righe valide (UC6) e riporta l'esito di ognuna.
 

@@ -26,11 +26,11 @@ describe('groupProfilesByTenant', () => {
 describe('userSchema', () => {
   // UC6-S3 and UC6-S4 on the client side, with the backend codes.
   it('reports Required and InvalidFormat like the backend', () => {
-    const result = userSchema.safeParse({ firstName: ' ', lastName: 'Rossi', email: 'non-una-email', birthDate: '', profileIds: [] })
+    const result = userSchema.safeParse({ firstName: ' ', lastName: 'Rossi', email: 'non-una-email', profileIds: [] })
     // Zod reports every failed check; the form (zodResolver) shows the first one per field.
     const messages = Object.fromEntries(
       (result.error?.issues ?? []).toReversed().map((issue) => [issue.path.join('.'), issue.message]),
     )
-    expect(messages).toEqual({ firstName: 'Required', email: 'InvalidFormat', birthDate: 'Required' })
+    expect(messages).toEqual({ firstName: 'Required', email: 'InvalidFormat' })
   })
 })

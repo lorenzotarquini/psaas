@@ -70,17 +70,16 @@ Sostituisce l'intera organizzazione del cliente: ciò che non compare nel body v
 - I profili tolti vengono rimossi anche dagli utenti in Keycloak (attributo `profileIds`). Se Keycloak non risponde l'organizzazione resta salvata: gli utenti conservano un id che le letture già omettono (UC7-R3), e l'evento è nel log.
 
 ### UC6 – `POST /api/users`
-Body: `{ firstName, lastName, email, birthDate: "YYYY-MM-DD", profileIds: [] }`.
-Risposte: `201` + `Location` (`/api/users/{id}`) + utente (vedi UC7) · `400` errori per campo (`firstName`, `lastName`, `email`, `birthDate` = `Required`; `email` = `InvalidFormat` o `NotUnique` se già usata; `birthDate` = `InvalidFormat` se non è una data `YYYY-MM-DD`; `profileIds[i]` = `InvalidValue` se il profilo non esiste) · `503` Keycloak non raggiungibile.
-Effetto: utente creato in Keycloak (username = email in minuscolo, attributi `birthDate`, `profileIds`, `createdBy`, `invitesSent`, `lastInviteAt`, azione richiesta `UPDATE_PASSWORD` finché l'utente non imposta la password) e email di impostazione password (`UPDATE_PASSWORD`) inviata da Keycloak. Se Keycloak non riesce a inviare l'email, l'utente appena creato viene rimosso e la risposta è `503`.
+Body: `{ firstName, lastName, email, profileIds: [] }`.
+Risposte: `201` + `Location` (`/api/users/{id}`) + utente (vedi UC7) · `400` errori per campo (`firstName`, `lastName`, `email` = `Required`; `email` = `InvalidFormat` o `NotUnique` se già usata; `profileIds[i]` = `InvalidValue` se il profilo non esiste) · `503` Keycloak non raggiungibile.
+Effetto: utente creato in Keycloak (username = email in minuscolo, attributi `profileIds`, `lastInviteAt`, azione richiesta `UPDATE_PASSWORD` finché l'utente non imposta la password) e email di impostazione password (`UPDATE_PASSWORD`) inviata da Keycloak. Se Keycloak non riesce a inviare l'email, l'utente appena creato viene rimosso e la risposta è `503`.
 
 ### UC7 – `GET /api/users?search=&tenantId=&profileId=&status=&page=1&pageSize=50`
-Risposta: `{ items: [utente], totalCount, page, pageSize }` con utente = `{ id, firstName, lastName, email, birthDate, profiles: [{ id, name, tenantId, tenantCompanyName, tenantStatus }], status, mfaRequired, lastLoginAt, createdAt, createdBy, invitesSent, lastInviteAt }` · `400` (`page` < 1, `pageSize` fuori 1–200, `status` sconosciuto = `InvalidValue`) · `503` Keycloak non raggiungibile.
+Risposta: `{ items: [utente], totalCount, page, pageSize }` con utente = `{ id, firstName, lastName, email, profiles: [{ id, name, tenantId, tenantCompanyName, tenantStatus }], status, mfaRequired, lastLoginAt, createdAt, lastInviteAt }` · `400` (`page` < 1, `pageSize` fuori 1–200, `status` sconosciuto = `InvalidValue`) · `503` Keycloak non raggiungibile.
 - `search` vuoto restituisce tutti gli utenti; altrimenti cerca il testo all'interno di nome, cognome, username ed email, senza maiuscole. `tenantId`/`profileId` tengono gli utenti con un profilo di quel cliente / quel profilo; `status`: `Invited`, `Active`, `Suspended`, `Disabled` (UC19-R1).
 - Ordine per cognome e nome. Filtri e pagine sono applicati sui primi 1000 utenti che Keycloak restituisce per la ricerca.
 - `lastLoginAt` dall'ultimo evento `LOGIN` di Keycloak, `null` se non c'è o se gli eventi non sono disponibili.
 - I profili salvati sull'utente che non esistono più vengono omessi.
-- `birthDate` è `null` per gli utenti creati fuori dal portale (ad esempio direttamente in Keycloak).
 
 ### UC21 – Elenco clienti con filtri, ordinamento, conteggi ed export
 - `GET /api/tenants` accetta, oltre a `search`, `page` e `pageSize`: `status` e `planId` (ripetibili, in OR tra loro), `moduleId`, `province` (sigla, senza maiuscole), `renewalWithinDays` (1–3650: rinnovo o fine prova entro N giorni, scaduti compresi), `sort` (`companyName`, `city`, `status`, `plan`, `renewsAt`, con `-` davanti per l'ordine decrescente). Parametri non validi → `400` con il parametro = `InvalidValue`.
@@ -146,19 +145,19 @@ Risposta: `{ items: [utente], totalCount, page, pageSize }` con utente = `{ id, 
 
 ### UC19 – Gestire un utente
 - `GET /api/users/{id}` → utente (come in UC7) · `404`.
-- `PUT /api/users/{id}` body `{ firstName, lastName, birthDate: "YYYY-MM-DD", profileIds, mfaRequired }` → `200` + utente · `400` con i codici di UC6 (`firstName`, `lastName`, `birthDate`, `profileIds[i]` = `InvalidValue` o `LimitExceeded` per un cliente nuovo al limite) · `404`. L'email non si modifica. `mfaRequired: true` aggiunge l'azione `CONFIGURE_TOTP`.
+- `PUT /api/users/{id}` body `{ firstName, lastName, profileIds, mfaRequired }` → `200` + utente · `400` con i codici di UC6 (`firstName`, `lastName`, `profileIds[i]` = `InvalidValue` o `LimitExceeded` per un cliente nuovo al limite) · `404`. L'email non si modifica. `mfaRequired: true` aggiunge l'azione `CONFIGURE_TOTP`.
 - `POST /api/users/{id}/invite` (solo `Invited`), `/reset-password` (solo `Active` o `Suspended`), `/disable`, `/enable` → `200` + utente · `409` se lo stato non lo consente · `404`. Invito e reset fanno inviare a Keycloak l'email `execute-actions-email` con `UPDATE_PASSWORD`.
 - Audit: `user.updated` (`{ email, changes: { <campo>: { before, after }, profilesAdded, profilesRemoved } }`, nello storico dei clienti di prima e di dopo), `user.invited`, `user.password.reset`, `user.disabled`, `user.enabled` (`{ email }`).
 
 ### UC20 – `POST /api/users/import`
-Body `{ rows: [{ firstName, lastName, email, birthDate, profiles: "Cliente:Profilo|…" }], confirm }` (1–500 righe, altrimenti `400` con `rows` = `InvalidValue`). Risposta `200` `[{ row, email, errors: { <campo>: codice }, created }]`: con `confirm: false` solo anteprima; con `confirm: true` le righe senza errori vengono create con UC6 (`created` = utente) e gli eventuali errori del momento (es. `email` `NotUnique`) sono riportati sulla riga. `profiles` = `InvalidValue` se una coppia non esiste; un'email ripetuta nel file è `NotUnique` dalla seconda volta.
+Body `{ rows: [{ firstName, lastName, email, profiles: "Cliente:Profilo|…" }], confirm }` (1–500 righe, altrimenti `400` con `rows` = `InvalidValue`). Risposta `200` `[{ row, email, errors: { <campo>: codice }, created }]`: con `confirm: false` solo anteprima; con `confirm: true` le righe senza errori vengono create con UC6 (`created` = utente) e gli eventuali errori del momento (es. `email` `NotUnique`) sono riportati sulla riga. `profiles` = `InvalidValue` se una coppia non esiste; un'email ripetuta nel file è `NotUnique` dalla seconda volta.
 
 ### Keycloak come archivio utenti (UC6, UC7, UC19)
 Il backend chiama l'API di amministrazione di Keycloak (`{Authority}` con `/realms/` → `/admin/realms/`) con il service account del client `adminportal-api`. Configurazione richiesta:
 - client `adminportal-api` con *Client authentication* e *Service accounts* attivi; il segreto va in `Keycloak:ClientSecret` (user secrets o variabile d'ambiente `Keycloak__ClientSecret`, mai in `appsettings.json`);
 - al service account vanno assegnati i ruoli `view-users`, `manage-users` e `view-events` (ultimo accesso) del client `realm-management`;
 - per l'ultimo accesso vanno salvati gli eventi utente `LOGIN` del realm (*Realm settings → Events*);
-- nel *User profile* del realm vanno dichiarati gli attributi `birthDate`, `profileIds` (multivalore), `mfaRequired`, `createdBy`, `invitesSent` e `lastInviteAt`, oppure vanno abilitati gli *Unmanaged attributes*: da Keycloak 24 gli attributi non dichiarati vengono scartati senza errore;
+- nel *User profile* del realm vanno dichiarati gli attributi `profileIds` (multivalore), `mfaRequired` e `lastInviteAt`, modificabili solo dall'amministratore (non abilitare gli *Unmanaged attributes* in modalità "Enabled": l'utente potrebbe cambiarsi i profili dalla console account): da Keycloak 24 gli attributi non dichiarati vengono scartati senza errore;
 - il realm deve avere l'SMTP configurato, altrimenti la creazione risponde `503`.
 
 Senza segreto o senza ruoli le chiamate a `/api/users` rispondono `503` e la causa compare nel log come errore; all'avvio il backend avvisa se `Keycloak:ClientSecret` manca.

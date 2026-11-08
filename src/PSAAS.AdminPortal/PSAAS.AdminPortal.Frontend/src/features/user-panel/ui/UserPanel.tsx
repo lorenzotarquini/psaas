@@ -52,7 +52,6 @@ function PanelBody({ user }: { user: User }) {
   const original = {
     firstName: user.firstName,
     lastName: user.lastName,
-    birthDate: user.birthDate ?? '',
     mfaRequired: user.mfaRequired,
     profileIds: user.profiles.map((p) => p.id),
   }
@@ -148,16 +147,14 @@ function PanelBody({ user }: { user: User }) {
         )}
       </section>
 
-      {editing && (
+      {/* A rejected name opens the form, or the 400 would go unseen. */}
+      {(editing || errors.firstName || errors.lastName) && (
         <section className="grid grid-cols-2 gap-x-3 gap-y-1 border-b border-base-300 px-5 py-4">
           <Field label={t('userForm.firstName')} error={errors.firstName?.[0]}>
             <input className="input input-sm w-full" value={draft.firstName} onChange={(e) => setDraft({ ...draft, firstName: e.target.value })} />
           </Field>
           <Field label={t('userForm.lastName')} error={errors.lastName?.[0]}>
             <input className="input input-sm w-full" value={draft.lastName} onChange={(e) => setDraft({ ...draft, lastName: e.target.value })} />
-          </Field>
-          <Field label={t('users.birthDate')} error={errors.birthDate?.[0]}>
-            <input type="date" className="input input-sm w-full" value={draft.birthDate} onChange={(e) => setDraft({ ...draft, birthDate: e.target.value })} />
           </Field>
           <label className="flex items-center gap-2 pt-6">
             <input type="checkbox" className="checkbox checkbox-sm" checked={draft.mfaRequired} onChange={(e) => setDraft({ ...draft, mfaRequired: e.target.checked })} />
@@ -240,19 +237,10 @@ function PanelBody({ user }: { user: User }) {
           </dd>
           <dt className="text-base-content/60">{t('users.username')}</dt>
           <dd className="break-all">{user.email}</dd>
-          <dt className="text-base-content/60">{t('users.birthDate')}</dt>
-          <dd className="data">{user.birthDate ? formatDate(user.birthDate, i18n.language) : '–'}</dd>
           <dt className="text-base-content/60">{t('users.createdAt')}</dt>
-          <dd>
-            {user.createdAt ? formatDate(user.createdAt, i18n.language) : '–'}
-            {user.createdBy && ` ${t('users.by', { name: user.createdBy })}`}
-          </dd>
+          <dd>{user.createdAt ? formatDate(user.createdAt, i18n.language) : '–'}</dd>
           <dt className="text-base-content/60">{t('users.invite')}</dt>
-          <dd>
-            {user.invitesSent > 0
-              ? t('users.invitesSent', { count: user.invitesSent, last: user.lastInviteAt ? formatDate(user.lastInviteAt, i18n.language) : '–' })
-              : '–'}
-          </dd>
+          <dd>{user.lastInviteAt ? formatDate(user.lastInviteAt, i18n.language) : '–'}</dd>
           <dt className="text-base-content/60">{t('users.lastLogin')}</dt>
           <dd className="data">{user.lastLoginAt ? when(user.lastLoginAt) : t('users.never')}</dd>
         </dl>

@@ -24,14 +24,13 @@ describe('readUserRows', () => {
         firstName: 'Giulia',
         lastName: 'Ferri',
         email: 'giulia.ferri@example.com',
-        birthDate: '1991-04-12',
         profiles: 'Officine Rinaldi Spa:Capoturno|Ceramiche Bassi Srl:Operatore',
       },
     ])
   })
 
   it('accepts English headers in any order and rejects a missing column', () => {
-    expect(readUserRows('email,lastName,firstName,birthDate\na@x.it,Rossi,Mario,1980-01-01')?.[0]).toMatchObject({ firstName: 'Mario', profiles: '' })
+    expect(readUserRows('email,lastName,firstName\na@x.it,Rossi,Mario')?.[0]).toMatchObject({ firstName: 'Mario', profiles: '' })
     expect(readUserRows('nome,cognome\nMario,Rossi')).toBeNull()
   })
 })

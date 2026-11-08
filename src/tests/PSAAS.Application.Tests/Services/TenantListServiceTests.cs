@@ -65,7 +65,7 @@ public sealed class TenantListServiceTests
     public async Task UC21_S5_CountsUsersOfThePageTenants()
     {
         _list.Items.AddRange([Item("Alfa Srl", "p1"), Item("Beta Snc")]);
-        _users.Users.Add(new("u1", "M", "R", "m@x.it", null, ["p1"]));
+        _users.Users.Add(new("u1", "M", "R", "m@x.it", ["p1"]));
 
         var page = await Service.GetListAsync(new TenantListQuery());
 
@@ -77,7 +77,7 @@ public sealed class TenantListServiceTests
     {
         _list.Items.Add(Item("Alfa Srl", "p1"));
         _users.Unavailable = true;
-        _users.Users.Add(new("u1", "M", "R", "m@x.it", null, ["p1"]));
+        _users.Users.Add(new("u1", "M", "R", "m@x.it", ["p1"]));
 
         var page = await Service.GetListAsync(new TenantListQuery());
 

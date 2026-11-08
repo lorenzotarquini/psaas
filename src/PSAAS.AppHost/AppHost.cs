@@ -6,15 +6,15 @@ var postgresPassword = builder.AddParameter("postgres-password");
 var postgres = builder.AddPostgres("postgres", postgresUsername, postgresPassword, port: 5432)
     .WithDataBindMount("../postgres_data");
 
-var psaasDb = postgres.AddDatabase("psaas-db", "psaas-db");
+var adminPortalDb = postgres.AddDatabase("adminportal-db", "adminportal-db");
 
 // Secret of the confidential client adminportal-api: its service account manages users, reads login events
 // and exchanges tokens for impersonation. Set it with: dotnet user-secrets set "Parameters:admin-portal-client-secret" "<value>"
 var keycloakClientSecret = builder.AddParameter("admin-portal-client-secret", secret: true);
 
 var backend = builder.AddProject<Projects.PSAAS_AdminPortal_Backend>("adminportal-backend")
-    .WithReference(psaasDb)
-    .WaitFor(psaasDb)
+    .WithReference(adminPortalDb)
+    .WaitFor(adminPortalDb)
     .WithEnvironment("Keycloak__ClientSecret", keycloakClientSecret)
     // Locally emails are written as .eml files instead of being sent: no mail reaches the clients' PECs.
     .WithEnvironment("Email__From", "noreply@psaas.local")

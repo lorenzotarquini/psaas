@@ -35,7 +35,7 @@ public sealed class AdminPortalHost(string connectionString) : WebApplicationFac
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.UseSetting("ConnectionStrings:psaas-db", connectionString);
+        builder.UseSetting("ConnectionStrings:adminportal-db", connectionString);
         // Scenarios drive retries themselves.
         builder.UseSetting("Provisioning:RetryMinutes", "0");
         builder.UseSetting("Billing:RunHours", "0");

@@ -18,7 +18,7 @@ Obiettivo: rendere `PSAAS.AdminPortal.Backend` (Web API .NET 10, presentation de
 2. Pulizia template: via `WeatherForecast`; OpenAPI solo in Development.
 3. Autenticazione/autorizzazione: `AddKeycloak`, `UseAuthentication`/`UseAuthorization`, sezione `Keycloak` in appsettings (`Mode: Api`, `ValidateAudience: true`), policy `Administrator`, gruppo `/api` con `RequireAuthorization("Administrator")`.
 4. Database e servizi esterni: `AddPsaasInfrastructure`, `ItalianCities:BaseUrl` in appsettings.
-5. Aspire: AppHost → Backend con `WithReference(psaasDb).WaitFor(psaasDb)`. La configurazione Keycloak sta in `appsettings.json` del backend (in modalità `Api` non ci sono segreti); i vecchi parametri `keycloak-*` dell'AppHost sono stati rimossi.
+5. Aspire: AppHost → Backend con `WithReference(adminPortalDb).WaitFor(adminPortalDb)`. La configurazione Keycloak sta in `appsettings.json` del backend (in modalità `Api` non ci sono segreti); i vecchi parametri `keycloak-*` dell'AppHost sono stati rimossi.
 6. Trasversali: NLog, CORS, ProblemDetails + exception handler (conflitti → 409), `/health`.
 7. Casi d'uso in Application: RIMANDATO, sono le prime funzionalità da implementare (CreateTenant, EditTenant, GetTenants, GetTenant + `AddPsaasApplication()`).
 8. Test: `PSAAS.AdminPortal.Backend.Tests` con `WebApplicationFactory` (401 senza token, 403 senza ruolo, 200 con ruolo), nella cartella di solution `/Tests/`.

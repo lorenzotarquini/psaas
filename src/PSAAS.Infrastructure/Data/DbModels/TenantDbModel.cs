@@ -6,6 +6,8 @@ public sealed class TenantDbModel
 {
     public string Id { get; set; } = string.Empty;
 
+    public string Kind { get; set; } = "Business";
+
     public string CompanyName { get; set; } = string.Empty;
 
     public string NormalizedCompanyName { get; set; } = string.Empty;

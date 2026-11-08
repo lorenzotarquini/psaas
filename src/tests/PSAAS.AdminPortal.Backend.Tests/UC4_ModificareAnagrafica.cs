@@ -92,4 +92,20 @@ public sealed class UC4_ModificareAnagrafica(PostgresFixture database) : Accepta
     private static readonly IEqualityComparer<TenantDetail> TenantComparer = EqualityComparer<TenantDetail>.Create(
         (a, b) => a!.Id == b!.Id && a.CompanyName == b.CompanyName && a.CompleteVatNumber == b.CompleteVatNumber
             && a.CertifiedEmail == b.CertifiedEmail && a.Address == b.Address);
+
+    [Fact, Trait("Scenario", "UC4-S7")]
+    public async Task S7_UnPrivatoRestaPrivato()
+    {
+        var mario = await GivenIndividualAsync("Mario Rossi", "RSSMRA85T10A562S");
+
+        var renamed = await EditAsync(mario.Id, TenantBody("Mario Giuseppe Rossi", "VRDGPP80A01F205X", "mario@example.com"));
+        var withVat = await ErrorsAsync(await EditAsync(mario.Id, TenantBody("Mario Rossi", "IT11111111111", "mario@example.com")));
+
+        Assert.Equal(HttpStatusCode.OK, renamed.StatusCode);
+        var scheda = await TenantAsync(mario.Id);
+        Assert.Equal("Individual", scheda.Kind);
+        Assert.Equal("Mario Giuseppe Rossi", scheda.CompanyName);
+        Assert.Equal("VRDGPP80A01F205X", scheda.CompleteVatNumber);
+        Assert.Equal("InvalidFormat", withVat["completeVatNumber"]);
+    }
 }

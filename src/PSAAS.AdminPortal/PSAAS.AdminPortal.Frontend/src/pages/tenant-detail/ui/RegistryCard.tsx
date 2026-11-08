@@ -5,21 +5,26 @@ import type { TenantDetail } from '@/entities/tenant'
 export function RegistryCard({ tenant }: { tenant: TenantDetail }) {
   const { t } = useTranslation()
   const { street, postalCode, city, country } = tenant.address
+  const individual = tenant.kind === 'Individual'
 
   return (
     <section className="panel px-4 py-3.5">
       <h2 className="panel-title mb-2.5">{t('tenantDetail.registry')}</h2>
       <dl className="grid grid-cols-[6.5rem_1fr] gap-x-3 gap-y-2">
-        <dt className="text-base-content/60">{t('tenants.vatNumber')}</dt>
+        <dt className="text-base-content/60">{t(individual ? 'tenants.taxCode' : 'tenants.vatNumber')}</dt>
         <dd className="data">{tenant.completeVatNumber}</dd>
-        <dt className="text-base-content/60">{t('tenants.certifiedEmail')}</dt>
+        <dt className="text-base-content/60">{t(individual ? 'tenants.email' : 'tenants.certifiedEmail')}</dt>
         <dd className="break-all">{tenant.certifiedEmail}</dd>
         <dt className="text-base-content/60">{t('tenantDetail.address')}</dt>
         <dd>
           {street}, {postalCode} {city} ({country})
         </dd>
-        <dt className="text-base-content/60">{t('tenantForm.sdiCode')}</dt>
-        <dd className="data">{tenant.sdiCode ?? '–'}</dd>
+        {!individual && (
+          <>
+            <dt className="text-base-content/60">{t('tenantForm.sdiCode')}</dt>
+            <dd className="data">{tenant.sdiCode ?? '–'}</dd>
+          </>
+        )}
         <dt className="text-base-content/60">{t('tenantForm.accountManager')}</dt>
         <dd>{tenant.accountManager ?? '–'}</dd>
       </dl>

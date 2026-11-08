@@ -1,6 +1,7 @@
 @PSAAS.AdminPortal.Backend_HostAddress = http://localhost:5192
 @token = <access token Keycloak>
 @tenantId = <guid tenant>
+@profileId = <id profilo>
 
 GET {{PSAAS.AdminPortal.Backend_HostAddress}}/health
 
@@ -26,6 +27,24 @@ Authorization: Bearer {{token}}
 
 ###
 
+# UC9: a profile of an organization, then deleted (use the id of the response)
+POST {{PSAAS.AdminPortal.Backend_HostAddress}}/api/profiles
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "tenantId": "{{tenantId}}",
+  "name": "Revisore",
+  "description": "Sola lettura"
+}
+
+###
+
+DELETE {{PSAAS.AdminPortal.Backend_HostAddress}}/api/profiles/{{profileId}}
+Authorization: Bearer {{token}}
+
+###
+
 GET {{PSAAS.AdminPortal.Backend_HostAddress}}/api/geography/cities?term=ro
 Authorization: Bearer {{token}}
 
@@ -43,6 +62,22 @@ Content-Type: application/json
   "postalCode": "00118",
   "profiles": [ { "key": "op", "name": "Operatore" } ],
   "productiveUnits": [ { "name": "Stabilimento", "profileKeys": [ "op" ] } ]
+}
+
+###
+# UC3-R9: a private person (B2C); it gets the "Personale" unit and profile
+POST {{PSAAS.AdminPortal.Backend_HostAddress}}/api/tenants
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "kind": "Individual",
+  "companyName": "Mario Rossi",
+  "completeVatNumber": "RSSMRA85T10A562S",
+  "certifiedEmail": "mario.rossi@example.com",
+  "street": "Via Roma 1",
+  "city": "Roma",
+  "postalCode": "00118"
 }
 
 ###

@@ -115,4 +115,68 @@ public sealed class UC3_AttivareCliente(PostgresFixture database) : AcceptanceTe
         Assert.Equal("InvalidValue", errors["productiveUnits[0].profileKeys[0]"]);
         Assert.Empty((await TenantsAsync()).Items);
     }
+
+    [Fact, Trait("Scenario", "UC3-S9")]
+    public async Task S9_AttivazioneDiUnPrivato()
+    {
+        var created = await ReadAsync<TenantDetail>(
+            await ActivateAsync(IndividualBody("Mario Rossi", "rssmra85t10a562s", "mario.rossi@example.com")),
+            HttpStatusCode.Created);
+
+        Assert.Equal("Individual", created.Kind);
+        Assert.Equal("Mario Rossi", created.CompanyName);
+        Assert.Equal("RSSMRA85T10A562S", created.CompleteVatNumber);
+        Assert.Equal("RSSMRA85T10A562S", created.VatNumber);
+        Assert.Equal("mario.rossi@example.com", created.CertifiedEmail);
+        var profile = Assert.Single(created.Profiles);
+        Assert.Equal("Personale", profile.Name);
+        Assert.Equal([profile.Id], Assert.Single(created.ProductiveUnits, unit => unit.Name == "Personale").ProfileIds);
+        Assert.Equal("Individual", Assert.Single((await TenantsAsync()).Items).Kind);
+    }
+
+    [Fact, Trait("Scenario", "UC3-S10")]
+    public async Task S10_PrivatiOmonimi()
+    {
+        await GivenTenantAsync("Mario Rossi");
+        await GivenIndividualAsync("Mario Rossi", "RSSMRA85T10A562S");
+
+        var homonym = await ActivateAsync(IndividualBody("Mario Rossi", "VRDGPP80A01F205X"));
+        var sameTaxCode = await ErrorsAsync(await ActivateAsync(IndividualBody("Mario Rossi", "RSSMRA85T10A562S")));
+
+        Assert.Equal(HttpStatusCode.Created, homonym.StatusCode);
+        Assert.Equal("NotUnique", sameTaxCode["completeVatNumber"]);
+        Assert.False(sameTaxCode.ContainsKey("companyName"));
+        Assert.Equal(3, (await TenantsAsync()).Items.Count);
+    }
+
+    [Fact, Trait("Scenario", "UC3-S11")]
+    public async Task S11_RegoleDelPrivato()
+    {
+        var body = IndividualBody(new string('a', 51), "RSSMRA85T10A562X");
+        body["sdiCode"] = "M5UXCR1";
+        var alien = TenantBody("Alfa Srl");
+        alien["kind"] = "Alieno";
+
+        var errors = await ErrorsAsync(await ActivateAsync(body));
+        var unknownKind = await ErrorsAsync(await ActivateAsync(alien));
+
+        Assert.Equal("MaxLengthExceeded", errors["companyName"]);
+        Assert.Equal("InvalidFormat", errors["completeVatNumber"]);
+        Assert.Equal("InvalidValue", errors["sdiCode"]);
+        Assert.Equal("InvalidValue", unknownKind["kind"]);
+        Assert.Empty((await TenantsAsync()).Items);
+    }
+
+    [Fact, Trait("Scenario", "UC3-S12")]
+    public async Task S12_PrivatoConLaSuaOrganizzazione()
+    {
+        var body = IndividualBody();
+        body["profiles"] = new[] { new { key = "fam", name = "Famiglia" } };
+        body["productiveUnits"] = new[] { new { name = "Casa", profileKeys = new[] { "fam" } } };
+
+        var created = await ReadAsync<TenantDetail>(await ActivateAsync(body), HttpStatusCode.Created);
+
+        Assert.Equal("Famiglia", Assert.Single(created.Profiles).Name);
+        Assert.Equal("Casa", Assert.Single(created.ProductiveUnits).Name);
+    }
 }

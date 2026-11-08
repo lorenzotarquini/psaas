@@ -82,7 +82,8 @@ public sealed class TenantsController(ITenantReadRepository tenants, IUserDirect
             tenant.Code,
             TenantLifecycleDto.From(tenant.Lifecycle),
             tenant.Commercial.SdiCode,
-            tenant.Commercial.AccountManager);
+            tenant.Commercial.AccountManager,
+            tenant.Kind.ToString());
     }
 
     // UC13: status change along the allowed transitions; the response is the updated detail.
@@ -170,18 +171,29 @@ public sealed class TenantsController(ITenantReadRepository tenants, IUserDirect
     }
 
     // UC11: same rules and codes as saving (UC3/UC4), one field at a time, so the form can check on blur.
+    // kind (TenantKind name, default Business) picks the rules: an individual has a full name and a tax code.
     [HttpGet("field-validation")]
     public async Task<ActionResult<TenantFieldValidationDto>> ValidateField(
         [FromQuery, Required] string field,
         [FromQuery] string? value,
         [FromQuery] Guid? excludeTenantId,
+        [FromQuery] string? kind,
         [FromServices] TenantCreateValidator validator,
         CancellationToken cancellationToken)
     {
+        var kindErrors = new Dictionary<string, string>();
+        var tenantKind = TenantKinds.Parse(kind, kindErrors);
+        if (kindErrors.Count > 0)
+        {
+            Logger.Info("Field validation requested for unknown kind {Kind}", kind);
+            return ValidationProblem(new ValidationProblemDetails(
+                kindErrors.ToDictionary(error => error.Key, error => new[] { error.Value })));
+        }
+
         var result = field switch
         {
-            "companyName" => await validator.ValidateCompanyNameAsync(value, excludeTenantId, cancellationToken),
-            "completeVatNumber" => await validator.ValidateCompleteVatNumberAsync(value, excludeTenantId, cancellationToken),
+            "companyName" => await validator.ValidateCompanyNameAsync(value, excludeTenantId, cancellationToken, tenantKind),
+            "completeVatNumber" => await validator.ValidateCompleteVatNumberAsync(value, excludeTenantId, cancellationToken, tenantKind),
             "certifiedEmail" => await validator.ValidateCertifiedEmailAsync(value, excludeTenantId, cancellationToken),
             _ => null
         };

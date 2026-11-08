@@ -15,6 +15,8 @@ type TextFieldProps = {
   hint?: ReactNode
   /** Shows "used/maxLength" next to the label. */
   counter?: boolean
+  /** Key under validationHint for the error detail, when it is not the field name. */
+  hintScope?: string
 } & InputHTMLAttributes<HTMLInputElement>
 
 export function TextField({
@@ -24,6 +26,7 @@ export function TextField({
   valid,
   hint,
   counter,
+  hintScope,
   className = '',
   maxLength,
   ...inputProps
@@ -59,7 +62,7 @@ export function TextField({
         )}
       </label>
       <div id={`${id}-help`}>
-        <FieldError name={name} extra={invalid ? hint : undefined} />
+        <FieldError name={name} extra={invalid ? hint : undefined} hintScope={hintScope} />
         {!invalid && hint && <p className={`text-[12px] ${valid ? 'text-success' : 'text-base-content/60'}`}>{hint}</p>}
       </div>
     </div>

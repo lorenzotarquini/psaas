@@ -1,6 +1,7 @@
 export {
   emptyRegistry,
   registryFromTenant,
+  nameMaxLength,
   registrySchema,
   toRegistryRequest,
   type RegistryValues,

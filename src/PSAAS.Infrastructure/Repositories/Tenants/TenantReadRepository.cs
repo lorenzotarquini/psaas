@@ -77,7 +77,7 @@ public sealed class TenantReadRepository(PsaasDbContext dbContext) : ITenantRead
         var query = dbContext.Tenants.AsNoTracking().Where(tenant => tenant.Id != excluded);
         query = field switch
         {
-            "companyName" => query.Where(tenant => tenant.NormalizedCompanyName == normalizedValue),
+            "companyName" => query.Where(tenant => tenant.NormalizedCompanyName == normalizedValue && tenant.Kind == "Business"),
             "completeVatNumber" => query.Where(tenant => tenant.CompleteVatNumber == normalizedValue),
             "certifiedEmail" => query.Where(tenant => tenant.NormalizedCertifiedEmail == normalizedValue),
             _ => throw new ArgumentOutOfRangeException(nameof(field), field, "Not a unique tenant field")

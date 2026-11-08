@@ -1,5 +1,12 @@
 ﻿namespace PSAAS.Domain
 {
+    /// <summary>A company (B2B) or a private person (B2C). Fixed at creation.</summary>
+    public enum TenantKind
+    {
+        Business,
+        Individual,
+    }
+
     public class Tenant
     {
         private Tenant()
@@ -15,7 +22,7 @@
         }
 
         private Tenant(Guid id, string companyName, string vatNumber, string completeVatNumber, string certifiedEmail,
-            Address address, TenantLifecycle lifecycle, TenantCommercialInfo commercial)
+            Address address, TenantLifecycle lifecycle, TenantCommercialInfo commercial, TenantKind kind)
         {
             if (id == Guid.Empty)
             {
@@ -30,12 +37,20 @@
             Address = address;
             Lifecycle = lifecycle;
             Commercial = commercial;
+            Kind = kind;
         }
 
         public Guid Id { get; }
+
+        public TenantKind Kind { get; }
+
+        /// <summary>For an individual: full name.</summary>
         public string CompanyName { get; }
+        /// <summary>For an individual: the tax code (codice fiscale), like <see cref="CompleteVatNumber" />.</summary>
         public string VatNumber { get; }
+        /// <summary>For an individual: the tax code (codice fiscale).</summary>
         public string CompleteVatNumber { get; }
+        /// <summary>For an individual: a plain email address.</summary>
         public string CertifiedEmail { get; }
         public Address Address { get; }
 
@@ -57,17 +72,18 @@
         /// <param name="status">Active for a direct activation (UC3), Onboarding for a draft (UC14).</param>
         public static Tenant Create(string companyName, string vatNumber, string completeVatNumber,
             string certifiedEmail, Address address, TenantStatus status = TenantStatus.Active,
-            TenantCommercialInfo? commercial = null, DateTimeOffset? now = null)
+            TenantCommercialInfo? commercial = null, DateTimeOffset? now = null, TenantKind kind = TenantKind.Business)
         {
             return new Tenant(Guid.NewGuid(), companyName, vatNumber, completeVatNumber, certifiedEmail, address,
-                TenantLifecycle.New(status, now ?? DateTimeOffset.UtcNow), commercial ?? TenantCommercialInfo.Empty);
+                TenantLifecycle.New(status, now ?? DateTimeOffset.UtcNow), commercial ?? TenantCommercialInfo.Empty, kind);
         }
 
         public static Tenant Rehydrate(Guid id, string companyName, string vatNumber, string completeVatNumber,
-            string certifiedEmail, Address address, TenantLifecycle? lifecycle = null, TenantCommercialInfo? commercial = null)
+            string certifiedEmail, Address address, TenantLifecycle? lifecycle = null, TenantCommercialInfo? commercial = null,
+            TenantKind kind = TenantKind.Business)
         {
             return new Tenant(id, companyName, vatNumber, completeVatNumber, certifiedEmail, address,
-                lifecycle ?? TenantLifecycle.New(TenantStatus.Active, DateTimeOffset.MinValue), commercial ?? TenantCommercialInfo.Empty);
+                lifecycle ?? TenantLifecycle.New(TenantStatus.Active, DateTimeOffset.MinValue), commercial ?? TenantCommercialInfo.Empty, kind);
         }
 
         /// <exception cref="InvalidOperationException">The transition is not allowed (EXP-04).</exception>

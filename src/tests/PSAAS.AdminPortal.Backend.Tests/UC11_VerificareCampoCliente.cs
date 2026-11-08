@@ -66,10 +66,24 @@ public sealed class UC11_VerificareCampoCliente(PostgresFixture database) : Acce
         Assert.Equal(new TenantReferenceView(alfa.Id, "Alfa Srl"), result.ConflictingTenant);
     }
 
-    private async Task<FieldValidationView> ValidateAsync(string field, string value, Guid? excludeTenantId = null)
+    [Theory, Trait("Scenario", "UC11-S7")]
+    [InlineData("companyName", "Alfa Srl", null)]
+    [InlineData("completeVatNumber", "RSSMRA85T10A562S", "NotUnique")]
+    [InlineData("completeVatNumber", "VRDGPP80A01F205X", null)]
+    [InlineData("completeVatNumber", "IT22222222222", "InvalidFormat")]
+    public async Task S7_RegoleDelPrivato(string field, string value, string? expected)
+    {
+        await GivenTenantAsync("Alfa Srl");
+        await GivenIndividualAsync("Mario Rossi", "RSSMRA85T10A562S");
+
+        Assert.Equal(expected, (await ValidateAsync(field, value, kind: "Individual")).ErrorCode);
+    }
+
+    private async Task<FieldValidationView> ValidateAsync(string field, string value, Guid? excludeTenantId = null, string? kind = null)
     {
         var url = $"/api/tenants/field-validation?field={field}&value={Uri.EscapeDataString(value)}";
         if (excludeTenantId is { } id) url += $"&excludeTenantId={id}";
+        if (kind is not null) url += $"&kind={kind}";
         return await ReadAsync<FieldValidationView>(await Admin.GetAsync(url), HttpStatusCode.OK);
     }
 }

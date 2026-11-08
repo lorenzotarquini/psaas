@@ -76,6 +76,9 @@ export function TenantsTable({ tenants, columns, sort, onSort, selected, onSelec
                   <Link to={tenantPath(tenant.id)} state={returnState} className="link link-hover font-semibold">
                     {tenant.companyName}
                   </Link>
+                  {tenant.kind === 'Individual' && (
+                    <span className="badge badge-ghost badge-xs ml-1.5 align-middle">{t('tenants.kinds.Individual')}</span>
+                  )}
                   <span className="data block text-[11.5px] text-base-content/55">{tenant.completeVatNumber}</span>
                 </td>
                 {show('certifiedEmail') && <td className="whitespace-nowrap">{tenant.certifiedEmail.toLowerCase()}</td>}

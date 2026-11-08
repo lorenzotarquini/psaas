@@ -3,6 +3,7 @@ using PSAAS.Domain;
 
 namespace PSAAS.AdminPortal.Backend.Contracts;
 
+/// <param name="Kind">TenantKind name: Business, or Individual (CompanyName is the full name, CompleteVatNumber the tax code).</param>
 public sealed record TenantDetailDto(
     Guid Id,
     string CompanyName,
@@ -15,7 +16,8 @@ public sealed record TenantDetailDto(
     string Code,
     TenantLifecycleDto Lifecycle,
     string? SdiCode,
-    string? AccountManager);
+    string? AccountManager,
+    string Kind);
 
 /// <param name="Status">TenantStatus name: Onboarding, Trial, Active, Suspended, Cancelling, Ceased.</param>
 public sealed record TenantLifecycleDto(string Status, string? Reason, DateTimeOffset ChangedAt, DateTimeOffset CreatedAt)

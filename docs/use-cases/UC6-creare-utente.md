@@ -127,3 +127,17 @@ Scenario: Keycloak non raggiungibile
   Quando l'amministratore crea un utente valido
   Allora il sistema segnala che il servizio non è disponibile
 ```
+
+### UC6-S8
+
+Test: `UC6_CreareUtente.S8_UtenteDiUnPrivato`
+
+```gherkin
+# language: it
+Funzionalità: Creare un utente
+
+Scenario: L'utente di un privato (B2C)
+  Dato che esiste il privato "Mario Rossi", con il suo profilo "Personale"
+  Quando l'amministratore crea l'utente "Mario Rossi" con email "mario.rossi@example.com" e il profilo "Personale"
+  Allora l'utente è creato con il profilo "Personale" di "Mario Rossi"
+```

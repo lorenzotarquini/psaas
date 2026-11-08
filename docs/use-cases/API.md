@@ -14,9 +14,9 @@ Errori di validazione: `400` `ValidationProblem` con un codice per campo in `err
 | UC6 | `POST /api/users` | esiste |
 | UC7 | `GET /api/users?search=&tenantId=&profileId=&status=&page=&pageSize=` | esiste |
 | UC8 | `GET /api/me` | esiste |
-| UC9 | `GET /api/profiles` | esiste |
+| UC9 | `GET /api/profiles` · `POST /api/profiles` · `DELETE /api/profiles/{id}` | esiste |
 | UC10 | `GET /api/geography/cities?term=` | esiste |
-| UC11 | `GET /api/tenants/field-validation?field=&value=&excludeTenantId=` | esiste |
+| UC11 | `GET /api/tenants/field-validation?field=&value=&excludeTenantId=&kind=` | esiste |
 | UC12 | `GET /api/audit?tenantId=&action=&search=&from=&to=&page=&pageSize=` | esiste |
 | UC13 | `POST /api/tenants/{id}/status` | esiste |
 | UC14 | `POST /api/tenants` con `draft: true` · `DELETE /api/tenants/{id}` | esiste |
@@ -41,7 +41,8 @@ Errori di validazione: `400` `ValidationProblem` con un codice per campo in `err
 
 - **UC1/UC21** → `{ items: [{ id, companyName, vatNumber, completeVatNumber, certifiedEmail, city, province, code, status, createdAt, planId, planName, subscriptionStatus, maxUsers, renewsAt, modules: [{ id, name, icon, status }], profileIds, userCount }], totalCount, page, pageSize }`. Vedi la sezione UC21.
 - **UC2** → `{ id, companyName, vatNumber, completeVatNumber, certifiedEmail, address: { street, city, postalCode, country }, profiles: [{ id, name, description, userCount }], productiveUnits: [{ id, name, description, profileIds }] }`; `404` se non esiste. `userCount` = utenti con quel profilo (da Keycloak), `null` se Keycloak non risponde: la scheda non fallisce.
-- **UC3** → body `{ companyName, completeVatNumber, certifiedEmail, street, city, postalCode, profiles?: [{ key, name, description }], productiveUnits?: [{ name, description, profileKeys }] }`; `201` + `Location` + scheda (UC2).
+- **UC3** → body `{ kind?, companyName, completeVatNumber, certifiedEmail, street, city, postalCode, profiles?: [{ key, name, description }], productiveUnits?: [{ name, description, profileKeys }] }`; `201` + `Location` + scheda (UC2).
+- **Organizzazioni e privati (UC3-R9, R10)**: `kind` = `Business` (predefinito) o `Individual`; altro valore → `kind` = `InvalidValue`. Per un privato gli stessi campi hanno un altro significato: `companyName` = nome e cognome (≤ 50, non unico), `completeVatNumber` = codice fiscale (anche `vatNumber` nella scheda), `certifiedEmail` = email ordinaria; `sdiCode` non ammesso (`InvalidValue`). Senza profili né unità il privato riceve l'unità e il profilo "Personale". Scheda (UC2) ed elenco (UC1/UC21) espongono `kind`; UC4 non lo accetta (il tipo non cambia).
 - **UC8** → `{ keycloakId, name, email, roles }`.
 - **UC9** → `[{ id, tenantId, tenantCompanyName, name, description }]` ordinati per nome.
 - **UC10** → `[{ name, provinceCode, postalCodes }]`; `400` se `term` ha meno di 2 caratteri, `503` se la lista comuni non risponde.
@@ -162,9 +163,15 @@ Il backend chiama l'API di amministrazione di Keycloak (`{Authority}` con `/real
 
 Senza segreto o senza ruoli le chiamate a `/api/users` rispondono `503` e la causa compare nel log come errore; all'avvio il backend avvisa se `Keycloak:ClientSecret` manca.
 
-### UC11 – `GET /api/tenants/field-validation?field=&value=&excludeTenantId=`
+### UC9 – Profili
+- `GET /api/profiles` → `[{ id, tenantId, tenantCompanyName, name, description }]` ordinati per nome.
+- `POST /api/profiles` body `{ tenantId, name, description? }` → `201` + `Location` + `{ id, tenantId, tenantCompanyName, name, description }` · `400` con `tenantId` = `Required` / `InvalidValue` (organizzazione inesistente), `name` = `Required` / `NotUnique`. Il profilo nasce senza unità.
+- `DELETE /api/profiles/{id}` → `204` · `404` se non esiste. Il profilo viene tolto agli utenti (Keycloak) e alle unità che apriva.
+- Entrambe sono una modifica della struttura (UC5): audit `tenant.organization.updated`.
+
+### UC11 – `GET /api/tenants/field-validation?field=&value=&excludeTenantId=&kind=`
 Verifica un solo campo dell'anagrafica con le regole del salvataggio (UC3/UC4), per controllarlo all'uscita dal campo.
-- `field`: `companyName`, `completeVatNumber` oppure `certifiedEmail`. `value`: il valore scritto. `excludeTenantId` (facoltativo): il cliente in modifica, i cui valori non contano come duplicati.
+- `field`: `companyName`, `completeVatNumber` oppure `certifiedEmail`. `value`: il valore scritto. `excludeTenantId` (facoltativo): il cliente in modifica, i cui valori non contano come duplicati. `kind` (facoltativo, `Business` o `Individual`): le regole del tipo; sconosciuto → `400` con `errors.kind = InvalidValue`.
 - Risposte: `200` `{ "errorCode": null, "conflictingTenant": null }` se valido, altrimenti il codice (`NotUnique`, `Required`, `InvalidFormat`, `MaxLengthExceeded`); con `NotUnique` anche `conflictingTenant: { id, companyName }`, il cliente che usa già il valore · `400` con `errors.field = InvalidValue` se `field` non è verificabile.
 - Non registra nulla: il salvataggio ripete tutti i controlli.
 
@@ -175,7 +182,7 @@ Audit log, dal più recente: `{ items: [{ id, occurredAt, actorId, actorName, ac
 
 | `action` | Quando | `details` |
 |---|---|---|
-| `tenant.created` | UC3 | `{ profiles, productiveUnits }` (quanti) |
+| `tenant.created` | UC3 | `{ kind, profiles, productiveUnits }` (tipo e quanti) |
 | `tenant.registry.updated` | UC4, solo se qualcosa cambia | `{ changes: { <campo>: { before, after } } }` |
 | `tenant.organization.updated` | UC5, solo se qualcosa cambia | `{ profilesAdded, profilesRemoved, profilesRenamed: [{ before, after }], unitsAdded, unitsRemoved, unitsRenamed, accessChanges }` |
 | `user.created` | UC6, un evento per ogni cliente dei profili (o uno senza cliente) | `{ email, tenant, profiles }` |

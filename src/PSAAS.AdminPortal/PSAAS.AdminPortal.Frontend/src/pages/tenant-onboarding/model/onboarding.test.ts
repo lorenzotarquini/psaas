@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildChecks, nextStep, readStep } from './onboarding'
+import { buildChecks, defaultProfileIds, nextStep, readStep } from './onboarding'
 
 const values = { companyName: 'Rinaldi Srl', completeVatNumber: 'IT123', certifiedEmail: 'a@pec.it', city: '', postalCode: '' }
 const free = { verified: false, conflictingTenant: null }
@@ -45,5 +45,15 @@ describe('buildChecks', () => {
       planChosen: true,
     })
     expect(address).toEqual({ key: 'address', state: 'ok', detail: { key: 'onboarding.checks.addressOk', values: { city: 'Bologna', postalCode: '40121' } } })
+  })
+})
+
+describe('defaultProfileIds', () => {
+  // A private person has only "Personale": its first user gets it without a click.
+  it('preselects the only profile, and nothing when there is a choice', () => {
+    const profile = (id: string) => ({ id, name: id, description: null, userCount: 0 })
+    expect(defaultProfileIds({ profiles: [profile('personale')] })).toEqual(['personale'])
+    expect(defaultProfileIds({ profiles: [profile('a'), profile('b')] })).toEqual([])
+    expect(defaultProfileIds({ profiles: [] })).toEqual([])
   })
 })

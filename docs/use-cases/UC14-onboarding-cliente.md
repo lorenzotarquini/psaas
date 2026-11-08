@@ -5,9 +5,9 @@
 **Obiettivo:** preparare un nuovo cliente in più passi, potendo interrompere e riprendere, e attivarlo solo alla fine.
 
 ## Flusso principale
-1. **Anagrafica:** l'amministratore compila dati legali e sede (UC3, con controllo dei campi univoci UC11 e ricerca comuni UC10), codice SDI e referente commerciale. Passando al passo successivo il sistema salva il cliente come **bozza** (stato Onboarding).
+1. **Anagrafica:** l'amministratore sceglie se è un'azienda o un privato (UC3-R9) e compila dati legali e sede (UC3, con controllo dei campi univoci UC11 e ricerca comuni UC10), codice SDI (solo aziende) e referente commerciale. Passando al passo successivo il sistema salva il cliente come **bozza** (stato Onboarding).
 2. **Piano e moduli:** sceglie piano, prova gratuita e moduli (EXP-02/03, quando disponibili).
-3. **Organizzazione:** definisce profili e unità produttive (UC5).
+3. **Struttura:** definisce profili e unità produttive (UC5); un privato la trova già pronta con l'unità e il profilo "Personale" (UC3-R10).
 4. **Primi utenti:** crea i primi utenti con i loro profili (UC6).
 5. **Riepilogo:** verifica e attiva; il cliente passa ad Attivo (o Trial se il piano prevede la prova).
 
@@ -22,6 +22,7 @@
 - R2. Solo una bozza si può eliminare (`DELETE`); per gli altri clienti la risposta è `409`.
 - R3. Codice SDI facoltativo: 7 caratteri (6 per la pubblica amministrazione), lettere e cifre; altrimenti `InvalidFormat`.
 - R4. Avvio, attivazione e annullamento della bozza compaiono nello storico (UC12).
+- R5. Il tipo si sceglie al primo salvataggio della bozza e poi non cambia (UC4-R3).
 
 ## Scenari di accettazione
 

@@ -1,10 +1,10 @@
 # UC3 – Attivare un nuovo cliente
 
 **Attore:** Amministratore
-**Obiettivo:** registrare una nuova azienda cliente, eventualmente già con la sua organizzazione.
+**Obiettivo:** registrare una nuova organizzazione, azienda o privato, eventualmente già con la sua struttura (profili e unità produttive).
 
 ## Flusso principale
-1. L'amministratore inserisce ragione sociale, P.IVA completa, PEC e indirizzo (via, città, CAP), aiutandosi con la ricerca dei comuni (UC10).
+1. L'amministratore sceglie il tipo (Azienda o Privato) e inserisce ragione sociale, P.IVA completa, PEC e indirizzo (via, città, CAP), aiutandosi con la ricerca dei comuni (UC10). Per un privato inserisce invece nome e cognome, codice fiscale ed email (R9).
 2. Facoltativamente aggiunge profili e unità produttive, indicando quali unità apre ogni profilo.
 3. Il sistema verifica i dati e registra cliente, profili e unità tutti insieme.
 4. Il sistema mostra la scheda del nuovo cliente (UC2).
@@ -23,6 +23,12 @@
 - R6. Profili e unità produttive sono facoltativi. Nella stessa richiesta i nomi dei profili sono unici tra loro, e così quelli delle unità (senza distinzione di maiuscole); un nome è obbligatorio.
 - R7. Un profilo può non aprire nessuna unità; un'unità può non essere aperta da nessun profilo.
 - R8. Un cliente cancellato in futuro (soft delete) continuerà a occupare ragione sociale, P.IVA e PEC.
+- R9. Tipo (`kind`): `Business` (azienda, predefinito) o `Individual` (privato); un altro valore è `InvalidValue`. Per un privato:
+  - `companyName` è nome e cognome: obbligatorio, al massimo 50 caratteri, **non** unico (gli omonimi sono normali);
+  - `completeVatNumber` è il codice fiscale: 16 caratteri con il carattere di controllo corretto (anche omocodico), unico tra tutte le organizzazioni; la P.IVA nazionale coincide con il codice fiscale;
+  - `certifiedEmail` è un'email ordinaria, con le regole di R4;
+  - il codice SDI non è ammesso (`InvalidValue`): le fatture ai privati vanno al codice fiscale.
+- R10. Un privato attivato senza profili né unità riceve l'unità produttiva "Personale" aperta dal profilo "Personale": basta creare l'utente e dargli quel profilo (UC6). Se la richiesta porta la sua struttura, vale quella.
 
 ## Scenari di accettazione
 
@@ -147,4 +153,62 @@ Scenario: Errori nell'organizzazione indicati per posizione
   Allora la richiesta è rifiutata con "NotUnique" sul nome e sulla chiave del secondo profilo
   E "Required" sul nome dell'unità e "InvalidValue" sul suo riferimento al profilo
   E nessun cliente è stato creato
+```
+
+### UC3-S9
+
+Test: `UC3_AttivareCliente.S9_AttivazioneDiUnPrivato`
+
+```gherkin
+# language: it
+Funzionalità: Attivare un nuovo cliente
+
+Scenario: Attivazione di un privato
+  Quando l'amministratore attiva il privato "Mario Rossi" con codice fiscale "rssmra85t10a562s" ed email "mario.rossi@example.com"
+  Allora l'organizzazione è creata di tipo privato
+  E la scheda mostra il codice fiscale "RSSMRA85T10A562S" e l'email "mario.rossi@example.com"
+  E la scheda mostra l'unità "Personale" aperta dal profilo "Personale"
+```
+
+### UC3-S10
+
+Test: `UC3_AttivareCliente.S10_PrivatiOmonimi`
+
+```gherkin
+# language: it
+Funzionalità: Attivare un nuovo cliente
+
+Scenario: Gli omonimi sono ammessi, lo stesso codice fiscale no
+  Dato che esistono l'azienda "Mario Rossi" e il privato "Mario Rossi" con codice fiscale "RSSMRA85T10A562S"
+  Quando l'amministratore attiva il privato "Mario Rossi" con codice fiscale "VRDGPP80A01F205X"
+  Allora l'organizzazione è creata
+  Ma attivando il privato "Mario Rossi" con codice fiscale "RSSMRA85T10A562S" la richiesta è rifiutata con "NotUnique" solo sul codice fiscale
+```
+
+### UC3-S11
+
+Test: `UC3_AttivareCliente.S11_RegoleDelPrivato`
+
+```gherkin
+# language: it
+Funzionalità: Attivare un nuovo cliente
+
+Scenario: Regole del privato
+  Quando l'amministratore attiva un privato con nome di 51 caratteri, codice fiscale "RSSMRA85T10A562X" e codice SDI "M5UXCR1"
+  Allora la richiesta è rifiutata con "MaxLengthExceeded" sul nome, "InvalidFormat" sul codice fiscale e "InvalidValue" sul codice SDI
+  E attivando un cliente di tipo "Alieno" la richiesta è rifiutata con "InvalidValue" sul tipo
+  E nessuna organizzazione è stata creata
+```
+
+### UC3-S12
+
+Test: `UC3_AttivareCliente.S12_PrivatoConLaSuaOrganizzazione`
+
+```gherkin
+# language: it
+Funzionalità: Attivare un nuovo cliente
+
+Scenario: Un privato attivato con la sua struttura non riceve quella predefinita
+  Quando l'amministratore attiva un privato con il profilo "Famiglia" che apre l'unità "Casa"
+  Allora la scheda mostra solo il profilo "Famiglia" e l'unità "Casa"
 ```

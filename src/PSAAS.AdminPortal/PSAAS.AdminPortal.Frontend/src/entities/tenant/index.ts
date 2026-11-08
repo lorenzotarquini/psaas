@@ -14,6 +14,7 @@ export {
   type OrganizationRequest,
   type TenantCreateRequest,
   type TenantDetail,
+  type TenantKind,
   type TenantLifecycle,
   type TenantStatus,
   type TenantReference,

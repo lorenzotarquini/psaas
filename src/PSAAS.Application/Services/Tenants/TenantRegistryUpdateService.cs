@@ -10,7 +10,7 @@ namespace PSAAS.Application.Services.Tenants;
 
 /// <summary>
 /// UC4: updates the registry of an existing tenant with the UC3 rules; uniqueness excludes the tenant itself,
-/// so saving its own unchanged values is not a duplicate.
+/// so saving its own unchanged values is not a duplicate. The kind never changes: its rules apply.
 /// </summary>
 public sealed class TenantRegistryUpdateService(
     ITenantReadRepository reader,
@@ -35,12 +35,12 @@ public sealed class TenantRegistryUpdateService(
         }
 
         var errors = new Dictionary<string, string>();
-        var completeVatNumber = await ValidateUniqueFieldsAsync(tenantId, request, errors, cancellationToken);
+        var completeVatNumber = await ValidateUniqueFieldsAsync(tenantId, before.Kind, request, errors, cancellationToken);
         var street = TenantOrganizationRules.Trim(request.Street);
         var postalCode = TenantOrganizationRules.Trim(request.PostalCode);
         var (city, province) = await addressValidator.ValidateAsync(
             street, TenantOrganizationRules.Trim(request.City), postalCode, errors, cancellationToken);
-        var sdiCode = TenantCreateValidator.ValidateSdiCode(request.SdiCode);
+        var sdiCode = TenantCreateValidator.ValidateSdiCode(request.SdiCode, before.Kind);
         if (!sdiCode.IsValid)
         {
             errors["sdiCode"] = sdiCode.ErrorCode!;
@@ -54,14 +54,15 @@ public sealed class TenantRegistryUpdateService(
         var tenant = Tenant.Rehydrate(
             tenantId,
             TenantOrganizationRules.Trim(request.CompanyName),
-            completeVatNumber[2..],
+            TenantKinds.NationalPart(completeVatNumber, before.Kind),
             completeVatNumber,
             TenantOrganizationRules.Trim(request.CertifiedEmail),
             new Address(street, city, postalCode, TenantCreateService.Country, province),
             before.Lifecycle,
             new TenantCommercialInfo(
                 TenantOrganizationRules.NullIfEmpty(sdiCode.NormalizedValue),
-                TenantOrganizationRules.NullIfEmpty(request.AccountManager)));
+                TenantOrganizationRules.NullIfEmpty(request.AccountManager)),
+            before.Kind);
         try
         {
             if (!await tenants.UpdateAsync(tenant, cancellationToken))
@@ -72,7 +73,7 @@ public sealed class TenantRegistryUpdateService(
         catch (TenantUniquenessConflictException)
         {
             // Another administrator saved the same value meanwhile (UC3 flow 3b): report the fields.
-            await ValidateUniqueFieldsAsync(tenantId, request, errors, cancellationToken);
+            await ValidateUniqueFieldsAsync(tenantId, before.Kind, request, errors, cancellationToken);
             if (errors.Count == 0)
             {
                 throw;
@@ -102,12 +103,13 @@ public sealed class TenantRegistryUpdateService(
 
     private async Task<string> ValidateUniqueFieldsAsync(
         Guid tenantId,
+        TenantKind kind,
         TenantRegistryUpdateRequest request,
         Dictionary<string, string> errors,
         CancellationToken cancellationToken)
     {
-        AddError(errors, "companyName", await validator.ValidateCompanyNameAsync(request.CompanyName, tenantId, cancellationToken));
-        var completeVatNumber = await validator.ValidateCompleteVatNumberAsync(request.CompleteVatNumber, tenantId, cancellationToken);
+        AddError(errors, "companyName", await validator.ValidateCompanyNameAsync(request.CompanyName, tenantId, cancellationToken, kind));
+        var completeVatNumber = await validator.ValidateCompleteVatNumberAsync(request.CompleteVatNumber, tenantId, cancellationToken, kind);
         AddError(errors, "completeVatNumber", completeVatNumber);
         AddError(errors, "certifiedEmail", await validator.ValidateCertifiedEmailAsync(request.CertifiedEmail, tenantId, cancellationToken));
         return completeVatNumber.NormalizedValue;

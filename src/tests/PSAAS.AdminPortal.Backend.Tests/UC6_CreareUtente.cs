@@ -90,6 +90,20 @@ public sealed class UC6_CreareUtente(PostgresFixture database) : AcceptanceTest(
         Assert.Equal(HttpStatusCode.ServiceUnavailable, response.StatusCode);
     }
 
+    [Fact, Trait("Scenario", "UC6-S8")]
+    public async Task S8_UtenteDiUnPrivato()
+    {
+        var mario = await GivenIndividualAsync("Mario Rossi");
+
+        var created = await ReadAsync<UserView>(
+            await CreateAsync(UserBody("Mario", "Rossi", "mario.rossi@example.com", mario.Profile("Personale").Id)),
+            HttpStatusCode.Created);
+
+        var profile = Assert.Single(created.Profiles);
+        Assert.Equal("Personale", profile.Name);
+        Assert.Equal("Mario Rossi", profile.TenantCompanyName);
+    }
+
     private static object UserBody(string firstName, string lastName, string email, params string[] profileIds) =>
         new { firstName, lastName, email, profileIds };
 

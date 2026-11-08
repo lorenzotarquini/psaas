@@ -652,6 +652,137 @@
           ]
         },
         {
+          "name": "UC3 Create individual (draft)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/tenants",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tenants"
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"kind\": \"Individual\",\n  \"companyName\": \"Privato {{runId}}\",\n  \"completeVatNumber\": \"{{taxCode}}\",\n  \"certifiedEmail\": \"privato{{runId}}@example.com\",\n  \"street\": \"Via Roma 1\",\n  \"city\": \"Roma\",\n  \"postalCode\": \"00118\",\n  \"draft\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// A tax code unique to this run, with the right check letter (UC3-R9).",
+                  "const odd = [1, 0, 5, 7, 9, 13, 15, 17, 19, 21, 2, 4, 18, 20, 11, 3, 6, 8, 12, 14, 16, 10, 22, 25, 24, 23];",
+                  "const n = String(Date.now()).slice(-7);",
+                  "const body = 'RSSMRA' + n.slice(0, 2) + 'A' + n.slice(2, 4) + 'H' + n.slice(4, 7);",
+                  "let sum = 0;",
+                  "for (let i = 0; i < 15; i++) { const c = body[i]; const v = /\\d/.test(c) ? c.charCodeAt(0) - 48 : c.charCodeAt(0) - 65; sum += i % 2 === 0 ? odd[v] : v; }",
+                  "pm.collectionVariables.set('taxCode', body + String.fromCharCode(65 + (sum % 26)));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', () => pm.expect(pm.response.code).to.be.oneOf([201]));",
+                  "if (pm.response.code < 300) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('individualId', json.id);",
+                  "  pm.test('a private person with its Personale profile', () => {",
+                  "    pm.expect(json.kind).to.eql('Individual');",
+                  "    pm.expect(json.profiles.map((p) => p.name)).to.eql(['Personale']);",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UC11 Validate tax code",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/tenants/field-validation?field=completeVatNumber&value={{taxCode}}&kind=Individual",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tenants",
+                "field-validation"
+              ],
+              "query": [
+                {
+                  "key": "field",
+                  "value": "completeVatNumber"
+                },
+                {
+                  "key": "value",
+                  "value": "{{taxCode}}"
+                },
+                {
+                  "key": "kind",
+                  "value": "Individual"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('already used by the individual', () => pm.expect(pm.response.json().errorCode).to.eql('NotUnique'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UC14 Discard individual draft",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/tenants/{{individualId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tenants",
+                "{{individualId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 204', () => pm.expect(pm.response.code).to.be.oneOf([204]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "UC21 List with filters and sort",
           "request": {
             "method": "GET",
@@ -1262,6 +1393,72 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UC9 Create profile",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/profiles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "profiles"
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"name\": \"Revisore {{runId}}\",\n  \"description\": \"Sola lettura\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', () => pm.expect(pm.response.code).to.be.oneOf([201]));",
+                  "if (pm.response.code < 300) { pm.collectionVariables.set('createdProfileId', pm.response.json().id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UC9 Delete profile",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/profiles/{{createdProfileId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "profiles",
+                "{{createdProfileId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 204', () => pm.expect(pm.response.code).to.be.oneOf([204]));"
                 ]
               }
             }
@@ -2335,6 +2532,18 @@
     },
     {
       "key": "communicationId",
+      "value": ""
+    },
+    {
+      "key": "taxCode",
+      "value": ""
+    },
+    {
+      "key": "individualId",
+      "value": ""
+    },
+    {
+      "key": "createdProfileId",
       "value": ""
     }
   ]

@@ -2,15 +2,20 @@ using System.Net.Mail;
 using System.Text.RegularExpressions;
 using PSAAS.Application.Abstractions.Tenants;
 using PSAAS.Application.Contracts.Tenants;
+using PSAAS.Domain;
 
 namespace PSAAS.Application.Validators.Tenants;
 
 public sealed partial class TenantCreateValidator(ITenantUniquenessChecker uniquenessChecker)
 {
     private const int CompanyNameMaxLength = 20;
+    private const int PersonNameMaxLength = 50;
+
     // Synchronous format/required rules only (no uniqueness check).
-    public TenantFieldValidationResult ValidateCompanyNameFormat(string? companyName)
+    /// <param name="kind">For an individual the field is the full name: longer and never unique.</param>
+    public TenantFieldValidationResult ValidateCompanyNameFormat(string? companyName, TenantKind kind = TenantKind.Business)
     {
+        var maxLength = kind == TenantKind.Individual ? PersonNameMaxLength : CompanyNameMaxLength;
         var displayCompanyName = companyName?.Trim() ?? string.Empty;
         var normalizedCompanyName = TenantFieldNormalizer.NormalizeCompanyName(companyName);
         if (displayCompanyName.Length == 0 || normalizedCompanyName.Length == 0)
@@ -18,12 +23,13 @@ public sealed partial class TenantCreateValidator(ITenantUniquenessChecker uniqu
             return TenantFieldValidationResult.Invalid(TenantFieldValidationErrorCodes.Required);
         }
 
-        return displayCompanyName.Length > CompanyNameMaxLength
+        return displayCompanyName.Length > maxLength
             ? TenantFieldValidationResult.Invalid(TenantFieldValidationErrorCodes.MaxLengthExceeded, normalizedCompanyName)
             : TenantFieldValidationResult.Valid(normalizedCompanyName);
     }
 
-    public TenantFieldValidationResult ValidateCompleteVatNumberFormat(string? completeVatNumber)
+    /// <param name="kind">For an individual the field holds the tax code (codice fiscale).</param>
+    public TenantFieldValidationResult ValidateCompleteVatNumberFormat(string? completeVatNumber, TenantKind kind = TenantKind.Business)
     {
         var normalized = TenantFieldNormalizer.NormalizeCompleteVatNumber(completeVatNumber);
         if (normalized.Length == 0)
@@ -31,7 +37,10 @@ public sealed partial class TenantCreateValidator(ITenantUniquenessChecker uniqu
             return TenantFieldValidationResult.Invalid(TenantFieldValidationErrorCodes.Required);
         }
 
-        return CompleteVatNumberRegex().IsMatch(normalized)
+        var valid = kind == TenantKind.Individual
+            ? ItalianTaxCode.IsValid(normalized)
+            : CompleteVatNumberRegex().IsMatch(normalized);
+        return valid
             ? TenantFieldValidationResult.Valid(normalized)
             : TenantFieldValidationResult.Invalid(TenantFieldValidationErrorCodes.InvalidFormat, normalized);
     }
@@ -61,10 +70,11 @@ public sealed partial class TenantCreateValidator(ITenantUniquenessChecker uniqu
     public async Task<TenantFieldValidationResult> ValidateCompanyNameAsync(
         string? companyName,
         Guid? excludedTenantId,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        TenantKind kind = TenantKind.Business)
     {
-        var format = ValidateCompanyNameFormat(companyName);
-        if (!format.IsValid) return format;
+        var format = ValidateCompanyNameFormat(companyName, kind);
+        if (!format.IsValid || kind == TenantKind.Individual) return format;
         var normalizedCompanyName = TenantFieldNormalizer.NormalizeCompanyName(companyName);
 
         var isUnique = excludedTenantId.HasValue
@@ -91,9 +101,10 @@ public sealed partial class TenantCreateValidator(ITenantUniquenessChecker uniqu
     public async Task<TenantFieldValidationResult> ValidateCompleteVatNumberAsync(
         string? completeVatNumber,
         Guid? excludedTenantId,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        TenantKind kind = TenantKind.Business)
     {
-        var format = ValidateCompleteVatNumberFormat(completeVatNumber);
+        var format = ValidateCompleteVatNumberFormat(completeVatNumber, kind);
         if (!format.IsValid) return format;
         var normalizedCompleteVatNumber = TenantFieldNormalizer.NormalizeCompleteVatNumber(completeVatNumber);
 
@@ -140,10 +151,18 @@ public sealed partial class TenantCreateValidator(ITenantUniquenessChecker uniqu
             : TenantFieldValidationResult.Invalid(TenantFieldValidationErrorCodes.NotUnique, normalizedCertifiedEmail);
     }
 
-    /// <summary>Optional SDI recipient code: 7 characters, 6 for public administrations; stored uppercase.</summary>
-    public static TenantFieldValidationResult ValidateSdiCode(string? sdiCode)
+    /// <summary>
+    /// Optional SDI recipient code: 7 characters, 6 for public administrations; stored uppercase.
+    /// Individuals have none (their invoices go to the tax code with code 0000000).
+    /// </summary>
+    public static TenantFieldValidationResult ValidateSdiCode(string? sdiCode, TenantKind kind = TenantKind.Business)
     {
         var normalized = sdiCode?.Trim().ToUpperInvariant() ?? string.Empty;
+        if (kind == TenantKind.Individual && normalized.Length > 0)
+        {
+            return TenantFieldValidationResult.Invalid(TenantFieldValidationErrorCodes.InvalidValue, normalized);
+        }
+
         return normalized.Length == 0 || SdiCodeRegex().IsMatch(normalized)
             ? TenantFieldValidationResult.Valid(normalized)
             : TenantFieldValidationResult.Invalid(TenantFieldValidationErrorCodes.InvalidFormat, normalized);

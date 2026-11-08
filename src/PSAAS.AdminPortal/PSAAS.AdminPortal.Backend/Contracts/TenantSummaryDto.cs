@@ -11,7 +11,8 @@ public sealed record TenantSummaryDto(
     string City,
     string Code,
     string Status,
-    DateTimeOffset CreatedAt)
+    DateTimeOffset CreatedAt,
+    string Kind)
 {
     public static TenantSummaryDto From(Tenant tenant) => new(
         tenant.Id,
@@ -22,5 +23,6 @@ public sealed record TenantSummaryDto(
         tenant.Address.city,
         tenant.Code,
         tenant.Lifecycle.Status.ToString(),
-        tenant.Lifecycle.CreatedAt);
+        tenant.Lifecycle.CreatedAt,
+        tenant.Kind.ToString());
 }

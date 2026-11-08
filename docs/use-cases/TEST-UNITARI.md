@@ -38,6 +38,8 @@ Ogni scenario di accettazione (`UCn-Sm`) scende negli strati interni: qui si ved
 | UC7-S1, S2, S6 | Ricerca in Keycloak: ricerca interna al testo, lettura degli attributi, errori | `KeycloakUserDirectoryTests.UC7_*` |
 | UC8-S1…S5 | Identità e ruoli dal token | `PSAAS.Auth.Tests` (lettura dei ruoli Keycloak) |
 | UC9-S1, S2 | Panoramica dei profili | `ProfileReadRepositoryTests.UC9_*` |
+| UC9-S3…S6 | Creazione ed eliminazione dei profili | solo accettazione: riusano `TenantOrganizationService` (UC5), già coperto da `TenantOrganizationServiceTests` |
+| UC3-S9…S11, UC11-S7 | Regole del privato: codice fiscale con carattere di controllo, nome non unico ≤ 50, niente SDI, tipo per nome | `IndividualRulesTests` |
 | UC10-S1…S3 | Ricerca comuni: filtro, ordine, limite di 20, errori | `ItalianCityProviderTests` |
 | UC12-S1…S7 | Audit: registrazione con autore e ora, filtri, ordine, pagine | `AuditLogTests.UC12_*` |
 | UC12-S1…S4 | Eventi scritti da ogni caso d'uso (anagrafica solo se cambia, uno per cliente per gli utenti) | `TenantCreateServiceTests.UC12_*`, `TenantRegistryUpdateServiceTests.UC12_*`, `TenantOrganizationServiceTests.UC12_*`, `UserCreateServiceTests.UC12_*` |

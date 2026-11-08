@@ -11,6 +11,7 @@ import { ApiError } from '@/shared/api'
 import { applyServerErrors } from '@/shared/lib/form'
 import { ErrorAlert } from '@/shared/ui/error-alert'
 import { FieldError } from '@/shared/ui/form-field'
+import { defaultProfileIds } from '../model/onboarding'
 import { StepFooter } from './StepFooter'
 import { StepLayout } from './SimpleSteps'
 
@@ -83,7 +84,8 @@ export function UsersStep({ draft, onNext, onCancel, nextLabel }: UsersStepProps
                 <button type="button" className="btn btn-ghost btn-sm self-end" aria-label={t('onboarding.removeUser')} onClick={() => rows.remove(i)}>
                   <FontAwesomeIcon icon={faTrash} />
                 </button>
-                <div className="flex flex-wrap gap-1.5 md:col-span-4">
+                <div className="flex flex-wrap items-center gap-1.5 md:col-span-4">
+                  <span className="text-[11.5px] text-base-content/60">{t('onboarding.userFields.profiles')}</span>
                   {draft.profiles.length === 0 ? (
                     <span className="text-[12px] text-base-content/50">{t('onboarding.noProfilesYet')}</span>
                   ) : (
@@ -110,7 +112,7 @@ export function UsersStep({ draft, onNext, onCancel, nextLabel }: UsersStepProps
               </div>
             ))}
             <div className="px-4 py-2">
-              <button type="button" className="btn btn-ghost btn-sm text-primary" onClick={() => rows.append({ ...emptyUser })}>
+              <button type="button" className="btn btn-ghost btn-sm text-primary" onClick={() => rows.append({ ...emptyUser, profileIds: defaultProfileIds(draft) })}>
                 <FontAwesomeIcon icon={faPlus} />
                 {t('onboarding.addUser')}
               </button>

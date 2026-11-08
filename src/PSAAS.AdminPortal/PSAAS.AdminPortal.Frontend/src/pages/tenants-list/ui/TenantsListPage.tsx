@@ -77,7 +77,7 @@ export function TenantsListPage() {
   const exportCsv = async (ids: string[] = []) => {
     setExportError(null)
     try {
-      await apiDownload(tenantsExportPath(query, ids), 'clienti.csv')
+      await apiDownload(tenantsExportPath(query, ids), 'organizzazioni.csv')
     } catch (e) {
       setExportError(e)
     }

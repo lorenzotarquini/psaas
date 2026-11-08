@@ -20,7 +20,8 @@ public static class TenantDbModelConverter
             tenant.CertifiedEmail,
             tenant.Address,
             new TenantLifecycle(Enum.Parse<TenantStatus>(tenant.Status), tenant.StatusReason, tenant.StatusChangedAt, tenant.CreatedAt),
-            new TenantCommercialInfo(tenant.SdiCode, tenant.AccountManager));
+            new TenantCommercialInfo(tenant.SdiCode, tenant.AccountManager),
+            Enum.Parse<TenantKind>(tenant.Kind));
     }
 
     public static TenantDbModel ToDbModel(Tenant tenant)
@@ -33,6 +34,7 @@ public static class TenantDbModelConverter
         return new TenantDbModel
         {
             Id = tenant.Id.ToString(),
+            Kind = tenant.Kind.ToString(),
             CompanyName = tenant.CompanyName,
             NormalizedCompanyName = TenantFieldNormalizer.NormalizeCompanyName(tenant.CompanyName),
             VatNumber = tenant.VatNumber,

@@ -23,15 +23,19 @@ public sealed class TenantCreateService(
 
     public const string Country = "IT";
 
+    /// <summary>Name of the unit and profile an individual gets when the request brings no organization (B2C).</summary>
+    public const string DefaultIndividualOrganizationName = "Personale";
+
     public async Task<TenantCreateResult> CreateAsync(TenantCreateRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
         var errors = new Dictionary<string, string>();
+        var kind = TenantKinds.Parse(request.Kind, errors);
 
-        var completeVatNumber = await ValidateUniqueFieldsAsync(request, errors, cancellationToken);
+        var completeVatNumber = await ValidateUniqueFieldsAsync(request, kind, errors, cancellationToken);
         var street = Trim(request.Street);
         var (city, province) = await addressValidator.ValidateAsync(street, Trim(request.City), Trim(request.PostalCode), errors, cancellationToken);
-        var sdiCode = TenantCreateValidator.ValidateSdiCode(request.SdiCode);
+        var sdiCode = TenantCreateValidator.ValidateSdiCode(request.SdiCode, kind);
         if (!sdiCode.IsValid)
         {
             errors["sdiCode"] = sdiCode.ErrorCode!;
@@ -39,6 +43,14 @@ public sealed class TenantCreateService(
 
         var profiles = request.Profiles ?? [];
         var units = request.ProductiveUnits ?? [];
+        if (kind == TenantKind.Individual && profiles.Count == 0 && units.Count == 0)
+        {
+            // B2C: the person gets a ready organization, so creating the user and giving it this profile is enough.
+            const string key = "default";
+            profiles = [new TenantCreateProfileRequest(key, DefaultIndividualOrganizationName, null)];
+            units = [new TenantCreateProductiveUnitRequest(DefaultIndividualOrganizationName, null, [key])];
+        }
+
         TenantOrganizationRules.ValidateNames(profiles.Select(profile => profile.Name).ToArray(), "profiles", errors);
         TenantOrganizationRules.ValidateNames(units.Select(unit => unit.Name).ToArray(), "productiveUnits", errors);
         var profileKeys = TenantOrganizationRules.ValidateProfileKeys(profiles.Select(profile => profile.Key).ToArray(), errors);
@@ -52,13 +64,14 @@ public sealed class TenantCreateService(
 
         var tenant = Tenant.Create(
             Trim(request.CompanyName),
-            completeVatNumber[2..],
+            TenantKinds.NationalPart(completeVatNumber, kind),
             completeVatNumber,
             Trim(request.CertifiedEmail),
             new Address(street, city, Trim(request.PostalCode), Country, province),
             request.Draft ? TenantStatus.Onboarding : TenantStatus.Active,
             new TenantCommercialInfo(NullIfEmpty(sdiCode.NormalizedValue), NullIfEmpty(request.AccountManager)),
-            clock.GetUtcNow());
+            clock.GetUtcNow(),
+            kind);
         // Profiles without a key are never referenced, so any unique temporary id works for them.
         var temporaryIds = profiles.Select(profile => NullIfEmpty(profile.Key) ?? Guid.NewGuid().ToString()).ToArray();
 
@@ -78,7 +91,7 @@ public sealed class TenantCreateService(
         catch (TenantUniquenessConflictException)
         {
             // A concurrent insert won the unique-index race: report which fields are now taken.
-            await ValidateUniqueFieldsAsync(request, errors, cancellationToken);
+            await ValidateUniqueFieldsAsync(request, kind, errors, cancellationToken);
             if (errors.Count == 0)
             {
                 Logger.Error("Tenant {TenantId} hit a unique conflict that no field explains", tenant.Id);
@@ -96,11 +109,12 @@ public sealed class TenantCreateService(
                 tenant.Id.ToString(),
                 tenant.CompanyName,
                 tenant.Id.ToString(),
-                new { profiles = profiles.Count, productiveUnits = units.Count }),
+                new { kind = kind.ToString(), profiles = profiles.Count, productiveUnits = units.Count }),
             cancellationToken);
         Logger.Info(
-            "Created tenant {TenantId} with {ProfileCount} profiles and {ProductiveUnitCount} productive units",
+            "Created tenant {TenantId} ({TenantKind}) with {ProfileCount} profiles and {ProductiveUnitCount} productive units",
             tenant.Id,
+            kind,
             profiles.Count,
             units.Count);
         return new TenantCreateResult(tenant.Id, errors);
@@ -108,11 +122,12 @@ public sealed class TenantCreateService(
 
     private async Task<string> ValidateUniqueFieldsAsync(
         TenantCreateRequest request,
+        TenantKind kind,
         Dictionary<string, string> errors,
         CancellationToken cancellationToken)
     {
-        AddError(errors, "companyName", await validator.ValidateCompanyNameAsync(request.CompanyName, cancellationToken));
-        var completeVatNumber = await validator.ValidateCompleteVatNumberAsync(request.CompleteVatNumber, cancellationToken);
+        AddError(errors, "companyName", await validator.ValidateCompanyNameAsync(request.CompanyName, null, cancellationToken, kind));
+        var completeVatNumber = await validator.ValidateCompleteVatNumberAsync(request.CompleteVatNumber, null, cancellationToken, kind);
         AddError(errors, "completeVatNumber", completeVatNumber);
         AddError(errors, "certifiedEmail", await validator.ValidateCertifiedEmailAsync(request.CertifiedEmail, cancellationToken));
         return completeVatNumber.NormalizedValue;

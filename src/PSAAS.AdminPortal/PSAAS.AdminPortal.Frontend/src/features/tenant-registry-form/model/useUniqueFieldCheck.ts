@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useFormContext, type RegisterOptions, type UseFormReturn } from 'react-hook-form'
-import { validateTenantField, type TenantReference, type UniqueTenantField } from '@/entities/tenant'
+import { validateTenantField, type TenantKind, type TenantReference, type UniqueTenantField } from '@/entities/tenant'
 import { getLogger } from '@/shared/lib/logger'
 import type { RegistryValues } from './registry'
 
@@ -8,6 +8,8 @@ const logger = getLogger('tenant-registry-form')
 
 interface CheckedValue {
   value: string
+  kind: TenantKind
+  errorCode: string | null
   conflictingTenant: TenantReference | null
 }
 
@@ -25,14 +27,15 @@ export function useUniqueFieldCheck(excludeTenantId?: string, form?: UseFormRetu
   const onBlur = (field: UniqueTenantField): RegisterOptions => ({
     onBlur: async () => {
       const value = getValues(field).trim()
+      const kind = getValues('kind')
       // Empty: nothing to check yet. Format errors: already shown by the client, no request.
       if (!value || !(await trigger(field))) return
       try {
-        const { errorCode, conflictingTenant } = await validateTenantField(field, value, excludeTenantId)
-        // The field may have changed while the answer was coming.
-        if (getValues(field).trim() !== value) return
+        const { errorCode, conflictingTenant } = await validateTenantField(field, value, excludeTenantId, kind)
+        // The field (or the kind) may have changed while the answer was coming.
+        if (getValues(field).trim() !== value || getValues('kind') !== kind) return
         if (errorCode) setError(field, { type: 'server', message: errorCode })
-        setChecked((current) => ({ ...current, [field]: { value, conflictingTenant } }))
+        setChecked((current) => ({ ...current, [field]: { value, kind, errorCode, conflictingTenant } }))
       } catch (error) {
         // Not blocking: saving checks everything again.
         logger.warn({ err: error, field }, 'Field validation unavailable')
@@ -42,8 +45,8 @@ export function useUniqueFieldCheck(excludeTenantId?: string, form?: UseFormRetu
 
   const statusOf = (field: UniqueTenantField, currentValue: string) => {
     const result = checked[field]
-    const current = result && result.value === currentValue.trim()
-    return { verified: Boolean(current && !result.conflictingTenant), conflictingTenant: current ? result.conflictingTenant : null }
+    const current = result && result.value === currentValue.trim() && result.kind === getValues('kind')
+    return { verified: Boolean(current && !result.errorCode), conflictingTenant: current ? result.conflictingTenant : null }
   }
 
   return { onBlur, statusOf }

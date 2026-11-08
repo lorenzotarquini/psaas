@@ -34,6 +34,7 @@ public static class TenantListSorts
 /// <summary>A row of mock 1c.</summary>
 /// <param name="RenewsAt">The next renewal, or the end of the trial for a tenant in trial; null without a plan.</param>
 /// <param name="UserCount">Users with a profile of the tenant; null when Keycloak could not count them.</param>
+/// <param name="Kind">TenantKind name: Business or Individual.</param>
 public sealed record TenantListItem(
     Guid Id,
     string CompanyName,
@@ -52,7 +53,8 @@ public sealed record TenantListItem(
     DateTimeOffset? RenewsAt,
     IReadOnlyList<TenantListModule> Modules,
     IReadOnlyList<string> ProfileIds,
-    int? UserCount = null);
+    int? UserCount = null,
+    string Kind = "Business");
 
 public sealed record TenantListModule(string Id, string Name, string? Icon, string Status);
 

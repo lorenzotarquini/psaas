@@ -1,6 +1,9 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import { apiDelete, apiGet, apiPost, apiPut, type PagedResult } from '@/shared/api'
 
+/** A company (B2B) or a private person (B2C, UC3-R9); fixed at creation. */
+export type TenantKind = 'Business' | 'Individual'
+
 /** EXP-04 statuses (UC13). */
 export type TenantStatus = 'Onboarding' | 'Trial' | 'Active' | 'Suspended' | 'Cancelling' | 'Ceased'
 
@@ -31,6 +34,7 @@ export interface TenantSummary {
   modules: { id: string; name: string; icon: string | null; status: string }[]
   /** null when Keycloak could not count them. */
   userCount: number | null
+  kind: TenantKind
 }
 
 export type TenantSort = 'companyName' | 'city' | 'status' | 'plan' | 'renewsAt'
@@ -90,6 +94,8 @@ export interface TenantDetail {
   lifecycle: TenantLifecycle
   sdiCode: string | null
   accountManager: string | null
+  /** For an individual companyName is the full name, completeVatNumber the tax code, certifiedEmail a plain email. */
+  kind: TenantKind
 }
 
 /** UC3/UC4 registry fields; SDI code and account manager are optional (UC14). */
@@ -116,6 +122,8 @@ export type TenantCreateRequest = TenantRegistryRequest & {
   productiveUnits: Omit<OrganizationRequest['productiveUnits'][number], 'id'>[]
   /** UC14: save as a draft (Onboarding) to complete step by step. */
   draft?: boolean
+  /** Default Business; an individual without organization gets the "Personale" unit and profile. */
+  kind?: TenantKind
 }
 
 /** UC11: the fields that can be checked one at a time. */
@@ -134,9 +142,10 @@ export interface FieldValidation {
 }
 
 /** UC11: checks one unique field with the rules of saving. */
-export function validateTenantField(field: UniqueTenantField, value: string, excludeTenantId?: string) {
+export function validateTenantField(field: UniqueTenantField, value: string, excludeTenantId?: string, kind: TenantKind = 'Business') {
   const query = new URLSearchParams({ field, value })
   if (excludeTenantId) query.set('excludeTenantId', excludeTenantId)
+  if (kind !== 'Business') query.set('kind', kind)
   return apiGet<FieldValidation>(`/api/tenants/field-validation?${query}`)
 }
 

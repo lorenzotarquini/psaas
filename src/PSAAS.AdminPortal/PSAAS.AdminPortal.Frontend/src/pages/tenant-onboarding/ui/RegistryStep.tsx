@@ -77,7 +77,8 @@ export function RegistryStep({ draft, onSaved, onNext, onActivated, onCancel }: 
           ? await submitWithServerErrors(() => update.mutateAsync(request), form.setError)
           : draft
         : await submitWithServerErrors(
-            () => create.mutateAsync({ ...request, profiles: [], productiveUnits: [], draft: true }),
+            // A private person gets its "Personale" unit and profile from the backend (UC3-R10).
+            () => create.mutateAsync({ ...request, kind: formValues.kind, profiles: [], productiveUnits: [], draft: true }),
             form.setError,
           )
     })()
@@ -131,7 +132,7 @@ export function RegistryStep({ draft, onSaved, onNext, onActivated, onCancel }: 
           />
         </form>
         <div className="border-base-300 px-1 py-2 lg:border-l lg:px-5">
-          <ChecksPanel checks={checks} />
+          <ChecksPanel checks={checks} individual={values.kind === 'Individual'} />
         </div>
       </div>
     </FormProvider>

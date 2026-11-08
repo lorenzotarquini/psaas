@@ -9,6 +9,9 @@ public sealed class TenantUniquenessChecker(PsaasDbContext dbContext) : ITenantU
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
+    // Only businesses need a unique name (UC3-R2): private persons may be homonyms.
+    private const string BusinessKind = nameof(Domain.TenantKind.Business);
+
     public async Task<bool> IsCompanyNameUniqueAsync(
         string normalizedCompanyName,
         CancellationToken cancellationToken = default)
@@ -16,7 +19,7 @@ public sealed class TenantUniquenessChecker(PsaasDbContext dbContext) : ITenantU
         var exists = await dbContext.Tenants
             .AsNoTracking()
             .AnyAsync(
-                tenant => tenant.NormalizedCompanyName == normalizedCompanyName,
+                tenant => tenant.NormalizedCompanyName == normalizedCompanyName && tenant.Kind == BusinessKind,
                 cancellationToken)
             .ConfigureAwait(false);
         if (exists)
@@ -35,7 +38,7 @@ public sealed class TenantUniquenessChecker(PsaasDbContext dbContext) : ITenantU
         var exists = await dbContext.Tenants
             .AsNoTracking()
             .AnyAsync(
-                tenant => tenant.NormalizedCompanyName == normalizedCompanyName
+                tenant => tenant.NormalizedCompanyName == normalizedCompanyName && tenant.Kind == BusinessKind
                     && tenant.Id != excludedTenantId.ToString(),
                 cancellationToken)
             .ConfigureAwait(false);

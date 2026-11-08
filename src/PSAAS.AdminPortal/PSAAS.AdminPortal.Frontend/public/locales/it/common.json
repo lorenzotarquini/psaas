@@ -19,7 +19,7 @@
   "menu": "Menu",
   "nav": {
     "home": "Panoramica",
-    "tenants": "Clienti",
+    "tenants": "Organizzazioni",
     "users": "Utenti",
     "profiles": "Profili",
     "console": "Admin console",
@@ -41,16 +41,16 @@
     "settings": "Impostazioni"
   },
   "tenants": {
-    "title": "Clienti",
-    "searchPlaceholder": "Ragione sociale, P.IVA o PEC",
+    "title": "Organizzazioni",
+    "searchPlaceholder": "Nome, P.IVA, codice fiscale o email",
     "companyName": "Ragione sociale",
     "vatNumber": "P.IVA",
     "completeVatNumber": "P.IVA completa",
     "certifiedEmail": "PEC",
     "city": "Città",
-    "empty": "Non ci sono ancora clienti.",
-    "noResults": "Nessun cliente corrisponde a \"{{search}}\".",
-    "tabsLabel": "Viste dei clienti",
+    "empty": "Non ci sono ancora organizzazioni.",
+    "noResults": "Nessuna organizzazione corrisponde a \"{{search}}\".",
+    "tabsLabel": "Viste delle organizzazioni",
     "tabs": {
       "all": "Tutti",
       "Active": "Attivi",
@@ -83,26 +83,34 @@
       "renewal": "Rinnovo"
     },
     "exportCsv": "Esporta CSV",
-    "selectPage": "Seleziona i clienti della pagina",
+    "selectPage": "Seleziona le organizzazioni della pagina",
     "select": "Seleziona {{name}}",
     "expired": "scaduto",
     "inDays_one": "tra {{count}} g",
     "inDays_other": "tra {{count}} gg",
-    "noMatch": "Nessun cliente corrisponde ai filtri.",
+    "noMatch": "Nessuna organizzazione corrisponde ai filtri.",
     "bulk": {
-      "label": "Azioni sui clienti selezionati",
+      "label": "Azioni sulle organizzazioni selezionate",
       "selected_one": "{{count}} selezionato",
       "selected_other": "{{count}} selezionati",
       "changePlan": "Cambia piano",
       "communicate": "Invia comunicazione",
       "export": "Esporta",
       "escHint": "Esc per deselezionare",
-      "changePlanTitle_one": "Cambia il piano di {{count}} cliente",
-      "changePlanTitle_other": "Cambia il piano di {{count}} clienti",
-      "changePlanHint": "Per ogni cliente valgono le regole della sottoscrizione: limiti del piano, moduli e prezzo del nuovo piano. Gli add-on vengono tolti.",
+      "changePlanTitle_one": "Cambia il piano di {{count}} organizzazione",
+      "changePlanTitle_other": "Cambia il piano di {{count}} organizzazioni",
+      "changePlanHint": "Per ogni organizzazione valgono le regole della sottoscrizione: limiti del piano, moduli e prezzo del nuovo piano. Gli add-on vengono tolti.",
       "apply": "Applica",
       "done": "piano cambiato"
-    }
+    },
+    "kind": "Tipo",
+    "kinds": {
+      "Business": "Azienda",
+      "Individual": "Privato"
+    },
+    "fullName": "Nome e cognome",
+    "taxCode": "Codice fiscale",
+    "email": "Email"
   },
   "pagination": {
     "pageSize": "Righe per pagina",
@@ -124,12 +132,12 @@
     "pageNotFoundHint": "L'indirizzo non corrisponde a nessuna pagina del portale."
   },
   "tenantDetail": {
-    "backToList": "Torna all'elenco clienti",
-    "notFound": "Cliente non trovato.",
+    "backToList": "Torna all'elenco organizzazioni",
+    "notFound": "Organizzazione non trovata.",
     "registry": "Anagrafica",
     "address": "Sede",
-    "organization": "Organizzazione",
-    "noOrganization": "Il cliente non ha profili né unità produttive.",
+    "organization": "Struttura",
+    "noOrganization": "L'organizzazione non ha profili né unità produttive.",
     "profiles": "Profili",
     "productiveUnits": "Unità produttive",
     "noProfiles": "Nessun profilo.",
@@ -139,12 +147,12 @@
     "opens": "Apre l'unità",
     "doesNotOpen": "Non apre l'unità",
     "editRegistry": "Modifica anagrafica",
-    "editOrganization": "Modifica organizzazione",
-    "tabsLabel": "Sezioni del cliente",
+    "editOrganization": "Modifica struttura",
+    "tabsLabel": "Sezioni dell'organizzazione",
     "tabs": {
       "overview": "Panoramica",
       "registry": "Anagrafica",
-      "organization": "Organizzazione",
+      "organization": "Struttura",
       "subscription": "Abbonamento e moduli",
       "users": "Utenti",
       "usage": "Uso",
@@ -152,7 +160,7 @@
       "history": "Storico"
     },
     "customerSince": "Cliente dal {{date}}",
-    "draftBanner": "Questo cliente è una bozza in onboarding: non è ancora attivo.",
+    "draftBanner": "Questa organizzazione è una bozza in onboarding: non è ancora attiva.",
     "resumeOnboarding": "Riprendi l'onboarding",
     "statusReason": "{{status}} dal {{date}}: {{reason}}"
   },
@@ -165,14 +173,14 @@
     "LimitExceeded": "Limite del piano raggiunto"
   },
   "tenantForm": {
-    "createTitle": "Nuovo cliente",
+    "createTitle": "Nuova organizzazione",
     "editTitle": "Modifica anagrafica di {{name}}",
-    "backToDetail": "Torna alla scheda cliente",
+    "backToDetail": "Torna alla scheda organizzazione",
     "street": "Via",
     "postalCode": "CAP",
     "cityListUnavailable": "Elenco comuni non disponibile: scrivi città e CAP a mano.",
     "optional": "facoltativo",
-    "create": "Attiva cliente",
+    "create": "Attiva organizzazione",
     "save": "Salva",
     "available": "Disponibile",
     "openConflicting": "Apri \"{{name}}\"",
@@ -186,7 +194,7 @@
     "citySource": "Fonte ISTAT"
   },
   "organizationEditor": {
-    "title": "Organizzazione di {{name}}",
+    "title": "Struttura di {{name}}",
     "name": "Nome",
     "description": "Descrizione",
     "addProfile": "Aggiungi profilo",
@@ -204,7 +212,7 @@
     "unitName": "Nome dell'unità",
     "restore": "Ripristina",
     "access": "{{profile}} apre {{unit}}",
-    "save": "Salva organizzazione",
+    "save": "Salva struttura",
     "removalWarning_one": "Rimuovere {{names}} lo toglierà anche a {{count}} utente in Keycloak.",
     "removalWarning_other": "Rimuovere {{names}} lo toglierà anche a {{count}} utenti in Keycloak."
   },
@@ -219,7 +227,7 @@
     "email": "Email",
     "noProfiles": "Nessun profilo",
     "user": "Utente",
-    "profilesTenant": "Profili · cliente",
+    "profilesTenant": "Profili · organizzazione",
     "statusLabel": "Stato",
     "lastLogin": "Ultimo accesso",
     "never": "mai",
@@ -230,13 +238,13 @@
       "Disabled": "Disattivato"
     },
     "filters": {
-      "tenant": "Cliente",
+      "tenant": "Organizzazione",
       "profile": "Profilo",
       "status": "Stato"
     },
     "resultCount_one": "{{count}} risultato su nome, cognome ed email",
     "resultCount_other": "{{count}} risultati su nome, cognome ed email",
-    "noTenantUsers": "Nessun utente ha profili di questo cliente.",
+    "noTenantUsers": "Nessun utente ha profili di questa organizzazione.",
     "panel": "Dettaglio utente",
     "closePanel": "Chiudi il dettaglio",
     "mfaRequired": "MFA richiesta",
@@ -254,8 +262,8 @@
       "disable": "Utente disattivato: non può più accedere.",
       "enable": "Utente riattivato."
     },
-    "groupedByTenant": "raggruppati per cliente",
-    "addTenantProfile": "Aggiungi profilo di un altro cliente",
+    "groupedByTenant": "raggruppati per organizzazione",
+    "addTenantProfile": "Aggiungi profilo di un'altra organizzazione",
     "save": "Salva modifiche",
     "details": "Dettagli",
     "username": "Username",
@@ -264,7 +272,7 @@
     "import": {
       "button": "Importa CSV",
       "title": "Importa utenti da CSV",
-      "hint": "Colonne: nome, cognome, email, profili (Cliente:Profilo separati da |). Prima vedi l'anteprima, poi confermi.",
+      "hint": "Colonne: nome, cognome, email, profili (Organizzazione:Profilo separati da |). Prima vedi l'anteprima, poi confermi.",
       "choose": "Scegli file",
       "template": "Scarica il modello",
       "badFile": "Il file non ha le colonne richieste o non contiene righe.",
@@ -298,9 +306,18 @@
   "profiles": {
     "title": "Profili",
     "empty": "Non ci sono profili.",
-    "filterPlaceholder": "Filtra per profilo, descrizione o cliente",
+    "filterPlaceholder": "Filtra per profilo, descrizione o organizzazione",
     "count": "{{count}} di {{total}} profili",
-    "tenant": "Cliente"
+    "tenant": "Organizzazione",
+    "create": "Nuovo profilo",
+    "name": "Nome",
+    "description": "Descrizione",
+    "tenantPlaceholder": "Scegli l'organizzazione",
+    "save": "Crea profilo",
+    "cancel": "Annulla",
+    "delete": "Elimina",
+    "deleteConfirm": "Eliminare il profilo \"{{name}}\" di {{tenant}}? Lo perdono gli utenti che lo hanno e le unità produttive che apriva.",
+    "actions": "Azioni"
   },
   "breadcrumb": "Percorso",
   "settings": {
@@ -321,11 +338,17 @@
     },
     "companyName": {
       "MaxLengthExceeded": "al massimo 20 caratteri"
+    },
+    "taxCode": {
+      "InvalidFormat": "16 caratteri, mese e carattere di controllo corretti (es. RSSMRA85T10A562S)"
+    },
+    "fullName": {
+      "MaxLengthExceeded": "al massimo 50 caratteri"
     }
   },
   "audit": {
     "title": "Audit log",
-    "subtitle": "Chi ha fatto cosa, quando e su quale cliente.",
+    "subtitle": "Chi ha fatto cosa, quando e su quale organizzazione.",
     "yesterday": "ieri",
     "empty": "Nessun evento.",
     "noMatch": "Nessun evento corrisponde ai filtri.",
@@ -340,10 +363,10 @@
       "detail": "Dettaglio"
     },
     "filters": {
-      "tenant.": "Clienti",
+      "tenant.": "Organizzazioni",
       "tenant.created": "Attivazioni",
       "tenant.registry": "Anagrafiche",
-      "tenant.organization": "Organizzazioni",
+      "tenant.organization": "Strutture",
       "user.": "Utenti",
       "tenant.onboarding": "Onboarding",
       "tenant.status": "Stati"
@@ -352,7 +375,7 @@
       "tenant": {
         "created": "ha attivato",
         "registryUpdated": "ha modificato l'anagrafica di",
-        "organizationUpdated": "ha modificato l'organizzazione di",
+        "organizationUpdated": "ha modificato la struttura di",
         "onboardingStarted": "ha avviato l'onboarding di",
         "onboardingDiscarded": "ha annullato l'onboarding di",
         "status": {
@@ -452,19 +475,19 @@
       "Active": "Riattiva",
       "Suspended": "Sospendi",
       "Cancelling": "Avvia disdetta",
-      "Ceased": "Cessa il cliente",
+      "Ceased": "Cessa l'organizzazione",
       "Trial": "Avvia prova"
     },
     "explain": {
-      "Active": "Il cliente torna attivo e i suoi utenti possono accedere.",
+      "Active": "L'organizzazione torna attiva e i suoi utenti possono accedere.",
       "Suspended": "L'accesso alla piattaforma viene bloccato; i dati restano. Si può riattivare.",
-      "Cancelling": "Il cliente entra nel periodo di preavviso; si può revocare riattivandolo.",
+      "Cancelling": "L'organizzazione entra nel periodo di preavviso; si può revocare riattivandola.",
       "Ceased": "Cancellazione logica: non si torna indietro. Ragione sociale, P.IVA e PEC restano occupate.",
-      "Trial": "Il cliente inizia il periodo di prova."
+      "Trial": "L'organizzazione inizia il periodo di prova."
     }
   },
   "onboarding": {
-    "title": "Attiva nuovo cliente",
+    "title": "Attiva nuova organizzazione",
     "stepsLabel": "Passi dell'onboarding",
     "stepOf": "Passo {{step}} di {{total}}",
     "savedAt": "Bozza salvata alle {{time}}",
@@ -478,7 +501,7 @@
         "hint": "Sottoscrizione, trial, add-on"
       },
       "organization": {
-        "title": "Organizzazione",
+        "title": "Struttura",
         "hint": "Profili e unità produttive"
       },
       "users": {
@@ -492,32 +515,33 @@
     },
     "cancel": "Annulla",
     "nextTo": "Avanti: {{step}}",
-    "skipAndActivate": "Salta organizzazione e attiva",
-    "activate": "Attiva cliente",
+    "skipAndActivate": "Salta struttura e attiva",
+    "activate": "Attiva organizzazione",
     "edit": "Modifica",
     "usersHint": "Ogni utente riceve da Keycloak l'email per impostare la password.",
     "noUsers": "Nessun utente: puoi aggiungerne ora o più tardi.",
     "addUser": "Aggiungi utente",
     "removeUser": "Rimuovi utente",
-    "noProfilesYet": "Il cliente non ha ancora profili.",
+    "noProfilesYet": "L'organizzazione non ha ancora profili.",
     "usersCreated_one": "Creato {{count}} utente: {{emails}}",
     "usersCreated_other": "Creati {{count}} utenti: {{emails}}",
     "userFields": {
       "firstName": "Nome",
       "lastName": "Cognome",
-      "email": "Email"
+      "email": "Email",
+      "profiles": "Profili:"
     },
-    "summaryHint": "Controlla i dati e attiva il cliente.",
+    "summaryHint": "Controlla i dati e attiva l'organizzazione.",
     "organizationSummary": "{{profiles}} profili, {{units}} unità produttive",
-    "usersSummary_one": "{{count}} utente con profili del cliente",
-    "usersSummary_other": "{{count}} utenti con profili del cliente",
-    "activationNote": "All'attivazione il cliente passa da Onboarding ad Attivo.",
+    "usersSummary_one": "{{count}} utente con profili dell'organizzazione",
+    "usersSummary_other": "{{count}} utenti con profili dell'organizzazione",
+    "activationNote": "All'attivazione l'organizzazione passa da Onboarding ad Attiva.",
     "openDraft": "Apri la scheda della bozza",
     "discardTitle": "Annullare l'onboarding?",
     "discardText": "La bozza \"{{name}}\" viene eliminata con profili e unità. Gli utenti già creati restano in Keycloak.",
     "keepDraft": "Continua",
     "discard": "Elimina la bozza",
-    "draftInfo": "Il cliente resta \"In onboarding\" finché non lo attivi. Puoi riprendere la bozza da Clienti.",
+    "draftInfo": "L'organizzazione resta \"In onboarding\" finché non la attivi. Puoi riprendere la bozza da Organizzazioni.",
     "checks": {
       "title": "Controlli",
       "companyName": "Ragione sociale unica",
@@ -532,13 +556,18 @@
       "addressOk": "{{city}} · {{postalCode}}",
       "waitingCity": "In attesa del comune",
       "planChosen": "Piano scelto",
-      "planStep": "Passo 2"
+      "planStep": "Passo 2",
+      "individual": {
+        "companyName": "Nome e cognome",
+        "completeVatNumber": "Codice fiscale valido e unico",
+        "certifiedEmail": "Email unica"
+      }
     }
   },
   "catalog": {
     "modulesSubtitle": "Moduli installabili sulla piattaforma, con versione, dipendenze e permessi",
     "plansSubtitle": "Pacchetti in vendita: moduli inclusi, limiti e prezzo",
-    "subscriptionsSubtitle": "Il piano di ogni cliente e lo stato dei suoi moduli",
+    "subscriptionsSubtitle": "Il piano di ogni organizzazione e lo stato dei suoi moduli",
     "registerModule": "Registra modulo",
     "register": "Registra",
     "manifest": "Manifest del modulo (JSON)",
@@ -552,8 +581,8 @@
     "permissions": "Permessi",
     "permissionCount_one": "{{count}} permesso",
     "permissionCount_other": "{{count}} permessi",
-    "tenants": "Clienti",
-    "tenant": "Cliente",
+    "tenants": "Organizzazioni",
+    "tenant": "Organizzazione",
     "core": "core",
     "deprecate": "Depreca",
     "restore": "Rendi disponibile",
@@ -590,7 +619,7 @@
     "trialDaysLabel": "Giorni di prova",
     "maxUsers": "Utenti max",
     "maxProductiveUnits": "Unità max",
-    "subscribers": "Clienti",
+    "subscribers": "Organizzazioni",
     "archived": "Archiviato",
     "newPlan": "Nuovo piano",
     "editPlan": "Modifica {{name}}",
@@ -601,7 +630,7 @@
     "sellable": "In vendita",
     "includedModules": "Moduli inclusi",
     "noPlans": "Nessun piano: creane uno dalla pagina Piani.",
-    "noSubscriptions": "Nessun cliente ha ancora una sottoscrizione.",
+    "noSubscriptions": "Nessuna organizzazione ha ancora una sottoscrizione.",
     "unlimited": "illimitati",
     "limits": "{{users}} · {{units}}",
     "moduleCount_one": "{{count}} modulo incluso",
@@ -612,7 +641,7 @@
     "addOns": "Moduli aggiuntivi",
     "addOn": "add-on",
     "subscriptionErrors": {
-      "LimitExceeded": "Il cliente ha più utenti o unità produttive di quanti il piano ne ammetta.",
+      "LimitExceeded": "L'organizzazione ha più utenti o unità produttive di quanti il piano ne ammetta.",
       "InvalidValue": "Piano non disponibile.",
       "Required": "Scegli un piano."
     },
@@ -642,7 +671,7 @@
     "subtitle": "Fatture dei periodi delle sottoscrizioni, incassi e solleciti",
     "run": "Esegui fatturazione",
     "runHint": "Rinnovi, fine prova, scadenze, solleciti e sospensioni: gira da sola ogni giorno",
-    "runResult": "Fatturazione eseguita: {{issued}} fatture emesse, {{expired}} sottoscrizioni scadute, {{reminders}} solleciti, {{suspended}} clienti sospesi.",
+    "runResult": "Fatturazione eseguita: {{issued}} fatture emesse, {{expired}} sottoscrizioni scadute, {{reminders}} solleciti, {{suspended}} organizzazioni sospese.",
     "kpi": {
       "toCollect": "Da incassare",
       "overdue": "Scaduto",
@@ -662,11 +691,11 @@
       "Invoice": "Fattura",
       "CreditNote": "Nota di credito"
     },
-    "searchPlaceholder": "Cliente o numero",
+    "searchPlaceholder": "Organizzazione o numero",
     "empty": "Nessuna fattura.",
-    "noTenantInvoices": "Nessuna fattura per questo cliente.",
+    "noTenantInvoices": "Nessuna fattura per questa organizzazione.",
     "number": "Numero",
-    "customer": "Cliente",
+    "customer": "Organizzazione",
     "issuedAt": "Emessa il",
     "dueAt": "Scadenza",
     "period": "Periodo",
@@ -702,7 +731,7 @@
     "metrics": "Metriche dei moduli",
     "days_one": "{{count}} giorno",
     "days_other": "{{count}} giorni",
-    "noMetrics": "Nessun modulo ha ancora inviato dati di uso per questo cliente.",
+    "noMetrics": "Nessun modulo ha ancora inviato dati di uso per questa organizzazione.",
     "kind": {
       "counter": "totale del periodo",
       "gauge": "ultimo valore"
@@ -738,7 +767,7 @@
     }
   },
   "communications": {
-    "subtitle": "Annunci nella piattaforma ed email alla PEC dei clienti",
+    "subtitle": "Annunci nella piattaforma ed email alla PEC delle organizzazioni",
     "new": "Nuova comunicazione",
     "subject": "Oggetto",
     "body": "Testo",
@@ -748,19 +777,19 @@
       "Email": "Email"
     },
     "recipients": "Destinatari",
-    "recipientsShort": "Clienti",
-    "selection_one": "Il cliente selezionato",
-    "selection_other": "I {{count}} clienti selezionati",
+    "recipientsShort": "Organizzazioni",
+    "selection_one": "L'organizzazione selezionata",
+    "selection_other": "Le {{count}} organizzazioni selezionate",
     "byFilters": "Per filtri",
     "filterStatus": "Stato",
     "filterPlan": "Piano",
     "filterModule": "Modulo attivo",
     "anyModule": "Qualsiasi modulo",
-    "reach_one": "Raggiunge {{count}} cliente: {{sample}}",
-    "reach_other": "Raggiunge {{count}} clienti: {{sample}}",
-    "reachNone": "Nessun cliente corrisponde a questi filtri.",
-    "confirm_one": "Inviare la comunicazione a {{count}} cliente?",
-    "confirm_other": "Inviare la comunicazione a {{count}} clienti?",
+    "reach_one": "Raggiunge {{count}} organizzazione: {{sample}}",
+    "reach_other": "Raggiunge {{count}} organizzazioni: {{sample}}",
+    "reachNone": "Nessuna organizzazione corrisponde a questi filtri.",
+    "confirm_one": "Inviare la comunicazione a {{count}} organizzazione?",
+    "confirm_other": "Inviare la comunicazione a {{count}} organizzazioni?",
     "send": "Invia",
     "empty": "Nessuna comunicazione inviata.",
     "sentAt": "Inviata",
@@ -768,7 +797,7 @@
     "failed_other": "{{count}} email non recapitate",
     "detail": "Dettaglio comunicazione",
     "close": "Chiudi",
-    "tenant": "Cliente",
+    "tenant": "Organizzazione",
     "visibleUntil": "visibile fino al {{date}}",
     "emailStatus": {
       "Sent": "Inviata",
@@ -798,7 +827,7 @@
     "summary_one": "{{count}} attività da gestire, {{urgent}} urgenti",
     "summary_other": "{{count}} attività da gestire, {{urgent}} urgenti",
     "kpi": {
-      "activeTenants": "Clienti attivi",
+      "activeTenants": "Organizzazioni attive",
       "trials": "In trial",
       "users": "Utenti",
       "modules": "Moduli installati"
@@ -826,7 +855,7 @@
       "resendInvites": "Reinvia inviti",
       "resume": "Riprendi"
     },
-    "variousTenants": "Vari clienti",
+    "variousTenants": "Varie organizzazioni",
     "recent": "Attività recente",
     "age": {
       "minutes_one": "{{count}} min",
@@ -838,11 +867,11 @@
     }
   },
   "search": {
-    "placeholder": "Cerca clienti, utenti, P.IVA, PEC…",
+    "placeholder": "Cerca organizzazioni, utenti, P.IVA, codici fiscali, PEC…",
     "open": "Apri la ricerca",
     "title": "Ricerca",
     "groups": {
-      "tenants": "Clienti",
+      "tenants": "Organizzazioni",
       "users": "Utenti",
       "actions": "Azioni rapide"
     },
@@ -857,7 +886,7 @@
     "hint": "La piattaforma si apre in una nuova scheda con la sessione dell'utente, per il tempo scelto.",
     "user": "Utente",
     "chooseUser": "Scegli un utente attivo",
-    "noUsers": "Nessun utente attivo per questo cliente.",
+    "noUsers": "Nessun utente attivo per questa organizzazione.",
     "reason": "Motivo",
     "reasonPlaceholder": "Es. verifica segnalazione 4521",
     "duration": "Durata",

@@ -73,6 +73,21 @@ public abstract class AcceptanceTest(PostgresFixture database) : IAsyncLifetime
         };
     }
 
+    /// <summary>A valid private person (B2C): full name, tax code and plain email; unique email unless given.</summary>
+    protected static Dictionary<string, object?> IndividualBody(
+        string fullName = "Mario Rossi",
+        string taxCode = "RSSMRA85T10A562S",
+        string? email = null)
+    {
+        var body = TenantBody(fullName, taxCode, email ?? $"privato{Interlocked.Increment(ref _uniqueCounter)}@example.com");
+        body["kind"] = "Individual";
+        return body;
+    }
+
+    /// <summary>"Dato che esiste il privato ...".</summary>
+    protected async Task<TenantDetail> GivenIndividualAsync(string fullName = "Mario Rossi", string taxCode = "RSSMRA85T10A562S") =>
+        await ReadAsync<TenantDetail>(await ActivateAsync(IndividualBody(fullName, taxCode)), HttpStatusCode.Created);
+
     protected Task<HttpResponseMessage> ActivateAsync(object body) => Admin.PostAsJsonAsync("/api/tenants", body);
 
     /// <summary>"Dato che esiste il cliente ...": created through the API, as an administrator would.</summary>

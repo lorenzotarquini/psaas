@@ -43,7 +43,8 @@ public sealed class PsaasDbContext(DbContextOptions<PsaasDbContext> options) : D
             entityBuilder.HasKey(tenant => tenant.Id);
 
             entityBuilder.HasIndex(tenant => tenant.Id).IsUnique();
-            entityBuilder.HasIndex(tenant => tenant.NormalizedCompanyName).IsUnique();
+            // Two private persons may share a name: the company name is unique among businesses only.
+            entityBuilder.HasIndex(tenant => tenant.NormalizedCompanyName).IsUnique().HasFilter("\"Kind\" = 'Business'");
             entityBuilder.HasIndex(tenant => tenant.CompleteVatNumber).IsUnique();
             entityBuilder.HasIndex(tenant => tenant.NormalizedCertifiedEmail).IsUnique();
 
@@ -55,6 +56,7 @@ public sealed class PsaasDbContext(DbContextOptions<PsaasDbContext> options) : D
             entityBuilder.Property(tenant => tenant.CertifiedEmail).IsRequired();
             entityBuilder.Property(tenant => tenant.NormalizedCertifiedEmail).IsRequired();
 
+            entityBuilder.Property(tenant => tenant.Kind).IsRequired().HasMaxLength(20).HasDefaultValue("Business");
             entityBuilder.Property(tenant => tenant.Status).IsRequired().HasMaxLength(20).HasDefaultValue("Active");
             entityBuilder.Property(tenant => tenant.StatusChangedAt).HasDefaultValueSql("now()");
             entityBuilder.Property(tenant => tenant.CreatedAt).HasDefaultValueSql("now()");

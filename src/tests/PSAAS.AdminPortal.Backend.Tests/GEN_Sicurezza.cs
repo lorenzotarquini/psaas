@@ -24,6 +24,8 @@ public sealed class GEN_Sicurezza(PostgresFixture database) : AcceptanceTest(dat
         { "POST", "/api/users/import" },
         { "GET", "/api/me" },
         { "GET", "/api/profiles" },
+        { "POST", "/api/profiles" },
+        { "DELETE", "/api/profiles/p-1" },
         { "GET", "/api/geography/cities?term=ro" },
         { "GET", "/api/tenants/field-validation?field=companyName&value=x" },
         { "GET", "/api/audit" },

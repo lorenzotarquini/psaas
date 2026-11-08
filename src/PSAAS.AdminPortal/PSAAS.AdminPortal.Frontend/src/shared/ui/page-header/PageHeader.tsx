@@ -6,7 +6,7 @@ interface PageHeaderProps {
   /** Shown next to the title in mono, e.g. the number of tenants. */
   count?: number
   subtitle?: ReactNode
-  /** Pages above this one in the topbar breadcrumb (e.g. Clienti for a tenant). */
+  /** Pages above this one in the topbar breadcrumb (e.g. Organizzazioni for a tenant). */
   parents?: Crumb[]
   actions?: ReactNode
 }

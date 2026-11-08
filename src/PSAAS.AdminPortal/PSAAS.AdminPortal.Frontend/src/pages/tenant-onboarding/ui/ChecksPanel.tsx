@@ -8,7 +8,8 @@ const icons = { ok: faCircleCheck, error: faCircleXmark, pending: faCircle } as 
 const colors = { ok: 'text-success', error: 'text-error', pending: 'text-base-content/30' } as const
 
 // Right column of mock 1e: the rules of saving, checked as the administrator types.
-export function ChecksPanel({ checks }: { checks: Check[] }) {
+// individual: a private person has its own labels (full name, tax code, email).
+export function ChecksPanel({ checks, individual = false }: { checks: Check[]; individual?: boolean }) {
   const { t } = useTranslation()
 
   return (
@@ -19,7 +20,7 @@ export function ChecksPanel({ checks }: { checks: Check[] }) {
           <li key={check.key} className="grid grid-cols-[18px_1fr] gap-2">
             <FontAwesomeIcon icon={icons[check.state]} className={`mt-0.5 ${colors[check.state]}`} />
             <div>
-              <div className="font-semibold">{t(`onboarding.checks.${check.key}`)}</div>
+              <div className="font-semibold">{t(individual && check.key !== 'address' && check.key !== 'plan' ? `onboarding.checks.individual.${check.key}` : `onboarding.checks.${check.key}`)}</div>
               <div className="text-[12px] text-base-content/60">{t(check.detail.key, check.detail.values)}</div>
             </div>
           </li>

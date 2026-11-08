@@ -111,7 +111,8 @@ public sealed class TenantListRepository(PsaasDbContext dbContext) : ITenantList
                 // Core first, then by name, as in mock 1c.
                 modules[r.Tenant.Id].OrderByDescending(m => m.IsCore).ThenBy(m => m.Name)
                     .Select(m => new TenantListModule(m.Id, m.Name, m.Icon, m.Status)).ToArray(),
-                profiles[r.Tenant.Id].ToArray())).ToArray(),
+                profiles[r.Tenant.Id].ToArray(),
+                Kind: r.Tenant.Kind)).ToArray(),
             totalCount,
             query.Page,
             query.PageSize);

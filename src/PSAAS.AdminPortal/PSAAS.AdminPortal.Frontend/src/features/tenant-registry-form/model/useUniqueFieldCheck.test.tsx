@@ -34,7 +34,7 @@ describe('useUniqueFieldCheck', () => {
     validate.mockResolvedValue({ errorCode: 'NotUnique', conflictingTenant: { id: 't-1', companyName: 'Alfa Srl' } })
     const result = setup({ companyName: ' ALFA s.r.l. ' })
     await blur(result, 'companyName')
-    expect(validate).toHaveBeenCalledWith('companyName', 'ALFA s.r.l.', undefined)
+    expect(validate).toHaveBeenCalledWith('companyName', 'ALFA s.r.l.', undefined, 'Business')
     expect(result.current.form.getFieldState('companyName').error?.message).toBe('NotUnique')
     // UC11-R4: the tenant already using the value, to link to it.
     expect(result.current.check.statusOf('companyName', 'ALFA s.r.l.')).toEqual({
@@ -48,7 +48,7 @@ describe('useUniqueFieldCheck', () => {
     validate.mockResolvedValue({ errorCode: null, conflictingTenant: null })
     const result = setup({ certifiedEmail: 'alfa@pec.it' }, 'tenant-1')
     await blur(result, 'certifiedEmail')
-    expect(validate).toHaveBeenCalledWith('certifiedEmail', 'alfa@pec.it', 'tenant-1')
+    expect(validate).toHaveBeenCalledWith('certifiedEmail', 'alfa@pec.it', 'tenant-1', 'Business')
     expect(result.current.form.getFieldState('certifiedEmail').error).toBeUndefined()
     // Mock 1a: confirmed free while the value stays the same.
     expect(result.current.check.statusOf('certifiedEmail', 'alfa@pec.it').verified).toBe(true)
@@ -71,5 +71,25 @@ describe('useUniqueFieldCheck', () => {
     })
     await blur(result, 'companyName')
     expect(result.current.form.getFieldState('companyName').error).toBeUndefined()
+  })
+
+  // UC11-S7: a private person is checked with its own rules, and a check stops counting when the kind changes.
+  it('checks with the rules of the kind', async () => {
+    validate.mockResolvedValue({ errorCode: null, conflictingTenant: null })
+    const result = setup({ kind: 'Individual', completeVatNumber: 'rssmra85t10a562s' })
+    await blur(result, 'completeVatNumber')
+    expect(validate).toHaveBeenCalledWith('completeVatNumber', 'rssmra85t10a562s', undefined, 'Individual')
+    expect(result.current.check.statusOf('completeVatNumber', 'rssmra85t10a562s').verified).toBe(true)
+    act(() => result.current.form.setValue('kind', 'Business'))
+    expect(result.current.check.statusOf('completeVatNumber', 'rssmra85t10a562s').verified).toBe(false)
+  })
+
+  // A value refused by the backend for any reason is not "Disponibile", even if no tenant uses it.
+  it('does not confirm a value the backend refused', async () => {
+    validate.mockResolvedValue({ errorCode: 'InvalidFormat', conflictingTenant: null })
+    const result = setup({ kind: 'Individual', completeVatNumber: 'RSSMRA85T10A562X' })
+    await blur(result, 'completeVatNumber')
+    expect(result.current.form.getFieldState('completeVatNumber').error?.message).toBe('InvalidFormat')
+    expect(result.current.check.statusOf('completeVatNumber', 'RSSMRA85T10A562X').verified).toBe(false)
   })
 })

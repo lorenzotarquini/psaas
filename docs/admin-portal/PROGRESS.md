@@ -19,6 +19,25 @@ Piano: `C:\Users\ltarq\.claude\plans\voglio-che-prepari-un-abundant-quail.md` ·
 | 10 Comunicazioni e notifiche | ✅ | vedi log |
 | 11 Panoramica, ricerca, impersonificazione | ✅ | vedi log |
 | 12 Consolidamento | ✅ | vedi log |
+| 13 Organizzazioni e privati (B2C) | ✅ (da verificare a video) | non ancora committata |
+
+## Fase 13 – Organizzazioni e privati (B2C)
+
+Obiettivo: servire anche i privati senza un secondo modello. Un privato è un'**organizzazione di tipo Privato**: stesso tenant, quindi abbonamenti, fatture, uso, audit e comunicazioni restano invariati.
+
+Flussi risultanti:
+- **B2B**: crea organizzazione (Azienda) → aree operative → profili → collega profili e aree → crea utente → associa al profilo.
+- **B2C**: crea organizzazione (Privato), che nasce con l'area "Personale" e il profilo "Personale" → crea utente → associa al profilo.
+
+Piano:
+1. **Dominio e dati**: `TenantKind` (`Business`, `Individual`) sul tenant, immutabile dopo la creazione; colonna `Kind` (default `Business`); l'indice unico sulla ragione sociale vale solo per le aziende (gli omonimi sono normali).
+2. **Regole per tipo** (UC3, UC4, UC11, UC14): per un privato `companyName` è nome e cognome (obbligatorio, ≤ 50, non unico), `completeVatNumber` è il codice fiscale (16 caratteri, carattere di controllo, unico), `certifiedEmail` è un'email ordinaria (unica), il codice SDI non è ammesso. Le aziende non cambiano.
+3. **Organizzazione di default**: un privato creato senza profili né unità riceve l'unità "Personale" aperta dal profilo "Personale".
+4. **Profili** (UC9 → "Gestire i profili"): `POST /api/profiles` e `DELETE /api/profiles/{id}`, con le regole di UC5 (nomi unici nell'organizzazione, eliminazione sempre consentita, il profilo viene tolto agli utenti, audit come modifica dell'organizzazione).
+5. **Frontend**: "Clienti" diventa "Organizzazioni" in tutta l'interfaccia; scelta Azienda/Privato nel primo passo dell'onboarding con etichette e controlli per tipo; badge "Privato" in elenco e scheda; pagina Profili con "Nuovo profilo" ed "Elimina".
+6. **Documentazione e test**: glossario, UC3, UC4, UC9, UC11, UC14, API.md, TEST-UNITARI.md, collection Postman; test di accettazione, unitari (codice fiscale, dominio) e Vitest.
+
+Esito: accettazione 285/285 (UC3-S9…S12, UC4-S7, UC6-S8, UC9-S3…S6, UC11-S7, GEN con i nuovi endpoint), unitari Application 159, Infrastructure 55, Domain 25, Auth 8; Vitest 74 in 27 file; `tsc` pulito; oxlint pulito (steiger: i soliti 7 suggerimenti, decisione 62). Non ancora fatto: giro a video nel browser e collection Postman eseguita con newman (le nuove richieste sono scritte ma non provate contro un backend).
 
 ## Test rossi attesi
 
@@ -94,6 +113,16 @@ Per verificare l'interfaccia senza il login reale: provider OIDC locale (`devidp
 61. **Conferma dell'invio delle comunicazioni** con un secondo passo nel modulo (barra scura come quella delle modifiche non salvate), al posto di `window.confirm`.
 62. **Suggerimenti steiger "insignificant slice" lasciati**: entità e feature usate da una sola pagina (comuni, utente corrente, viste salvate, pannelli) restano slice a sé per tenere separati dati, azioni e pagine; si possono accorpare se il designer o il team preferiscono meno cartelle.
 63. **Giro visivo sui mock (27/10, ambiente locale con OIDC di sviluppo)**: confronto schermata per schermata con 1b–1f e controllo delle pagine senza mock, tema scuro e mobile. Corretti: pulsanti secondari bianchi con bordo come nei mock (regola nel layer `utilities`, perché daisyUI sta in un layer annidato lì dentro); righe dell'elenco clienti su una riga e checkbox da 16 px; contatore caratteri allineato a destra; etichette delle card numeriche di Fatturazione e Uso come in 1b; badge "Nessun profilo" col bordo chiaro; badge grigio leggibile nel tema scuro; etichette `sdiCode` e `accountManager` nell'audit. **Bug**: "Annulla" nella conferma d'invio delle comunicazioni la riapriva (React riusava il pulsante cliccato come pulsante di invio durante lo stesso clic); risolto con `key` distinte, verificato con Playwright (jsdom non riproduce il caso).
+
+64. **Un privato è un tenant di tipo `Individual`** che riusa le colonne dell'azienda: `CompanyName` = nome e cognome, `CompleteVatNumber`/`VatNumber` = codice fiscale, `CertifiedEmail` = email. Così fatture, ricerca, elenco, comunicazioni e indice unico del codice fiscale funzionano senza modifiche; le colonne non sono state rinominate (lo dice il commento nel dominio).
+65. **Ragione sociale unica solo tra le aziende**: indice parziale `"Kind" = 'Business'`; gli omonimi privati sono ammessi, il codice fiscale resta unico su tutte le organizzazioni.
+66. **Codice fiscale con carattere di controllo** verificato dal backend (anche omocodico); il frontend controlla solo il formato.
+67. **Struttura "Personale" automatica** per un privato creato senza profili né unità (anche in bozza dall'onboarding).
+68. **"Organizzazione" (profili e unità) diventa "Struttura"** nell'interfaccia e nell'audit, per non confonderla con l'organizzazione-tenant; le "Unità produttive" mantengono il loro nome.
+69. **Eliminare un profilo è sempre consentito** (come UC5-R4) dopo una conferma che dice chi lo perde, invece di bloccarlo quando ha utenti: resta coerente con la modifica della struttura.
+70. **Profili creati e cancellati riusando `TenantOrganizationService`**: stesse regole, stesso audit, stessa rimozione dagli utenti Keycloak.
+71. **Nessun filtro per tipo nell'elenco Organizzazioni**: per ora solo il badge "Privato" in elenco e scheda. Il CSV esportato non ha una colonna del tipo.
+72. **Scelta dell'organizzazione nel dialog "Nuovo profilo"**: ricerca più le prime 100 trovate (shortcut annotato).
 
 ## Da far vedere al designer
 

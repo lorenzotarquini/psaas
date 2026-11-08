@@ -62,5 +62,12 @@ export function buildChecks(input: {
   ]
 }
 
+/**
+ * Profiles a new user row starts with: the only profile when there is just one (always the case for a private
+ * person, UC3-R10), so the user is not created without access by mistake; otherwise none, the administrator picks.
+ */
+export const defaultProfileIds = (tenant: Pick<TenantDetail, 'profiles'>) =>
+  tenant.profiles.length === 1 ? [tenant.profiles[0].id] : []
+
 /** A draft is resumed where it makes sense: an organization or users already there means further on. */
 export const isDraft = (tenant: TenantDetail | undefined) => tenant?.lifecycle.status === 'Onboarding'

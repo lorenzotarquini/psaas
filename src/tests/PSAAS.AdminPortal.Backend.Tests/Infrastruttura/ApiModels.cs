@@ -8,7 +8,7 @@ public sealed record TenantSummary(
     Guid Id, string CompanyName, string VatNumber, string CompleteVatNumber, string CertifiedEmail, string City,
     string Code = "", string Status = "", DateTimeOffset CreatedAt = default,
     string? Province = null, string? PlanName = null, int? MaxUsers = null, DateTimeOffset? RenewsAt = null,
-    List<TenantListModuleView>? Modules = null, int? UserCount = null);
+    List<TenantListModuleView>? Modules = null, int? UserCount = null, string Kind = "Business");
 
 public sealed record TenantListModuleView(string Id, string Name, string Status);
 
@@ -28,7 +28,8 @@ public sealed record TenantDetail(
     string Code = "",
     LifecycleView? Lifecycle = null,
     string? SdiCode = null,
-    string? AccountManager = null)
+    string? AccountManager = null,
+    string Kind = "Business")
 {
     public ProfileView Profile(string name) => Profiles.Single(profile => profile.Name == name);
 

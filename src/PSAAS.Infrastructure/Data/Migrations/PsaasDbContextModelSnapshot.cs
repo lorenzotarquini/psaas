@@ -543,6 +543,13 @@ namespace PSAAS.Infrastructure.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("now()");
 
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("Business");
+
                     b.Property<string>("NormalizedCertifiedEmail")
                         .IsRequired()
                         .HasColumnType("text");
@@ -586,7 +593,8 @@ namespace PSAAS.Infrastructure.Data.Migrations
                         .IsUnique();
 
                     b.HasIndex("NormalizedCompanyName")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("\"Kind\" = 'Business'");
 
                     b.HasIndex("Status");
 

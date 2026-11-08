@@ -1,1 +1,1 @@
-export { useProfiles, type Profile } from './api/profileApi'
+export { useCreateProfile, useDeleteProfile, useProfiles, type Profile, type ProfileCreateRequest } from './api/profileApi'

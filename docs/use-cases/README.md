@@ -4,9 +4,16 @@ Requisiti raccolti con l'intervista del 2026-10-20. Ogni use case ha un file ded
 
 ## Il prodotto
 
-PSAAS è un gestionale per aziende: una base comune estendibile con plugin. Ogni azienda cliente è un **tenant**.
+PSAAS è un gestionale per aziende e per privati: una base comune estendibile con plugin. Ogni cliente è un'**organizzazione** (tenant): un'**azienda** (B2B) o un **privato** (B2C).
 
-L'**Admin Portal** è il pannello di controllo del gestore della piattaforma: serve a gestire i clienti, i loro utenti e (in futuro) comunicazioni, disattivazioni, licenze, report.
+L'**Admin Portal** è il pannello di controllo del gestore della piattaforma: serve a gestire le organizzazioni, i loro utenti e (in futuro) comunicazioni, disattivazioni, licenze, report.
+
+Nell'interfaccia la voce "Clienti" si chiama **Organizzazioni**; negli use case "cliente" e "organizzazione" indicano la stessa cosa (il tenant). La "Struttura" di un'organizzazione sono i suoi profili e le sue unità produttive (UC5).
+
+### Flussi tipici
+
+- **B2B:** crea l'organizzazione Azienda (UC3/UC14) → aggiunge le unità produttive e i profili e li collega (UC5, UC9) → crea l'utente e gli dà il profilo (UC6).
+- **B2C:** crea l'organizzazione Privato (UC3/UC14), che nasce con l'unità e il profilo "Personale" → crea l'utente e gli dà quel profilo (UC6).
 
 ## Attori
 
@@ -20,7 +27,7 @@ L'**Admin Portal** è il pannello di controllo del gestore della piattaforma: se
 
 | Termine | Significato |
 |---|---|
-| Cliente (tenant) | Azienda che usa PSAAS. Identificata da ragione sociale, P.IVA e PEC, tutte uniche. |
+| Organizzazione (cliente, tenant) | Chi usa PSAAS: un'**azienda**, identificata da ragione sociale, P.IVA e PEC, tutte uniche; oppure un **privato**, identificato da nome e cognome (non unici), codice fiscale ed email (unici). Il tipo si sceglie alla creazione e non cambia. |
 | Unità produttiva | Parte indipendente di un cliente: un reparto (IT, commerciale) o, per aziende grandi, una filiale. |
 | Profilo | Regola di un cliente che dà accesso a zero o più delle sue unità produttive. |
 | Utente | Una persona fisica. Vive solo in Keycloak; ha zero o più profili, anche di clienti diversi. I clienti di un utente si ricavano dai suoi profili. |
@@ -37,7 +44,7 @@ L'**Admin Portal** è il pannello di controllo del gestore della piattaforma: se
 | [UC6](UC6-creare-utente.md) | Creare un utente | in ambito |
 | [UC7](UC7-cercare-utenti.md) | Cercare gli utenti | in ambito |
 | [UC8](UC8-chi-sono.md) | Sapere chi sono | in ambito |
-| [UC9](UC9-panoramica-profili.md) | Consultare la panoramica dei profili | in ambito |
+| [UC9](UC9-panoramica-profili.md) | Gestire i profili: panoramica, creazione ed eliminazione | in ambito |
 | [UC10](UC10-cercare-comune.md) | Cercare un comune (di supporto a UC3 e UC4) | in ambito |
 | [UC11](UC11-verificare-campo-cliente.md) | Verificare un campo univoco del cliente (di supporto a UC3 e UC4) | in ambito |
 | [UC12](UC12-audit-log.md) | Consultare l'audit log e lo storico di un cliente (EXP-10) | in ambito |
@@ -99,6 +106,8 @@ Schema dello scenario: Ogni operazione richiede un amministratore autenticato
     | GET /api/users                        |
     | GET /api/me                           |
     | GET /api/profiles                     |
+    | POST /api/profiles                    |
+    | DELETE /api/profiles/{id}             |
     | GET /api/geography/cities?term=ro     |
     | GET /api/tenants/field-validation?field=companyName&value=x |
 ```

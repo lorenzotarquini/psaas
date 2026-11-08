@@ -10,6 +10,8 @@ namespace PSAAS.Application.Contracts.Tenants;
 /// <param name="SdiCode">Optional SDI recipient code (6–7 letters or digits).</param>
 /// <param name="AccountManager">Optional name of the account manager on the platform side.</param>
 /// <param name="Draft">UC14: create the tenant in Onboarding, to complete it step by step and activate it later.</param>
+/// <param name="Kind">TenantKind name: "Business" (default) or "Individual". For an individual CompanyName is the full
+/// name, CompleteVatNumber the tax code (codice fiscale) and CertifiedEmail a plain email.</param>
 public sealed record TenantCreateRequest(
     string? CompanyName,
     string? CompleteVatNumber,
@@ -21,7 +23,8 @@ public sealed record TenantCreateRequest(
     IReadOnlyList<TenantCreateProductiveUnitRequest>? ProductiveUnits = null,
     string? SdiCode = null,
     string? AccountManager = null,
-    bool Draft = false);
+    bool Draft = false,
+    string? Kind = null);
 
 /// <param name="Key">Client-chosen key that productive units of the same request use to reference this profile.</param>
 public sealed record TenantCreateProfileRequest(string? Key, string? Name, string? Description);

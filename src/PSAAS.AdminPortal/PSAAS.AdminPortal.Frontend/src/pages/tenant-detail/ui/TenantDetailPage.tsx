@@ -82,6 +82,9 @@ function TenantView({ tenant }: { tenant: TenantDetail }) {
               <h1 className="flex flex-wrap items-center gap-2 text-[22px] font-semibold tracking-[-0.01em]">
                 {tenant.companyName}
                 <TenantStatusBadge status={tenant.lifecycle.status} />
+                {tenant.kind === 'Individual' && (
+                  <span className="badge badge-ghost badge-sm font-medium">{t('tenants.kinds.Individual')}</span>
+                )}
                 {subscription && (
                   <span className="badge badge-ghost badge-sm font-medium">
                     {subscription.planName} · {t(`catalog.period.${subscription.billingPeriod}`)}

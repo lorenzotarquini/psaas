@@ -1,18 +1,22 @@
-import { faFilter } from '@fortawesome/free-solid-svg-icons'
+import { faFilter, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
-import { useProfiles } from '@/entities/profile'
+import { useProfiles, type Profile } from '@/entities/profile'
 import { tenantPath } from '@/shared/routes'
 import { ErrorAlert } from '@/shared/ui/error-alert'
 import { PageHeader } from '@/shared/ui/page-header'
+import { CreateProfileDialog } from './CreateProfileDialog'
+import { DeleteProfileDialog } from './DeleteProfileDialog'
 
-// UC9: read-only overview of every profile of every tenant, ordered by name (by the backend).
+// UC9: every profile of every organization, ordered by name (by the backend); here they are also created and deleted.
 export function ProfilesPage() {
   const { t } = useTranslation()
   const { data: profiles = [], error, isPending } = useProfiles()
   const [filter, setFilter] = useState('')
+  const [creating, setCreating] = useState(false)
+  const [deleting, setDeleting] = useState<Profile | null>(null)
 
   // The whole list is already here: filter on the client.
   const needle = filter.trim().toLowerCase()
@@ -22,7 +26,16 @@ export function ProfilesPage() {
 
   return (
     <>
-      <PageHeader title={t('profiles.title')} count={isPending ? undefined : profiles.length} />
+      <PageHeader
+        title={t('profiles.title')}
+        count={isPending ? undefined : profiles.length}
+        actions={
+          <button type="button" className="btn btn-primary btn-sm" onClick={() => setCreating(true)}>
+            <FontAwesomeIcon icon={faPlus} />
+            {t('profiles.create')}
+          </button>
+        }
+      />
       <label className="input w-full max-w-sm">
         <FontAwesomeIcon icon={faFilter} className="text-base-content/40" />
         <input
@@ -50,6 +63,9 @@ export function ProfilesPage() {
                   <th>{t('tenantDetail.profile')}</th>
                   <th>{t('organizationEditor.description')}</th>
                   <th>{t('profiles.tenant')}</th>
+                  <th className="w-px">
+                    <span className="sr-only">{t('profiles.actions')}</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -62,6 +78,16 @@ export function ProfilesPage() {
                         {profile.tenantCompanyName}
                       </Link>
                     </td>
+                    <td>
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-xs text-error"
+                        aria-label={`${t('profiles.delete')} ${profile.name}`}
+                        onClick={() => setDeleting(profile)}
+                      >
+                        <FontAwesomeIcon icon={faTrash} />
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -72,6 +98,8 @@ export function ProfilesPage() {
           </div>
         )}
       </div>
+      <CreateProfileDialog open={creating} onClose={() => setCreating(false)} />
+      <DeleteProfileDialog profile={deleting} onClose={() => setDeleting(null)} />
     </>
   )
 }

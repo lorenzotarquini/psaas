@@ -15,7 +15,8 @@
 
 ## Regole
 - R1. Tutti i dati anagrafici sono modificabili, P.IVA compresa.
-- R2. Valgono le stesse regole di UC3 (R1–R5). L'unicità esclude il cliente stesso: si possono salvare i propri valori invariati.
+- R2. Valgono le stesse regole di UC3 (R1–R5, e R9 per un privato). L'unicità esclude il cliente stesso: si possono salvare i propri valori invariati.
+- R3. Il tipo (azienda o privato) non si modifica: la richiesta non lo contiene e valgono le regole del tipo scelto alla creazione.
 
 ## Scenari di accettazione
 
@@ -104,4 +105,19 @@ Funzionalità: Modificare l'anagrafica di un cliente
 Scenario: Cliente inesistente
   Quando l'amministratore modifica un cliente che non esiste
   Allora il sistema risponde che il cliente non è stato trovato
+```
+
+### UC4-S7
+
+Test: `UC4_ModificareAnagrafica.S7_UnPrivatoRestaPrivato`
+
+```gherkin
+# language: it
+Funzionalità: Modificare l'anagrafica di un cliente
+
+Scenario: Un privato resta privato
+  Dato che esiste il privato "Mario Rossi" con codice fiscale "RSSMRA85T10A562S"
+  Quando l'amministratore lo rinomina in "Mario Giuseppe Rossi" con codice fiscale "VRDGPP80A01F205X"
+  Allora la scheda mostra il privato "Mario Giuseppe Rossi" con il nuovo codice fiscale
+  Ma salvando la P.IVA "IT11111111111" al posto del codice fiscale la richiesta è rifiutata con "InvalidFormat"
 ```

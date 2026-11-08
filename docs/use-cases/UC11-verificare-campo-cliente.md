@@ -11,12 +11,14 @@
 ## Flussi alternativi
 - **2a. Modifica di un cliente esistente (UC4):** l'amministratore indica quale cliente sta modificando; i valori di quel cliente non contano come duplicati.
 - **2b. Campo che non si può verificare:** la richiesta è rifiutata come non valida.
+- **2c. Privato:** l'amministratore indica il tipo `Individual`; valgono le regole del privato (UC3-R9). Un tipo sconosciuto è rifiutato con `InvalidValue` su `kind`.
 
 ## Regole
 - R1. Si possono verificare solo ragione sociale (`companyName`), P.IVA completa (`completeVatNumber`) e PEC (`certifiedEmail`).
 - R2. Valgono le regole di UC3: obbligatorietà, formato, lunghezza e unicità, con gli stessi codici (`Required`, `InvalidFormat`, `MaxLengthExceeded`, `NotUnique`).
 - R3. La verifica non registra nulla e non sostituisce i controlli del salvataggio: un altro amministratore può usare lo stesso valore nel frattempo (UC3 flusso 3b).
 - R4. Se il valore è già usato, la risposta indica quale cliente lo usa (id e ragione sociale), per poterlo aprire.
+- R5. Il tipo (`kind`, predefinito `Business`) sceglie le regole: per un privato il nome non è mai un duplicato e `completeVatNumber` è il codice fiscale.
 
 ## Scenari di accettazione
 
@@ -121,4 +123,25 @@ Scenario: Il duplicato indica quale cliente usa già il valore
   Dato che esiste il cliente "Alfa Srl"
   Quando l'amministratore verifica la ragione sociale "ALFA s.r.l."
   Allora il valore risulta "NotUnique" ed è indicato il cliente "Alfa Srl", per poterlo aprire
+```
+
+### UC11-S7
+
+Test: `UC11_VerificareCampoCliente.S7_RegoleDelPrivato`
+
+```gherkin
+# language: it
+Funzionalità: Verificare un campo univoco del cliente
+
+Schema dello scenario: Regole del privato
+  Dato che esistono l'azienda "Alfa Srl" e il privato "Mario Rossi" con codice fiscale "RSSMRA85T10A562S"
+  Quando l'amministratore verifica "<campo>" con valore "<valore>" per un privato
+  Allora la risposta è "<esito>"
+
+  Esempi:
+    | campo             | valore           | esito         |
+    | companyName       | Alfa Srl         | valido        |
+    | completeVatNumber | RSSMRA85T10A562S | NotUnique     |
+    | completeVatNumber | VRDGPP80A01F205X | valido        |
+    | completeVatNumber | IT22222222222    | InvalidFormat |
 ```

@@ -1,0 +1,14 @@
+namespace FinHorizon.AdminPortal.Infrastructure.Data.DbModels;
+
+public sealed class ProfileDbModel
+{
+    public string Id { get; set; } = string.Empty;
+
+    public string TenantId { get; set; } = string.Empty;
+
+    public string Name { get; set; } = string.Empty;
+
+    public string? Description { get; set; }
+
+    public ICollection<ProductiveUnitProfileDbModel> ProductiveUnitProfiles { get; set; } = [];
+}

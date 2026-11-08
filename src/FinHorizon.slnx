@@ -1,0 +1,24 @@
+<Solution>
+  <Folder Name="/AdminPortal/">
+    <Project Path="AdminPortal/FinHorizon.AdminPortal.Domain/FinHorizon.AdminPortal.Domain.csproj" />
+    <Project Path="AdminPortal/FinHorizon.AdminPortal.Application/FinHorizon.AdminPortal.Application.csproj" />
+    <Project Path="AdminPortal/FinHorizon.AdminPortal.Infrastructure/FinHorizon.AdminPortal.Infrastructure.csproj" />
+    <Project Path="AdminPortal/FinHorizon.AdminPortal.Backend/FinHorizon.AdminPortal.Backend.csproj" />
+  </Folder>
+  <Folder Name="/AdminPortal/Tests/">
+    <Project Path="AdminPortal/Tests/FinHorizon.AdminPortal.Domain.Tests/FinHorizon.AdminPortal.Domain.Tests.csproj" />
+    <Project Path="AdminPortal/Tests/FinHorizon.AdminPortal.Application.Tests/FinHorizon.AdminPortal.Application.Tests.csproj" />
+    <Project Path="AdminPortal/Tests/FinHorizon.AdminPortal.Infrastructure.Tests/FinHorizon.AdminPortal.Infrastructure.Tests.csproj" />
+    <Project Path="AdminPortal/Tests/FinHorizon.AdminPortal.Backend.Tests/FinHorizon.AdminPortal.Backend.Tests.csproj" />
+  </Folder>
+  <Folder Name="/Shared/">
+    <Project Path="Shared/FinHorizon.Auth/FinHorizon.Auth.csproj" />
+    <Project Path="Shared/FinHorizon.Modules.Sdk/FinHorizon.Modules.Sdk.csproj" />
+  </Folder>
+  <Folder Name="/Shared/Tests/">
+    <Project Path="Shared/Tests/FinHorizon.Auth.Tests/FinHorizon.Auth.Tests.csproj" />
+  </Folder>
+  <Folder Name="/Orchestration/">
+    <Project Path="FinHorizon.AppHost/FinHorizon.AppHost.csproj" />
+  </Folder>
+</Solution>

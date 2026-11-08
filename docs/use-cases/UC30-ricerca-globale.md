@@ -19,7 +19,7 @@
 
 ## Scenari di accettazione
 
-Test: [`UC30_RicercaGlobale`](../../src/tests/PSAAS.AdminPortal.Backend.Tests/UC30_RicercaGlobale.cs)
+Test: [`UC30_RicercaGlobale`](../../src/AdminPortal/Tests/FinHorizon.AdminPortal.Backend.Tests/UC30_RicercaGlobale.cs)
 
 ### UC30-S1
 

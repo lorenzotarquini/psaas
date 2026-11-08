@@ -16,7 +16,7 @@
 
 ## Scenari di accettazione
 
-Test: [`UC2_ConsultareCliente`](../../src/tests/PSAAS.AdminPortal.Backend.Tests/UC2_ConsultareCliente.cs)
+Test: [`UC2_ConsultareCliente`](../../src/AdminPortal/Tests/FinHorizon.AdminPortal.Backend.Tests/UC2_ConsultareCliente.cs)
 
 ### UC2-S1
 

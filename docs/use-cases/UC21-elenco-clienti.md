@@ -23,7 +23,7 @@
 
 ## Scenari di accettazione
 
-Test: [`UC21_ElencoClienti`](../../src/tests/PSAAS.AdminPortal.Backend.Tests/UC21_ElencoClienti.cs)
+Test: [`UC21_ElencoClienti`](../../src/AdminPortal/Tests/FinHorizon.AdminPortal.Backend.Tests/UC21_ElencoClienti.cs)
 
 ### UC21-S1
 

@@ -25,7 +25,7 @@
 
 ## Scenari di accettazione
 
-Test: [`UC27_Comunicazioni`](../../src/tests/PSAAS.AdminPortal.Backend.Tests/UC27_Comunicazioni.cs)
+Test: [`UC27_Comunicazioni`](../../src/AdminPortal/Tests/FinHorizon.AdminPortal.Backend.Tests/UC27_Comunicazioni.cs)
 
 ### UC27-S1
 

@@ -22,7 +22,7 @@
 
 ## Scenari di accettazione
 
-Test: [`UC17_Sottoscrizione`](../../src/tests/PSAAS.AdminPortal.Backend.Tests/UC17_Sottoscrizione.cs)
+Test: [`UC17_Sottoscrizione`](../../src/AdminPortal/Tests/FinHorizon.AdminPortal.Backend.Tests/UC17_Sottoscrizione.cs)
 
 ### UC17-S1
 

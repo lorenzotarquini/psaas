@@ -19,7 +19,7 @@
 
 ## Scenari di accettazione
 
-Test: [`UC16_Piani`](../../src/tests/PSAAS.AdminPortal.Backend.Tests/UC16_Piani.cs)
+Test: [`UC16_Piani`](../../src/AdminPortal/Tests/FinHorizon.AdminPortal.Backend.Tests/UC16_Piani.cs)
 
 ### UC16-S1
 

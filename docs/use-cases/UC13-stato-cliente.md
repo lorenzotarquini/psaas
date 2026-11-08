@@ -23,7 +23,7 @@
 
 ## Scenari di accettazione
 
-Test: [`UC13_StatoCliente`](../../src/tests/PSAAS.AdminPortal.Backend.Tests/UC13_StatoCliente.cs)
+Test: [`UC13_StatoCliente`](../../src/AdminPortal/Tests/FinHorizon.AdminPortal.Backend.Tests/UC13_StatoCliente.cs)
 
 ### UC13-S1
 

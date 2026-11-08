@@ -19,7 +19,8 @@ Piano: `C:\Users\ltarq\.claude\plans\voglio-che-prepari-un-abundant-quail.md` ·
 | 10 Comunicazioni e notifiche | ✅ | vedi log |
 | 11 Panoramica, ricerca, impersonificazione | ✅ | vedi log |
 | 12 Consolidamento | ✅ | vedi log |
-| 13 Organizzazioni e privati (B2C) | ✅ (da verificare a video) | non ancora committata |
+| 13 Organizzazioni e privati (B2C) | ✅ | `8bc020b` |
+| 14 Nome FinHorizon e struttura AdminPortal/Shared | ✅ | vedi log |
 
 ## Fase 13 – Organizzazioni e privati (B2C)
 
@@ -39,23 +40,34 @@ Piano:
 
 Esito: accettazione 285/285 (UC3-S9…S12, UC4-S7, UC6-S8, UC9-S3…S6, UC11-S7, GEN con i nuovi endpoint), unitari Application 159, Infrastructure 55, Domain 25, Auth 8; Vitest 74 in 27 file; `tsc` pulito; oxlint pulito (steiger: i soliti 7 suggerimenti, decisione 62). Non ancora fatto: giro a video nel browser e collection Postman eseguita con newman (le nuove richieste sono scritte ma non provate contro un backend).
 
+## Fase 14 – Nome FinHorizon e struttura AdminPortal/Shared
+
+Il progetto si chiama **FinHorizon** (acronimo FNHZ). La clean architecture non è più "comune": è del portale.
+
+- Progetti rinominati e spostati con `git mv`: `src/AdminPortal/FinHorizon.AdminPortal.{Domain,Application,Infrastructure,Backend,Frontend}` con i test in `src/AdminPortal/Tests/`; `src/Shared/FinHorizon.Auth` e il nuovo `src/Shared/FinHorizon.Modules.Sdk`, con i test in `src/Shared/Tests/`; `src/FinHorizon.AppHost`. Solution unica `src/FinHorizon.slnx` con le stesse cartelle.
+- `FinHorizon.Modules.Sdk` contiene i contratti scambiati con i moduli: `ModuleManifest` e `ModuleStatuses`, `ModuleProvisioningRequest` (prima un oggetto anonimo nel provisioner), `UsageReport`, `UsageRecordRequest`, `UsageKinds`. Lo usa l'Application del portale.
+- `PsaasDbContext` → `AdminPortalDbContext`, `AddPsaas*` → `AddAdminPortal*`; le migration mantengono i loro id.
+- Nomi brevi con l'acronimo: utente Postgres `fnhz`, temi `fnhz`/`fnhz-dark`, chiavi nel browser `fnhz-*` (le preferenze salvate prima si perdono una volta). Il realm Keycloak resta `PSAAS`.
+- Database di sviluppo azzerato (cartella `src/postgres_data` ricreata) con l'utente `fnhz`; `adminportal-db` ricreato e migrato.
+- Esito: accettazione 285/285, Application 159, Infrastructure 55, Domain 25, Auth 8; Vitest 77; `tsc` e oxlint puliti.
+
 ## Test rossi attesi
 
 Nessuno. A fine lavoro (fase 12): accettazione 267/267, unitari Application 146, Infrastructure 55, Domain 25, Auth 5; Vitest 69 in 26 file; `tsc` pulito; lint senza avvisi di oxlint (restano 7 suggerimenti "insignificant slice" di steiger, vedi decisione 62). Collection Postman eseguita per intero con newman contro il backend locale: 63/63 asserzioni, ripetibile.
 
 ## Ambiente di sviluppo autonomo (fuori dal repo, nello scratchpad della sessione)
 
-Per verificare l'interfaccia senza il login reale: provider OIDC locale (`devidp/server.mjs`, porta 8099: login automatico come "Marta Russo", token RS256, sottoinsieme dell'API utenti di Keycloak in memoria), Postgres dedicato (container `psaas-dev-pg`, porta 5433), backend su 5300 (`backend.sh`), Vite su 5180 (`VITE_KEYCLOAK_URL=http://localhost:8099`), screenshot con `e2e/look.mjs`, dati d'esempio con `e2e/seed.mjs` e `e2e/seed-catalog.mjs` (moduli, piani, sottoscrizioni; l'hook di Magazzino punta a una porta chiusa per mostrare il provisioning fallito).
+Per verificare l'interfaccia senza il login reale: provider OIDC locale (`devidp/server.mjs`, porta 8099: login automatico come "Marta Russo", token RS256, sottoinsieme dell'API utenti di Keycloak in memoria), Postgres dedicato (container `fnhz-dev-pg`, porta 5433), backend su 5300 (`backend.sh`), Vite su 5180 (`VITE_KEYCLOAK_URL=http://localhost:8099`), screenshot con `e2e/look.mjs`, dati d'esempio con `e2e/seed.mjs` e `e2e/seed-catalog.mjs` (moduli, piani, sottoscrizioni; l'hook di Magazzino punta a una porta chiusa per mostrare il provisioning fallito).
 
 ## Decisioni prese in autonomia
 
 1. **Ragione sociale ≤ 20 caratteri (UC3-R2) mantenuta**: alcuni nomi dei mock la superano ("Acciaierie Ventura Spa", 22). Nel seed sono accorciati. Da chiarire con il designer o rivedere la regola.
-2. **Tema scuro `psaas-dark`** derivato dagli stessi toni (i mock non lo includono): da validare con il designer.
+2. **Tema scuro `fnhz-dark`** derivato dagli stessi toni (i mock non lo includono): da validare con il designer.
 3. **Font IBM Plex self-hosted** con `@fontsource` invece di Google Fonts.
 4. **UC8 (chi sono)** spostato nel menu dell'avatar: ID Keycloak e ruoli (client e realm) dal token.
 5. **Piè di pagina della sidebar**: versione del modulo core (`core 2.0.3`, mock 1b) e realm; la versione del portale resta nel tooltip.
 6. **Badge d'ambiente** da `VITE_ENVIRONMENT_LABEL` (`.env`: `SVILUPPO`).
-7. **Tema scelto persistito** in localStorage (`psaas-theme`); senza scelta segue il sistema.
+7. **Tema scelto persistito** in localStorage (`fnhz-theme`); senza scelta segue il sistema.
 8. **Pagine di modifica anagrafica e organizzazione** sostituite dalle schede Anagrafica e Organizzazione della scheda cliente (`/tenants/{id}?tab=registry|organization`); la conferma con `window.confirm` alla rimozione di profili è sostituita dall'avviso nella barra delle modifiche (mock 1d).
 9. **Matrice dell'organizzazione**: nomi delle unità e dei profili modificabili direttamente nelle intestazioni della matrice (il mock mostra testo statico ma UC5 richiede la rinomina).
 10. **UC5 con Keycloak giù**: l'organizzazione si salva comunque; gli utenti tengono un id di profilo che le letture già omettono (UC7-R3).
@@ -82,7 +94,7 @@ Per verificare l'interfaccia senza il login reale: provider OIDC locale (`devidp
 30. **Conteggi delle schede** su tutti i clienti, non sui filtri correnti (il mock non lo chiarisce).
 31. **"Cambia piano" multiplo** dal frontend, una sottoscrizione (UC17) per cliente con esito per riga; nessun endpoint di massa. Gli add-on dei clienti vengono tolti.
 32. **"Invia comunicazione"** visibile ma disattivato fino alla fase 10.
-33. **Colonne scelte** salvate nel browser (`psaas-tenant-columns`); le viste salvate (UC22) sono invece sul server, per amministratore.
+33. **Colonne scelte** salvate nel browser (`fnhz-tenant-columns`); le viste salvate (UC22) sono invece sul server, per amministratore.
 34. **Export senza conteggio utenti** (eviterebbe migliaia di chiamate a Keycloak); valori che iniziano con `=+-@` neutralizzati contro la formula injection.
 35. **Utenti nell'elenco** contati con Keycloak solo per la pagina visibile (shortcut annotato); niente ordinamento per utenti.
 36. **Fatture emesse "oggi"** anche per periodi arretrati recuperati dal processo giornaliero: la scadenza parte dall'emissione.
@@ -109,7 +121,7 @@ Per verificare l'interfaccia senza il login reale: provider OIDC locale (`devidp
 57. **Scorciatoie**: ⌘K/Ctrl+K, N (nuovo cliente), Esc; J/K per scorrere le righe non implementate (il mock non le mostra).
 58. **Impersonificazione solo dalla scheda cliente** (mock 1d): il pannello utente non la ospita per le regole FSD (una feature non importa un'altra).
 59. **Token exchange "legacy" di Keycloak** (`requested_subject`): richiede la feature `token-exchange` attiva nel realm; la piattaforma deve leggere il token dal frammento `/impersonate#access_token=…`.
-60. **Collection Postman come esecuzione unica**: crea il proprio cliente, piano, utente, vista e comunicazione con nomi unici (`runId`), cattura gli id dalle risposte, ottiene il token con client credentials se `token` è vuoto, e verifica lo stato atteso di ogni richiesta (anche i 409 voluti). Comando: `npx newman run docs/postman/PSAAS.AdminPortal.postman_collection.json --env-var baseUrl=… --env-var keycloakUrl=…/realms/PSAAS --env-var clientSecret=…`.
+60. **Collection Postman come esecuzione unica**: crea il proprio cliente, piano, utente, vista e comunicazione con nomi unici (`runId`), cattura gli id dalle risposte, ottiene il token con client credentials se `token` è vuoto, e verifica lo stato atteso di ogni richiesta (anche i 409 voluti). Comando: `npx newman run docs/postman/FinHorizon.AdminPortal.postman_collection.json --env-var baseUrl=… --env-var keycloakUrl=…/realms/PSAAS --env-var clientSecret=…`.
 61. **Conferma dell'invio delle comunicazioni** con un secondo passo nel modulo (barra scura come quella delle modifiche non salvate), al posto di `window.confirm`.
 62. **Suggerimenti steiger "insignificant slice" lasciati**: entità e feature usate da una sola pagina (comuni, utente corrente, viste salvate, pannelli) restano slice a sé per tenere separati dati, azioni e pagine; si possono accorpare se il designer o il team preferiscono meno cartelle.
 63. **Giro visivo sui mock (27/10, ambiente locale con OIDC di sviluppo)**: confronto schermata per schermata con 1b–1f e controllo delle pagine senza mock, tema scuro e mobile. Corretti: pulsanti secondari bianchi con bordo come nei mock (regola nel layer `utilities`, perché daisyUI sta in un layer annidato lì dentro); righe dell'elenco clienti su una riga e checkbox da 16 px; contatore caratteri allineato a destra; etichette delle card numeriche di Fatturazione e Uso come in 1b; badge "Nessun profilo" col bordo chiaro; badge grigio leggibile nel tema scuro; etichette `sdiCode` e `accountManager` nell'audit. **Bug**: "Annulla" nella conferma d'invio delle comunicazioni la riapriva (React riusava il pulsante cliccato come pulsante di invio durante lo stesso clic); risolto con `key` distinte, verificato con Playwright (jsdom non riproduce il caso).

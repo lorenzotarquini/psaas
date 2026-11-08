@@ -20,7 +20,7 @@
 
 ## Scenari di accettazione
 
-Test: [`UC4_ModificareAnagrafica`](../../src/tests/PSAAS.AdminPortal.Backend.Tests/UC4_ModificareAnagrafica.cs)
+Test: [`UC4_ModificareAnagrafica`](../../src/AdminPortal/Tests/FinHorizon.AdminPortal.Backend.Tests/UC4_ModificareAnagrafica.cs)
 
 ### UC4-S1
 

@@ -1,0 +1,905 @@
+{
+  "appName": "FinHorizon Admin Portal",
+  "loading": "Loading…",
+  "logout": "Log out",
+  "language": "Language",
+  "theme": "Theme",
+  "themes": {
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "me": {
+    "title": "Current user",
+    "keycloakId": "Keycloak ID",
+    "name": "Name",
+    "email": "Email",
+    "roles": "Roles",
+    "error": "Could not read the current user (HTTP {{status}})."
+  },
+  "menu": "Menu",
+  "nav": {
+    "home": "Overview",
+    "tenants": "Organizations",
+    "users": "Users",
+    "profiles": "Profiles",
+    "console": "Admin console",
+    "groups": {
+      "operations": "Operations",
+      "catalog": "Catalog",
+      "administration": "Administration"
+    },
+    "modules": "Modules",
+    "plans": "Plans",
+    "subscriptions": "Subscriptions",
+    "billing": "Billing",
+    "communications": "Communications",
+    "audit": "Audit log",
+    "settings": "Settings"
+  },
+  "profile": {
+    "title": "My profile",
+    "settings": "Settings"
+  },
+  "tenants": {
+    "title": "Organizations",
+    "searchPlaceholder": "Name, VAT number, tax code or email",
+    "companyName": "Company name",
+    "vatNumber": "VAT number",
+    "completeVatNumber": "Complete VAT number",
+    "certifiedEmail": "PEC",
+    "city": "City",
+    "empty": "There are no organizations yet.",
+    "noResults": "No organization matches \"{{search}}\".",
+    "tabsLabel": "Organization views",
+    "tabs": {
+      "all": "All",
+      "Active": "Active",
+      "Trial": "Trial",
+      "Onboarding": "Onboarding",
+      "Suspended": "Suspended",
+      "renewingSoon": "Renewal < 30 d"
+    },
+    "saveView": "Save view",
+    "viewName": "View name",
+    "deleteView": "Delete the view {{name}}",
+    "filters": {
+      "plan": "Plan",
+      "module": "Module",
+      "province": "Province",
+      "provinceCode": "Province code",
+      "renewal": "Renewal",
+      "within_one": "within {{count}} day",
+      "within_other": "within {{count}} days",
+      "clear": "Clear the {{label}} filter"
+    },
+    "columns": "Columns",
+    "col": {
+      "certifiedEmail": "PEC",
+      "city": "City",
+      "status": "Status",
+      "plan": "Plan",
+      "modules": "Modules",
+      "users": "Users",
+      "renewal": "Renewal"
+    },
+    "exportCsv": "Export CSV",
+    "selectPage": "Select the organizations of the page",
+    "select": "Select {{name}}",
+    "expired": "expired",
+    "inDays_one": "in {{count}} day",
+    "inDays_other": "in {{count}} days",
+    "noMatch": "No organization matches the filters.",
+    "bulk": {
+      "label": "Actions on the selected organizations",
+      "selected_one": "{{count}} selected",
+      "selected_other": "{{count}} selected",
+      "changePlan": "Change plan",
+      "communicate": "Send communication",
+      "export": "Export",
+      "escHint": "Esc to deselect",
+      "changePlanTitle_one": "Change the plan of {{count}} organization",
+      "changePlanTitle_other": "Change the plan of {{count}} organizations",
+      "changePlanHint": "The subscription rules apply to each organization: plan limits, modules and price of the new plan. Add-ons are removed.",
+      "apply": "Apply",
+      "done": "plan changed"
+    },
+    "kind": "Type",
+    "kinds": {
+      "Business": "Company",
+      "Individual": "Private person"
+    },
+    "fullName": "Full name",
+    "taxCode": "Tax code",
+    "email": "Email"
+  },
+  "pagination": {
+    "pageSize": "Rows per page",
+    "previous": "Previous page",
+    "next": "Next page",
+    "pageOf": "Page {{page}} of {{totalPages}}",
+    "range": "{{first}}–{{last}} of {{total}}"
+  },
+  "errors": {
+    "forbidden": "You are not allowed to do this.",
+    "notFound": "Item not found.",
+    "unavailable": "Service temporarily unavailable. Please try again shortly.",
+    "generic": "An unexpected error occurred.",
+    "pageNotFound": "Page not found",
+    "validation": "Some data is not valid: check the highlighted fields.",
+    "loadFailed": "Loading failed (error {{status}}). Try again or contact support.",
+    "saveFailed": "Saving failed (error {{status}}): no change was recorded. Try again or contact support.",
+    "network": "Server unreachable: check your connection and try again.",
+    "pageNotFoundHint": "The address does not match any page of the portal."
+  },
+  "tenantDetail": {
+    "backToList": "Back to organizations",
+    "notFound": "Organization not found.",
+    "registry": "Registry",
+    "address": "Registered office",
+    "organization": "Structure",
+    "noOrganization": "The organization has no profiles or productive units.",
+    "profiles": "Profiles",
+    "productiveUnits": "Productive units",
+    "noProfiles": "No profiles.",
+    "noProductiveUnits": "No productive units.",
+    "profile": "Profile",
+    "matrixCaption": "Productive units opened by each profile",
+    "opens": "Opens the unit",
+    "doesNotOpen": "Does not open the unit",
+    "editRegistry": "Edit registry",
+    "editOrganization": "Edit structure",
+    "tabsLabel": "Organization sections",
+    "tabs": {
+      "overview": "Overview",
+      "registry": "Registry",
+      "organization": "Structure",
+      "subscription": "Subscription and modules",
+      "users": "Users",
+      "usage": "Usage",
+      "invoices": "Invoices",
+      "history": "History"
+    },
+    "customerSince": "Customer since {{date}}",
+    "draftBanner": "This organization is a draft in onboarding: it is not active yet.",
+    "resumeOnboarding": "Resume onboarding",
+    "statusReason": "{{status}} since {{date}}: {{reason}}"
+  },
+  "validation": {
+    "Required": "Required field",
+    "InvalidFormat": "Invalid format",
+    "MaxLengthExceeded": "Text too long",
+    "NotUnique": "Value already in use",
+    "InvalidValue": "Invalid value",
+    "LimitExceeded": "Plan limit reached"
+  },
+  "tenantForm": {
+    "createTitle": "New organization",
+    "editTitle": "Edit registry of {{name}}",
+    "backToDetail": "Back to organization",
+    "street": "Street",
+    "postalCode": "Postal code",
+    "cityListUnavailable": "City list unavailable: type city and postal code by hand.",
+    "optional": "optional",
+    "create": "Activate organization",
+    "save": "Save",
+    "available": "Available",
+    "openConflicting": "Open \"{{name}}\"",
+    "registryHint": "Each unique field is checked when you leave it, with the same rules as saving.",
+    "city": "Town",
+    "sdiCode": "SDI code",
+    "accountManager": "Account manager",
+    "postalCodeFromCity": "Filled from the town",
+    "choosePostalCode": "Choose the postal code",
+    "cityKeys": "↑↓ move · ↵ select",
+    "citySource": "Source ISTAT"
+  },
+  "organizationEditor": {
+    "title": "Structure of {{name}}",
+    "name": "Name",
+    "description": "Description",
+    "addProfile": "Add profile",
+    "addUnit": "Add productive unit",
+    "removeProfile": "Remove profile",
+    "removeUnit": "Remove productive unit",
+    "openedBy": "Opened by profiles:",
+    "unnamedProfile": "(unnamed profile)",
+    "invalidProfileLink": "Link to an invalid profile.",
+    "confirmRemoveProfiles": "You are removing the profiles: {{names}}. Users who have them will lose them. Continue?",
+    "matrixTitle": "Profiles × productive units",
+    "matrixHint": "Click a cell to open or close the access of a profile to a unit.",
+    "users": "Users",
+    "profileName": "Profile name",
+    "unitName": "Unit name",
+    "restore": "Restore",
+    "access": "{{profile}} opens {{unit}}",
+    "save": "Save structure",
+    "removalWarning_one": "Removing {{names}} also removes it from {{count}} user in Keycloak.",
+    "removalWarning_other": "Removing {{names}} also removes it from {{count}} users in Keycloak."
+  },
+  "users": {
+    "title": "Users",
+    "create": "New user",
+    "created": "User {{email}} created. Keycloak sent them the email to set the password.",
+    "searchPlaceholder": "Search by first name, last name or email",
+    "noResults": "No user matches \"{{search}}\".",
+    "empty": "There are no users.",
+    "name": "Name",
+    "email": "Email",
+    "noProfiles": "No profiles",
+    "user": "User",
+    "profilesTenant": "Profiles · organization",
+    "statusLabel": "Status",
+    "lastLogin": "Last login",
+    "never": "never",
+    "status": {
+      "Active": "Active",
+      "Invited": "Invitation sent",
+      "Suspended": "Suspended",
+      "Disabled": "Disabled"
+    },
+    "filters": {
+      "tenant": "Organization",
+      "profile": "Profile",
+      "status": "Status"
+    },
+    "resultCount_one": "{{count}} result on first name, last name and email",
+    "resultCount_other": "{{count}} results on first name, last name and email",
+    "noTenantUsers": "No user has profiles of this organization.",
+    "panel": "User detail",
+    "closePanel": "Close the detail",
+    "mfaRequired": "MFA required",
+    "requireMfa": "Require MFA",
+    "actions": {
+      "invite": "Resend invitation",
+      "edit": "Edit",
+      "resetPassword": "Reset password",
+      "disable": "Disable",
+      "enable": "Enable"
+    },
+    "done": {
+      "invite": "Invitation sent again: Keycloak emailed it.",
+      "reset-password": "Keycloak emailed the link to set a new password.",
+      "disable": "User disabled: they can no longer log in.",
+      "enable": "User enabled again."
+    },
+    "groupedByTenant": "grouped by organization",
+    "addTenantProfile": "Add a profile of another organization",
+    "save": "Save changes",
+    "details": "Details",
+    "username": "Username",
+    "createdAt": "Created",
+    "invite": "Last invitation",
+    "import": {
+      "button": "Import CSV",
+      "title": "Import users from CSV",
+      "hint": "Columns: nome, cognome, email, profili (Organization:Profile separated by |). Check the preview, then confirm.",
+      "choose": "Choose file",
+      "template": "Download the template",
+      "badFile": "The file lacks the required columns or has no rows.",
+      "preview_one": "{{count}} valid row of {{total}}.",
+      "preview_other": "{{count}} valid rows of {{total}}.",
+      "created_one": "{{count}} user created from {{total}} rows.",
+      "created_other": "{{count}} users created from {{total}} rows.",
+      "outcome": "Outcome",
+      "ok": "Valid",
+      "done": "Created",
+      "close": "Close",
+      "confirm_one": "Import {{count}} user",
+      "confirm_other": "Import {{count}} users",
+      "fields": {
+        "firstName": "First name",
+        "lastName": "Last name",
+        "email": "Email",
+        "profiles": "Profiles"
+      }
+    }
+  },
+  "userForm": {
+    "title": "New user",
+    "backToUsers": "Back to users",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "passwordEmail": "The email is also the username. Keycloak will email the person to set the password.",
+    "create": "Create user",
+    "invalidProfile": "One of the chosen profiles no longer exists: reload the page."
+  },
+  "profiles": {
+    "title": "Profiles",
+    "empty": "There are no profiles.",
+    "filterPlaceholder": "Filter by profile, description or organization",
+    "count": "{{count}} of {{total}} profiles",
+    "tenant": "Organization",
+    "create": "New profile",
+    "name": "Name",
+    "description": "Description",
+    "tenantPlaceholder": "Choose the organization",
+    "save": "Create profile",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "deleteConfirm": "Delete the profile \"{{name}}\" of {{tenant}}? Its users and the productive units it opened lose it.",
+    "actions": "Actions"
+  },
+  "breadcrumb": "Breadcrumb",
+  "settings": {
+    "subtitle": "Preferences of this administrator (kept in the browser) and status of the connected services.",
+    "preferences": "Preferences",
+    "languageHint": "Interface language.",
+    "themeHint": "Light or dark; without a choice it follows the system."
+  },
+  "unsaved": {
+    "count_one": "{{count}} unsaved change.",
+    "count_other": "{{count}} unsaved changes.",
+    "discard": "Discard",
+    "saveShortcut": "Ctrl S"
+  },
+  "validationHint": {
+    "completeVatNumber": {
+      "InvalidFormat": "expected IT + 11 digits"
+    },
+    "companyName": {
+      "MaxLengthExceeded": "at most 20 characters"
+    },
+    "taxCode": {
+      "InvalidFormat": "16 characters, with a valid month and check letter (e.g. RSSMRA85T10A562S)"
+    },
+    "fullName": {
+      "MaxLengthExceeded": "at most 50 characters"
+    }
+  },
+  "audit": {
+    "title": "Audit log",
+    "subtitle": "Who did what, when and on which organization.",
+    "yesterday": "yesterday",
+    "empty": "No events.",
+    "noMatch": "No event matches the filters.",
+    "searchPlaceholder": "Search by actor or object",
+    "allActions": "All actions",
+    "from": "From",
+    "to": "To",
+    "columns": {
+      "when": "When",
+      "actor": "Actor",
+      "event": "Event",
+      "detail": "Detail"
+    },
+    "filters": {
+      "tenant.": "Organizations",
+      "tenant.created": "Activations",
+      "tenant.registry": "Registries",
+      "tenant.organization": "Structures",
+      "user.": "Users",
+      "tenant.onboarding": "Onboarding",
+      "tenant.status": "Statuses"
+    },
+    "actions": {
+      "tenant": {
+        "created": "activated",
+        "registryUpdated": "changed the registry of",
+        "organizationUpdated": "changed the structure of",
+        "onboardingStarted": "started the onboarding of",
+        "onboardingDiscarded": "cancelled the onboarding of",
+        "status": {
+          "Activated": "activated",
+          "Active": "reactivated",
+          "Suspended": "suspended",
+          "Cancelling": "put on notice",
+          "Ceased": "ceased",
+          "Trial": "started the trial of",
+          "other": "changed the status of"
+        }
+      },
+      "user": {
+        "created": "created the user",
+        "updated": "edited the user",
+        "invited": "resent the invitation to",
+        "passwordReset": "requested a password reset for",
+        "disabled": "disabled the user",
+        "enabled": "enabled the user",
+        "impersonated": "impersonated"
+      },
+      "subscription": {
+        "created": "subscribed a plan for",
+        "changed": "changed the plan of",
+        "expired": "saw the subscription expire for"
+      },
+      "module": {
+        "provisioned": "activated a module for",
+        "provisioningFailed": "provisioning failed for",
+        "registered": "registered the module",
+        "updated": "updated the module"
+      },
+      "plan": {
+        "created": "created the plan",
+        "updated": "updated the plan"
+      },
+      "invoice": {
+        "issued": "issued the invoice",
+        "creditNote": "issued the credit note",
+        "paid": "registered the payment of the invoice",
+        "reminder": "sent a payment reminder for the invoice",
+        "cancelled": "cancelled the invoice"
+      },
+      "communication": {
+        "sent": "sent the communication"
+      }
+    },
+    "fields": {
+      "companyName": "Company name",
+      "completeVatNumber": "VAT number",
+      "certifiedEmail": "PEC",
+      "street": "Street",
+      "city": "City",
+      "postalCode": "Postal code",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "mfaRequired": "MFA required",
+      "sdiCode": "SDI code",
+      "accountManager": "Account manager"
+    },
+    "details": {
+      "profileAdded": "added profile \"{{name}}\"",
+      "profileRemoved": "removed profile \"{{name}}\"",
+      "unitAdded": "added unit \"{{name}}\"",
+      "unitRemoved": "removed unit \"{{name}}\"",
+      "renamed": "\"{{before}}\" → \"{{after}}\"",
+      "accessChanges_one": "{{count}} access changed",
+      "accessChanges_other": "{{count}} accesses changed",
+      "forTenant": "for {{tenant}}",
+      "profiles_one": "{{count}} profile",
+      "profiles_other": "{{count}} profiles",
+      "units_one": "{{count}} unit",
+      "units_other": "{{count}} units",
+      "reason": "reason: {{reason}}",
+      "trial": "on trial",
+      "modulesAdded": "modules added: {{names}}",
+      "modulesRemoved": "modules removed: {{names}}",
+      "profilesAdded": "profiles added: {{names}}",
+      "profilesRemoved": "profiles removed: {{names}}",
+      "reminder_one": "reminder {{count}}",
+      "reminder_other": "reminder {{count}}",
+      "creditNoteOf": "credit note {{number}}"
+    },
+    "history": "History",
+    "historyAll": "Whole history"
+  },
+  "tenantStatus": {
+    "Onboarding": "Onboarding",
+    "Trial": "Trial",
+    "Active": "Active",
+    "Suspended": "Suspended",
+    "Cancelling": "Cancelling",
+    "Ceased": "Ceased",
+    "actions": "Status actions",
+    "reason": "Reason",
+    "to": {
+      "Active": "Reactivate",
+      "Suspended": "Suspend",
+      "Cancelling": "Give notice",
+      "Ceased": "Cease the organization",
+      "Trial": "Start trial"
+    },
+    "explain": {
+      "Active": "The organization is active again and its users can sign in.",
+      "Suspended": "Access to the platform is blocked; data is kept. It can be reactivated.",
+      "Cancelling": "The organization enters its notice period; reactivating revokes it.",
+      "Ceased": "Soft delete with no way back. Company name, VAT number and PEC stay taken.",
+      "Trial": "The organization starts its trial."
+    }
+  },
+  "onboarding": {
+    "title": "Activate new organization",
+    "stepsLabel": "Onboarding steps",
+    "stepOf": "Step {{step}} of {{total}}",
+    "savedAt": "Draft saved at {{time}}",
+    "steps": {
+      "registry": {
+        "title": "Registry",
+        "hint": "Legal data and address"
+      },
+      "plan": {
+        "title": "Plan and modules",
+        "hint": "Subscription, trial, add-ons"
+      },
+      "organization": {
+        "title": "Structure",
+        "hint": "Profiles and productive units"
+      },
+      "users": {
+        "title": "First users",
+        "hint": "Invitations via Keycloak"
+      },
+      "summary": {
+        "title": "Summary",
+        "hint": "Check and activate"
+      }
+    },
+    "cancel": "Cancel",
+    "nextTo": "Next: {{step}}",
+    "skipAndActivate": "Skip structure and activate",
+    "activate": "Activate organization",
+    "edit": "Edit",
+    "usersHint": "Keycloak emails each user the link to set the password.",
+    "noUsers": "No users: add them now or later.",
+    "addUser": "Add user",
+    "removeUser": "Remove user",
+    "noProfilesYet": "The organization has no profiles yet.",
+    "usersCreated_one": "Created {{count}} user: {{emails}}",
+    "usersCreated_other": "Created {{count}} users: {{emails}}",
+    "userFields": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "profiles": "Profiles:"
+    },
+    "summaryHint": "Check the data and activate the organization.",
+    "organizationSummary": "{{profiles}} profiles, {{units}} productive units",
+    "usersSummary_one": "{{count}} user with profiles of the organization",
+    "usersSummary_other": "{{count}} users with profiles of the organization",
+    "activationNote": "On activation the organization goes from Onboarding to Active.",
+    "openDraft": "Open the draft page",
+    "discardTitle": "Cancel the onboarding?",
+    "discardText": "The draft \"{{name}}\" is deleted with its profiles and units. Users already created stay in Keycloak.",
+    "keepDraft": "Continue",
+    "discard": "Delete the draft",
+    "draftInfo": "The organization stays \"In onboarding\" until you activate it. You can resume the draft from Organizations.",
+    "checks": {
+      "title": "Checks",
+      "companyName": "Unique company name",
+      "completeVatNumber": "Valid and unique VAT number",
+      "certifiedEmail": "Unique PEC",
+      "address": "Matching town and postal code",
+      "plan": "Plan chosen",
+      "usedBy": "Already used by \"{{name}}\"",
+      "verified": "Verified",
+      "toVerify": "Checked when you leave the field",
+      "empty": "To fill in",
+      "addressOk": "{{city}} · {{postalCode}}",
+      "waitingCity": "Waiting for the town",
+      "planChosen": "Plan chosen",
+      "planStep": "Step 2",
+      "individual": {
+        "companyName": "Full name",
+        "completeVatNumber": "Valid and unique tax code",
+        "certifiedEmail": "Unique email"
+      }
+    }
+  },
+  "catalog": {
+    "modulesSubtitle": "Modules installable on the platform, with version, dependencies and permissions",
+    "plansSubtitle": "What is sold: included modules, limits and price",
+    "subscriptionsSubtitle": "The plan of every organization and the status of its modules",
+    "registerModule": "Register module",
+    "register": "Register",
+    "manifest": "Module manifest (JSON)",
+    "manifestHint": "Paste the manifest published by the module. The same id with a new version updates the module.",
+    "invalidJson": "The text is not valid JSON",
+    "module": "Module",
+    "modules": "Modules",
+    "version": "Version",
+    "status": "Status",
+    "requires": "Requires",
+    "permissions": "Permissions",
+    "permissionCount_one": "{{count}} permission",
+    "permissionCount_other": "{{count}} permissions",
+    "tenants": "Organizations",
+    "tenant": "Organization",
+    "core": "core",
+    "deprecate": "Deprecate",
+    "restore": "Make available",
+    "moduleStatus": {
+      "Beta": "Beta",
+      "Available": "Available",
+      "Deprecated": "Deprecated"
+    },
+    "provisioning": {
+      "Provisioning": "Provisioning",
+      "Active": "Active",
+      "Failed": "Provisioning failed"
+    },
+    "subscriptionStatus": {
+      "Trial": "Trial",
+      "Active": "Active",
+      "Expired": "Expired",
+      "Cancelled": "Cancelled"
+    },
+    "period": {
+      "Monthly": "monthly",
+      "Yearly": "yearly"
+    },
+    "per": {
+      "Monthly": "month",
+      "Yearly": "year"
+    },
+    "plan": "Plan",
+    "price": "Price",
+    "priceEur": "Price (€)",
+    "trial": "Trial",
+    "trialDays_one": "{{count}} trial day",
+    "trialDays_other": "{{count}} trial days",
+    "trialDaysLabel": "Trial days",
+    "maxUsers": "Max users",
+    "maxProductiveUnits": "Max units",
+    "subscribers": "Organizations",
+    "archived": "Archived",
+    "newPlan": "New plan",
+    "editPlan": "Edit {{name}}",
+    "savePlan": "Save plan",
+    "code": "Code",
+    "name": "Name",
+    "billingPeriod": "Billing period",
+    "sellable": "For sale",
+    "includedModules": "Included modules",
+    "noPlans": "No plans yet: create one from the Plans page.",
+    "noSubscriptions": "No organization has a subscription yet.",
+    "unlimited": "unlimited",
+    "limits": "{{users}} · {{units}}",
+    "moduleCount_one": "{{count}} module included",
+    "moduleCount_other": "{{count}} modules included",
+    "startTrial_one": "Start with a {{count}}-day trial",
+    "startTrial_other": "Start with a {{count}}-day trial",
+    "autoRenew": "Automatic renewal",
+    "addOns": "Add-on modules",
+    "addOn": "add-on",
+    "subscriptionErrors": {
+      "LimitExceeded": "The organization has more users or productive units than the plan allows.",
+      "InvalidValue": "Plan not available.",
+      "Required": "Choose a plan."
+    },
+    "activeModules": "Active modules",
+    "manage": "Manage",
+    "noSubscription": "No plan subscribed.",
+    "trialUntil": "On trial until {{date}}",
+    "renewsOn": "Renews on {{date}}",
+    "endsOn": "Ends on {{date}}",
+    "since": "since {{date}}",
+    "attempts": "Attempts",
+    "retry": "Retry",
+    "changePlan": "Change plan",
+    "choosePlan": "Choose the plan",
+    "saveSubscription": "Save subscription",
+    "renewal": "Renewal",
+    "failedCount_one": "{{count}} failed",
+    "failedCount_other": "{{count}} failed",
+    "users_one": "{{count}} user",
+    "users_other": "{{count}} users",
+    "usersUnlimited": "unlimited users",
+    "units_one": "{{count}} unit",
+    "units_other": "{{count}} units",
+    "unitsUnlimited": "unlimited units"
+  },
+  "billing": {
+    "subtitle": "Invoices of subscription periods, payments and reminders",
+    "run": "Run billing",
+    "runHint": "Renewals, trial ends, due dates, reminders and suspensions: runs by itself every day",
+    "runResult": "Billing done: {{issued}} invoices issued, {{expired}} subscriptions expired, {{reminders}} reminders, {{suspended}} organizations suspended.",
+    "kpi": {
+      "toCollect": "To collect",
+      "overdue": "Overdue",
+      "paidThisMonth": "Collected this month",
+      "issuedThisMonth": "Invoiced this month",
+      "overdueCount_one": "{{count}} overdue invoice",
+      "overdueCount_other": "{{count}} overdue invoices"
+    },
+    "all": "All",
+    "status": {
+      "Issued": "Issued",
+      "Overdue": "Overdue",
+      "Paid": "Paid",
+      "Cancelled": "Cancelled"
+    },
+    "kind": {
+      "Invoice": "Invoice",
+      "CreditNote": "Credit note"
+    },
+    "searchPlaceholder": "Organization or number",
+    "empty": "No invoices.",
+    "noTenantInvoices": "No invoices for this organization.",
+    "number": "Number",
+    "customer": "Organization",
+    "issuedAt": "Issued on",
+    "dueAt": "Due",
+    "period": "Period",
+    "total": "Total",
+    "net": "Net",
+    "vat": "VAT {{rate}}%",
+    "statusLabel": "Status",
+    "description": "Description",
+    "amount": "Amount",
+    "reminders_one": "{{count}} reminder",
+    "reminders_other": "{{count}} reminders",
+    "panel": "Invoice detail",
+    "closePanel": "Close the invoice",
+    "cancels": "Cancels",
+    "creditNote": "Credit note",
+    "reason": "Reason",
+    "paidAt": "Paid on",
+    "registerPayment": "Register payment",
+    "paymentDate": "Payment date",
+    "reference": "Reference",
+    "markPaid": "Mark as paid",
+    "cancel": "Cancel invoice",
+    "cancelReason": "Reason for cancelling",
+    "cancelHint": "A credit note of the same amount will be issued.",
+    "confirmCancel": "Cancel and issue credit note"
+  },
+  "usage": {
+    "users": "Users",
+    "activeUsers": "Active users",
+    "activeHint": "Logged in during the last 30 days",
+    "units": "Productive units",
+    "unlimited": "unlimited",
+    "metrics": "Module metrics",
+    "days_one": "{{count}} day",
+    "days_other": "{{count}} days",
+    "noMetrics": "No module has sent usage data for this organization yet.",
+    "kind": {
+      "counter": "total of the period",
+      "gauge": "latest value"
+    },
+    "chart": "Trend of {{metric}} over the last {{days}} days"
+  },
+  "services": {
+    "title": "Connected services",
+    "refresh": "Check again",
+    "checkedAt": "Checked {{when}}",
+    "status": {
+      "Up": "Operational",
+      "Degraded": "Degraded",
+      "Down": "Unreachable",
+      "NotConfigured": "Not configured"
+    },
+    "names": {
+      "database": "Database",
+      "keycloak": "Keycloak (sign-in)",
+      "keycloak-admin": "Keycloak users API",
+      "city-list": "City list",
+      "module-hooks": "Module hooks",
+      "invoice-transmission": "Invoice transmission",
+      "email": "Email (SMTP)",
+      "impersonation": "Impersonation"
+    },
+    "failedModules_one": "{{count}} module with failed provisioning",
+    "failedModules_other": "{{count}} modules with failed provisioning",
+    "notConfigured": {
+      "invoice-transmission": "SDI not configured: invoices stay in the portal",
+      "email": "SMTP not configured: communications and reminders are not emailed",
+      "impersonation": "Token exchange not configured"
+    }
+  },
+  "communications": {
+    "subtitle": "Platform announcements and emails to the organizations' PEC",
+    "new": "New communication",
+    "subject": "Subject",
+    "body": "Text",
+    "channels": "Channels",
+    "channel": {
+      "InApp": "Platform announcement",
+      "Email": "Email"
+    },
+    "recipients": "Recipients",
+    "recipientsShort": "Organizations",
+    "selection_one": "The selected organization",
+    "selection_other": "The {{count}} selected organizations",
+    "byFilters": "By filters",
+    "filterStatus": "Status",
+    "filterPlan": "Plan",
+    "filterModule": "Active module",
+    "anyModule": "Any module",
+    "reach_one": "Reaches {{count}} organization: {{sample}}",
+    "reach_other": "Reaches {{count}} organizations: {{sample}}",
+    "reachNone": "No organization matches these filters.",
+    "confirm_one": "Send the communication to {{count}} organization?",
+    "confirm_other": "Send the communication to {{count}} organizations?",
+    "send": "Send",
+    "empty": "No communications sent.",
+    "sentAt": "Sent",
+    "failed_one": "{{count}} email not delivered",
+    "failed_other": "{{count}} emails not delivered",
+    "detail": "Communication detail",
+    "close": "Close",
+    "tenant": "Organization",
+    "visibleUntil": "visible until {{date}}",
+    "emailStatus": {
+      "Sent": "Sent",
+      "Failed": "Error",
+      "Skipped": "Not sent"
+    },
+    "confirmSend": "Confirm and send"
+  },
+  "notifications": {
+    "title": "To handle",
+    "label_one": "{{count}} thing to handle",
+    "label_other": "{{count}} things to handle",
+    "empty": "Nothing to handle.",
+    "kinds": {
+      "module.failed": "Provisioning of {{subject}} failed for {{tenant}}",
+      "invoice.overdue": "Invoice {{subject}} of {{tenant}} overdue",
+      "trial.ending": "The trial of {{tenant}} ends in {{count}} days",
+      "users.limit": "{{tenant}} has {{count}} users of {{limit}}",
+      "draft.stalled": "Onboarding of {{tenant}} stalled for {{count}} days",
+      "users.invites": "{{count}} users have not completed their first login"
+    }
+  },
+  "overview": {
+    "morning": "Good morning, {{name}}",
+    "afternoon": "Good afternoon, {{name}}",
+    "evening": "Good evening, {{name}}",
+    "summary_one": "{{count}} thing to handle, {{urgent}} urgent",
+    "summary_other": "{{count}} things to handle, {{urgent}} urgent",
+    "kpi": {
+      "activeTenants": "Active organizations",
+      "trials": "In trial",
+      "users": "Users",
+      "modules": "Installed modules"
+    },
+    "thisMonth_one": "+{{count}} this month",
+    "thisMonth_other": "+{{count}} this month",
+    "endingSoon_one": "{{count}} ends within 7 days",
+    "endingSoon_other": "{{count}} end within 7 days",
+    "createdThisMonth_one": "{{count}} created this month",
+    "createdThisMonth_other": "{{count}} created this month",
+    "inBeta_one": "{{count}} in beta",
+    "inBeta_other": "{{count}} in beta",
+    "areas": {
+      "all": "All",
+      "provisioning": "Provisioning",
+      "subscriptions": "Subscriptions",
+      "invoices": "Invoices",
+      "users": "Users"
+    },
+    "actions": {
+      "retry": "Retry",
+      "openInvoice": "Open invoice",
+      "convert": "Convert",
+      "proposeUpgrade": "Propose upgrade",
+      "resendInvites": "Resend invitations",
+      "resume": "Resume"
+    },
+    "variousTenants": "Several organizations",
+    "recent": "Recent activity",
+    "age": {
+      "minutes_one": "{{count}} min",
+      "minutes_other": "{{count}} min",
+      "hours_one": "{{count}} h",
+      "hours_other": "{{count}} h",
+      "days_one": "{{count}} d",
+      "days_other": "{{count}} d"
+    }
+  },
+  "search": {
+    "placeholder": "Search organizations, users, VAT, tax codes, PEC…",
+    "open": "Open search",
+    "title": "Search",
+    "groups": {
+      "tenants": "Organizations",
+      "users": "Users",
+      "actions": "Quick actions"
+    },
+    "usersUnavailable": "Users unavailable: Keycloak is not answering.",
+    "move": "to move",
+    "openItem": "to open",
+    "close": "Close"
+  },
+  "impersonation": {
+    "button": "Impersonate",
+    "title": "Sign in as a user",
+    "hint": "The platform opens in a new tab with the user's session, for the chosen time.",
+    "user": "User",
+    "chooseUser": "Choose an active user",
+    "noUsers": "No active users for this organization.",
+    "reason": "Reason",
+    "reasonPlaceholder": "E.g. checking ticket 4521",
+    "duration": "Duration",
+    "minutes_one": "{{count}} minute",
+    "minutes_other": "{{count}} minutes",
+    "audited": "The impersonation is recorded in the history with the reason.",
+    "start": "Open the platform",
+    "notConfigured": "Impersonation not configured (Keycloak token exchange)",
+    "errors": {
+      "reason": {
+        "Required": "Give a reason",
+        "InvalidValue": "At least 10 characters"
+      }
+    }
+  }
+}

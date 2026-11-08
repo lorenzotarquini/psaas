@@ -22,7 +22,7 @@
 
 ## Scenari di accettazione
 
-Test: [`UC20_ImportareUtenti`](../../src/tests/PSAAS.AdminPortal.Backend.Tests/UC20_ImportareUtenti.cs)
+Test: [`UC20_ImportareUtenti`](../../src/AdminPortal/Tests/FinHorizon.AdminPortal.Backend.Tests/UC20_ImportareUtenti.cs)
 
 ### UC20-S1
 

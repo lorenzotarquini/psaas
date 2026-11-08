@@ -32,7 +32,7 @@
 
 ## Scenari di accettazione
 
-Test: [`UC3_AttivareCliente`](../../src/tests/PSAAS.AdminPortal.Backend.Tests/UC3_AttivareCliente.cs)
+Test: [`UC3_AttivareCliente`](../../src/AdminPortal/Tests/FinHorizon.AdminPortal.Backend.Tests/UC3_AttivareCliente.cs)
 
 ### UC3-S1
 

@@ -24,7 +24,7 @@
 
 ## Scenari di accettazione
 
-Test: [`UC31_Impersonificazione`](../../src/tests/PSAAS.AdminPortal.Backend.Tests/UC31_Impersonificazione.cs)
+Test: [`UC31_Impersonificazione`](../../src/AdminPortal/Tests/FinHorizon.AdminPortal.Backend.Tests/UC31_Impersonificazione.cs)
 
 ### UC31-S1
 

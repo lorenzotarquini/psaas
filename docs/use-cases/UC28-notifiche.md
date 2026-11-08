@@ -18,7 +18,7 @@
 
 ## Scenari di accettazione
 
-Test: [`UC28_Notifiche`](../../src/tests/PSAAS.AdminPortal.Backend.Tests/UC28_Notifiche.cs)
+Test: [`UC28_Notifiche`](../../src/AdminPortal/Tests/FinHorizon.AdminPortal.Backend.Tests/UC28_Notifiche.cs)
 
 ### UC28-S1
 

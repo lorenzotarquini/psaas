@@ -26,7 +26,7 @@
 
 ## Scenari di accettazione
 
-Test: [`UC14_OnboardingCliente`](../../src/tests/PSAAS.AdminPortal.Backend.Tests/UC14_OnboardingCliente.cs)
+Test: [`UC14_OnboardingCliente`](../../src/AdminPortal/Tests/FinHorizon.AdminPortal.Backend.Tests/UC14_OnboardingCliente.cs)
 
 ### UC14-S1
 

@@ -20,7 +20,7 @@
 
 ## Scenari di accettazione
 
-Test: [`UC1_CercareClienti`](../../src/tests/PSAAS.AdminPortal.Backend.Tests/UC1_CercareClienti.cs)
+Test: [`UC1_CercareClienti`](../../src/AdminPortal/Tests/FinHorizon.AdminPortal.Backend.Tests/UC1_CercareClienti.cs)
 
 ### UC1-S1
 

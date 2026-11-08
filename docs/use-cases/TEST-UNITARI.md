@@ -4,9 +4,9 @@ Ogni scenario di accettazione (`UCn-Sm`) scende negli strati interni: qui si ved
 
 | Progetto | Cosa isola | Dipendenze |
 |---|---|---|
-| `PSAAS.Domain.Tests` | entità del dominio | nessuna |
-| `PSAAS.Application.Tests` | casi d'uso e validatori | porte simulate (`Fakes.cs`) |
-| `PSAAS.Infrastructure.Tests` | repository, convertitori, provider esterni | EF InMemory, `HttpMessageHandler` simulato |
+| `FinHorizon.AdminPortal.Domain.Tests` | entità del dominio | nessuna |
+| `FinHorizon.AdminPortal.Application.Tests` | casi d'uso e validatori | porte simulate (`Fakes.cs`) |
+| `FinHorizon.AdminPortal.Infrastructure.Tests` | repository, convertitori, provider esterni | EF InMemory, `HttpMessageHandler` simulato |
 
 ## Copertura per scenario
 
@@ -36,7 +36,7 @@ Ogni scenario di accettazione (`UCn-Sm`) scende negli strati interni: qui si ved
 | UC6-S1, S5, S7, flusso 3d | Chiamate all'API di amministrazione Keycloak: attributi, email di impostazione password, conflitto, errori, rimozione se l'email non parte | `KeycloakUserDirectoryTests.UC6_*` |
 | UC7-S1, S3, S4, S6 | Ricerca utenti: cliente ricavato dal profilo, profili cancellati omessi | `UserSearchServiceTests.UC7_*`, `ProfileReadRepositoryTests.UC7_*` |
 | UC7-S1, S2, S6 | Ricerca in Keycloak: ricerca interna al testo, lettura degli attributi, errori | `KeycloakUserDirectoryTests.UC7_*` |
-| UC8-S1…S5 | Identità e ruoli dal token | `PSAAS.Auth.Tests` (lettura dei ruoli Keycloak) |
+| UC8-S1…S5 | Identità e ruoli dal token | `FinHorizon.Auth.Tests` (lettura dei ruoli Keycloak) |
 | UC9-S1, S2 | Panoramica dei profili | `ProfileReadRepositoryTests.UC9_*` |
 | UC9-S3…S6 | Creazione ed eliminazione dei profili | solo accettazione: riusano `TenantOrganizationService` (UC5), già coperto da `TenantOrganizationServiceTests` |
 | UC3-S9…S11, UC11-S7 | Regole del privato: codice fiscale con carattere di controllo, nome non unico ≤ 50, niente SDI, tipo per nome | `IndividualRulesTests` |

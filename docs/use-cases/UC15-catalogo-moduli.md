@@ -22,7 +22,7 @@
 
 ## Scenari di accettazione
 
-Test: [`UC15_CatalogoModuli`](../../src/tests/PSAAS.AdminPortal.Backend.Tests/UC15_CatalogoModuli.cs)
+Test: [`UC15_CatalogoModuli`](../../src/AdminPortal/Tests/FinHorizon.AdminPortal.Backend.Tests/UC15_CatalogoModuli.cs)
 
 ### UC15-S1
 

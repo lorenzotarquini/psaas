@@ -2,7 +2,7 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/src/PSAAS.AppHost/.vs
+.vs/
 [Bb]in/
 [Oo]bj/
 /src/postgres_data/

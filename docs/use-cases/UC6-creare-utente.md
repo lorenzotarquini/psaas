@@ -2,7 +2,7 @@
 
 **Attore:** Amministratore
 **Sistemi coinvolti:** Keycloak
-**Obiettivo:** dare accesso a PSAAS a una persona.
+**Obiettivo:** dare accesso a FinHorizon a una persona.
 
 ## Flusso principale
 1. L'amministratore inserisce nome, cognome ed email della persona.
@@ -27,7 +27,7 @@
 
 ## Scenari di accettazione
 
-Test: [`UC6_CreareUtente`](../../src/tests/PSAAS.AdminPortal.Backend.Tests/UC6_CreareUtente.cs)
+Test: [`UC6_CreareUtente`](../../src/AdminPortal/Tests/FinHorizon.AdminPortal.Backend.Tests/UC6_CreareUtente.cs)
 
 ### UC6-S1
 

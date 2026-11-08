@@ -18,7 +18,7 @@
 
 ## Scenari di accettazione
 
-Test: [`UC18_Provisioning`](../../src/tests/PSAAS.AdminPortal.Backend.Tests/UC18_Provisioning.cs)
+Test: [`UC18_Provisioning`](../../src/AdminPortal/Tests/FinHorizon.AdminPortal.Backend.Tests/UC18_Provisioning.cs)
 
 ### UC18-S1
 

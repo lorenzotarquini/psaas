@@ -18,7 +18,7 @@
 
 ## Scenari di accettazione
 
-Test: [`UC26_StatoServizi`](../../src/tests/PSAAS.AdminPortal.Backend.Tests/UC26_StatoServizi.cs)
+Test: [`UC26_StatoServizi`](../../src/AdminPortal/Tests/FinHorizon.AdminPortal.Backend.Tests/UC26_StatoServizi.cs)
 
 ### UC26-S1
 

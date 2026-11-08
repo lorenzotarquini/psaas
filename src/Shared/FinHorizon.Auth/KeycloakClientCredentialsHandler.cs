@@ -1,0 +1,168 @@
+using System.Net.Http.Headers;
+using System.Text.Json;
+using Microsoft.Extensions.Options;
+using NLog;
+using FinHorizon.Auth.Internal;
+
+namespace FinHorizon.Auth;
+
+public sealed class KeycloakClientCredentialsHandler : DelegatingHandler
+{
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+    private static readonly TimeSpan ExpirationMargin = TimeSpan.FromSeconds(30);
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly KeycloakOptions _options;
+    private readonly SemaphoreSlim _tokenLock = new(1, 1);
+    private string? _cachedToken;
+    private DateTimeOffset _expiresAt = DateTimeOffset.MinValue;
+
+    public KeycloakClientCredentialsHandler(
+        IOptions<KeycloakOptions> options,
+        IHttpClientFactory httpClientFactory)
+    {
+        _options = options.Value;
+        _httpClientFactory = httpClientFactory;
+    }
+
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        var token = await GetAccessTokenAsync(cancellationToken).ConfigureAwait(false);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<string> GetAccessTokenAsync(CancellationToken cancellationToken)
+    {
+        if (_cachedToken is not null && DateTimeOffset.UtcNow < _expiresAt)
+        {
+            return _cachedToken;
+        }
+
+        await _tokenLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            if (_cachedToken is not null && DateTimeOffset.UtcNow < _expiresAt)
+            {
+                return _cachedToken;
+            }
+
+            await AcquireTokenAsync(cancellationToken).ConfigureAwait(false);
+            return _cachedToken!;
+        }
+        finally
+        {
+            _tokenLock.Release();
+        }
+    }
+
+    private async Task AcquireTokenAsync(CancellationToken cancellationToken)
+    {
+        KeycloakOptionsValidator.ValidateClientCredentials(_options);
+
+        var clientId = _options.ClientCredentials.ClientId ?? _options.ClientId;
+        var clientSecret = _options.ClientCredentials.ClientSecret ?? _options.ClientSecret;
+        var tokenEndpoint = $"{_options.Authority.TrimEnd('/')}/protocol/openid-connect/token";
+        var client = _httpClientFactory.CreateClient(KeycloakDefaults.TokenHttpClientName);
+        client.Timeout = TimeSpan.FromSeconds(_options.ClientCredentials.TimeoutSeconds);
+
+        for (var attempt = 0; attempt <= _options.ClientCredentials.RetryCount; attempt++)
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Post, tokenEndpoint)
+            {
+                Content = CreateTokenRequestContent(clientId, clientSecret!)
+            };
+
+            try
+            {
+                using var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false);
+                if (!response.IsSuccessStatusCode)
+                {
+                    if ((int)response.StatusCode is >= 400 and < 500)
+                    {
+                        // Wrong secret, client without service account or unknown client: retrying will not help.
+                        // Keycloak's body ({"error":"invalid_client",...}) says which one and holds no secret.
+                        var reason = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+                        Logger.Error("Keycloak token endpoint refused client {ClientId} with status code {StatusCode}: {Reason}", clientId, (int)response.StatusCode, reason);
+                        throw new InvalidOperationException(
+                            $"Keycloak refused the client credentials of '{clientId}' (HTTP {(int)response.StatusCode}): check the client secret and that Service accounts is enabled.");
+                    }
+
+                    Logger.Error("Keycloak token endpoint returned status code {StatusCode}.", (int)response.StatusCode);
+
+                    response.EnsureSuccessStatusCode();
+                }
+
+                await CacheTokenAsync(response, cancellationToken).ConfigureAwait(false);
+                return;
+            }
+            catch (Exception ex) when (ex is not InvalidOperationException && attempt < _options.ClientCredentials.RetryCount)
+            {
+                Logger.Warn(ex, "Keycloak token acquisition attempt {Attempt} failed. Retrying.", attempt + 1);
+            }
+        }
+    }
+
+    private FormUrlEncodedContent CreateTokenRequestContent(string clientId, string clientSecret)
+    {
+        var values = new Dictionary<string, string>
+        {
+            ["grant_type"] = "client_credentials",
+            ["client_id"] = clientId,
+            ["client_secret"] = clientSecret
+        };
+
+        if (_options.ClientCredentials.Scopes.Length > 0)
+        {
+            values["scope"] = string.Join(' ', _options.ClientCredentials.Scopes);
+        }
+
+        return new FormUrlEncodedContent(values);
+    }
+
+    private async Task CacheTokenAsync(HttpResponseMessage response, CancellationToken cancellationToken)
+    {
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+        using var document = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken).ConfigureAwait(false);
+        var root = document.RootElement;
+        var token = root.GetProperty("access_token").GetString();
+        var expiresIn = root.TryGetProperty("expires_in", out var expiresElement) ? expiresElement.GetInt32() : 0;
+
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            throw new InvalidOperationException("Keycloak token endpoint returned an empty access_token.");
+        }
+
+        if (expiresIn <= 0)
+        {
+            throw new InvalidOperationException("Keycloak token endpoint returned an invalid expires_in value.");
+        }
+
+        _cachedToken = token;
+        _expiresAt = DateTimeOffset.UtcNow.AddSeconds(expiresIn).Subtract(ExpirationMargin);
+        Logger.Debug("Keycloak client credentials token acquired. Expires in {ExpiresInSeconds} seconds.", expiresIn);
+        // A 403 from the admin API means these lack realm-management roles: logged once per token, no secret in it.
+        Logger.Info("Service account token roles: {Roles}", DescribeClientRoles(token));
+    }
+
+    /// <summary>The client roles of a JWT ("realm-management: view-users, manage-users"), read from its payload.</summary>
+    internal static string DescribeClientRoles(string token)
+    {
+        try
+        {
+            var payload = token.Split('.')[1].Replace('-', '+').Replace('_', '/');
+            payload = payload.PadRight(payload.Length + (4 - payload.Length % 4) % 4, '=');
+            using var claims = JsonDocument.Parse(Convert.FromBase64String(payload));
+            if (!claims.RootElement.TryGetProperty("resource_access", out var access))
+            {
+                return "none";
+            }
+
+            return string.Join("; ", access.EnumerateObject().Select(client =>
+                $"{client.Name}: {string.Join(", ", client.Value.TryGetProperty("roles", out var roles) ? roles.EnumerateArray().Select(role => role.GetString()) : [])}"));
+        }
+        catch (Exception exception) when (exception is FormatException or JsonException or IndexOutOfRangeException)
+        {
+            return "unreadable";
+        }
+    }
+}

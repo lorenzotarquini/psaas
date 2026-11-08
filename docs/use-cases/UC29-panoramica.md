@@ -21,7 +21,7 @@
 
 ## Scenari di accettazione
 
-Test: [`UC29_Panoramica`](../../src/tests/PSAAS.AdminPortal.Backend.Tests/UC29_Panoramica.cs)
+Test: [`UC29_Panoramica`](../../src/AdminPortal/Tests/FinHorizon.AdminPortal.Backend.Tests/UC29_Panoramica.cs)
 
 ### UC29-S1
 

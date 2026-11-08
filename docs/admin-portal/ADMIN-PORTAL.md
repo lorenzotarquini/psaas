@@ -1,4 +1,4 @@
-# PSAAS Admin Portal – Funzionalità, verifica E2E e proposta di espansione
+# FinHorizon Admin Portal – Funzionalità, verifica E2E e proposta di espansione
 
 *Documento aggiornato al 26/10/2026 · branch `feature/admin-console` (fasi 0–12 del piano sui mock 1a–1f). La sezione 4 è la verifica E2E del 22/10 sulla versione precedente; la nuova verifica si farà dopo la configurazione di Keycloak.*
 
@@ -17,7 +17,7 @@
 
 ## 1. Cos'è l'Admin Portal
 
-PSAAS è un gestionale B2B multi-tenant: una **base comune** estendibile con **moduli** (plugin). Ogni azienda cliente è un **tenant**.
+FinHorizon è un gestionale B2B multi-tenant: una **base comune** estendibile con **moduli** (plugin). Ogni azienda cliente è un **tenant**.
 
 L'**Admin Portal** è il pannello di controllo del gestore della piattaforma ("Admin console" nei mock del designer). Serve a:
 
@@ -39,21 +39,43 @@ Restano fuori, come proposte nella [sezione 6](#6-proposta-di-espansione-analisi
 | Parte | Tecnologia | Responsabilità |
 |---|---|---|
 | Frontend | React 19, Vite, TypeScript, Tailwind + daisyUI, TanStack Query, react-hook-form + zod, i18next (it/en) | UI dell'amministratore; login Keycloak con PKCE; validazione lato client con gli stessi codici d'errore del backend |
-| Backend | ASP.NET Core (.NET 10), clean architecture: Domain, Application, Infrastructure, AdminPortal.Backend | API REST `/api/*`, protette dal ruolo `Administrator`; `POST /api/usage` dal ruolo `UsageReporter` |
-| Dati | PostgreSQL (EF Core, migrazioni in `PSAAS.Infrastructure/Data/Migrations`) | Clienti e organizzazione, audit, catalogo, piani e sottoscrizioni, fatture, uso giornaliero, comunicazioni, viste salvate |
+| Backend | ASP.NET Core (.NET 10), clean architecture tutta interna al portale: `FinHorizon.AdminPortal.Domain`, `.Application`, `.Infrastructure`, `.Backend` | API REST `/api/*`, protette dal ruolo `Administrator`; `POST /api/usage` dal ruolo `UsageReporter` |
+| Codice condiviso | `FinHorizon.Auth` (Keycloak), `FinHorizon.Modules.Sdk` (contratti con i moduli: manifest, hook di provisioning, invio dell'uso) | Usabile da portale e moduli; non contiene logica di business del portale |
+| Dati | PostgreSQL (EF Core, migrazioni in `FinHorizon.AdminPortal.Infrastructure/Data/Migrations`) | Clienti e organizzazione, audit, catalogo, piani e sottoscrizioni, fatture, uso giornaliero, comunicazioni, viste salvate |
 | Processi in background | `BackgroundService` del backend | Riprova del provisioning (`Provisioning:RetryMinutes`), fatturazione giornaliera (`Billing:RunHours`) |
 | Integrazioni dietro porte | `IUserDirectory`, `IModuleProvisioner`, `IEmailSender`, `IInvoiceTransmitter`, `IImpersonationGateway`, `IServiceProbe` | Keycloak, hook dei moduli, SMTP, SDI (non collegato), token exchange; simulate nei test di accettazione |
 | Identità | Keycloak (realm `PSAAS`) | Login dell'amministratore; utenti dei clienti con attributi `profileIds`, `mfaRequired`, `lastInviteAt`; eventi di login per l'ultimo accesso |
 | Orchestrazione locale | .NET Aspire (AppHost) | Avvia Postgres, backend e frontend |
 | Qualità | xUnit con Testcontainers (accettazione), test unitari per strato, Vitest | Uno o più test per ogni scenario Gherkin |
 
-Contratto HTTP: [`docs/use-cases/API.md`](../use-cases/API.md). Collection Postman: [`docs/postman`](../postman/PSAAS.AdminPortal.postman_collection.json).
+### Struttura del codice
+
+```
+src/
+├─ FinHorizon.slnx                     solution: AdminPortal/, AdminPortal/Tests/, Shared/, Shared/Tests/, Orchestration/
+├─ FinHorizon.AppHost/                 Aspire: Postgres (adminportal-db), backend, frontend
+├─ AdminPortal/
+│  ├─ FinHorizon.AdminPortal.Domain/
+│  ├─ FinHorizon.AdminPortal.Application/      porte, servizi, contratti
+│  ├─ FinHorizon.AdminPortal.Infrastructure/   EF Core (AdminPortalDbContext, migrazioni), Keycloak, SMTP, hook
+│  ├─ FinHorizon.AdminPortal.Backend/          API
+│  ├─ FinHorizon.AdminPortal.Frontend/         React (fuori dalla solution, avviato da Aspire)
+│  └─ Tests/                                   un progetto di test per strato
+└─ Shared/
+   ├─ FinHorizon.Auth/
+   ├─ FinHorizon.Modules.Sdk/
+   └─ Tests/
+```
+
+Regole: la clean architecture è del portale e nessun altro progetto la referenzia; `Shared/` non dipende dal portale; ogni modulo futuro avrà la propria cartella con i propri strati e il proprio database, e userà solo `Shared/`.
+
+Contratto HTTP: [`docs/use-cases/API.md`](../use-cases/API.md). Collection Postman: [`docs/postman`](../postman/FinHorizon.AdminPortal.postman_collection.json).
 
 ### Design system "Admin console"
 
 Dai mock del designer ([`mockups/`](mockups/), schermata 1a), realizzato con i temi daisyUI 5 in `src/app/styles/index.css`:
 
-- **Temi** `psaas` (chiaro, predefinito) e `psaas-dark` (segue la preferenza del sistema), colori in oklch: superfici neutre fredde, un solo accento indaco per l'azione principale, verde/ambra/rosso/grigio riservati agli **stati** (`StatusBadge`). La sidebar usa il colore `neutral` (ink) e resta scura in entrambi i temi.
+- **Temi** `fnhz` (chiaro, predefinito) e `fnhz-dark` (segue la preferenza del sistema), colori in oklch: superfici neutre fredde, un solo accento indaco per l'azione principale, verde/ambra/rosso/grigio riservati agli **stati** (`StatusBadge`). La sidebar usa il colore `neutral` (ink) e resta scura in entrambi i temi.
 - **Densità**: testo a 13 px, campi e pulsanti da 32 px (`--size-field`), tabelle da 36 px per riga (`.table-dense`), dati (P.IVA, id, date, conteggi) in **IBM Plex Mono**, testo in **IBM Plex Sans** (self-hosted con `@fontsource`).
 - **Struttura**: sidebar a gruppi (Operatività, Catalogo, Amministrazione) con versione e realm; topbar con percorso (dichiarato dalle pagine tramite `PageHeader`), ricerca globale, badge d'ambiente (`VITE_ENVIRONMENT_LABEL`), lingua, tema (ricordato nel browser), avatar con identità e ruoli (UC8).
 
@@ -165,7 +187,7 @@ In ordine di impatto. La colonna **Stato** riporta le correzioni fatte dopo la v
 | G6 | Attesa lunga sugli errori 500 (passo 16) | Lo spinner resta per alcuni secondi prima dell'errore | I 5xx vengono ritentati 2 volte; è utile per i 503, meno per i 500 | Ritentare solo su errori di rete e 503 | ✅ Risolto: si ritentano solo rete e 503 |
 | G7 | Profili: una chiamata per cliente (passo 15) | `GET /api/tenants/{id}` per ogni cliente, solo per mostrarne il nome | `GET /api/profiles` non restituisce la ragione sociale | Aggiungere `tenantCompanyName` alla risposta di UC9, come già fatto per UC7 | ✅ Risolto: `tenantCompanyName` in `GET /api/profiles` |
 | G8 | Ricerca utenti limitata a 100 risultati | Con molti utenti la lista è troncata senza avviso | UC7 non prevede paginazione | Paginazione come UC1 (EXP-06) | Risolto in parte: pagine, filtri e totale; il limite sale a 1000 utenti per ricerca (filtri in memoria) |
-| G9 | Password di Postgres in chiaro | `src/PSAAS.AppHost/appsettings.json` contiene la password del DB | Già segnalato in `PLAN.md` | Spostarla negli user secrets e cambiarla | Aperto |
+| G9 | Password di Postgres in chiaro | `src/FinHorizon.AppHost/appsettings.json` contiene la password del DB | Già segnalato in `PLAN.md` | Spostarla negli user secrets e cambiarla | Aperto |
 | G10 | Pagina Impostazioni vuota (passo 21) | Il link "Impostazioni" del menu profilo porta a una pagina senza contenuto | Segnaposto | Riempirla con lingua, tema e preferenze, oppure toglierla dal menu finché non serve (EXP-07) | ✅ Risolto: lingua e tema nella pagina |
 | G11 | `<html lang>` fisso a `it` | Lettori di schermo e sillabazione restano in italiano anche con l'interfaccia in inglese | `index.html` statico | Aggiornare `document.documentElement.lang` al cambio lingua | ✅ Risolto: `lang` segue la lingua scelta |
 
@@ -185,7 +207,7 @@ Ripetuta nell'app reale dopo le correzioni (stesso ambiente, 22/10/2026):
 
 ### 6.1 Il punto di partenza
 
-L'Admin Portal oggi gestisce **chi** sono i clienti e **come sono organizzati**. Un gestionale per amministratori di un SaaS B2B modulare deve gestire anche **cosa ha acquistato ogni cliente**, **cosa sta usando**, **quanto paga** e **cosa è successo**. Il principio guida è che PSAAS è fatto da un **modulo comune (core)** e da **moduli indipendenti plug and play**, attivati per singolo cliente in base alla sottoscrizione.
+L'Admin Portal oggi gestisce **chi** sono i clienti e **come sono organizzati**. Un gestionale per amministratori di un SaaS B2B modulare deve gestire anche **cosa ha acquistato ogni cliente**, **cosa sta usando**, **quanto paga** e **cosa è successo**. Il principio guida è che FinHorizon è fatto da un **modulo comune (core)** e da **moduli indipendenti plug and play**, attivati per singolo cliente in base alla sottoscrizione.
 
 ### 6.2 Modello concettuale proposto
 

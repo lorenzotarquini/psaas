@@ -23,7 +23,7 @@
 
 ## Scenari di accettazione
 
-Test: [`UC9_PanoramicaProfili`](../../src/tests/PSAAS.AdminPortal.Backend.Tests/UC9_PanoramicaProfili.cs)
+Test: [`UC9_PanoramicaProfili`](../../src/AdminPortal/Tests/FinHorizon.AdminPortal.Backend.Tests/UC9_PanoramicaProfili.cs)
 
 ### UC9-S1
 

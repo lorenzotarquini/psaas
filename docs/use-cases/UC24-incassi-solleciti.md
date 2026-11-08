@@ -25,7 +25,7 @@
 
 ## Scenari di accettazione
 
-Test: [`UC24_IncassiSolleciti`](../../src/tests/PSAAS.AdminPortal.Backend.Tests/UC24_IncassiSolleciti.cs)
+Test: [`UC24_IncassiSolleciti`](../../src/AdminPortal/Tests/FinHorizon.AdminPortal.Backend.Tests/UC24_IncassiSolleciti.cs)
 
 ### UC24-S1
 

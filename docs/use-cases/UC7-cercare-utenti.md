@@ -21,7 +21,7 @@
 
 ## Scenari di accettazione
 
-Test: [`UC7_CercareUtenti`](../../src/tests/PSAAS.AdminPortal.Backend.Tests/UC7_CercareUtenti.cs)
+Test: [`UC7_CercareUtenti`](../../src/AdminPortal/Tests/FinHorizon.AdminPortal.Backend.Tests/UC7_CercareUtenti.cs)
 
 ### UC7-S1
 

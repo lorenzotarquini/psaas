@@ -4,7 +4,7 @@ Requisiti raccolti con l'intervista del 2026-10-20. Ogni use case ha un file ded
 
 ## Il prodotto
 
-PSAAS è un gestionale per aziende e per privati: una base comune estendibile con plugin. Ogni cliente è un'**organizzazione** (tenant): un'**azienda** (B2B) o un **privato** (B2C).
+FinHorizon è un gestionale per aziende e per privati: una base comune estendibile con plugin. Ogni cliente è un'**organizzazione** (tenant): un'**azienda** (B2B) o un **privato** (B2C).
 
 L'**Admin Portal** è il pannello di controllo del gestore della piattaforma: serve a gestire le organizzazioni, i loro utenti e (in futuro) comunicazioni, disattivazioni, licenze, report.
 
@@ -27,7 +27,7 @@ Nell'interfaccia la voce "Clienti" si chiama **Organizzazioni**; negli use case 
 
 | Termine | Significato |
 |---|---|
-| Organizzazione (cliente, tenant) | Chi usa PSAAS: un'**azienda**, identificata da ragione sociale, P.IVA e PEC, tutte uniche; oppure un **privato**, identificato da nome e cognome (non unici), codice fiscale ed email (unici). Il tipo si sceglie alla creazione e non cambia. |
+| Organizzazione (cliente, tenant) | Chi usa FinHorizon: un'**azienda**, identificata da ragione sociale, P.IVA e PEC, tutte uniche; oppure un **privato**, identificato da nome e cognome (non unici), codice fiscale ed email (unici). Il tipo si sceglie alla creazione e non cambia. |
 | Unità produttiva | Parte indipendente di un cliente: un reparto (IT, commerciale) o, per aziende grandi, una filiale. |
 | Profilo | Regola di un cliente che dà accesso a zero o più delle sue unità produttive. |
 | Utente | Una persona fisica. Vive solo in Keycloak; ha zero o più profili, anche di clienti diversi. I clienti di un utente si ricavano dai suoi profili. |
@@ -68,7 +68,7 @@ Nell'interfaccia la voce "Clienti" si chiama **Organizzazioni**; negli use case 
 | [UC30](UC30-ricerca-globale.md) | Cercare in tutta la console (⌘K) | in ambito |
 | [UC31](UC31-impersonificazione.md) | Entrare nella piattaforma come un utente (EXP-12) | in ambito |
 
-Contratto HTTP: [API.md](API.md) (collection Postman: [PSAAS.AdminPortal.postman_collection.json](../postman/PSAAS.AdminPortal.postman_collection.json)). Test unitari derivati dagli scenari: [TEST-UNITARI.md](TEST-UNITARI.md).
+Contratto HTTP: [API.md](API.md) (collection Postman: [FinHorizon.AdminPortal.postman_collection.json](../postman/FinHorizon.AdminPortal.postman_collection.json)). Test unitari derivati dagli scenari: [TEST-UNITARI.md](TEST-UNITARI.md).
 
 Regola comune a tutti gli use case: l'amministratore deve essere autenticato su Keycloak e avere il ruolo `Administrator`; altrimenti nessuna operazione è consentita.
 
@@ -81,7 +81,7 @@ Regola comune a tutti gli use case: l'amministratore deve essere autenticato su 
 
 ## Scenari comuni
 
-Test: [`GEN_Sicurezza`](../../src/tests/PSAAS.AdminPortal.Backend.Tests/GEN_Sicurezza.cs)
+Test: [`GEN_Sicurezza`](../../src/AdminPortal/Tests/FinHorizon.AdminPortal.Backend.Tests/GEN_Sicurezza.cs)
 
 ### GEN-S1
 

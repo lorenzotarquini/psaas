@@ -26,7 +26,7 @@
 
 ## Scenari di accettazione
 
-Test: [`UC19_GestireUtente`](../../src/tests/PSAAS.AdminPortal.Backend.Tests/UC19_GestireUtente.cs)
+Test: [`UC19_GestireUtente`](../../src/AdminPortal/Tests/FinHorizon.AdminPortal.Backend.Tests/UC19_GestireUtente.cs)
 
 ### UC19-S1
 
@@ -37,9 +37,9 @@ Test: `UC19_GestireUtente.S1_DettaglioConStatoEInvito`
 Funzionalità: Gestire un utente
 
 Scenario: Dettaglio di un utente appena creato
-  Dato che "Giulia Ferri" è stata creata dall'amministratore "admin.psaas" e non ha ancora impostato la password
+  Dato che "Giulia Ferri" è stata creata dall'amministratore "admin.fnhz" e non ha ancora impostato la password
   Quando l'amministratore apre "Giulia Ferri"
-  Allora vede lo stato "Invito inviato", 1 invito inviato e "creata da admin.psaas"
+  Allora vede lo stato "Invito inviato", 1 invito inviato e "creata da admin.fnhz"
 ```
 
 ### UC19-S2

@@ -17,7 +17,7 @@
 
 ## Scenari di accettazione
 
-Test: [`UC10_CercareComune`](../../src/tests/PSAAS.AdminPortal.Backend.Tests/UC10_CercareComune.cs)
+Test: [`UC10_CercareComune`](../../src/AdminPortal/Tests/FinHorizon.AdminPortal.Backend.Tests/UC10_CercareComune.cs)
 
 ### UC10-S1
 

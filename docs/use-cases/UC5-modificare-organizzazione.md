@@ -22,7 +22,7 @@
 
 ## Scenari di accettazione
 
-Test: [`UC5_ModificareOrganizzazione`](../../src/tests/PSAAS.AdminPortal.Backend.Tests/UC5_ModificareOrganizzazione.cs)
+Test: [`UC5_ModificareOrganizzazione`](../../src/AdminPortal/Tests/FinHorizon.AdminPortal.Backend.Tests/UC5_ModificareOrganizzazione.cs)
 
 ### UC5-S1
 

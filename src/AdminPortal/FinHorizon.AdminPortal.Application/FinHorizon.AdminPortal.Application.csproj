@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FinHorizon.AdminPortal.Domain\FinHorizon.AdminPortal.Domain.csproj" />
+    <ProjectReference Include="..\..\Shared\FinHorizon.Modules.Sdk\FinHorizon.Modules.Sdk.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.12" />
+    <PackageReference Include="NLog" Version="6.2.1" />
+  </ItemGroup>
+
+</Project>

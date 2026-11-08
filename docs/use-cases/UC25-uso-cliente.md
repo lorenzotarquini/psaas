@@ -20,7 +20,7 @@
 
 ## Scenari di accettazione
 
-Test: [`UC25_UsoCliente`](../../src/tests/PSAAS.AdminPortal.Backend.Tests/UC25_UsoCliente.cs)
+Test: [`UC25_UsoCliente`](../../src/AdminPortal/Tests/FinHorizon.AdminPortal.Backend.Tests/UC25_UsoCliente.cs)
 
 ### UC25-S1
 

@@ -1,0 +1,905 @@
+{
+  "appName": "FinHorizon Admin Portal",
+  "loading": "Caricamento…",
+  "logout": "Esci",
+  "language": "Lingua",
+  "theme": "Tema",
+  "themes": {
+    "light": "Chiaro",
+    "dark": "Scuro"
+  },
+  "me": {
+    "title": "Utente corrente",
+    "keycloakId": "ID Keycloak",
+    "name": "Nome",
+    "email": "Email",
+    "roles": "Ruoli",
+    "error": "Impossibile leggere l'utente corrente (HTTP {{status}})."
+  },
+  "menu": "Menu",
+  "nav": {
+    "home": "Panoramica",
+    "tenants": "Organizzazioni",
+    "users": "Utenti",
+    "profiles": "Profili",
+    "console": "Admin console",
+    "groups": {
+      "operations": "Operatività",
+      "catalog": "Catalogo",
+      "administration": "Amministrazione"
+    },
+    "modules": "Moduli",
+    "plans": "Piani",
+    "subscriptions": "Sottoscrizioni",
+    "billing": "Fatturazione",
+    "communications": "Comunicazioni",
+    "audit": "Audit log",
+    "settings": "Impostazioni"
+  },
+  "profile": {
+    "title": "Il mio profilo",
+    "settings": "Impostazioni"
+  },
+  "tenants": {
+    "title": "Organizzazioni",
+    "searchPlaceholder": "Nome, P.IVA, codice fiscale o email",
+    "companyName": "Ragione sociale",
+    "vatNumber": "P.IVA",
+    "completeVatNumber": "P.IVA completa",
+    "certifiedEmail": "PEC",
+    "city": "Città",
+    "empty": "Non ci sono ancora organizzazioni.",
+    "noResults": "Nessuna organizzazione corrisponde a \"{{search}}\".",
+    "tabsLabel": "Viste delle organizzazioni",
+    "tabs": {
+      "all": "Tutti",
+      "Active": "Attivi",
+      "Trial": "Trial",
+      "Onboarding": "Onboarding",
+      "Suspended": "Sospesi",
+      "renewingSoon": "Rinnovo < 30 gg"
+    },
+    "saveView": "Salva vista",
+    "viewName": "Nome della vista",
+    "deleteView": "Elimina la vista {{name}}",
+    "filters": {
+      "plan": "Piano",
+      "module": "Modulo",
+      "province": "Provincia",
+      "provinceCode": "Sigla della provincia",
+      "renewal": "Rinnovo",
+      "within_one": "entro {{count}} giorno",
+      "within_other": "entro {{count}} gg",
+      "clear": "Togli il filtro {{label}}"
+    },
+    "columns": "Colonne",
+    "col": {
+      "certifiedEmail": "PEC",
+      "city": "Sede",
+      "status": "Stato",
+      "plan": "Piano",
+      "modules": "Moduli",
+      "users": "Utenti",
+      "renewal": "Rinnovo"
+    },
+    "exportCsv": "Esporta CSV",
+    "selectPage": "Seleziona le organizzazioni della pagina",
+    "select": "Seleziona {{name}}",
+    "expired": "scaduto",
+    "inDays_one": "tra {{count}} g",
+    "inDays_other": "tra {{count}} gg",
+    "noMatch": "Nessuna organizzazione corrisponde ai filtri.",
+    "bulk": {
+      "label": "Azioni sulle organizzazioni selezionate",
+      "selected_one": "{{count}} selezionato",
+      "selected_other": "{{count}} selezionati",
+      "changePlan": "Cambia piano",
+      "communicate": "Invia comunicazione",
+      "export": "Esporta",
+      "escHint": "Esc per deselezionare",
+      "changePlanTitle_one": "Cambia il piano di {{count}} organizzazione",
+      "changePlanTitle_other": "Cambia il piano di {{count}} organizzazioni",
+      "changePlanHint": "Per ogni organizzazione valgono le regole della sottoscrizione: limiti del piano, moduli e prezzo del nuovo piano. Gli add-on vengono tolti.",
+      "apply": "Applica",
+      "done": "piano cambiato"
+    },
+    "kind": "Tipo",
+    "kinds": {
+      "Business": "Azienda",
+      "Individual": "Privato"
+    },
+    "fullName": "Nome e cognome",
+    "taxCode": "Codice fiscale",
+    "email": "Email"
+  },
+  "pagination": {
+    "pageSize": "Righe per pagina",
+    "previous": "Pagina precedente",
+    "next": "Pagina successiva",
+    "pageOf": "Pagina {{page}} di {{totalPages}}",
+    "range": "{{first}}–{{last}} di {{total}}"
+  },
+  "errors": {
+    "forbidden": "Non hai i permessi per questa operazione.",
+    "notFound": "Elemento non trovato.",
+    "unavailable": "Servizio temporaneamente non disponibile. Riprova tra poco.",
+    "generic": "Si è verificato un errore imprevisto.",
+    "pageNotFound": "Pagina non trovata",
+    "validation": "Alcuni dati non sono validi: controlla i campi evidenziati.",
+    "loadFailed": "Caricamento non riuscito (errore {{status}}). Riprova o contatta l'assistenza.",
+    "saveFailed": "Salvataggio non riuscito (errore {{status}}): nessuna modifica è stata registrata. Riprova o contatta l'assistenza.",
+    "network": "Server non raggiungibile: controlla la connessione e riprova.",
+    "pageNotFoundHint": "L'indirizzo non corrisponde a nessuna pagina del portale."
+  },
+  "tenantDetail": {
+    "backToList": "Torna all'elenco organizzazioni",
+    "notFound": "Organizzazione non trovata.",
+    "registry": "Anagrafica",
+    "address": "Sede",
+    "organization": "Struttura",
+    "noOrganization": "L'organizzazione non ha profili né unità produttive.",
+    "profiles": "Profili",
+    "productiveUnits": "Unità produttive",
+    "noProfiles": "Nessun profilo.",
+    "noProductiveUnits": "Nessuna unità produttiva.",
+    "profile": "Profilo",
+    "matrixCaption": "Unità produttive aperte da ciascun profilo",
+    "opens": "Apre l'unità",
+    "doesNotOpen": "Non apre l'unità",
+    "editRegistry": "Modifica anagrafica",
+    "editOrganization": "Modifica struttura",
+    "tabsLabel": "Sezioni dell'organizzazione",
+    "tabs": {
+      "overview": "Panoramica",
+      "registry": "Anagrafica",
+      "organization": "Struttura",
+      "subscription": "Abbonamento e moduli",
+      "users": "Utenti",
+      "usage": "Uso",
+      "invoices": "Fatture",
+      "history": "Storico"
+    },
+    "customerSince": "Cliente dal {{date}}",
+    "draftBanner": "Questa organizzazione è una bozza in onboarding: non è ancora attiva.",
+    "resumeOnboarding": "Riprendi l'onboarding",
+    "statusReason": "{{status}} dal {{date}}: {{reason}}"
+  },
+  "validation": {
+    "Required": "Campo obbligatorio",
+    "InvalidFormat": "Formato non valido",
+    "MaxLengthExceeded": "Testo troppo lungo",
+    "NotUnique": "Valore già in uso",
+    "InvalidValue": "Valore non valido",
+    "LimitExceeded": "Limite del piano raggiunto"
+  },
+  "tenantForm": {
+    "createTitle": "Nuova organizzazione",
+    "editTitle": "Modifica anagrafica di {{name}}",
+    "backToDetail": "Torna alla scheda organizzazione",
+    "street": "Via",
+    "postalCode": "CAP",
+    "cityListUnavailable": "Elenco comuni non disponibile: scrivi città e CAP a mano.",
+    "optional": "facoltativo",
+    "create": "Attiva organizzazione",
+    "save": "Salva",
+    "available": "Disponibile",
+    "openConflicting": "Apri \"{{name}}\"",
+    "registryHint": "Ogni campo univoco viene verificato all'uscita, con le stesse regole del salvataggio.",
+    "city": "Comune",
+    "sdiCode": "Codice SDI",
+    "accountManager": "Referente commerciale",
+    "postalCodeFromCity": "Si compila dal comune",
+    "choosePostalCode": "Scegli il CAP",
+    "cityKeys": "↑↓ naviga · ↵ seleziona",
+    "citySource": "Fonte ISTAT"
+  },
+  "organizationEditor": {
+    "title": "Struttura di {{name}}",
+    "name": "Nome",
+    "description": "Descrizione",
+    "addProfile": "Aggiungi profilo",
+    "addUnit": "Aggiungi unità produttiva",
+    "removeProfile": "Rimuovi profilo",
+    "removeUnit": "Rimuovi unità produttiva",
+    "openedBy": "Aperta dai profili:",
+    "unnamedProfile": "(profilo senza nome)",
+    "invalidProfileLink": "Collegamento a un profilo non valido.",
+    "confirmRemoveProfiles": "Stai rimuovendo i profili: {{names}}. Gli utenti che li hanno li perderanno. Continuare?",
+    "matrixTitle": "Profili × unità produttive",
+    "matrixHint": "Clicca una cella per aprire o chiudere l'accesso di un profilo a un'unità.",
+    "users": "Utenti",
+    "profileName": "Nome del profilo",
+    "unitName": "Nome dell'unità",
+    "restore": "Ripristina",
+    "access": "{{profile}} apre {{unit}}",
+    "save": "Salva struttura",
+    "removalWarning_one": "Rimuovere {{names}} lo toglierà anche a {{count}} utente in Keycloak.",
+    "removalWarning_other": "Rimuovere {{names}} lo toglierà anche a {{count}} utenti in Keycloak."
+  },
+  "users": {
+    "title": "Utenti",
+    "create": "Nuovo utente",
+    "created": "Utente {{email}} creato. Keycloak gli ha inviato l'email per impostare la password.",
+    "searchPlaceholder": "Cerca per nome, cognome o email",
+    "noResults": "Nessun utente corrisponde a \"{{search}}\".",
+    "empty": "Non ci sono utenti.",
+    "name": "Nome",
+    "email": "Email",
+    "noProfiles": "Nessun profilo",
+    "user": "Utente",
+    "profilesTenant": "Profili · organizzazione",
+    "statusLabel": "Stato",
+    "lastLogin": "Ultimo accesso",
+    "never": "mai",
+    "status": {
+      "Active": "Attivo",
+      "Invited": "Invito inviato",
+      "Suspended": "Sospeso",
+      "Disabled": "Disattivato"
+    },
+    "filters": {
+      "tenant": "Organizzazione",
+      "profile": "Profilo",
+      "status": "Stato"
+    },
+    "resultCount_one": "{{count}} risultato su nome, cognome ed email",
+    "resultCount_other": "{{count}} risultati su nome, cognome ed email",
+    "noTenantUsers": "Nessun utente ha profili di questa organizzazione.",
+    "panel": "Dettaglio utente",
+    "closePanel": "Chiudi il dettaglio",
+    "mfaRequired": "MFA richiesta",
+    "requireMfa": "Richiedi MFA",
+    "actions": {
+      "invite": "Reinvia invito",
+      "edit": "Modifica",
+      "resetPassword": "Reset password",
+      "disable": "Disattiva",
+      "enable": "Riattiva"
+    },
+    "done": {
+      "invite": "Invito inviato di nuovo: Keycloak ha mandato l'email.",
+      "reset-password": "Keycloak ha inviato l'email per impostare una nuova password.",
+      "disable": "Utente disattivato: non può più accedere.",
+      "enable": "Utente riattivato."
+    },
+    "groupedByTenant": "raggruppati per organizzazione",
+    "addTenantProfile": "Aggiungi profilo di un'altra organizzazione",
+    "save": "Salva modifiche",
+    "details": "Dettagli",
+    "username": "Username",
+    "createdAt": "Creato",
+    "invite": "Ultimo invito",
+    "import": {
+      "button": "Importa CSV",
+      "title": "Importa utenti da CSV",
+      "hint": "Colonne: nome, cognome, email, profili (Organizzazione:Profilo separati da |). Prima vedi l'anteprima, poi confermi.",
+      "choose": "Scegli file",
+      "template": "Scarica il modello",
+      "badFile": "Il file non ha le colonne richieste o non contiene righe.",
+      "preview_one": "{{count}} riga valida su {{total}}.",
+      "preview_other": "{{count}} righe valide su {{total}}.",
+      "created_one": "{{count}} utente creato su {{total}} righe.",
+      "created_other": "{{count}} utenti creati su {{total}} righe.",
+      "outcome": "Esito",
+      "ok": "Valida",
+      "done": "Creato",
+      "close": "Chiudi",
+      "confirm_one": "Importa {{count}} utente",
+      "confirm_other": "Importa {{count}} utenti",
+      "fields": {
+        "firstName": "Nome",
+        "lastName": "Cognome",
+        "email": "Email",
+        "profiles": "Profili"
+      }
+    }
+  },
+  "userForm": {
+    "title": "Nuovo utente",
+    "backToUsers": "Torna agli utenti",
+    "firstName": "Nome",
+    "lastName": "Cognome",
+    "passwordEmail": "L'email sarà anche lo username. Keycloak invierà alla persona un'email per impostare la password.",
+    "create": "Crea utente",
+    "invalidProfile": "Uno dei profili scelti non esiste più: ricarica la pagina."
+  },
+  "profiles": {
+    "title": "Profili",
+    "empty": "Non ci sono profili.",
+    "filterPlaceholder": "Filtra per profilo, descrizione o organizzazione",
+    "count": "{{count}} di {{total}} profili",
+    "tenant": "Organizzazione",
+    "create": "Nuovo profilo",
+    "name": "Nome",
+    "description": "Descrizione",
+    "tenantPlaceholder": "Scegli l'organizzazione",
+    "save": "Crea profilo",
+    "cancel": "Annulla",
+    "delete": "Elimina",
+    "deleteConfirm": "Eliminare il profilo \"{{name}}\" di {{tenant}}? Lo perdono gli utenti che lo hanno e le unità produttive che apriva.",
+    "actions": "Azioni"
+  },
+  "breadcrumb": "Percorso",
+  "settings": {
+    "subtitle": "Preferenze di questo amministratore (salvate nel browser) e stato dei servizi collegati.",
+    "preferences": "Preferenze",
+    "languageHint": "Lingua dell'interfaccia.",
+    "themeHint": "Chiaro o scuro; senza scelta segue il sistema."
+  },
+  "unsaved": {
+    "count_one": "{{count}} modifica non salvata.",
+    "count_other": "{{count}} modifiche non salvate.",
+    "discard": "Annulla",
+    "saveShortcut": "Ctrl S"
+  },
+  "validationHint": {
+    "completeVatNumber": {
+      "InvalidFormat": "atteso IT + 11 cifre"
+    },
+    "companyName": {
+      "MaxLengthExceeded": "al massimo 20 caratteri"
+    },
+    "taxCode": {
+      "InvalidFormat": "16 caratteri, mese e carattere di controllo corretti (es. RSSMRA85T10A562S)"
+    },
+    "fullName": {
+      "MaxLengthExceeded": "al massimo 50 caratteri"
+    }
+  },
+  "audit": {
+    "title": "Audit log",
+    "subtitle": "Chi ha fatto cosa, quando e su quale organizzazione.",
+    "yesterday": "ieri",
+    "empty": "Nessun evento.",
+    "noMatch": "Nessun evento corrisponde ai filtri.",
+    "searchPlaceholder": "Cerca per autore o oggetto",
+    "allActions": "Tutte le azioni",
+    "from": "Dal",
+    "to": "Al",
+    "columns": {
+      "when": "Quando",
+      "actor": "Autore",
+      "event": "Evento",
+      "detail": "Dettaglio"
+    },
+    "filters": {
+      "tenant.": "Organizzazioni",
+      "tenant.created": "Attivazioni",
+      "tenant.registry": "Anagrafiche",
+      "tenant.organization": "Strutture",
+      "user.": "Utenti",
+      "tenant.onboarding": "Onboarding",
+      "tenant.status": "Stati"
+    },
+    "actions": {
+      "tenant": {
+        "created": "ha attivato",
+        "registryUpdated": "ha modificato l'anagrafica di",
+        "organizationUpdated": "ha modificato la struttura di",
+        "onboardingStarted": "ha avviato l'onboarding di",
+        "onboardingDiscarded": "ha annullato l'onboarding di",
+        "status": {
+          "Activated": "ha attivato",
+          "Active": "ha riattivato",
+          "Suspended": "ha sospeso",
+          "Cancelling": "ha messo in disdetta",
+          "Ceased": "ha cessato",
+          "Trial": "ha avviato la prova di",
+          "other": "ha cambiato lo stato di"
+        }
+      },
+      "user": {
+        "created": "ha creato l'utente",
+        "updated": "ha modificato l'utente",
+        "invited": "ha reinviato l'invito a",
+        "passwordReset": "ha chiesto il reset della password di",
+        "disabled": "ha disattivato l'utente",
+        "enabled": "ha riattivato l'utente",
+        "impersonated": "ha impersonato"
+      },
+      "subscription": {
+        "created": "ha sottoscritto un piano per",
+        "changed": "ha cambiato il piano di",
+        "expired": "ha visto scadere la sottoscrizione di"
+      },
+      "module": {
+        "provisioned": "ha attivato un modulo per",
+        "provisioningFailed": "provisioning fallito per",
+        "registered": "ha registrato il modulo",
+        "updated": "ha aggiornato il modulo"
+      },
+      "plan": {
+        "created": "ha creato il piano",
+        "updated": "ha modificato il piano"
+      },
+      "invoice": {
+        "issued": "ha emesso la fattura",
+        "creditNote": "ha emesso la nota di credito",
+        "paid": "ha registrato il pagamento della fattura",
+        "reminder": "ha sollecitato il pagamento della fattura",
+        "cancelled": "ha annullato la fattura"
+      },
+      "communication": {
+        "sent": "ha inviato la comunicazione"
+      }
+    },
+    "fields": {
+      "companyName": "Ragione sociale",
+      "completeVatNumber": "P.IVA",
+      "certifiedEmail": "PEC",
+      "street": "Via",
+      "city": "Città",
+      "postalCode": "CAP",
+      "firstName": "Nome",
+      "lastName": "Cognome",
+      "mfaRequired": "MFA richiesta",
+      "sdiCode": "Codice SDI",
+      "accountManager": "Referente commerciale"
+    },
+    "details": {
+      "profileAdded": "aggiunto il profilo \"{{name}}\"",
+      "profileRemoved": "tolto il profilo \"{{name}}\"",
+      "unitAdded": "aggiunta l'unità \"{{name}}\"",
+      "unitRemoved": "tolta l'unità \"{{name}}\"",
+      "renamed": "\"{{before}}\" → \"{{after}}\"",
+      "accessChanges_one": "{{count}} accesso cambiato",
+      "accessChanges_other": "{{count}} accessi cambiati",
+      "forTenant": "per {{tenant}}",
+      "profiles_one": "{{count}} profilo",
+      "profiles_other": "{{count}} profili",
+      "units_one": "{{count}} unità",
+      "units_other": "{{count}} unità",
+      "reason": "motivo: {{reason}}",
+      "trial": "in prova",
+      "modulesAdded": "moduli aggiunti: {{names}}",
+      "modulesRemoved": "moduli tolti: {{names}}",
+      "profilesAdded": "profili aggiunti: {{names}}",
+      "profilesRemoved": "profili tolti: {{names}}",
+      "reminder_one": "{{count}}° sollecito",
+      "reminder_other": "{{count}}° sollecito",
+      "creditNoteOf": "nota di credito {{number}}"
+    },
+    "history": "Storico",
+    "historyAll": "Tutto lo storico"
+  },
+  "tenantStatus": {
+    "Onboarding": "Onboarding",
+    "Trial": "Trial",
+    "Active": "Attivo",
+    "Suspended": "Sospeso",
+    "Cancelling": "In disdetta",
+    "Ceased": "Cessato",
+    "actions": "Azioni sullo stato",
+    "reason": "Motivo",
+    "to": {
+      "Active": "Riattiva",
+      "Suspended": "Sospendi",
+      "Cancelling": "Avvia disdetta",
+      "Ceased": "Cessa l'organizzazione",
+      "Trial": "Avvia prova"
+    },
+    "explain": {
+      "Active": "L'organizzazione torna attiva e i suoi utenti possono accedere.",
+      "Suspended": "L'accesso alla piattaforma viene bloccato; i dati restano. Si può riattivare.",
+      "Cancelling": "L'organizzazione entra nel periodo di preavviso; si può revocare riattivandola.",
+      "Ceased": "Cancellazione logica: non si torna indietro. Ragione sociale, P.IVA e PEC restano occupate.",
+      "Trial": "L'organizzazione inizia il periodo di prova."
+    }
+  },
+  "onboarding": {
+    "title": "Attiva nuova organizzazione",
+    "stepsLabel": "Passi dell'onboarding",
+    "stepOf": "Passo {{step}} di {{total}}",
+    "savedAt": "Bozza salvata alle {{time}}",
+    "steps": {
+      "registry": {
+        "title": "Anagrafica",
+        "hint": "Dati legali e sede"
+      },
+      "plan": {
+        "title": "Piano e moduli",
+        "hint": "Sottoscrizione, trial, add-on"
+      },
+      "organization": {
+        "title": "Struttura",
+        "hint": "Profili e unità produttive"
+      },
+      "users": {
+        "title": "Primi utenti",
+        "hint": "Inviti via Keycloak"
+      },
+      "summary": {
+        "title": "Riepilogo",
+        "hint": "Verifica e attiva"
+      }
+    },
+    "cancel": "Annulla",
+    "nextTo": "Avanti: {{step}}",
+    "skipAndActivate": "Salta struttura e attiva",
+    "activate": "Attiva organizzazione",
+    "edit": "Modifica",
+    "usersHint": "Ogni utente riceve da Keycloak l'email per impostare la password.",
+    "noUsers": "Nessun utente: puoi aggiungerne ora o più tardi.",
+    "addUser": "Aggiungi utente",
+    "removeUser": "Rimuovi utente",
+    "noProfilesYet": "L'organizzazione non ha ancora profili.",
+    "usersCreated_one": "Creato {{count}} utente: {{emails}}",
+    "usersCreated_other": "Creati {{count}} utenti: {{emails}}",
+    "userFields": {
+      "firstName": "Nome",
+      "lastName": "Cognome",
+      "email": "Email",
+      "profiles": "Profili:"
+    },
+    "summaryHint": "Controlla i dati e attiva l'organizzazione.",
+    "organizationSummary": "{{profiles}} profili, {{units}} unità produttive",
+    "usersSummary_one": "{{count}} utente con profili dell'organizzazione",
+    "usersSummary_other": "{{count}} utenti con profili dell'organizzazione",
+    "activationNote": "All'attivazione l'organizzazione passa da Onboarding ad Attiva.",
+    "openDraft": "Apri la scheda della bozza",
+    "discardTitle": "Annullare l'onboarding?",
+    "discardText": "La bozza \"{{name}}\" viene eliminata con profili e unità. Gli utenti già creati restano in Keycloak.",
+    "keepDraft": "Continua",
+    "discard": "Elimina la bozza",
+    "draftInfo": "L'organizzazione resta \"In onboarding\" finché non la attivi. Puoi riprendere la bozza da Organizzazioni.",
+    "checks": {
+      "title": "Controlli",
+      "companyName": "Ragione sociale unica",
+      "completeVatNumber": "P.IVA valida e unica",
+      "certifiedEmail": "PEC unica",
+      "address": "Comune e CAP coerenti",
+      "plan": "Piano selezionato",
+      "usedBy": "Già usata da \"{{name}}\"",
+      "verified": "Verificata",
+      "toVerify": "Da verificare all'uscita dal campo",
+      "empty": "Da compilare",
+      "addressOk": "{{city}} · {{postalCode}}",
+      "waitingCity": "In attesa del comune",
+      "planChosen": "Piano scelto",
+      "planStep": "Passo 2",
+      "individual": {
+        "companyName": "Nome e cognome",
+        "completeVatNumber": "Codice fiscale valido e unico",
+        "certifiedEmail": "Email unica"
+      }
+    }
+  },
+  "catalog": {
+    "modulesSubtitle": "Moduli installabili sulla piattaforma, con versione, dipendenze e permessi",
+    "plansSubtitle": "Pacchetti in vendita: moduli inclusi, limiti e prezzo",
+    "subscriptionsSubtitle": "Il piano di ogni organizzazione e lo stato dei suoi moduli",
+    "registerModule": "Registra modulo",
+    "register": "Registra",
+    "manifest": "Manifest del modulo (JSON)",
+    "manifestHint": "Incolla il manifest pubblicato dal modulo. Lo stesso id con una versione nuova aggiorna il modulo.",
+    "invalidJson": "Il testo non è un JSON valido",
+    "module": "Modulo",
+    "modules": "Moduli",
+    "version": "Versione",
+    "status": "Stato",
+    "requires": "Richiede",
+    "permissions": "Permessi",
+    "permissionCount_one": "{{count}} permesso",
+    "permissionCount_other": "{{count}} permessi",
+    "tenants": "Organizzazioni",
+    "tenant": "Organizzazione",
+    "core": "core",
+    "deprecate": "Depreca",
+    "restore": "Rendi disponibile",
+    "moduleStatus": {
+      "Beta": "Beta",
+      "Available": "Disponibile",
+      "Deprecated": "Deprecato"
+    },
+    "provisioning": {
+      "Provisioning": "In provisioning",
+      "Active": "Attivo",
+      "Failed": "Provisioning fallito"
+    },
+    "subscriptionStatus": {
+      "Trial": "Prova",
+      "Active": "Attiva",
+      "Expired": "Scaduta",
+      "Cancelled": "Annullata"
+    },
+    "period": {
+      "Monthly": "mensile",
+      "Yearly": "annuale"
+    },
+    "per": {
+      "Monthly": "mese",
+      "Yearly": "anno"
+    },
+    "plan": "Piano",
+    "price": "Prezzo",
+    "priceEur": "Prezzo (€)",
+    "trial": "Prova",
+    "trialDays_one": "{{count}} giorno di prova",
+    "trialDays_other": "{{count}} giorni di prova",
+    "trialDaysLabel": "Giorni di prova",
+    "maxUsers": "Utenti max",
+    "maxProductiveUnits": "Unità max",
+    "subscribers": "Organizzazioni",
+    "archived": "Archiviato",
+    "newPlan": "Nuovo piano",
+    "editPlan": "Modifica {{name}}",
+    "savePlan": "Salva piano",
+    "code": "Codice",
+    "name": "Nome",
+    "billingPeriod": "Periodicità",
+    "sellable": "In vendita",
+    "includedModules": "Moduli inclusi",
+    "noPlans": "Nessun piano: creane uno dalla pagina Piani.",
+    "noSubscriptions": "Nessuna organizzazione ha ancora una sottoscrizione.",
+    "unlimited": "illimitati",
+    "limits": "{{users}} · {{units}}",
+    "moduleCount_one": "{{count}} modulo incluso",
+    "moduleCount_other": "{{count}} moduli inclusi",
+    "startTrial_one": "Inizia con {{count}} giorno di prova",
+    "startTrial_other": "Inizia con {{count}} giorni di prova",
+    "autoRenew": "Rinnovo automatico",
+    "addOns": "Moduli aggiuntivi",
+    "addOn": "add-on",
+    "subscriptionErrors": {
+      "LimitExceeded": "L'organizzazione ha più utenti o unità produttive di quanti il piano ne ammetta.",
+      "InvalidValue": "Piano non disponibile.",
+      "Required": "Scegli un piano."
+    },
+    "activeModules": "Moduli attivi",
+    "manage": "Gestisci",
+    "noSubscription": "Nessun piano sottoscritto.",
+    "trialUntil": "In prova fino al {{date}}",
+    "renewsOn": "Si rinnova il {{date}}",
+    "endsOn": "Scade il {{date}}",
+    "since": "dal {{date}}",
+    "attempts": "Tentativi",
+    "retry": "Riprova",
+    "changePlan": "Cambia piano",
+    "choosePlan": "Scegli il piano",
+    "saveSubscription": "Salva abbonamento",
+    "renewal": "Rinnovo",
+    "failedCount_one": "{{count}} fallito",
+    "failedCount_other": "{{count}} falliti",
+    "users_one": "{{count}} utente",
+    "users_other": "{{count}} utenti",
+    "usersUnlimited": "utenti illimitati",
+    "units_one": "{{count}} unità",
+    "units_other": "{{count}} unità",
+    "unitsUnlimited": "unità illimitate"
+  },
+  "billing": {
+    "subtitle": "Fatture dei periodi delle sottoscrizioni, incassi e solleciti",
+    "run": "Esegui fatturazione",
+    "runHint": "Rinnovi, fine prova, scadenze, solleciti e sospensioni: gira da sola ogni giorno",
+    "runResult": "Fatturazione eseguita: {{issued}} fatture emesse, {{expired}} sottoscrizioni scadute, {{reminders}} solleciti, {{suspended}} organizzazioni sospese.",
+    "kpi": {
+      "toCollect": "Da incassare",
+      "overdue": "Scaduto",
+      "paidThisMonth": "Incassato nel mese",
+      "issuedThisMonth": "Fatturato nel mese",
+      "overdueCount_one": "{{count}} fattura scaduta",
+      "overdueCount_other": "{{count}} fatture scadute"
+    },
+    "all": "Tutte",
+    "status": {
+      "Issued": "Emessa",
+      "Overdue": "Scaduta",
+      "Paid": "Pagata",
+      "Cancelled": "Annullata"
+    },
+    "kind": {
+      "Invoice": "Fattura",
+      "CreditNote": "Nota di credito"
+    },
+    "searchPlaceholder": "Organizzazione o numero",
+    "empty": "Nessuna fattura.",
+    "noTenantInvoices": "Nessuna fattura per questa organizzazione.",
+    "number": "Numero",
+    "customer": "Organizzazione",
+    "issuedAt": "Emessa il",
+    "dueAt": "Scadenza",
+    "period": "Periodo",
+    "total": "Totale",
+    "net": "Imponibile",
+    "vat": "IVA {{rate}}%",
+    "statusLabel": "Stato",
+    "description": "Descrizione",
+    "amount": "Importo",
+    "reminders_one": "{{count}} sollecito",
+    "reminders_other": "{{count}} solleciti",
+    "panel": "Dettaglio fattura",
+    "closePanel": "Chiudi la fattura",
+    "cancels": "Storna",
+    "creditNote": "Nota di credito",
+    "reason": "Motivo",
+    "paidAt": "Pagata il",
+    "registerPayment": "Registra pagamento",
+    "paymentDate": "Data del pagamento",
+    "reference": "Riferimento",
+    "markPaid": "Segna come pagata",
+    "cancel": "Annulla fattura",
+    "cancelReason": "Motivo dell'annullamento",
+    "cancelHint": "Verrà emessa una nota di credito dello stesso importo.",
+    "confirmCancel": "Annulla ed emetti nota di credito"
+  },
+  "usage": {
+    "users": "Utenti",
+    "activeUsers": "Utenti attivi",
+    "activeHint": "Con un accesso negli ultimi 30 giorni",
+    "units": "Unità produttive",
+    "unlimited": "illimitati",
+    "metrics": "Metriche dei moduli",
+    "days_one": "{{count}} giorno",
+    "days_other": "{{count}} giorni",
+    "noMetrics": "Nessun modulo ha ancora inviato dati di uso per questa organizzazione.",
+    "kind": {
+      "counter": "totale del periodo",
+      "gauge": "ultimo valore"
+    },
+    "chart": "Andamento di {{metric}} negli ultimi {{days}} giorni"
+  },
+  "services": {
+    "title": "Servizi collegati",
+    "refresh": "Verifica di nuovo",
+    "checkedAt": "Verificati {{when}}",
+    "status": {
+      "Up": "Operativo",
+      "Degraded": "Degradato",
+      "Down": "Non raggiungibile",
+      "NotConfigured": "Non configurato"
+    },
+    "names": {
+      "database": "Database",
+      "keycloak": "Keycloak (accesso)",
+      "keycloak-admin": "API utenti Keycloak",
+      "city-list": "Elenco dei comuni",
+      "module-hooks": "Hook dei moduli",
+      "invoice-transmission": "Trasmissione fatture",
+      "email": "Email (SMTP)",
+      "impersonation": "Impersonificazione"
+    },
+    "failedModules_one": "{{count}} modulo in errore di provisioning",
+    "failedModules_other": "{{count}} moduli in errore di provisioning",
+    "notConfigured": {
+      "invoice-transmission": "SDI non configurato: le fatture restano nel portale",
+      "email": "SMTP non configurato: comunicazioni e solleciti non partono per email",
+      "impersonation": "Token exchange non configurato"
+    }
+  },
+  "communications": {
+    "subtitle": "Annunci nella piattaforma ed email alla PEC delle organizzazioni",
+    "new": "Nuova comunicazione",
+    "subject": "Oggetto",
+    "body": "Testo",
+    "channels": "Canali",
+    "channel": {
+      "InApp": "Annuncio nella piattaforma",
+      "Email": "Email"
+    },
+    "recipients": "Destinatari",
+    "recipientsShort": "Organizzazioni",
+    "selection_one": "L'organizzazione selezionata",
+    "selection_other": "Le {{count}} organizzazioni selezionate",
+    "byFilters": "Per filtri",
+    "filterStatus": "Stato",
+    "filterPlan": "Piano",
+    "filterModule": "Modulo attivo",
+    "anyModule": "Qualsiasi modulo",
+    "reach_one": "Raggiunge {{count}} organizzazione: {{sample}}",
+    "reach_other": "Raggiunge {{count}} organizzazioni: {{sample}}",
+    "reachNone": "Nessuna organizzazione corrisponde a questi filtri.",
+    "confirm_one": "Inviare la comunicazione a {{count}} organizzazione?",
+    "confirm_other": "Inviare la comunicazione a {{count}} organizzazioni?",
+    "send": "Invia",
+    "empty": "Nessuna comunicazione inviata.",
+    "sentAt": "Inviata",
+    "failed_one": "{{count}} email non recapitata",
+    "failed_other": "{{count}} email non recapitate",
+    "detail": "Dettaglio comunicazione",
+    "close": "Chiudi",
+    "tenant": "Organizzazione",
+    "visibleUntil": "visibile fino al {{date}}",
+    "emailStatus": {
+      "Sent": "Inviata",
+      "Failed": "Errore",
+      "Skipped": "Non inviata"
+    },
+    "confirmSend": "Conferma invio"
+  },
+  "notifications": {
+    "title": "Da gestire",
+    "label_one": "{{count}} cosa da gestire",
+    "label_other": "{{count}} cose da gestire",
+    "empty": "Niente da gestire.",
+    "kinds": {
+      "module.failed": "Provisioning di {{subject}} fallito per {{tenant}}",
+      "invoice.overdue": "Fattura {{subject}} di {{tenant}} scaduta",
+      "trial.ending": "La prova di {{tenant}} finisce tra {{count}} giorni",
+      "users.limit": "{{tenant}} ha {{count}} utenti su {{limit}}",
+      "draft.stalled": "Onboarding di {{tenant}} fermo da {{count}} giorni",
+      "users.invites": "{{count}} utenti non hanno completato il primo accesso"
+    }
+  },
+  "overview": {
+    "morning": "Buongiorno, {{name}}",
+    "afternoon": "Buon pomeriggio, {{name}}",
+    "evening": "Buonasera, {{name}}",
+    "summary_one": "{{count}} attività da gestire, {{urgent}} urgenti",
+    "summary_other": "{{count}} attività da gestire, {{urgent}} urgenti",
+    "kpi": {
+      "activeTenants": "Organizzazioni attive",
+      "trials": "In trial",
+      "users": "Utenti",
+      "modules": "Moduli installati"
+    },
+    "thisMonth_one": "+{{count}} questo mese",
+    "thisMonth_other": "+{{count}} questo mese",
+    "endingSoon_one": "{{count}} scade entro 7 gg",
+    "endingSoon_other": "{{count}} scadono entro 7 gg",
+    "createdThisMonth_one": "{{count}} creato questo mese",
+    "createdThisMonth_other": "{{count}} creati questo mese",
+    "inBeta_one": "{{count}} in beta",
+    "inBeta_other": "{{count}} in beta",
+    "areas": {
+      "all": "Tutte",
+      "provisioning": "Provisioning",
+      "subscriptions": "Sottoscrizioni",
+      "invoices": "Fatture",
+      "users": "Utenti"
+    },
+    "actions": {
+      "retry": "Riprova",
+      "openInvoice": "Apri fattura",
+      "convert": "Converti",
+      "proposeUpgrade": "Proponi upgrade",
+      "resendInvites": "Reinvia inviti",
+      "resume": "Riprendi"
+    },
+    "variousTenants": "Varie organizzazioni",
+    "recent": "Attività recente",
+    "age": {
+      "minutes_one": "{{count}} min",
+      "minutes_other": "{{count}} min",
+      "hours_one": "{{count}} h",
+      "hours_other": "{{count}} h",
+      "days_one": "{{count}} g",
+      "days_other": "{{count}} g"
+    }
+  },
+  "search": {
+    "placeholder": "Cerca organizzazioni, utenti, P.IVA, codici fiscali, PEC…",
+    "open": "Apri la ricerca",
+    "title": "Ricerca",
+    "groups": {
+      "tenants": "Organizzazioni",
+      "users": "Utenti",
+      "actions": "Azioni rapide"
+    },
+    "usersUnavailable": "Utenti non disponibili: Keycloak non risponde.",
+    "move": "per spostarti",
+    "openItem": "per aprire",
+    "close": "Chiudi"
+  },
+  "impersonation": {
+    "button": "Impersona",
+    "title": "Entra come un utente",
+    "hint": "La piattaforma si apre in una nuova scheda con la sessione dell'utente, per il tempo scelto.",
+    "user": "Utente",
+    "chooseUser": "Scegli un utente attivo",
+    "noUsers": "Nessun utente attivo per questa organizzazione.",
+    "reason": "Motivo",
+    "reasonPlaceholder": "Es. verifica segnalazione 4521",
+    "duration": "Durata",
+    "minutes_one": "{{count}} minuto",
+    "minutes_other": "{{count}} minuti",
+    "audited": "L'impersonificazione viene registrata nello storico con il motivo.",
+    "start": "Apri la piattaforma",
+    "notConfigured": "Impersonificazione non configurata (token exchange di Keycloak)",
+    "errors": {
+      "reason": {
+        "Required": "Indica il motivo",
+        "InvalidValue": "Almeno 10 caratteri"
+      }
+    }
+  }
+}

@@ -12,11 +12,11 @@
 - **1b. Token valido ma senza ruolo `Administrator`:** accesso negato (non autorizzato).
 
 ## Regole
-- R1. Le informazioni vengono solo dal token: nessun dato dell'amministratore è salvato in PSAAS.
+- R1. Le informazioni vengono solo dal token: nessun dato dell'amministratore è salvato in FinHorizon.
 
 ## Scenari di accettazione
 
-Test: [`UC8_ChiSono`](../../src/tests/PSAAS.AdminPortal.Backend.Tests/UC8_ChiSono.cs)
+Test: [`UC8_ChiSono`](../../src/AdminPortal/Tests/FinHorizon.AdminPortal.Backend.Tests/UC8_ChiSono.cs)
 
 ### UC8-S1
 
@@ -27,9 +27,9 @@ Test: `UC8_ChiSono.S1_IdentitaLettaDalToken`
 Funzionalità: Sapere chi sono
 
 Scenario: Identità letta dal token
-  Dato che l'amministratore è autenticato come "admin.psaas" con email "admin@psaas.it" e ruolo "Administrator"
+  Dato che l'amministratore è autenticato come "admin.fnhz" con email "admin@finhorizon.it" e ruolo "Administrator"
   Quando chiede chi è
-  Allora vede il suo identificativo Keycloak, "admin.psaas", "admin@psaas.it" e il ruolo "Administrator"
+  Allora vede il suo identificativo Keycloak, "admin.fnhz", "admin@finhorizon.it" e il ruolo "Administrator"
 ```
 
 ### UC8-S2

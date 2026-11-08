@@ -25,7 +25,7 @@
 
 ## Scenari di accettazione
 
-Test: [`UC12_AuditLog`](../../src/tests/PSAAS.AdminPortal.Backend.Tests/UC12_AuditLog.cs)
+Test: [`UC12_AuditLog`](../../src/AdminPortal/Tests/FinHorizon.AdminPortal.Backend.Tests/UC12_AuditLog.cs)
 
 ### UC12-S1
 
@@ -36,8 +36,8 @@ Test: `UC12_AuditLog.S1_AttivazioneRegistrataConAutore`
 Funzionalità: Audit log
 
 Scenario: L'attivazione di un cliente è registrata con il suo autore
-  Quando l'amministratore "admin.psaas" attiva il cliente "Alfa Srl"
-  Allora l'audit log contiene "tenant.created" su "Alfa Srl" con autore "admin.psaas"
+  Quando l'amministratore "admin.fnhz" attiva il cliente "Alfa Srl"
+  Allora l'audit log contiene "tenant.created" su "Alfa Srl" con autore "admin.fnhz"
 ```
 
 ### UC12-S2

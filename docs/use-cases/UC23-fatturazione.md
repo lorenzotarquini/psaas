@@ -25,7 +25,7 @@
 
 ## Scenari di accettazione
 
-Test: [`UC23_Fatturazione`](../../src/tests/PSAAS.AdminPortal.Backend.Tests/UC23_Fatturazione.cs)
+Test: [`UC23_Fatturazione`](../../src/AdminPortal/Tests/FinHorizon.AdminPortal.Backend.Tests/UC23_Fatturazione.cs)
 
 ### UC23-S1
 

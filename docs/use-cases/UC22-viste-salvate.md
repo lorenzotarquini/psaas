@@ -19,7 +19,7 @@
 
 ## Scenari di accettazione
 
-Test: [`UC22_VisteSalvate`](../../src/tests/PSAAS.AdminPortal.Backend.Tests/UC22_VisteSalvate.cs)
+Test: [`UC22_VisteSalvate`](../../src/AdminPortal/Tests/FinHorizon.AdminPortal.Backend.Tests/UC22_VisteSalvate.cs)
 
 ### UC22-S1
 

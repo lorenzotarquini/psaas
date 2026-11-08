@@ -22,7 +22,7 @@
 
 ## Scenari di accettazione
 
-Test: [`UC11_VerificareCampoCliente`](../../src/tests/PSAAS.AdminPortal.Backend.Tests/UC11_VerificareCampoCliente.cs)
+Test: [`UC11_VerificareCampoCliente`](../../src/AdminPortal/Tests/FinHorizon.AdminPortal.Backend.Tests/UC11_VerificareCampoCliente.cs)
 
 ### UC11-S1
 

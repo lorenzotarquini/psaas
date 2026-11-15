@@ -10,10 +10,10 @@ import { useDebts } from '@/entities/debt'
 import {
   amendTransaction,
   recordTransaction,
-  transactionKinds,
+  categorizedKinds,
   type Transaction,
   type TransactionInput,
-  type TransactionKind,
+  type CategorizedKind,
 } from '@/entities/transaction'
 import { invalidateLedger } from '@/shared/api'
 import { todayIso } from '@/shared/lib/date'
@@ -22,7 +22,7 @@ import { Field } from '@/shared/ui'
 
 // UC5-R1, R2 (the rules on stored data are the backend's).
 const schema = z.object({
-  kind: z.enum(transactionKinds),
+  kind: z.enum(categorizedKinds),
   date: z.string().min(1, 'Required'),
   amount: amountField({ positive: true }),
   accountId: z.string().min(1, 'Required'),
@@ -45,18 +45,18 @@ const serverFields: ServerFieldMap<Values> = {
 interface TransactionFormProps {
   /** The movement to amend (UC8); a new one when missing (UC5). */
   transaction?: Transaction
-  defaultKind?: TransactionKind
+  defaultKind?: CategorizedKind
   onDone: () => void
 }
 
-function initialValues(transaction: Transaction | undefined, kind: TransactionKind): Values {
+function initialValues(transaction: Transaction | undefined, kind: CategorizedKind): Values {
   return transaction
     ? {
-        kind: transaction.kind,
+        kind: transaction.kind as CategorizedKind,
         date: transaction.date,
         amount: amountText(transaction.amount),
         accountId: transaction.accountId,
-        category: { id: transaction.categoryId, kind: transaction.kind, name: transaction.categoryName },
+        category: transaction.categoryId ? { id: transaction.categoryId, kind: transaction.kind as CategorizedKind, name: transaction.categoryName ?? '' } : null,
         debtId: transaction.debtId ?? '',
         note: transaction.note ?? '',
       }
@@ -98,7 +98,7 @@ export function TransactionForm({ transaction, defaultKind = 'Expense', onDone }
     onError: (error) => setFormErrors(applyServerErrors(error, form.setError, serverFields)),
   })
 
-  function changeKind(next: TransactionKind) {
+  function changeKind(next: CategorizedKind) {
     form.setValue('kind', next)
     // Categories are per kind and only expenses pay debts (D5).
     form.setValue('category', null)
@@ -120,7 +120,7 @@ export function TransactionForm({ transaction, defaultKind = 'Expense', onDone }
         </p>
       )}
       <div role="radiogroup" aria-label={t('transactions.fields.kind')} className="join w-full">
-        {transactionKinds.map((option) => (
+        {categorizedKinds.map((option) => (
           <button
             key={option}
             type="button"

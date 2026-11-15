@@ -27,7 +27,9 @@ export function TransactionsPage() {
   const transactions = useTransactions(filter)
   const accounts = useAccounts()
   const debts = useDebts()
-  const categories = useCategories(filter.kind)
+  // A transfer has no category (UC9): the category filter is for expenses and incomes only.
+  const categoryKind = filter.kind === 'Transfer' ? undefined : filter.kind
+  const categories = useCategories(categoryKind)
   const page = transactions.data
   const pages = page ? Math.max(1, Math.ceil(page.totalCount / pageSize)) : 1
   const invalidPeriod = transactions.error instanceof ApiError && transactions.error.fieldErrors.period !== undefined
@@ -81,7 +83,7 @@ export function TransactionsPage() {
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-sm">
+        <label className={`flex flex-col gap-1 text-sm ${filter.kind === 'Transfer' ? 'invisible' : ''}`}>
           {t('transactions.fields.category')}
           <select className="select select-sm w-full" value={filter.categoryId ?? ''} onChange={(event) => set('categoryId', event.target.value)}>
             <option value="">{t('transactions.allCategories')}</option>

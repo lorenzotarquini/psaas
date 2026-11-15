@@ -1,1 +1,1 @@
-export type { TransactionKind } from '../api/transactions'
+export type { CategorizedKind as TransactionKind } from '../api/transactions'

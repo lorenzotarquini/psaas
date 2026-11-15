@@ -3,6 +3,7 @@ using FinHorizon.MySync.Application.Abstractions.Persistence;
 using FinHorizon.MySync.Application.Common;
 using FinHorizon.MySync.Domain.Common;
 using FinHorizon.MySync.Domain.Transactions;
+using FinHorizon.MySync.Domain.Transactions.Kinds;
 using FluentValidation;
 
 namespace FinHorizon.MySync.Application.Features.Categories;
@@ -14,7 +15,7 @@ public sealed class SearchCategoriesValidator : AbstractValidator<SearchCategori
 {
     public SearchCategoriesValidator() =>
         RuleFor(query => query.Kind)
-            .Must(kind => kind is null || EnumNames.TryParse<TransactionKind>(kind, out _))
+            .Must(kind => kind is null || (EnumNames.TryParse<TransactionKind>(kind, out var parsed) && MovementKinds.WithCategory.Contains(parsed)))
             .WithErrorCode(ErrorCodes.InvalidValue);
 }
 

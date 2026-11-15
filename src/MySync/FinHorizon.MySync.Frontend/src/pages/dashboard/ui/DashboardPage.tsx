@@ -4,7 +4,7 @@ import { Link, Navigate } from 'react-router'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowDown, faArrowUp, faScaleBalanced, faFileInvoiceDollar } from '@fortawesome/free-solid-svg-icons'
 import { useDashboard, useNetWorth } from '@/entities/portfolio'
-import type { TransactionKind } from '@/entities/transaction'
+import type { CategorizedKind } from '@/entities/transaction'
 import { TransactionDialog } from '@/features/edit-transaction'
 import { useFormat } from '@/shared/lib/format'
 import { Amount, EmptyState, LoadError, Loading } from '@/shared/ui'
@@ -19,7 +19,7 @@ export function DashboardPage() {
   const format = useFormat()
   const dashboard = useDashboard()
   const trend = useNetWorth('30d')
-  const [newKind, setNewKind] = useState<TransactionKind | undefined>()
+  const [newKind, setNewKind] = useState<CategorizedKind | undefined>()
 
   if (dashboard.isPending) return <Loading />
   if (dashboard.isError) return <LoadError />

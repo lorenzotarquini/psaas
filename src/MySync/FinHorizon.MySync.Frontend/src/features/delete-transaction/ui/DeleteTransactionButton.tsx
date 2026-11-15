@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTrashCan } from '@fortawesome/free-regular-svg-icons'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { deleteTransaction, signedAmount, type Transaction } from '@/entities/transaction'
+import { deleteTransaction, isTransfer, signedAmount, type Transaction } from '@/entities/transaction'
 import { invalidateLedger } from '@/shared/api'
 import { useFormat } from '@/shared/lib/format'
 import { Amount, Modal } from '@/shared/ui'
@@ -33,10 +33,10 @@ export function DeleteTransactionButton({ transaction }: { transaction: Transact
           <dd>{format.date(transaction.date)}</dd>
           <dt className="muted">{t('transactions.fields.amount')}</dt>
           <dd>
-            <Amount value={signedAmount(transaction)} signed />
+            {isTransfer(transaction) ? <Amount value={transaction.amount} /> : <Amount value={signedAmount(transaction)} signed />}
           </dd>
           <dt className="muted">{t('transactions.fields.account')}</dt>
-          <dd>{transaction.accountName}</dd>
+          <dd>{isTransfer(transaction) ? t('transfer.route', { from: transaction.accountName, to: transaction.counterAccountName }) : transaction.accountName}</dd>
         </dl>
         <p role="alert" className="alert alert-warning alert-soft mb-4">
           {t('transactions.deleteWarning')}

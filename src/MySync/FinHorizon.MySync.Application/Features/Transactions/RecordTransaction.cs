@@ -7,7 +7,7 @@ using FinHorizon.MySync.Domain.Transactions.Rules;
 
 namespace FinHorizon.MySync.Application.Features.Transactions;
 
-/// <summary>UC5: an expense or an income.</summary>
+/// <summary>UC5 and UC9: an expense, an income or a transfer between two accounts.</summary>
 public sealed record RecordTransactionCommand(
     string? Kind,
     DateOnly? Date,
@@ -15,7 +15,8 @@ public sealed record RecordTransactionCommand(
     Guid? AccountId,
     Guid? CategoryId,
     Guid? DebtId,
-    string? Note) : ITransactionInput;
+    string? Note,
+    Guid? CounterAccountId = null) : ITransactionInput;
 
 public sealed class RecordTransactionValidator : TransactionInputValidator<RecordTransactionCommand>;
 

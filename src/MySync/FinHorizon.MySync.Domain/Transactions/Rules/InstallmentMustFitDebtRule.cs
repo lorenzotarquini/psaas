@@ -18,7 +18,7 @@ public sealed class InstallmentMustFitDebtRule : ITransactionRule
 
         var debt = context.Debt;
         var residual = context.DebtResidualWithoutThisTransaction;
-        if (context.Data.Kind != TransactionKind.Expense || debt is null || !residual.IsPositive)
+        if (!context.Kind.CanPayDebt || debt is null || !residual.IsPositive)
         {
             yield return new FieldError(TransactionFields.DebtId, ErrorCodes.InvalidValue);
             yield break;

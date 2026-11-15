@@ -7,6 +7,7 @@ public static class TransactionFields
     public const string Date = "date";
     public const string Amount = "amount";
     public const string AccountId = "accountId";
+    public const string CounterAccountId = "counterAccountId";
     public const string CategoryId = "categoryId";
     public const string DebtId = "debtId";
     public const string Note = "note";

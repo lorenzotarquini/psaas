@@ -4,6 +4,7 @@ using FinHorizon.MySync.Application.Common;
 using FinHorizon.MySync.Domain.Categories;
 using FinHorizon.MySync.Domain.Common;
 using FinHorizon.MySync.Domain.Transactions;
+using FinHorizon.MySync.Domain.Transactions.Kinds;
 using FluentValidation;
 
 namespace FinHorizon.MySync.Application.Features.Categories;
@@ -15,7 +16,10 @@ public sealed class CreateCategoryValidator : AbstractValidator<CreateCategoryCo
 {
     public CreateCategoryValidator()
     {
-        RuleFor(command => command.Kind).RequiredEnumName<CreateCategoryCommand, TransactionKind>();
+        RuleFor(command => command.Kind)
+            .RequiredEnumName<CreateCategoryCommand, TransactionKind>()
+            .Must(kind => !EnumNames.TryParse<TransactionKind>(kind, out var parsed) || MovementKinds.WithCategory.Contains(parsed))
+            .WithErrorCode(ErrorCodes.InvalidValue);
         RuleFor(command => command.Name).RequiredText(Category.MaxNameLength);
     }
 }

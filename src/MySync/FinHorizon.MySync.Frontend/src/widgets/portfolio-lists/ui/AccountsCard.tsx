@@ -1,15 +1,17 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPlus } from '@fortawesome/free-solid-svg-icons'
+import { faPlus, faRightLeft } from '@fortawesome/free-solid-svg-icons'
 import { AccountKindIcon, type Account } from '@/entities/account'
 import { CreateAccountForm } from '@/features/create-account'
+import { TransferDialog } from '@/features/transfer-money'
 import { Amount, Modal } from '@/shared/ui'
 
 /** UC4: the accounts with today's balance; "New account" while the limit allows it (UC2). */
 export function AccountsCard({ accounts, max }: { accounts: Account[]; max: number }) {
   const { t } = useTranslation()
   const [creating, setCreating] = useState(false)
+  const [transferring, setTransferring] = useState(false)
 
   return (
     <section className="surface flex flex-col gap-3 p-5" aria-labelledby="accounts-title">
@@ -17,11 +19,21 @@ export function AccountsCard({ accounts, max }: { accounts: Account[]; max: numb
         <h2 id="accounts-title" className="surface-title">
           {t('accounts.title')} <span className="muted text-xs font-normal">{t('accounts.count', { count: accounts.length, max })}</span>
         </h2>
-        {accounts.length < max && (
-          <button type="button" className="btn btn-ghost btn-sm text-primary" onClick={() => setCreating(true)}>
-            <FontAwesomeIcon icon={faPlus} /> {t('accounts.new')}
-          </button>
-        )}
+        <div className="flex items-center gap-1">
+          {accounts.length < max && (
+            <button type="button" className="btn btn-ghost btn-sm text-primary" onClick={() => setCreating(true)}>
+              <FontAwesomeIcon icon={faPlus} /> {t('accounts.new')}
+            </button>
+          )}
+          {/* UC9: moving money needs two accounts. */}
+          {accounts.length >= 2 && (
+            <span className="tooltip tooltip-left" data-tip={t('transfer.title')}>
+              <button type="button" className="btn btn-ghost btn-sm btn-circle text-primary" aria-label={t('transfer.title')} onClick={() => setTransferring(true)}>
+                <FontAwesomeIcon icon={faRightLeft} />
+              </button>
+            </span>
+          )}
+        </div>
       </header>
       <ul className="flex flex-col divide-y divide-base-300">
         {accounts.map((account) => (
@@ -38,6 +50,7 @@ export function AccountsCard({ accounts, max }: { accounts: Account[]; max: numb
           </li>
         ))}
       </ul>
+      <TransferDialog open={transferring} onClose={() => setTransferring(false)} />
       <Modal open={creating} title={t('accounts.new')} onClose={() => setCreating(false)}>
         <CreateAccountForm onCreated={() => setCreating(false)} />
       </Modal>

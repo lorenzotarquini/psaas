@@ -29,6 +29,8 @@ export class FakeApi {
       amount,
       accountId: account.id,
       accountName: account.name,
+      counterAccountId: null,
+      counterAccountName: null,
       categoryId: this.id(),
       categoryName,
       debtId: null,
@@ -109,6 +111,7 @@ export class FakeApi {
     if (method === 'GET' && path === '/api/transactions') {
       return ok({ items: this.transactions, page: 1, pageSize: 25, totalCount: this.transactions.length, expenseTotal: 0, incomeTotal: 0 })
     }
+    if (method === 'POST' && path === '/api/transactions') return ok({ id: this.id(), ...body }, 201)
     if (method === 'DELETE' && path.startsWith('/api/transactions/')) {
       this.transactions = this.transactions.filter((t) => t.id !== path.split('/').pop())
       return new Response(null, { status: 204 })

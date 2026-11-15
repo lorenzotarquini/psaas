@@ -40,7 +40,8 @@ Da questi dati MySync calcola il **patrimonio netto** e ne mostra l'andamento ne
 | Debito | Una somma che l'utente deve restituire: ha un tipo, un nome, una descrizione, un tag, il conto da cui si paga e il residuo da pagare alla creazione. |
 | Tipo di debito | Finanziamento, Mutuo, Fido, Altro. |
 | Residuo | Quanto resta da pagare di un debito: residuo iniziale − rate pagate. Un debito con residuo 0 è **estinto**. |
-| Movimento | Una spesa (soldi che escono da un conto) o un ricavo (soldi che entrano), con data, importo, conto, categoria e, per le spese, l'eventuale debito di cui è una rata. |
+| Movimento | Una spesa (soldi che escono da un conto), un ricavo (soldi che entrano) o un trasferimento tra due conti dell'utente, con data e importo. Spese e ricavi hanno una categoria e, per le spese, l'eventuale debito di cui sono una rata. |
+| Trasferimento | Soldi spostati da un conto dell'utente a un altro (UC9): né spesa né ricavo, il patrimonio netto non cambia. |
 | Categoria | Etichetta dell'utente per raggruppare i movimenti (es. "Spesa alimentare", "Stipendio"). Le categorie di spesa e quelle di ricavo sono separate. |
 | Patrimonio netto | Somma dei saldi di tutti i conti, a una certa data. I debiti non vengono sottratti: si mostrano accanto come debiti residui (D9). |
 | Debiti residui | Somma dei residui di tutti i debiti, a una certa data. |
@@ -62,6 +63,7 @@ Da questi dati MySync calcola il **patrimonio netto** e ne mostra l'andamento ne
 | RF9 | Una spesa collegata a un debito ne riduce il residuo. | UC5 |
 | RF10 | MySync mostra l'andamento del patrimonio netto e dei debiti residui su un periodo scelto. | UC7 |
 | RF11 | L'utente consulta tutti i suoi movimenti con filtri, li modifica e li elimina; saldi, residui e andamento si ricalcolano di conseguenza. | UC8 |
+| RF12 | L'utente trasferisce denaro tra due suoi conti; il trasferimento compare tra i movimenti ma non è né una spesa né un ricavo. | UC9 |
 
 ### Non funzionali
 
@@ -87,6 +89,7 @@ Da questi dati MySync calcola il **patrimonio netto** e ne mostra l'andamento ne
 | [UC6](UC6-creare-categoria.md) | Creare una categoria al volo (di supporto a UC5) | in ambito |
 | [UC7](UC7-andamento-patrimonio.md) | Vedere l'andamento del patrimonio | in ambito |
 | [UC8](UC8-gestire-movimenti.md) | Consultare, modificare ed eliminare i movimenti | in ambito |
+| [UC9](UC9-trasferire-denaro.md) | Trasferire denaro tra due conti | in ambito |
 
 Contratto HTTP: [API.md](API.md).
 
@@ -94,7 +97,6 @@ Contratto HTTP: [API.md](API.md).
 
 - Finanze aziendali: conti, debiti e movimenti di un'organizzazione B2B (fase 2, D8).
 - Modifica ed eliminazione di conti, debiti e categorie (i movimenti invece hanno il CRUD completo, D1).
-- Giroconti tra due conti dell'utente.
 - Valute diverse dall'euro, rivalutazione dei preziosi.
 - Movimenti ricorrenti, piani di ammortamento, separazione tra quota capitale e interessi di una rata.
 - Import da estratto conto o collegamento alle banche (open banking).

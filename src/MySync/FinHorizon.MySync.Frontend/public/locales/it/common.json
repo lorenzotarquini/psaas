@@ -40,7 +40,8 @@
       "NotUnique": "Nome già usato",
       "InvalidValue": "Valore non valido",
       "LimitReached": "Limite raggiunto",
-      "Unexpected": "Errore inatteso"
+      "Unexpected": "Errore inatteso",
+      "SameAccount": "Scegli due conti diversi"
     }
   },
   "preferences": {
@@ -139,7 +140,8 @@
     },
     "kinds": {
       "Expense": "Spesa",
-      "Income": "Ricavo"
+      "Income": "Ricavo",
+      "Transfer": "Trasferimento"
     }
   },
   "setup": {
@@ -184,5 +186,16 @@
     "buildingUp": "L'andamento si costruirà con i tuoi movimenti.",
     "tableTitle": "Dati del grafico",
     "debts": "Debiti residui"
+  },
+  "transfer": {
+    "title": "Trasferisci denaro",
+    "editTitle": "Modifica trasferimento",
+    "submit": "Trasferisci",
+    "swap": "Inverti direzione",
+    "topAccount": "Primo conto",
+    "bottomAccount": "Secondo conto",
+    "amountOut": "Importo in uscita",
+    "amountIn": "Importo in entrata",
+    "route": "{{from}} → {{to}}"
   }
 }

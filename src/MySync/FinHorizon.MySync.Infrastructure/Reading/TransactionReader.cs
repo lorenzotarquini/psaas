@@ -18,21 +18,23 @@ internal sealed class TransactionReader(MySyncDbContext db) : ITransactionReader
     private const string FromWhere = """
         FROM "Transactions" t
         JOIN "Accounts" a ON a."Id" = t."AccountId"
-        JOIN "Categories" c ON c."Id" = t."CategoryId"
+        LEFT JOIN "Categories" c ON c."Id" = t."CategoryId"
+        LEFT JOIN "Accounts" ca ON ca."Id" = t."CounterAccountId"
         LEFT JOIN "Debts" d ON d."Id" = t."DebtId"
         WHERE t."OwnerId" = @owner
           AND (@id IS NULL OR t."Id" = @id)
           AND (@from IS NULL OR t."Date" >= @from)
           AND (@to IS NULL OR t."Date" <= @to)
           AND (@kind IS NULL OR t."Kind" = @kind)
-          AND (@account IS NULL OR t."AccountId" = @account)
+          AND (@account IS NULL OR t."AccountId" = @account OR t."CounterAccountId" = @account)
           AND (@category IS NULL OR t."CategoryId" = @category)
           AND (@debt IS NULL OR t."DebtId" = @debt)
         """;
 
     private const string Columns = """
         SELECT t."Id", t."Kind", t."Date", t."Amount", t."AccountId", a."Name" AS "AccountName",
-               t."CategoryId", c."Name" AS "CategoryName", t."DebtId", d."Name" AS "DebtName", t."Note", t."RecordedAt"
+               t."CategoryId", c."Name" AS "CategoryName", t."DebtId", d."Name" AS "DebtName", t."Note", t."RecordedAt",
+               t."CounterAccountId", ca."Name" AS "CounterAccountName"
         """;
 
     public async Task<TransactionView?> GetAsync(OwnerId owner, Guid id, CancellationToken cancellationToken = default)
@@ -95,7 +97,9 @@ internal sealed class TransactionReader(MySyncDbContext db) : ITransactionReader
         row.DebtId,
         row.DebtName,
         row.Note,
-        row.RecordedAt);
+        row.RecordedAt,
+        row.CounterAccountId,
+        row.CounterAccountName);
 
     private sealed class Row
     {
@@ -111,9 +115,9 @@ internal sealed class TransactionReader(MySyncDbContext db) : ITransactionReader
 
         public string AccountName { get; init; } = string.Empty;
 
-        public Guid CategoryId { get; init; }
+        public Guid? CategoryId { get; init; }
 
-        public string CategoryName { get; init; } = string.Empty;
+        public string? CategoryName { get; init; }
 
         public Guid? DebtId { get; init; }
 
@@ -122,6 +126,10 @@ internal sealed class TransactionReader(MySyncDbContext db) : ITransactionReader
         public string? Note { get; init; }
 
         public DateTimeOffset RecordedAt { get; init; }
+
+        public Guid? CounterAccountId { get; init; }
+
+        public string? CounterAccountName { get; init; }
     }
 
     private sealed class Totals

@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import type { Transaction, TransactionKind } from '@/entities/transaction'
+import type { CategorizedKind, Transaction } from '@/entities/transaction'
 import { Modal } from '@/shared/ui'
 import { TransactionForm } from './TransactionForm'
 
@@ -7,7 +7,7 @@ interface TransactionDialogProps {
   open: boolean
   onClose: () => void
   transaction?: Transaction
-  defaultKind?: TransactionKind
+  defaultKind?: CategorizedKind
 }
 
 export function TransactionDialog({ open, onClose, transaction, defaultKind }: TransactionDialogProps) {

@@ -25,11 +25,12 @@ public sealed class TransactionContextLoader(
     {
         ArgumentNullException.ThrowIfNull(data);
         var account = await accounts.GetAsync(owner, data.AccountId, cancellationToken).ConfigureAwait(false);
-        var category = await categories.GetAsync(owner, data.CategoryId, cancellationToken).ConfigureAwait(false);
+        var counterAccount = data.CounterAccountId is { } counterId ? await accounts.GetAsync(owner, counterId, cancellationToken).ConfigureAwait(false) : null;
+        var category = data.CategoryId is { } categoryId ? await categories.GetAsync(owner, categoryId, cancellationToken).ConfigureAwait(false) : null;
         var debt = data.DebtId is { } debtId ? await debts.GetAsync(owner, debtId, cancellationToken).ConfigureAwait(false) : null;
         var residual = debt is null
             ? Money.Zero
             : debt.ResidualAfter(await ledger.InstallmentsPaidAsync(owner, debt.Id, amendedTransactionId, cancellationToken).ConfigureAwait(false));
-        return new TransactionContext(data, account, category, debt, residual, calendar.Today);
+        return new TransactionContext(data, account, category, debt, residual, calendar.Today, counterAccount);
     }
 }

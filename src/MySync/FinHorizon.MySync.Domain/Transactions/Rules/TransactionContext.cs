@@ -7,7 +7,8 @@ namespace FinHorizon.MySync.Domain.Transactions.Rules;
 
 /// <summary>
 /// Everything a rule needs to judge a movement: the data entered and the user's own records it points to.
-/// A record that does not exist, or belongs to another user, is null (RNF2).
+/// A record that does not exist, or belongs to another user, is null (RNF2). <see cref="CounterAccount"/> is the
+/// destination of a transfer.
 /// </summary>
 public sealed record TransactionContext(
     TransactionData Data,
@@ -15,4 +16,8 @@ public sealed record TransactionContext(
     Category? Category,
     Debt? Debt,
     Money DebtResidualWithoutThisTransaction,
-    DateOnly Today);
+    DateOnly Today,
+    Account? CounterAccount = null)
+{
+    public Kinds.IMovementKind Kind => Kinds.MovementKinds.Of(Data.Kind);
+}

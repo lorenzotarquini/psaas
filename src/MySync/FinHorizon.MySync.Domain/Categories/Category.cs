@@ -1,5 +1,6 @@
 using FinHorizon.MySync.Domain.Common;
 using FinHorizon.MySync.Domain.Transactions;
+using FinHorizon.MySync.Domain.Transactions.Kinds;
 
 namespace FinHorizon.MySync.Domain.Categories;
 
@@ -38,7 +39,7 @@ public sealed class Category : Entity
             throw new ArgumentException("The name is too long.", nameof(name));
         }
 
-        if (!Enum.IsDefined(kind))
+        if (!MovementKinds.WithCategory.Contains(kind))
         {
             throw new ArgumentOutOfRangeException(nameof(kind));
         }

@@ -2,7 +2,10 @@ using FinHorizon.MySync.Domain.Transactions;
 
 namespace FinHorizon.MySync.Application.Features.Transactions;
 
-/// <summary>A movement with the names of its account, category and debt.</summary>
+/// <summary>
+/// A movement with the names of what it points to. A transfer has no category and a destination account
+/// (<see cref="CounterAccountId"/>); <see cref="AccountId"/> is its source.
+/// </summary>
 public sealed record TransactionView(
     Guid Id,
     TransactionKind Kind,
@@ -10,12 +13,14 @@ public sealed record TransactionView(
     decimal Amount,
     Guid AccountId,
     string AccountName,
-    Guid CategoryId,
-    string CategoryName,
+    Guid? CategoryId,
+    string? CategoryName,
     Guid? DebtId,
     string? DebtName,
     string? Note,
-    DateTimeOffset RecordedAt);
+    DateTimeOffset RecordedAt,
+    Guid? CounterAccountId = null,
+    string? CounterAccountName = null);
 
 /// <summary>What a list of movements is filtered by (UC8 step C3).</summary>
 public sealed record TransactionFilter(

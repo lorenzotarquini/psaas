@@ -40,7 +40,8 @@
       "NotUnique": "Name already used",
       "InvalidValue": "Invalid value",
       "LimitReached": "Limit reached",
-      "Unexpected": "Unexpected error"
+      "Unexpected": "Unexpected error",
+      "SameAccount": "Choose two different accounts"
     }
   },
   "preferences": {
@@ -139,7 +140,8 @@
     },
     "kinds": {
       "Expense": "Expense",
-      "Income": "Income"
+      "Income": "Income",
+      "Transfer": "Transfer"
     }
   },
   "setup": {
@@ -184,5 +186,16 @@
     "buildingUp": "The trend builds up with your transactions.",
     "tableTitle": "Chart data",
     "debts": "Debts still due"
+  },
+  "transfer": {
+    "title": "Transfer money",
+    "editTitle": "Edit transfer",
+    "submit": "Transfer",
+    "swap": "Swap direction",
+    "topAccount": "First account",
+    "bottomAccount": "Second account",
+    "amountOut": "Amount out",
+    "amountIn": "Amount in",
+    "route": "{{from}} → {{to}}"
   }
 }

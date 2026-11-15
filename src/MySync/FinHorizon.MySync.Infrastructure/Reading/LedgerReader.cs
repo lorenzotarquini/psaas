@@ -12,11 +12,11 @@ internal sealed class LedgerReader(MySyncDbContext db) : ILedgerReader
     public async Task<IReadOnlyDictionary<Guid, Money>> MovementsByAccountAsync(OwnerId owner, CancellationToken cancellationToken = default)
     {
         var rows = await db.Database.SqlQuery<KeyedAmount>($"""
-            SELECT "AccountId" AS "Key",
-                   SUM(CASE WHEN "Kind" = 'Expense' THEN -"Amount" ELSE "Amount" END) AS "Amount"
-            FROM "Transactions"
-            WHERE "OwnerId" = {owner.Value}
-            GROUP BY "AccountId"
+            SELECT p."AccountId" AS "Key", SUM(p."Amount") AS "Amount"
+            FROM "Postings" p
+            JOIN "Transactions" t ON t."Id" = p."TransactionId"
+            WHERE t."OwnerId" = {owner.Value}
+            GROUP BY p."AccountId"
             """).ToListAsync(cancellationToken).ConfigureAwait(false);
         return rows.ToDictionary(row => row.Key, row => new Money(row.Amount));
     }
@@ -55,11 +55,17 @@ internal sealed class LedgerReader(MySyncDbContext db) : ILedgerReader
             .Select(debt => new OpeningValue(debt.CreatedOn, debt.InitialResidual))
             .ToListAsync(cancellationToken).ConfigureAwait(false);
         var days = await db.Database.SqlQuery<DailyRow>($"""
-            SELECT "Date",
-                   SUM(CASE WHEN "Kind" = 'Expense' THEN -"Amount" ELSE "Amount" END) AS "BalanceChange",
-                   COALESCE(SUM("Amount") FILTER (WHERE "DebtId" IS NOT NULL), 0) AS "InstallmentsPaid"
-            FROM "Transactions"
-            WHERE "OwnerId" = {owner.Value}
+            SELECT "Date", SUM("BalanceChange") AS "BalanceChange", SUM("InstallmentsPaid") AS "InstallmentsPaid"
+            FROM (
+                SELECT t."Date", p."Amount" AS "BalanceChange", 0 AS "InstallmentsPaid"
+                FROM "Postings" p
+                JOIN "Transactions" t ON t."Id" = p."TransactionId"
+                WHERE t."OwnerId" = {owner.Value}
+                UNION ALL
+                SELECT "Date", 0, "Amount"
+                FROM "Transactions"
+                WHERE "OwnerId" = {owner.Value} AND "DebtId" IS NOT NULL
+            ) AS day
             GROUP BY "Date"
             """).ToListAsync(cancellationToken).ConfigureAwait(false);
         return new LedgerHistory(

@@ -1,8 +1,12 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { apiDelete, apiGet, apiPost, apiPut, ledgerKey, toQuery } from '@/shared/api'
 
-export const transactionKinds = ['Expense', 'Income'] as const
+export const transactionKinds = ['Expense', 'Income', 'Transfer'] as const
 export type TransactionKind = (typeof transactionKinds)[number]
+
+/** Kinds that carry a category (UC5, UC6); a transfer moves money between two accounts instead (UC9). */
+export const categorizedKinds = ['Expense', 'Income'] as const
+export type CategorizedKind = (typeof categorizedKinds)[number]
 
 // Mirrors TransactionView in FinHorizon.MySync.Application.
 export interface Transaction {
@@ -10,10 +14,14 @@ export interface Transaction {
   kind: TransactionKind
   date: string
   amount: number
+  /** The account of an expense or income; the source of a transfer. */
   accountId: string
   accountName: string
-  categoryId: string
-  categoryName: string
+  /** The destination of a transfer. */
+  counterAccountId: string | null
+  counterAccountName: string | null
+  categoryId: string | null
+  categoryName: string | null
   debtId: string | null
   debtName: string | null
   note: string | null
@@ -34,7 +42,8 @@ export interface TransactionInput {
   date: string
   amount: number
   accountId: string
-  categoryId: string
+  counterAccountId?: string | null
+  categoryId?: string | null
   debtId?: string | null
   note?: string
 }
@@ -50,7 +59,9 @@ export interface TransactionFilter {
   pageSize?: number
 }
 
-/** Effect on the balance: an expense is negative. */
+export const isTransfer = (transaction: Pick<Transaction, 'kind'>) => transaction.kind === 'Transfer'
+
+/** Effect on the user's money: an expense is negative, a transfer moves money without changing it. */
 export const signedAmount = (transaction: Pick<Transaction, 'kind' | 'amount'>) =>
   transaction.kind === 'Expense' ? -transaction.amount : transaction.amount
 

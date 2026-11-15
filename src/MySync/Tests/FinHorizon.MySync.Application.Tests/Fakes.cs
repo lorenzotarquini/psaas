@@ -114,8 +114,9 @@ internal sealed class FakeLedger(FakeStore store) : ILedgerReader, ITransactionR
 {
     public Task<IReadOnlyDictionary<Guid, Money>> MovementsByAccountAsync(OwnerId owner, CancellationToken cancellationToken = default) =>
         Task.FromResult<IReadOnlyDictionary<Guid, Money>>(Of(owner)
-            .GroupBy(transaction => transaction.AccountId)
-            .ToDictionary(group => group.Key, group => Money.Sum(group.Select(transaction => transaction.SignedAmount))));
+            .SelectMany(transaction => transaction.Postings)
+            .GroupBy(posting => posting.AccountId)
+            .ToDictionary(group => group.Key, group => Money.Sum(group.Select(posting => posting.Amount))));
 
     public Task<IReadOnlyDictionary<Guid, Money>> InstallmentsByDebtAsync(OwnerId owner, CancellationToken cancellationToken = default) =>
         Task.FromResult<IReadOnlyDictionary<Guid, Money>>(Of(owner)
@@ -134,7 +135,7 @@ internal sealed class FakeLedger(FakeStore store) : ILedgerReader, ITransactionR
             store.Debts.Where(d => d.OwnerId == owner).Select(d => new OpeningValue(d.CreatedOn, d.InitialResidual)).ToList(),
             Of(owner).GroupBy(t => t.Date).Select(g => new DailyMovement(
                 g.Key,
-                Money.Sum(g.Select(t => t.SignedAmount)),
+                Money.Sum(g.SelectMany(t => t.Postings).Select(p => p.Amount)),
                 Money.Sum(g.Where(t => t.DebtId is not null).Select(t => t.Amount)))).ToList()));
 
     public Task<TransactionView?> GetAsync(OwnerId owner, Guid id, CancellationToken cancellationToken = default) =>
@@ -163,9 +164,11 @@ internal sealed class FakeLedger(FakeStore store) : ILedgerReader, ITransactionR
         t.AccountId,
         store.Accounts.Single(a => a.Id == t.AccountId).Descriptor.Name,
         t.CategoryId,
-        store.Categories.Single(c => c.Id == t.CategoryId).Name,
+        store.Categories.SingleOrDefault(c => c.Id == t.CategoryId)?.Name,
         t.DebtId,
         store.Debts.SingleOrDefault(d => d.Id == t.DebtId)?.Descriptor.Name,
         t.Note,
-        t.RecordedAt);
+        t.RecordedAt,
+        t.CounterAccountId,
+        store.Accounts.SingleOrDefault(a => a.Id == t.CounterAccountId)?.Descriptor.Name);
 }

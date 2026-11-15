@@ -4,7 +4,7 @@ Tutte le rotte sono sotto `/api`, richiedono un token Keycloak con audience `mys
 
 **Errori.** `400` con `ValidationProblemDetails`: in `errors` un codice per campo, gli stessi dell'Admin Portal (`Required`, `InvalidFormat`, `MaxLengthExceeded`, `NotUnique`, `InvalidValue`) più `LimitReached`, che arriva sul campo `limit` perché non riguarda un singolo input. Un id nell'URL inesistente o di un altro utente risponde `404`; un id nel corpo (conto, categoria, debito) di un altro utente è `InvalidValue` su quel campo.
 
-**Enumerazioni** per nome, senza distinzione di maiuscole (in risposta in PascalCase): conto `CurrentAccount`, `VirtualBank`, `Cash`, `Valuables`, `Other`; debito `Loan`, `Mortgage`, `Overdraft`, `Other`; movimento e categoria `Expense`, `Income`; periodo `30d`, `90d`, `12m`, `all`.
+**Enumerazioni** per nome, senza distinzione di maiuscole (in risposta in PascalCase): conto `CurrentAccount`, `VirtualBank`, `Cash`, `Valuables`, `Other`; debito `Loan`, `Mortgage`, `Overdraft`, `Other`; movimento `Expense`, `Income`, `Transfer`; categoria `Expense`, `Income`; periodo `30d`, `90d`, `12m`, `all`.
 
 | Metodo e rotta | Use case | Richiesta | Risposta |
 |---|---|---|---|
@@ -16,9 +16,9 @@ Tutte le rotte sono sotto `/api`, richiedono un token Keycloak con audience `mys
 | `GET /api/tags` | UC2, UC3 | — | Tag già usati su conti e debiti, distinti e ordinati |
 | `GET /api/categories?kind=&term=` | UC6 | — | Categorie dell'utente (di quel tipo, se indicato) il cui nome contiene `term`; al massimo 50 |
 | `POST /api/categories` | UC6 | `{ kind, name }` | `201` con la categoria nuova, `200` con quella esistente (UC6-R4) |
-| `GET /api/transactions?from=&to=&kind=&accountId=&categoryId=&debtId=&page=&pageSize=` | UC4, UC8 | — | `{ items: [{ id, kind, date, amount, accountId, accountName, categoryId, categoryName, debtId, debtName, note, recordedAt }], page, pageSize, totalCount, expenseTotal, incomeTotal }`; dal più recente; `pageSize` 1–100 (25); totali su tutto il filtro; `from` > `to` è `InvalidValue` su `period` |
+| `GET /api/transactions?from=&to=&kind=&accountId=&categoryId=&debtId=&page=&pageSize=` | UC4, UC8 | — | `{ items: [{ id, kind, date, amount, accountId, accountName, counterAccountId, counterAccountName, categoryId, categoryName, debtId, debtName, note, recordedAt }], page, pageSize, totalCount, expenseTotal, incomeTotal }`; dal più recente; `pageSize` 1–100 (25); totali su tutto il filtro (i trasferimenti non ci entrano); `accountId` trova un trasferimento anche come destinazione; `from` > `to` è `InvalidValue` su `period` |
 | `GET /api/transactions/{id}` | UC8 | — | Il movimento |
-| `POST /api/transactions` | UC5 | `{ kind, date, amount, accountId, categoryId, debtId?, note? }` | `201` con il movimento |
+| `POST /api/transactions` | UC5, UC9 | `{ kind, date, amount, accountId, categoryId?, counterAccountId?, debtId?, note? }`: `categoryId` obbligatorio per spese e ricavi, `counterAccountId` (destinazione) per i trasferimenti | `201` con il movimento |
 | `PUT /api/transactions/{id}` | UC8 | come `POST` | `200` con il movimento aggiornato |
 | `DELETE /api/transactions/{id}` | UC8 | — | `204` |
 | `GET /api/dashboard` | UC4 | — | `{ netWorth, debtsResidual, accounts, debts, recentTransactions (10), limits: { maxAccounts, maxDebts } }`; `netWorth` è la somma dei saldi, i debiti non vengono sottratti (D9) |

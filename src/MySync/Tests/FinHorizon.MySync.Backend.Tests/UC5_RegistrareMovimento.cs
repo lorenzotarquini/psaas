@@ -73,12 +73,11 @@ public sealed class UC5_RegistrareMovimento(PostgresFixture database) : Acceptan
     [Fact]
     public async Task S6_DatiObbligatoriMancanti()
     {
-        var errors = await ErrorsAsync(await Mario.PostAsJsonAsync("/api/transactions", new { }));
+        var errors = await ErrorsAsync(await Mario.PostAsJsonAsync("/api/transactions", new { kind = "Expense" }));
 
         Assert.Equal(
             new Dictionary<string, string>
             {
-                ["kind"] = "Required",
                 ["date"] = "Required",
                 ["amount"] = "Required",
                 ["accountId"] = "Required",

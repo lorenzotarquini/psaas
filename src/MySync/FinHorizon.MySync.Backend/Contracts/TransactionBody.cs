@@ -8,4 +8,5 @@ public sealed record TransactionBody(
     Guid? AccountId,
     Guid? CategoryId,
     Guid? DebtId,
-    string? Note);
+    string? Note,
+    Guid? CounterAccountId = null);

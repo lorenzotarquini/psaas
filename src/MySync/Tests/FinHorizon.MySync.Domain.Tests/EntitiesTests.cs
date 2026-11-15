@@ -48,7 +48,7 @@ public sealed class EntitiesTests
         var account = Account();
         var transaction = Transaction.Record(Mario, Expense(account, Category(), 85.40m), DateTimeOffset.UnixEpoch);
 
-        Assert.Equal(Euro(-85.40m), transaction.SignedAmount);
+        Assert.Equal([(account.Id, Euro(-85.40m))], transaction.Postings.Select(p => (p.AccountId, p.Amount)));
     }
 
     [Fact]

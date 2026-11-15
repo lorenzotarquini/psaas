@@ -185,7 +185,10 @@ namespace FinHorizon.MySync.Infrastructure.Data.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)");
 
-                    b.Property<Guid>("CategoryId")
+                    b.Property<Guid?>("CategoryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CounterAccountId")
                         .HasColumnType("uuid");
 
                     b.Property<DateOnly>("Date")
@@ -217,6 +220,8 @@ namespace FinHorizon.MySync.Infrastructure.Data.Migrations
 
                     b.HasIndex("CategoryId");
 
+                    b.HasIndex("CounterAccountId");
+
                     b.HasIndex("DebtId");
 
                     b.HasIndex("OwnerId", "Date", "RecordedAt");
@@ -244,13 +249,53 @@ namespace FinHorizon.MySync.Infrastructure.Data.Migrations
                     b.HasOne("FinHorizon.MySync.Domain.Categories.Category", null)
                         .WithMany()
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("FinHorizon.MySync.Domain.Accounts.Account", null)
+                        .WithMany()
+                        .HasForeignKey("CounterAccountId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("FinHorizon.MySync.Domain.Debts.Debt", null)
                         .WithMany()
                         .HasForeignKey("DebtId")
                         .OnDelete(DeleteBehavior.Restrict);
+
+                    b.OwnsMany("FinHorizon.MySync.Domain.Transactions.Posting", "Postings", b1 =>
+                        {
+                            b1.Property<Guid>("TransactionId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("integer");
+
+                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<int>("Id"));
+
+                            b1.Property<Guid>("AccountId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<decimal>("Amount")
+                                .HasPrecision(18, 2)
+                                .HasColumnType("numeric(18,2)");
+
+                            b1.HasKey("TransactionId", "Id");
+
+                            b1.HasIndex("AccountId");
+
+                            b1.ToTable("Postings", (string)null);
+
+                            b1.HasOne("FinHorizon.MySync.Domain.Accounts.Account", null)
+                                .WithMany()
+                                .HasForeignKey("AccountId")
+                                .OnDelete(DeleteBehavior.Restrict)
+                                .IsRequired();
+
+                            b1.WithOwner()
+                                .HasForeignKey("TransactionId");
+                        });
+
+                    b.Navigation("Postings");
                 });
 #pragma warning restore 612, 618
         }

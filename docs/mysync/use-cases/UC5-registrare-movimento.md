@@ -119,8 +119,8 @@ Test: `UC5_RegistrareMovimento.S6_DatiObbligatoriMancanti`
 Funzionalità: Registrare una spesa o un ricavo
 
 Scenario: Dati obbligatori mancanti
-  Quando "Mario" registra un movimento senza compilare nessun campo
-  Allora la richiesta è rifiutata con "Required" su tipo, data, importo, conto e categoria
+  Quando "Mario" registra una spesa senza compilare nessun altro campo
+  Allora la richiesta è rifiutata con "Required" su data, importo, conto e categoria
 ```
 
 ### UC5-S7

@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { fileURLToPath } from 'node:url'
@@ -18,5 +19,9 @@ export default defineConfig({
       // secure: false accepts the ASP.NET dev certificate, which Node does not trust (dev server only).
       '/api': { target: process.env.BACKEND_URL, changeOrigin: true, secure: false },
     },
+  },
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
   },
 })

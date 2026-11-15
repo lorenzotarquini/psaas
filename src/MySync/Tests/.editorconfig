@@ -1,0 +1,9 @@
+[*.cs]
+# Test names follow the scenarios: UCn_Name.Sm_Description.
+dotnet_diagnostic.CA1707.severity = none
+# xUnit test classes are discovered by reflection and are public by design.
+dotnet_diagnostic.CA1515.severity = none
+# Scenario hosts are disposed by xUnit through IAsyncLifetime.DisposeAsync.
+dotnet_diagnostic.CA1001.severity = none
+# HttpClient/HttpRequestMessage in scenarios live as long as the test host that owns them.
+dotnet_diagnostic.CA2000.severity = none

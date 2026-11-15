@@ -1,13 +1,188 @@
 {
-  "appName": "FinHorizon MySync",
+  "appName": "MySync",
   "loading": "Loading…",
   "logout": "Sign out",
-  "home": {
-    "title": "Welcome to MySync",
-    "signedInAs": "Signed in as {{name}}",
-    "empty": "MySync features will appear here."
+  "nav": {
+    "label": "Main navigation",
+    "dashboard": "Dashboard",
+    "transactions": "Transactions",
+    "netWorth": "Trend"
+  },
+  "actions": {
+    "title": "Actions",
+    "close": "Close",
+    "choose": "Choose…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "next": "Next",
+    "back": "Back"
+  },
+  "fields": {
+    "description": "Description",
+    "tag": "Tag"
+  },
+  "format": {
+    "money": "{{value, currency(currency: EUR)}}",
+    "signedMoney": "{{value, currency(currency: EUR; signDisplay: exceptZero)}}",
+    "date": "{{value, datetime(dateStyle: medium; timeZone: UTC)}}",
+    "shortDate": "{{value, datetime(day: numeric; month: short; timeZone: UTC)}}",
+    "percent": "{{value, number(style: percent; signDisplay: exceptZero; maximumFractionDigits: 1)}}"
   },
   "errors": {
-    "loadFailed": "Loading failed."
+    "loadFailed": "Could not load the data.",
+    "saveFailed": "Could not save: please try again.",
+    "codes": {
+      "Required": "Required",
+      "InvalidFormat": "Invalid format (2 decimals at most)",
+      "MaxLengthExceeded": "Too long",
+      "NotUnique": "Name already used",
+      "InvalidValue": "Invalid value",
+      "LimitReached": "Limit reached",
+      "Unexpected": "Unexpected error"
+    }
+  },
+  "preferences": {
+    "lightMode": "Switch to light theme",
+    "darkMode": "Switch to dark theme",
+    "language": "Language",
+    "languages": {
+      "it": "Italiano",
+      "en": "English"
+    }
+  },
+  "accounts": {
+    "title": "Accounts",
+    "count": "{{count}} of {{max}}",
+    "new": "New account",
+    "create": "Create account",
+    "limitReached": "You have reached the maximum number of accounts.",
+    "balanceHint": "What it holds today; it can be negative.",
+    "fields": {
+      "kind": "Account type",
+      "name": "Name",
+      "initialBalance": "Opening balance"
+    },
+    "kinds": {
+      "CurrentAccount": "Current account",
+      "VirtualBank": "Virtual bank",
+      "Cash": "Cash",
+      "Valuables": "Valuables",
+      "Other": "Other"
+    }
+  },
+  "debts": {
+    "title": "Debts",
+    "count": "{{count}} of {{max}}",
+    "new": "New debt",
+    "create": "Create debt",
+    "limitReached": "You have reached the maximum number of debts.",
+    "accountHint": "The account you pay the installments from.",
+    "empty": "No debts.",
+    "paidOff": "Paid off",
+    "progress": "How much of {{name}} is already paid",
+    "fields": {
+      "kind": "Debt type",
+      "name": "Name",
+      "account": "Linked account",
+      "residual": "Amount still due"
+    },
+    "kinds": {
+      "Loan": "Loan",
+      "Mortgage": "Mortgage",
+      "Overdraft": "Credit line",
+      "Other": "Other"
+    }
+  },
+  "categories": {
+    "placeholder": "Search or create a category",
+    "create": "Create “{{name}}”",
+    "none": "No categories yet: type one to create it."
+  },
+  "transactions": {
+    "title": "Transactions",
+    "subtitle": "Every expense and income, to filter and correct.",
+    "record": "Record",
+    "newExpense": "Expense",
+    "newIncome": "Income",
+    "editTitle": "Edit transaction",
+    "deleteTitle": "Delete the transaction?",
+    "deleteWarning": "Deletion is permanent and cannot be undone.",
+    "debtHint": "If it is a debt installment, it lowers what is still due.",
+    "noDebt": "None",
+    "installmentOf": "Installment of {{name}}",
+    "filters": "Filters",
+    "from": "From",
+    "to": "To",
+    "allKinds": "All",
+    "allAccounts": "All accounts",
+    "allCategories": "All categories",
+    "allDebts": "All",
+    "count_one": "{{count}} transaction",
+    "count_other": "{{count}} transactions",
+    "expenseTotal": "Expenses",
+    "incomeTotal": "Income",
+    "invalidPeriod": "The start date is after the end date.",
+    "noMatch": "No transaction matches the filters.",
+    "clearFilters": "Clear filters",
+    "pages": "Pages",
+    "pageOf": "{{page}} of {{pages}}",
+    "fields": {
+      "kind": "Type",
+      "amount": "Amount",
+      "date": "Date",
+      "account": "Account",
+      "category": "Category",
+      "debt": "Debt installment",
+      "note": "Note"
+    },
+    "kinds": {
+      "Expense": "Expense",
+      "Income": "Income"
+    }
+  },
+  "setup": {
+    "title": "Set up MySync",
+    "subtitle": "Tell us where your money is and what you still owe.",
+    "steps": {
+      "accounts": "Accounts",
+      "debts": "Debts"
+    },
+    "accountsTitle": "Your accounts",
+    "accountsHelp_zero": "You have reached the maximum number of accounts.",
+    "accountsHelp_one": "You can add {{count}} more account.",
+    "accountsHelp_other": "You can add {{count}} more accounts.",
+    "needAccount": "Create at least one account to continue.",
+    "debtsTitle": "Your debts",
+    "debtsHelp": "Optional: you can add them later from the dashboard.",
+    "finish": "Finish"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Your net worth today.",
+    "change30": "Last 30 days",
+    "trendTitle": "Net worth trend",
+    "seeTrend": "See the trend",
+    "recentTitle": "Latest transactions",
+    "seeAll": "See all",
+    "noTransactions": "No transactions yet: record your first expense or income."
+  },
+  "netWorth": {
+    "title": "Net worth trend",
+    "subtitle": "How net worth (the balances of your accounts) and the debts still to pay change over time.",
+    "period": "Period",
+    "periods": {
+      "30d": "30 days",
+      "90d": "90 days",
+      "12m": "12 months",
+      "all": "All"
+    },
+    "change": "Change over the period",
+    "chartLabel": "Net worth trend chart",
+    "netWorth": "Net worth",
+    "buildingUp": "The trend builds up with your transactions.",
+    "tableTitle": "Chart data",
+    "debts": "Debts still due"
   }
 }

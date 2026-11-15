@@ -1,8 +1,11 @@
+using System.Text.Json.Serialization;
 using NLog;
 using NLog.Extensions.Logging;
 using NLog.Web;
 using FinHorizon.Auth;
 using FinHorizon.MySync.Application;
+using FinHorizon.MySync.Application.Abstractions;
+using FinHorizon.MySync.Backend.Infrastructure;
 using FinHorizon.MySync.Infrastructure;
 
 var logger = LogManager.Setup()
@@ -22,7 +25,10 @@ try
     builder.Services.AddKeycloak(builder.Configuration);
     builder.Services.AddMySyncApplication();
     builder.Services.AddMySyncInfrastructure(builder.Configuration);
-    builder.Services.AddControllers();
+    builder.Services.AddHttpContextAccessor();
+    builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
+    builder.Services.AddControllers()
+        .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
     builder.Services.AddProblemDetails();
     builder.Services.AddHealthChecks();
     builder.Services.AddOpenApi();
@@ -32,6 +38,11 @@ try
         .AllowAnyMethod()));
 
     var app = builder.Build();
+
+    if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
+    {
+        await app.Services.MigrateMySyncDatabaseAsync();
+    }
 
     app.UseExceptionHandler();
     app.UseStatusCodePages();
@@ -48,10 +59,10 @@ try
 
     app.MapHealthChecks("/health");
 
-    // Every controller requires a signed-in user (policy User) unless it opts out explicitly.
+    // Every controller requires a MySync user (policy User: role enduser) unless it opts out explicitly.
     app.MapControllers().RequireAuthorization("User");
 
-    app.Run();
+    await app.RunAsync();
 }
 catch (Exception exception) when (exception is not HostAbortedException)
 {

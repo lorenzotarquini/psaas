@@ -4,16 +4,20 @@ import '../styles/index.css'
 import '@/shared/i18n'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { RouterProvider } from 'react-router'
-import { initAuth } from '@/shared/auth'
+import { session } from '@/shared/auth'
 import { getLogger } from '@/shared/lib/logger'
+import { initTheme } from '@/shared/theme'
 import { queryClient } from '../api/queryClient'
 import { createAppRouter } from '../routes/router'
 
 const logger = getLogger('main')
 const root = createRoot(document.getElementById('root')!)
 
+initTheme()
+
 // Keycloak docs: init before rendering/routing, since login changes the URL.
-initAuth()
+session
+  .init()
   .then(() =>
     root.render(
       <StrictMode>
@@ -26,7 +30,7 @@ initAuth()
     ),
   )
   .catch((error: unknown) => {
-    logger.fatal({ err: error }, 'Keycloak initialization failed')
+    logger.fatal({ err: error }, 'Authentication initialization failed')
     // Translations may not be loaded yet: plain bilingual fallback.
     root.render(<div className="alert alert-error m-8">Autenticazione non riuscita / Authentication failed.</div>)
   })

@@ -1,0 +1,40 @@
+import { useQuery } from '@tanstack/react-query'
+import { apiGet, apiPost, ledgerKey } from '@/shared/api'
+
+export const accountKinds = ['CurrentAccount', 'VirtualBank', 'Cash', 'Valuables', 'Other'] as const
+export type AccountKind = (typeof accountKinds)[number]
+
+// Mirrors AccountView in FinHorizon.MySync.Application.
+export interface Account {
+  id: string
+  kind: AccountKind
+  name: string
+  description: string | null
+  tag: string | null
+  initialBalance: number
+  openedOn: string
+  balance: number
+}
+
+export interface AccountList {
+  items: Account[]
+  max: number
+}
+
+export interface NewAccount {
+  kind: AccountKind
+  name: string
+  description?: string
+  tag?: string
+  initialBalance: number
+}
+
+export const accountsQueryKey = [ledgerKey, 'accounts'] as const
+
+export const useAccounts = () =>
+  useQuery({ queryKey: accountsQueryKey, queryFn: ({ signal }) => apiGet<AccountList>('/api/accounts', signal) })
+
+export const createAccount = (account: NewAccount) => apiPost<Account>('/api/accounts', account)
+
+/** Tags already used on accounts and debts, suggested while typing. */
+export const useTags = () => useQuery({ queryKey: [ledgerKey, 'tags'], queryFn: ({ signal }) => apiGet<string[]>('/api/tags', signal) })

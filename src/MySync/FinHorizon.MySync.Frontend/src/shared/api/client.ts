@@ -1,17 +1,10 @@
-import { getAccessToken, login } from '@/shared/auth'
+import { session } from '@/shared/auth'
 import { getLogger } from '@/shared/lib/logger'
 
 const logger = getLogger('api')
 
-/** Validation codes per field, e.g. { "companyName": ["Required"], "profiles[1].name": ["NotUnique"] }. */
+/** Validation codes per field, e.g. { "name": ["NotUnique"], "limit": ["LimitReached"] }. */
 export type FieldErrors = Record<string, string[]>
-
-export interface PagedResult<T> {
-  items: T[]
-  totalCount: number
-  page: number
-  pageSize: number
-}
 
 export class ApiError extends Error {
   readonly status: number
@@ -41,7 +34,7 @@ async function request<T>(method: Method, path: string, body?: unknown, signal?:
   const response = await fetch(path, {
     method,
     headers: {
-      Authorization: `Bearer ${await getAccessToken()}`,
+      ...(await session.headers()),
       Accept: 'application/json',
       ...(body !== undefined && { 'Content-Type': 'application/json' }),
     },
@@ -51,28 +44,25 @@ async function request<T>(method: Method, path: string, body?: unknown, signal?:
 
   if (!response.ok) {
     const fieldErrors = response.status === 400 ? await readFieldErrors(response) : {}
-    logger.error({ method, path, status: response.status, fieldErrors }, 'API call failed')
+    logger.error({ method, path, status: response.status, fields: Object.keys(fieldErrors) }, 'API call failed')
     // Token rejected despite the refresh: the session is gone, start a new login.
-    if (response.status === 401) void login()
+    if (response.status === 401) void session.login()
     throw new ApiError(response.status, path, fieldErrors)
   }
   return response.status === 204 ? (undefined as T) : ((await response.json()) as T)
 }
 
 export const apiGet = <T>(path: string, signal?: AbortSignal) => request<T>('GET', path, undefined, signal)
-
-/** Downloads a file the API produces (e.g. a CSV export) with the bearer token, saved under fileName. */
-export async function apiDownload(path: string, fileName: string) {
-  const response = await fetch(path, { headers: { Authorization: `Bearer ${await getAccessToken()}` } })
-  if (!response.ok) {
-    logger.error({ path, status: response.status }, 'Download failed')
-    throw new ApiError(response.status, path)
-  }
-  const url = URL.createObjectURL(await response.blob())
-  const link = Object.assign(document.createElement('a'), { href: url, download: fileName })
-  link.click()
-  URL.revokeObjectURL(url)
-}
 export const apiPost = <T>(path: string, body: unknown) => request<T>('POST', path, body)
 export const apiPut = <T>(path: string, body: unknown) => request<T>('PUT', path, body)
 export const apiDelete = (path: string) => request<void>('DELETE', path)
+
+/** Query string from the defined values only. */
+export function toQuery(params: Record<string, string | number | null | undefined>): string {
+  const search = new URLSearchParams()
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== null && value !== '') search.set(key, String(value))
+  }
+  const text = search.toString()
+  return text ? `?${text}` : ''
+}

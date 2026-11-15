@@ -1,0 +1,104 @@
+/*
+ * MySync theme: the ONLY file to edit to change the look.
+ * Every component uses the semantic tokens below (bg-base-100, text-primary, var(--chart-…)), never raw colours,
+ * so changing a value here re-skins the whole app, in light and in dark mode.
+ *
+ * Inspired by the "Enfix" finance template: a fresh green accent on a mint canvas, soft rounded cards.
+ * Dark mode keeps the same hues on slate surfaces. Theme names are used by the light/dark switch (shared/theme).
+ */
+
+/* ---- Light ---- */
+@plugin "daisyui/theme" {
+  name: "mysync";
+  default: true;
+  color-scheme: light;
+
+  /* Surfaces: cards, page canvas, borders and the text on them. */
+  --color-base-100: #ffffff;
+  --color-base-200: #eafaf0;
+  --color-base-300: #d5ecdd;
+  --color-base-content: #0f172a;
+
+  /* Main action and brand. */
+  --color-primary: #16a249;
+  --color-primary-content: #ffffff;
+  /* Dark ink for secondary emphasis (sidebar active item, headings). */
+  --color-secondary: #0f172a;
+  --color-secondary-content: #ffffff;
+  --color-accent: #0e7ceb;
+  --color-accent-content: #ffffff;
+  --color-neutral: #0f172a;
+  --color-neutral-content: #e2e8f0;
+
+  /* Status: income/positive, warnings, expenses/negative, information. */
+  --color-success: #12a347;
+  --color-success-content: #ffffff;
+  --color-warning: #fba801;
+  --color-warning-content: #1f1300;
+  --color-error: #dc2626;
+  --color-error-content: #ffffff;
+  --color-info: #0e7ceb;
+  --color-info-content: #ffffff;
+
+  /* Shape. */
+  --radius-selector: 1rem;
+  --radius-field: 0.75rem;
+  --radius-box: 1.25rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+/* ---- Dark ---- */
+@plugin "daisyui/theme" {
+  name: "mysync-dark";
+  prefersdark: true;
+  color-scheme: dark;
+
+  --color-base-100: #1f2937;
+  --color-base-200: #111827;
+  --color-base-300: #374151;
+  --color-base-content: #e5e7eb;
+
+  --color-primary: #22c55e;
+  --color-primary-content: #052e14;
+  --color-secondary: #e5e7eb;
+  --color-secondary-content: #111827;
+  --color-accent: #3b9cf5;
+  --color-accent-content: #04182c;
+  --color-neutral: #0b1220;
+  --color-neutral-content: #d1d5db;
+
+  --color-success: #34d399;
+  --color-success-content: #022c1c;
+  --color-warning: #fbbf24;
+  --color-warning-content: #2a1a00;
+  --color-error: #f87171;
+  --color-error-content: #2b0606;
+  --color-info: #3b9cf5;
+  --color-info-content: #04182c;
+
+  --radius-selector: 1rem;
+  --radius-field: 0.75rem;
+  --radius-box: 1.25rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+/* ---- Charts: follow the theme colours above, in both modes. ---- */
+:root {
+  --chart-net-worth: var(--color-primary);
+  --chart-debts: var(--color-error);
+  --chart-grid: var(--color-base-300);
+  --chart-text: color-mix(in oklab, var(--color-base-content) 60%, transparent);
+}
+
+/* ---- Typography ---- */
+@theme {
+  --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
+}

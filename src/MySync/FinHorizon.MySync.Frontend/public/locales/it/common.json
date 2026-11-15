@@ -1,13 +1,188 @@
 {
-  "appName": "FinHorizon MySync",
+  "appName": "MySync",
   "loading": "Caricamento…",
   "logout": "Esci",
-  "home": {
-    "title": "Benvenuto in MySync",
-    "signedInAs": "Accesso effettuato come {{name}}",
-    "empty": "Qui arriveranno le funzionalità di MySync."
+  "nav": {
+    "label": "Navigazione principale",
+    "dashboard": "Dashboard",
+    "transactions": "Movimenti",
+    "netWorth": "Andamento"
+  },
+  "actions": {
+    "title": "Azioni",
+    "close": "Chiudi",
+    "choose": "Scegli…",
+    "save": "Salva",
+    "cancel": "Annulla",
+    "delete": "Elimina",
+    "edit": "Modifica",
+    "next": "Avanti",
+    "back": "Indietro"
+  },
+  "fields": {
+    "description": "Descrizione",
+    "tag": "Tag"
+  },
+  "format": {
+    "money": "{{value, currency(currency: EUR)}}",
+    "signedMoney": "{{value, currency(currency: EUR; signDisplay: exceptZero)}}",
+    "date": "{{value, datetime(dateStyle: medium; timeZone: UTC)}}",
+    "shortDate": "{{value, datetime(day: numeric; month: short; timeZone: UTC)}}",
+    "percent": "{{value, number(style: percent; signDisplay: exceptZero; maximumFractionDigits: 1)}}"
   },
   "errors": {
-    "loadFailed": "Caricamento non riuscito."
+    "loadFailed": "Caricamento non riuscito.",
+    "saveFailed": "Salvataggio non riuscito: riprova.",
+    "codes": {
+      "Required": "Campo obbligatorio",
+      "InvalidFormat": "Formato non valido (al massimo 2 decimali)",
+      "MaxLengthExceeded": "Testo troppo lungo",
+      "NotUnique": "Nome già usato",
+      "InvalidValue": "Valore non valido",
+      "LimitReached": "Limite raggiunto",
+      "Unexpected": "Errore inatteso"
+    }
+  },
+  "preferences": {
+    "lightMode": "Passa al tema chiaro",
+    "darkMode": "Passa al tema scuro",
+    "language": "Lingua",
+    "languages": {
+      "it": "Italiano",
+      "en": "English"
+    }
+  },
+  "accounts": {
+    "title": "Conti",
+    "count": "{{count}} di {{max}}",
+    "new": "Nuovo conto",
+    "create": "Crea conto",
+    "limitReached": "Hai raggiunto il numero massimo di conti.",
+    "balanceHint": "Quanto c'è oggi; può essere negativo.",
+    "fields": {
+      "kind": "Tipo di conto",
+      "name": "Nome",
+      "initialBalance": "Saldo iniziale"
+    },
+    "kinds": {
+      "CurrentAccount": "Conto corrente",
+      "VirtualBank": "Banca virtuale",
+      "Cash": "Contanti",
+      "Valuables": "Preziosi",
+      "Other": "Altro"
+    }
+  },
+  "debts": {
+    "title": "Debiti",
+    "count": "{{count}} di {{max}}",
+    "new": "Nuovo debito",
+    "create": "Crea debito",
+    "limitReached": "Hai raggiunto il numero massimo di debiti.",
+    "accountHint": "Il conto da cui paghi le rate.",
+    "empty": "Nessun debito.",
+    "paidOff": "Estinto",
+    "progress": "Quanto è già stato pagato di {{name}}",
+    "fields": {
+      "kind": "Tipo di debito",
+      "name": "Nome",
+      "account": "Conto collegato",
+      "residual": "Residuo da pagare"
+    },
+    "kinds": {
+      "Loan": "Finanziamento",
+      "Mortgage": "Mutuo",
+      "Overdraft": "Fido",
+      "Other": "Altro"
+    }
+  },
+  "categories": {
+    "placeholder": "Cerca o crea una categoria",
+    "create": "Crea «{{name}}»",
+    "none": "Nessuna categoria: scrivine una per crearla."
+  },
+  "transactions": {
+    "title": "Movimenti",
+    "subtitle": "Tutte le spese e i ricavi, da filtrare e correggere.",
+    "record": "Registra",
+    "newExpense": "Spesa",
+    "newIncome": "Ricavo",
+    "editTitle": "Modifica movimento",
+    "deleteTitle": "Eliminare il movimento?",
+    "deleteWarning": "L'eliminazione è definitiva e non si può annullare.",
+    "debtHint": "Se è la rata di un debito, ne riduce il residuo.",
+    "noDebt": "Nessuno",
+    "installmentOf": "Rata di {{name}}",
+    "filters": "Filtri",
+    "from": "Dal",
+    "to": "Al",
+    "allKinds": "Tutti",
+    "allAccounts": "Tutti i conti",
+    "allCategories": "Tutte le categorie",
+    "allDebts": "Tutti",
+    "count_one": "{{count}} movimento",
+    "count_other": "{{count}} movimenti",
+    "expenseTotal": "Spese",
+    "incomeTotal": "Ricavi",
+    "invalidPeriod": "La data iniziale è successiva a quella finale.",
+    "noMatch": "Nessun movimento corrisponde ai filtri.",
+    "clearFilters": "Togli i filtri",
+    "pages": "Pagine",
+    "pageOf": "{{page}} di {{pages}}",
+    "fields": {
+      "kind": "Tipo",
+      "amount": "Importo",
+      "date": "Data",
+      "account": "Conto",
+      "category": "Categoria",
+      "debt": "Rata di un debito",
+      "note": "Nota"
+    },
+    "kinds": {
+      "Expense": "Spesa",
+      "Income": "Ricavo"
+    }
+  },
+  "setup": {
+    "title": "Configura MySync",
+    "subtitle": "Dicci dove sono i tuoi soldi e cosa devi ancora pagare.",
+    "steps": {
+      "accounts": "Conti",
+      "debts": "Debiti"
+    },
+    "accountsTitle": "I tuoi conti",
+    "accountsHelp_zero": "Hai raggiunto il numero massimo di conti.",
+    "accountsHelp_one": "Puoi aggiungere ancora {{count}} conto.",
+    "accountsHelp_other": "Puoi aggiungere ancora {{count}} conti.",
+    "needAccount": "Crea almeno un conto per continuare.",
+    "debtsTitle": "I tuoi debiti",
+    "debtsHelp": "Facoltativi: puoi aggiungerli anche dopo dalla dashboard.",
+    "finish": "Concludi"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Il tuo patrimonio oggi.",
+    "change30": "Ultimi 30 giorni",
+    "trendTitle": "Andamento del patrimonio",
+    "seeTrend": "Vedi l'andamento",
+    "recentTitle": "Ultimi movimenti",
+    "seeAll": "Vedi tutti",
+    "noTransactions": "Nessun movimento: registra la tua prima spesa o il tuo primo ricavo."
+  },
+  "netWorth": {
+    "title": "Andamento del patrimonio",
+    "subtitle": "Come cambiano nel tempo il patrimonio netto (i saldi dei conti) e i debiti ancora da pagare.",
+    "period": "Periodo",
+    "periods": {
+      "30d": "30 giorni",
+      "90d": "90 giorni",
+      "12m": "12 mesi",
+      "all": "Tutto"
+    },
+    "change": "Variazione nel periodo",
+    "chartLabel": "Grafico dell'andamento del patrimonio",
+    "netWorth": "Patrimonio netto",
+    "buildingUp": "L'andamento si costruirà con i tuoi movimenti.",
+    "tableTitle": "Dati del grafico",
+    "debts": "Debiti residui"
   }
 }

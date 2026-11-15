@@ -26,6 +26,8 @@ function givenHeavyAndLight() {
     createdOn: '2026-11-01',
     paidOff: false,
     group: 'Stable',
+    currency: 'EUR',
+    displayResidual: 80000,
   })
   return api
 }

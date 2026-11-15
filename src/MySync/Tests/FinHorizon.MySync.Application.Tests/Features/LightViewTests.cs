@@ -19,8 +19,8 @@ public sealed class LightViewTests : IDisposable
         _app.GivenAccount("Credem", 6000m);
         var gold = GivenAccount(AccountKind.Valuables, "Oro", 20_000m);
         GivenAccount(AccountKind.SavingsPlan, "PAC", 3_000m);
-        _app.Store.Debts.Add(Debt.Take(_app.Store.Id, DebtKind.Mortgage, new Descriptor("Mutuo", null, null), gold.Id, new Money(80_000m), _app.Store.Today.AddDays(-30)));
-        _app.Store.Debts.Add(Debt.Take(_app.Store.Id, DebtKind.Loan, new Descriptor("Auto", null, null), gold.Id, new Money(170m), _app.Store.Today.AddDays(-30)));
+        _app.Store.Debts.Add(Debt.Take(_app.Store.Id, DebtKind.Mortgage, new Descriptor("Mutuo", null, null), gold.Id, "EUR", new Money(80_000m), _app.Store.Today.AddDays(-30)));
+        _app.Store.Debts.Add(Debt.Take(_app.Store.Id, DebtKind.Loan, new Descriptor("Auto", null, null), gold.Id, "EUR", new Money(170m), _app.Store.Today.AddDays(-30)));
     }
 
     [Theory]
@@ -54,7 +54,7 @@ public sealed class LightViewTests : IDisposable
 
     private Account GivenAccount(AccountKind kind, string name, decimal balance)
     {
-        var account = Account.Open(_app.Store.Id, kind, new Descriptor(name, null, null), new Money(balance), _app.Store.Today.AddDays(-30));
+        var account = Account.Open(_app.Store.Id, kind, new Descriptor(name, null, null), "EUR", new Money(balance), _app.Store.Today.AddDays(-30));
         _app.Store.Accounts.Add(account);
         return account;
     }

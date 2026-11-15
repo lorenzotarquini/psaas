@@ -13,11 +13,14 @@ public sealed class MySyncHost(string connectionString, IReadOnlyDictionary<stri
     /// <summary>"Today" is 2026-11-15 in Rome; scenarios move it to build a history (UC7).</summary>
     public ScenarioClock Clock { get; } = new();
 
+    public FakeCurrencies Currencies { get; } = new();
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
         builder.UseSetting("ConnectionStrings:mysync-db", connectionString);
         builder.UseSetting("Database:MigrateOnStartup", "false");
+        builder.UseSetting("Currencies:Url", "https://frankfurter.test/");
         foreach (var (key, value) in settings ?? new Dictionary<string, string>())
         {
             builder.UseSetting(key, value);
@@ -33,6 +36,9 @@ public sealed class MySyncHost(string connectionString, IReadOnlyDictionary<stri
                 options.TimeProvider = TimeProvider.System;
             });
             services.AddSingleton<TimeProvider>(Clock);
+            // UC13: the scenarios never call Frankfurter.
+            services.AddSingleton<Application.Abstractions.Currencies.ICurrencyCatalog>(Currencies);
+            services.AddSingleton<Application.Abstractions.Currencies.IExchangeRates>(Currencies);
         });
     }
 }

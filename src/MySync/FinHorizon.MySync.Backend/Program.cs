@@ -30,6 +30,7 @@ try
     builder.Services.AddControllers()
         .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
     builder.Services.AddProblemDetails();
+    builder.Services.AddExceptionHandler<CurrencyServiceExceptionHandler>();
     builder.Services.AddHealthChecks();
     builder.Services.AddOpenApi();
     builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy

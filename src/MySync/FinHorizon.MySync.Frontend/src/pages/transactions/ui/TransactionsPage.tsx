@@ -115,10 +115,10 @@ export function TransactionsPage() {
           {page && (
             <div className="flex gap-4 text-sm">
               <span>
-                {t('transactions.expenseTotal')}: <Amount value={-page.expenseTotal} signed />
+                {t('transactions.expenseTotal')}: <Amount value={-page.expenseTotal} currency={page.currency} signed />
               </span>
               <span>
-                {t('transactions.incomeTotal')}: <Amount value={page.incomeTotal} signed />
+                {t('transactions.incomeTotal')}: <Amount value={page.incomeTotal} currency={page.currency} signed />
               </span>
             </div>
           )}

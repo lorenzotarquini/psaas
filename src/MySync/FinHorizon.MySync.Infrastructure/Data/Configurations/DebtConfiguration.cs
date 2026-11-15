@@ -15,6 +15,7 @@ internal sealed class DebtConfiguration : IEntityTypeConfiguration<Debt>
         builder.Property(debt => debt.Id).ValueGeneratedNever();
         builder.Property(debt => debt.OwnerId).IsRequired();
         builder.Property(debt => debt.Kind).HasConversion<string>().HasMaxLength(32);
+        builder.Property(debt => debt.Currency).HasMaxLength(CurrencyConfiguration.CodeLength).IsRequired();
         builder.MapDescriptor(debt => debt.Descriptor);
         builder.Property(debt => debt.NormalizedName).HasMaxLength(Descriptor.MaxNameLength).IsRequired();
         builder.HasOne<Account>().WithMany().HasForeignKey(debt => debt.AccountId).OnDelete(DeleteBehavior.Restrict);

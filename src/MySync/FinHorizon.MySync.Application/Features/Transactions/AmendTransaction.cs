@@ -16,7 +16,8 @@ public sealed record AmendTransactionCommand(
     Guid? CategoryId,
     Guid? DebtId,
     string? Note,
-    Guid? CounterAccountId = null) : ITransactionInput;
+    Guid? CounterAccountId = null,
+    decimal? CounterAmount = null) : ITransactionInput;
 
 public sealed class AmendTransactionValidator : TransactionInputValidator<AmendTransactionCommand>;
 

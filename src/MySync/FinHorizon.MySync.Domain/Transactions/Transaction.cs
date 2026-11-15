@@ -1,3 +1,4 @@
+using FinHorizon.MySync.Domain.Currencies;
 using FinHorizon.MySync.Domain.Common;
 using FinHorizon.MySync.Domain.Transactions.Kinds;
 
@@ -35,6 +36,9 @@ public sealed class Transaction : Entity
     /// <summary>The destination account of a transfer.</summary>
     public Guid? CounterAccountId { get; private set; }
 
+    /// <summary>What reaches the destination of a transfer between two currencies (UC13-R7); otherwise null.</summary>
+    public Money? CounterAmount { get; private set; }
+
     public Guid? CategoryId { get; private set; }
 
     public Guid? DebtId { get; private set; }
@@ -61,9 +65,15 @@ public sealed class Transaction : Entity
     {
         ArgumentNullException.ThrowIfNull(data);
         var kind = MovementKinds.Of(data.Kind);
-        if (!data.Amount.IsPositive || !Money.HasValidPrecision(data.Amount.Amount))
+        // The decimals of each currency are a rule (AmountsMustFitCurrenciesRule): here only the widest precision.
+        if (!IsValidAmount(data.Amount) || (data.CounterAmount is { } counter && !IsValidAmount(counter)))
         {
-            throw new ArgumentException("The amount must be positive, in cents.", nameof(data));
+            throw new ArgumentException("The amounts must be positive, with at most 8 decimals.", nameof(data));
+        }
+
+        if (data.CounterAmount is not null && !kind.UsesCounterAccount)
+        {
+            throw new ArgumentException($"A {data.Kind} has no counter amount.", nameof(data));
         }
 
         if ((data.DebtId is not null && !kind.CanPayDebt)
@@ -79,10 +89,13 @@ public sealed class Transaction : Entity
         Amount = data.Amount;
         AccountId = data.AccountId;
         CounterAccountId = data.CounterAccountId;
+        CounterAmount = data.CounterAmount;
         CategoryId = data.CategoryId;
         DebtId = data.DebtId;
         Note = TextNormalizer.Clean(data.Note);
         _postings.Clear();
         _postings.AddRange(kind.Postings(data));
     }
+
+    private static bool IsValidAmount(Money amount) => amount.IsPositive && Money.HasValidPrecision(amount.Amount, CurrencyRules.MaxDecimals);
 }

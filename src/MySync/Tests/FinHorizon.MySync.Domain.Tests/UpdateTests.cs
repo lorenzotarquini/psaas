@@ -14,7 +14,7 @@ public sealed class UpdateTests
     {
         var account = Account(initialBalance: 1000m, openedOn: Today.AddDays(-10));
 
-        account.Update(AccountKind.VirtualBank, new Descriptor("Revolut", "Carta", "Viaggi"), Euro(1500m));
+        account.Update(AccountKind.VirtualBank, new Descriptor("Revolut", "Carta", "Viaggi"), "EUR", Euro(1500m), hasMovements: false);
 
         Assert.Equal((AccountKind.VirtualBank, "Revolut", "REVOLUT", 1500m), (account.Kind, account.Descriptor.Name, account.NormalizedName, account.InitialBalance.Amount));
         Assert.Equal(Today.AddDays(-10), account.OpenedOn);
@@ -25,8 +25,8 @@ public sealed class UpdateTests
     {
         var debt = Debt(Account(), residual: 500m);
 
-        Assert.Throws<ArgumentException>(() => debt.Update(DebtKind.Loan, new Descriptor("Auto", null, null), debt.AccountId, Euro(99m), Euro(100m)));
-        debt.Update(DebtKind.Mortgage, new Descriptor("Mutuo", null, null), debt.AccountId, Euro(100m), Euro(100m));
+        Assert.Throws<ArgumentException>(() => debt.Update(DebtKind.Loan, new Descriptor("Auto", null, null), debt.AccountId, "EUR", Euro(99m), Euro(100m)));
+        debt.Update(DebtKind.Mortgage, new Descriptor("Mutuo", null, null), debt.AccountId, "EUR", Euro(100m), Euro(100m));
 
         Assert.Equal((DebtKind.Mortgage, "MUTUO", Euro(0m)), (debt.Kind, debt.NormalizedName, debt.ResidualAfter(Euro(100m))));
     }

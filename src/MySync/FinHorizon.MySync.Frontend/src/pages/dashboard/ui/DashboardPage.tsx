@@ -32,7 +32,7 @@ export function DashboardPage() {
   // from before the setup would send the user back to it.
   if (dashboard.data.accounts.length === 0) return dashboard.isFetching ? <Loading /> : <Navigate to="/setup" replace />
 
-  const { netWorth, debtsResidual, accounts, debts, recentTransactions, limits } = dashboard.data
+  const { netWorth, debtsResidual, accounts, debts, recentTransactions, limits, currency } = dashboard.data
   const change = trend.data
 
   return (
@@ -68,15 +68,15 @@ export function DashboardPage() {
 
         <div className="grid gap-4 sm:grid-cols-3">
           <KpiCard icon={faScaleBalanced} label={t('netWorth.netWorth')} highlight>
-            <Amount value={netWorth} highlightNegative />
+            <Amount value={netWorth} currency={currency} highlightNegative />
           </KpiCard>
           <KpiCard icon={faFileInvoiceDollar} label={t('netWorth.debts')}>
-            <Amount value={debtsResidual} />
+            <Amount value={debtsResidual} currency={currency} />
           </KpiCard>
           <KpiCard icon={faArrowUp} label={t('dashboard.change30')}>
             {change ? (
               <span>
-                <Amount value={change.change} signed />
+                <Amount value={change.change} currency={change.currency} signed />
                 {change.changePercent !== null && (
                   <span className={`ml-2 text-sm ${change.change < 0 ? 'text-error' : 'text-success'}`}>
                     ({amountsHidden ? hiddenAmount : format.percent(change.changePercent)})
@@ -102,7 +102,7 @@ export function DashboardPage() {
             {recentTransactions.length === 0 ? <EmptyState>{t('dashboard.noTransactions')}</EmptyState> : <TransactionTable items={recentTransactions} />}
           </section>
           <div className="flex flex-col gap-6">
-            <AccountsCard accounts={accounts} max={limits.maxAccounts} scope={scope} />
+            <AccountsCard accounts={accounts} max={limits.maxAccounts} scope={scope} displayCurrency={currency} />
             <DebtsCard debts={debts} max={limits.maxDebts} scope={scope} />
           </div>
         </div>

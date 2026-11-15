@@ -37,6 +37,7 @@ public static class DependencyInjection
         services.AddSingleton<TransactionPolicy>();
         services.AddScoped<TransactionContextLoader>();
         services.AddScoped<PortfolioReader>();
+        services.AddScoped<Features.Currencies.CurrencyConverter>();
         // Defaults here; the infrastructure binds and validates the configuration section.
         services.AddOptions<LimitsOptions>();
         services.AddScoped<IResourceLimits, ConfiguredResourceLimits>();

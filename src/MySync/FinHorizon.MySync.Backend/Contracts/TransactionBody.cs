@@ -9,4 +9,5 @@ public sealed record TransactionBody(
     Guid? CategoryId,
     Guid? DebtId,
     string? Note,
-    Guid? CounterAccountId = null);
+    Guid? CounterAccountId = null,
+    decimal? CounterAmount = null);

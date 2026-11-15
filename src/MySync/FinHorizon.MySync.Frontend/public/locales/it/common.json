@@ -33,7 +33,9 @@
     "signedMoney": "{{value, currency(currency: EUR; signDisplay: exceptZero)}}",
     "date": "{{value, datetime(dateStyle: medium; timeZone: UTC)}}",
     "shortDate": "{{value, datetime(day: numeric; month: short; timeZone: UTC)}}",
-    "percent": "{{value, number(style: percent; signDisplay: exceptZero; maximumFractionDigits: 1)}}"
+    "percent": "{{value, number(style: percent; signDisplay: exceptZero; maximumFractionDigits: 1)}}",
+    "number": "{{value, number}}",
+    "signedNumber": "{{value, number(signDisplay: exceptZero)}}"
   },
   "errors": {
     "loadFailed": "Caricamento non riuscito.",
@@ -68,7 +70,8 @@
     "fields": {
       "kind": "Tipo di conto",
       "name": "Nome",
-      "initialBalance": "Saldo iniziale"
+      "initialBalance": "Saldo iniziale",
+      "currency": "Valuta"
     },
     "kinds": {
       "CurrentAccount": "Conto corrente",
@@ -78,13 +81,15 @@
       "Other": "Altro",
       "DepositAccount": "Conto deposito",
       "Investments": "Investimenti",
-      "SavingsPlan": "PAC"
+      "SavingsPlan": "PAC",
+      "VirtualCurrency": "Moneta virtuale"
     },
     "confirmEdit": "Modificando il conto, il patrimonio attuale e il suo andamento verranno ricalcolati. Vuoi procedere?",
     "stableHidden_one": "{{count}} bene stabile nascosto",
     "stableHidden_other": "{{count}} beni stabili nascosti",
     "investmentsHidden_one": "{{count}} investimento o deposito nascosto",
-    "investmentsHidden_other": "{{count}} investimenti o depositi nascosti"
+    "investmentsHidden_other": "{{count}} investimenti o depositi nascosti",
+    "currencyHint": "Per la moneta virtuale scegli una criptovaluta (Bitcoin, Ethereum, …)."
   },
   "debts": {
     "title": "Debiti",
@@ -101,7 +106,8 @@
       "name": "Nome",
       "account": "Conto collegato",
       "residual": "Residuo da pagare",
-      "initialResidual": "Residuo iniziale"
+      "initialResidual": "Residuo iniziale",
+      "currency": "Valuta"
     },
     "kinds": {
       "Loan": "Finanziamento",
@@ -165,7 +171,8 @@
     "subtitle": "Dicci dove sono i tuoi soldi e cosa devi ancora pagare.",
     "steps": {
       "accounts": "Conti",
-      "debts": "Debiti"
+      "debts": "Debiti",
+      "currency": "Valuta"
     },
     "accountsTitle": "I tuoi conti",
     "accountsHelp_zero": "Hai raggiunto il numero massimo di conti.",
@@ -174,7 +181,9 @@
     "needAccount": "Crea almeno un conto per continuare.",
     "debtsTitle": "I tuoi debiti",
     "debtsHelp": "Facoltativi: puoi aggiungerli anche dopo dalla dashboard.",
-    "finish": "Concludi"
+    "finish": "Concludi",
+    "currencyTitle": "In che valuta vuoi vedere il tuo patrimonio?",
+    "currencyHelp": "Ogni conto avrà la sua valuta; patrimonio e andamento saranno convertiti in questa. Potrai cambiarla nelle Impostazioni."
   },
   "dashboard": {
     "title": "Dashboard",
@@ -215,7 +224,8 @@
     "bottomAccount": "Secondo conto",
     "amountOut": "Importo in uscita",
     "amountIn": "Importo in entrata",
-    "route": "{{from}} → {{to}}"
+    "route": "{{from}} → {{to}}",
+    "twoCurrencies": "Conti in valute diverse: scrivi quanto esce in {{from}} e quanto arriva in {{to}}."
   },
   "portfolio": {
     "title": "Conti e debiti",
@@ -254,5 +264,9 @@
   "scope": {
     "stable": "Patrimonio stabile e debiti a lungo termine",
     "investments": "Investimenti e depositi"
+  },
+  "currency": {
+    "display": "Valuta di visualizzazione",
+    "displayHint": "Patrimonio, debiti, andamento e totali sono mostrati in questa valuta, convertiti con il cambio di ogni giorno."
   }
 }

@@ -1,7 +1,9 @@
+using FinHorizon.MySync.Application.Abstractions.Currencies;
 using FinHorizon.MySync.Application.Abstractions.Limits;
 using FinHorizon.MySync.Application.Abstractions.Persistence;
 using FinHorizon.MySync.Application.Abstractions.Reading;
 using FinHorizon.MySync.Domain.Common;
+using FinHorizon.MySync.Infrastructure.Currencies;
 using FinHorizon.MySync.Infrastructure.Data;
 using FinHorizon.MySync.Infrastructure.Persistence;
 using FinHorizon.MySync.Infrastructure.Reading;
@@ -30,6 +32,22 @@ public static class DependencyInjection
         services.AddScoped<ITransactionRepository, TransactionRepository>();
         services.AddScoped<ILedgerReader, LedgerReader>();
         services.AddScoped<ITransactionReader, TransactionReader>();
+        services.AddScoped<IPreferencesRepository, PreferencesRepository>();
+
+        // UC13, D10: catalog and rates from Frankfurter, kept in memory (R9).
+        services.AddMemoryCache();
+        services.AddOptions<CurrencyServiceOptions>()
+            .Bind(configuration.GetSection(CurrencyServiceOptions.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+        services.AddHttpClient(FrankfurterCurrencies.ClientName, (provider, client) =>
+        {
+            client.BaseAddress = provider.GetRequiredService<Microsoft.Extensions.Options.IOptions<CurrencyServiceOptions>>().Value.Url;
+            client.Timeout = TimeSpan.FromSeconds(10);
+        });
+        services.AddSingleton<FrankfurterCurrencies>();
+        services.AddSingleton<ICurrencyCatalog>(provider => provider.GetRequiredService<FrankfurterCurrencies>());
+        services.AddSingleton<IExchangeRates>(provider => provider.GetRequiredService<FrankfurterCurrencies>());
 
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton<ICalendar, ZonedCalendar>();

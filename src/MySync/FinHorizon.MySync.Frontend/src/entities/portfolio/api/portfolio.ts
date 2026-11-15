@@ -16,6 +16,8 @@ export interface Dashboard {
   debts: Debt[]
   recentTransactions: Transaction[]
   limits: { maxAccounts: number; maxDebts: number }
+  /** The display currency of the totals (UC13). */
+  currency: string
 }
 
 export const netWorthPeriods = ['30d', '90d', '12m', 'all'] as const
@@ -33,6 +35,7 @@ export interface NetWorthTrend {
   points: NetWorthPoint[]
   change: number
   changePercent: number | null
+  currency: string
 }
 
 /** UC12: the totals count the groups in the scope; the lists stay complete and carry each item's group. */

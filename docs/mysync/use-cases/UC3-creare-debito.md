@@ -22,7 +22,8 @@
 ## Regole
 - R1. Tipo, nome, conto collegato e residuo sono obbligatori; descrizione e tag sono facoltativi.
 - R2. Nome, descrizione e tag seguono le stesse regole del conto (UC2-R2, R3); il nome è unico tra i debiti dell'utente. Il tag è suggerito tra quelli già usati dall'utente su conti e debiti.
-- R3. Residuo in euro con al massimo 2 decimali, maggiore di 0.
+- R3. Residuo nella valuta del debito con al massimo 2 decimali, maggiore di 0.
+- R7. Ogni debito ha una valuta tradizionale (UC13, D12): se non indicata vale quella di visualizzazione, e il frontend propone quella del conto collegato. Le rate escono da conti nella stessa valuta (UC13-R8).
 - R4. Il conto collegato è quello da cui l'utente paga le rate: in UC5 è proposto come conto della rata, ma l'utente può cambiarlo (D6).
 - R5. Il limite `MySync:MaxDebts` è un intero ≥ 0 letto all'avvio; se manca vale 1 (D2). Con 0 i debiti sono disattivati e il frontend non li mostra.
 - R6. Contano nel limite anche i debiti estinti (residuo 0).

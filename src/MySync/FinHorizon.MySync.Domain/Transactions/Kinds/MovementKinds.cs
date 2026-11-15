@@ -40,7 +40,7 @@ public sealed class IncomeKind : IMovementKind
 
 /// <summary>
 /// Money moves from one account of the user to another (UC9): neither an expense nor an income,
-/// so the net worth does not change.
+/// so the net worth does not change, except for the exchange between two currencies (UC13-R7).
 /// </summary>
 public sealed class TransferKind : IMovementKind
 {
@@ -56,7 +56,8 @@ public sealed class TransferKind : IMovementKind
     {
         ArgumentNullException.ThrowIfNull(data);
         var destination = data.CounterAccountId ?? throw new ArgumentException("A transfer needs a destination account.", nameof(data));
-        return [new Posting(data.AccountId, -data.Amount), new Posting(destination, data.Amount)];
+        // Between two currencies the destination receives its own amount (UC13-R7).
+        return [new Posting(data.AccountId, -data.Amount), new Posting(destination, data.CounterAmount ?? data.Amount)];
     }
 }
 

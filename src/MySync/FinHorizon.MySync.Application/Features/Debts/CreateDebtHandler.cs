@@ -2,7 +2,9 @@ using FinHorizon.MySync.Application.Abstractions;
 using FinHorizon.MySync.Application.Abstractions.Limits;
 using FinHorizon.MySync.Application.Abstractions.Persistence;
 using FinHorizon.MySync.Application.Common;
+using FinHorizon.MySync.Application.Features.Currencies;
 using FinHorizon.MySync.Domain.Common;
+using FinHorizon.MySync.Domain.Currencies;
 using FinHorizon.MySync.Domain.Debts;
 
 namespace FinHorizon.MySync.Application.Features.Debts;
@@ -14,6 +16,7 @@ public sealed class CreateDebtHandler(
     IAccountRepository accounts,
     IResourceLimits limits,
     ICalendar calendar,
+    CurrencyConverter converter,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateDebtCommand, DebtView>
 {
     private const string NameField = "name";
@@ -41,7 +44,15 @@ public sealed class CreateDebtHandler(
             return Result<DebtView>.Invalid(NameField, ErrorCodes.NotUnique);
         }
 
-        var debt = Debt.Take(user.Id, EnumNames.Parse<DebtKind>(request.Kind), descriptor, account.Id, new Money(request.Residual!.Value), calendar.Today);
+        var display = await converter.DisplayCurrencyAsync(user.Id, cancellationToken).ConfigureAwait(false);
+        var debt = Debt.Take(
+            user.Id,
+            EnumNames.Parse<DebtKind>(request.Kind),
+            descriptor,
+            account.Id,
+            request.Currency ?? display,
+            new Money(request.Residual!.Value),
+            calendar.Today);
         debts.Add(debt);
         try
         {
@@ -52,6 +63,6 @@ public sealed class CreateDebtHandler(
             return Result<DebtView>.Invalid(NameField, ErrorCodes.NotUnique);
         }
 
-        return Result<DebtView>.Created(DebtView.From(debt, Money.Zero));
+        return Result<DebtView>.Created(DebtView.From(debt, Money.Zero, new RateTable(display, []), calendar.Today));
     }
 }

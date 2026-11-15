@@ -14,6 +14,13 @@ describe('useFormat (it)', () => {
     expect(normalize(result.current.signedMoney(-85.4))).toBe('-85,40 €')
   })
 
+  // UC13: other currencies, up to 8 decimals for cryptocurrencies, tickers Intl does not know.
+  it('formats any currency', () => {
+    expect(normalize(result.current.money(1100, 'USD'))).toBe('1100,00 USD')
+    expect(normalize(result.current.money(0.12345678, 'BTC'))).toBe('0,12345678 BTC')
+    expect(normalize(result.current.money(2.5, 'AAVE'))).toBe('2,50 AAVE')
+  })
+
   it('keeps the calendar day whatever the time zone', () => expect(result.current.date('2026-11-15')).toBe('15 nov 2026'))
 
   it('formats a percentage change', () => expect(result.current.percent(5)).toBe('+5%'))

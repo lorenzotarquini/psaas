@@ -1,6 +1,7 @@
 using FinHorizon.MySync.Domain.Accounts;
 using FinHorizon.MySync.Domain.Categories;
 using FinHorizon.MySync.Domain.Debts;
+using FinHorizon.MySync.Domain.Preferences;
 using FinHorizon.MySync.Domain.Transactions;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,6 +18,8 @@ public sealed class MySyncDbContext(DbContextOptions<MySyncDbContext> options) :
 
     public DbSet<Transaction> Transactions => Set<Transaction>();
 
+    public DbSet<UserPreferences> Preferences => Set<UserPreferences>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ArgumentNullException.ThrowIfNull(modelBuilder);
@@ -26,7 +29,8 @@ public sealed class MySyncDbContext(DbContextOptions<MySyncDbContext> options) :
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
         ArgumentNullException.ThrowIfNull(configurationBuilder);
-        configurationBuilder.Properties<Domain.Common.Money>().HaveConversion<Configurations.MoneyConverter>().HavePrecision(18, 2);
+        // 8 decimals for cryptocurrencies (UC13-R2); 20 digits before the point are plenty for any currency.
+        configurationBuilder.Properties<Domain.Common.Money>().HaveConversion<Configurations.MoneyConverter>().HavePrecision(28, Domain.Currencies.CurrencyRules.MaxDecimals);
         configurationBuilder.Properties<Domain.Common.OwnerId>().HaveConversion<Configurations.OwnerIdConverter>().HaveMaxLength(64);
     }
 }

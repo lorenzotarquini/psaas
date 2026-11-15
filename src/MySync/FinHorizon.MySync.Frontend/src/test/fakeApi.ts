@@ -6,7 +6,15 @@ import { inScope, type PortfolioGroup } from '@/shared/lib/portfolio-scope'
 
 // The same mapping as PortfolioScope in the domain, for the fake only.
 const groupOf = (kind: Account['kind']): PortfolioGroup =>
-  kind === 'Valuables' ? 'Stable' : ['DepositAccount', 'Investments', 'SavingsPlan'].includes(kind) ? 'Investments' : 'Everyday'
+  kind === 'Valuables' ? 'Stable' : ['DepositAccount', 'Investments', 'SavingsPlan', 'VirtualCurrency'].includes(kind) ? 'Investments' : 'Everyday'
+
+/** UC13: a small catalog, traditional currencies and cryptocurrencies. */
+export const fakeCurrencies = [
+  { code: 'EUR', name: 'Euro', symbol: '€', type: 'Fiat' },
+  { code: 'USD', name: 'United States Dollar', symbol: '$', type: 'Fiat' },
+  { code: 'BTC', name: 'Bitcoin', symbol: '₿', type: 'Crypto' },
+  { code: 'ETH', name: 'Ethereum', symbol: 'Ξ', type: 'Crypto' },
+] as const
 
 type Json = Record<string, unknown>
 
@@ -17,13 +25,27 @@ export class FakeApi {
   categories: Category[] = []
   transactions: Transaction[] = []
   limits = { maxAccounts: 2, maxDebts: 1 }
+  /** UC13-R4: the euro until chosen. */
+  preferences = { displayCurrency: 'EUR', chosen: false }
   requests: { method: string; path: string; body?: Json }[] = []
   /** Path and query of every call, in order. */
   urls: string[] = []
   private nextId = 1
 
-  givenAccount(name: string, balance = 1000, kind: Account['kind'] = 'CurrentAccount'): Account {
-    const account: Account = { id: this.id(), kind, name, description: null, tag: null, initialBalance: balance, openedOn: '2026-11-01', balance, group: groupOf(kind) }
+  givenAccount(name: string, balance = 1000, kind: Account['kind'] = 'CurrentAccount', currency = 'EUR'): Account {
+    const account: Account = {
+      id: this.id(),
+      kind,
+      name,
+      description: null,
+      tag: null,
+      initialBalance: balance,
+      openedOn: '2026-11-01',
+      balance,
+      group: groupOf(kind),
+      currency,
+      displayBalance: balance,
+    }
     this.accounts.push(account)
     return account
   }
@@ -44,6 +66,9 @@ export class FakeApi {
       debtName: null,
       note: null,
       recordedAt: '2026-11-05T10:00:00Z',
+      currency: account.currency,
+      counterAmount: null,
+      counterCurrency: null,
     }
     this.transactions.push(transaction)
     return transaction
@@ -63,6 +88,12 @@ export class FakeApi {
     if (method === 'GET' && path === '/api/accounts') return ok({ items: this.accounts, max: this.limits.maxAccounts })
     if (method === 'GET' && path === '/api/debts') return ok({ items: this.debts, max: this.limits.maxDebts })
     if (method === 'GET' && path === '/api/tags') return ok([])
+    if (method === 'GET' && path === '/api/currencies') return ok(fakeCurrencies)
+    if (method === 'GET' && path === '/api/preferences') return ok(this.preferences)
+    if (method === 'PUT' && path === '/api/preferences') {
+      this.preferences = { displayCurrency: String(body!.displayCurrency), chosen: true }
+      return ok(this.preferences)
+    }
     if (method === 'GET' && path === '/api/categories') {
       const term = (url.searchParams.get('term') ?? '').toLowerCase()
       const kind = url.searchParams.get('kind')
@@ -84,6 +115,8 @@ export class FakeApi {
         openedOn: '2026-11-15',
         balance: Number(body!.initialBalance),
         group: groupOf(body!.kind as Account['kind']),
+        currency: String(body!.currency),
+        displayBalance: null,
       }
       this.accounts.push(account)
       return ok(account, 201)
@@ -101,6 +134,8 @@ export class FakeApi {
         createdOn: '2026-11-15',
         paidOff: false,
         group: body!.kind === 'Mortgage' ? 'Stable' : 'Everyday',
+        currency: String(body!.currency),
+        displayResidual: Number(body!.residual),
       }
       this.debts.push(debt)
       return ok(debt, 201)
@@ -116,11 +151,12 @@ export class FakeApi {
         debts: this.debts,
         recentTransactions: this.transactions,
         limits: this.limits,
+        currency: this.preferences.displayCurrency,
       })
     }
-    if (method === 'GET' && path === '/api/net-worth') return ok({ period: url.searchParams.get('period'), points: [], change: 0, changePercent: null })
+    if (method === 'GET' && path === '/api/net-worth') return ok({ period: url.searchParams.get('period'), points: [], change: 0, changePercent: null, currency: this.preferences.displayCurrency })
     if (method === 'GET' && path === '/api/transactions') {
-      return ok({ items: this.transactions, page: 1, pageSize: 25, totalCount: this.transactions.length, expenseTotal: 0, incomeTotal: 0 })
+      return ok({ items: this.transactions, page: 1, pageSize: 25, totalCount: this.transactions.length, expenseTotal: 0, incomeTotal: 0, currency: this.preferences.displayCurrency })
     }
     if (method === 'POST' && path === '/api/transactions') return ok({ id: this.id(), ...body }, 201)
     if (method === 'PUT' && path.startsWith('/api/accounts/')) {

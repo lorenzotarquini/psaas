@@ -20,7 +20,8 @@ public sealed record DashboardView(
     IReadOnlyList<AccountView> Accounts,
     IReadOnlyList<DebtView> Debts,
     IReadOnlyList<TransactionView> RecentTransactions,
-    UserLimits Limits);
+    UserLimits Limits,
+    string Currency);
 
 public sealed class GetDashboardHandler(ICurrentUser user, PortfolioReader portfolio, ITransactionReader transactions, IResourceLimits limits)
     : IRequestHandler<GetDashboardQuery, DashboardView>
@@ -43,6 +44,7 @@ public sealed class GetDashboardHandler(ICurrentUser user, PortfolioReader portf
             current.Accounts,
             current.Debts,
             recent.Items,
-            userLimits));
+            userLimits,
+            current.Currency));
     }
 }

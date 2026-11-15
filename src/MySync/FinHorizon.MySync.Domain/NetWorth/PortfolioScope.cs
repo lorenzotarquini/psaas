@@ -15,6 +15,7 @@ public sealed class PortfolioScope
         [AccountKind.DepositAccount] = PortfolioGroup.Investments,
         [AccountKind.Investments] = PortfolioGroup.Investments,
         [AccountKind.SavingsPlan] = PortfolioGroup.Investments,
+        [AccountKind.VirtualCurrency] = PortfolioGroup.Investments,
     };
 
     private static readonly Dictionary<DebtKind, PortfolioGroup> DebtGroups = new()

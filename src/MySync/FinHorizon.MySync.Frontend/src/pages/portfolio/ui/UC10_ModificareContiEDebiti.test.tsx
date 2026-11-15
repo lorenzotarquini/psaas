@@ -64,6 +64,8 @@ describe('UC10_ModificareContiEDebiti', () => {
       createdOn: '2026-11-01',
       paidOff: false,
       group: 'Stable',
+      currency: 'EUR',
+      displayResidual: 80000,
     })
     renderWithApi(<PortfolioPage />, api)
     const user = userEvent.setup()

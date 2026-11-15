@@ -21,6 +21,11 @@ internal sealed class LedgerReader(MySyncDbContext db) : ILedgerReader
         return rows.ToDictionary(row => row.Key, row => new Money(row.Amount));
     }
 
+    public Task<bool> HasMovementsAsync(OwnerId owner, Guid accountId, CancellationToken cancellationToken = default) =>
+        db.Transactions.AnyAsync(
+            transaction => transaction.OwnerId == owner && (transaction.AccountId == accountId || transaction.CounterAccountId == accountId),
+            cancellationToken);
+
     public async Task<IReadOnlyDictionary<Guid, Money>> InstallmentsByDebtAsync(OwnerId owner, CancellationToken cancellationToken = default)
     {
         var rows = await db.Database.SqlQuery<KeyedAmount>($"""
@@ -53,32 +58,32 @@ internal sealed class LedgerReader(MySyncDbContext db) : ILedgerReader
         var excludedDebtNames = excludedDebts.Select(kind => kind.ToString()).ToArray();
         var accounts = await db.Accounts.AsNoTracking()
             .Where(account => account.OwnerId == owner && !excludedAccounts.Contains(account.Kind))
-            .Select(account => new OpeningValue(account.OpenedOn, account.InitialBalance))
+            .Select(account => new OpeningValue(account.OpenedOn, account.InitialBalance, account.Currency))
             .ToListAsync(cancellationToken).ConfigureAwait(false);
         var debts = await db.Debts.AsNoTracking()
             .Where(debt => debt.OwnerId == owner && !excludedDebts.Contains(debt.Kind))
-            .Select(debt => new OpeningValue(debt.CreatedOn, debt.InitialResidual))
+            .Select(debt => new OpeningValue(debt.CreatedOn, debt.InitialResidual, debt.Currency))
             .ToListAsync(cancellationToken).ConfigureAwait(false);
         var days = await db.Database.SqlQuery<DailyRow>($"""
-            SELECT "Date", SUM("BalanceChange") AS "BalanceChange", SUM("InstallmentsPaid") AS "InstallmentsPaid"
+            SELECT "Date", "Currency", SUM("BalanceChange") AS "BalanceChange", SUM("InstallmentsPaid") AS "InstallmentsPaid"
             FROM (
-                SELECT t."Date", p."Amount" AS "BalanceChange", 0 AS "InstallmentsPaid"
+                SELECT t."Date", a."Currency", p."Amount" AS "BalanceChange", 0 AS "InstallmentsPaid"
                 FROM "Postings" p
                 JOIN "Transactions" t ON t."Id" = p."TransactionId"
                 JOIN "Accounts" a ON a."Id" = p."AccountId"
                 WHERE t."OwnerId" = {owner.Value} AND NOT (a."Kind" = ANY({excludedAccountNames}))
                 UNION ALL
-                SELECT t."Date", 0, t."Amount"
+                SELECT t."Date", d."Currency", 0, t."Amount"
                 FROM "Transactions" t
                 JOIN "Debts" d ON d."Id" = t."DebtId"
                 WHERE t."OwnerId" = {owner.Value} AND NOT (d."Kind" = ANY({excludedDebtNames}))
             ) AS day
-            GROUP BY "Date"
+            GROUP BY "Date", "Currency"
             """).ToListAsync(cancellationToken).ConfigureAwait(false);
         return new LedgerHistory(
             accounts,
             debts,
-            days.Select(day => new DailyMovement(day.Date, new Money(day.BalanceChange), new Money(day.InstallmentsPaid))).ToList());
+            days.Select(day => new DailyMovement(day.Date, new Money(day.BalanceChange), new Money(day.InstallmentsPaid), day.Currency)).ToList());
     }
 
     private sealed class KeyedAmount
@@ -91,6 +96,8 @@ internal sealed class LedgerReader(MySyncDbContext db) : ILedgerReader
     private sealed class DailyRow
     {
         public DateOnly Date { get; init; }
+
+        public string Currency { get; init; } = string.Empty;
 
         public decimal BalanceChange { get; init; }
 

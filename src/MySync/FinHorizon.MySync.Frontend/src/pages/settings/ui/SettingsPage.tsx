@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faKey, faUserPen } from '@fortawesome/free-solid-svg-icons'
+import { DisplayCurrencySetting } from '@/features/display-currency'
 import { LanguageSwitcher, ThemeToggle } from '@/features/preferences'
 import { session } from '@/shared/auth'
 
@@ -56,14 +57,17 @@ export function SettingsPage() {
         </button>
       </section>
 
-      <section className="surface flex flex-wrap items-center justify-between gap-3 p-5" aria-labelledby="settings-preferences">
-        <h2 id="settings-preferences" className="surface-title">
-          {t('settings.preferencesTitle')}
-        </h2>
-        <div className="flex items-center gap-2">
-          <LanguageSwitcher />
-          <ThemeToggle />
-        </div>
+      <section className="surface flex flex-col gap-4 p-5" aria-labelledby="settings-preferences">
+        <header className="flex flex-wrap items-center justify-between gap-3">
+          <h2 id="settings-preferences" className="surface-title">
+            {t('settings.preferencesTitle')}
+          </h2>
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher />
+            <ThemeToggle />
+          </div>
+        </header>
+        <DisplayCurrencySetting />
       </section>
     </div>
   )

@@ -3,7 +3,7 @@ import { apiGet, apiPost, apiPut, ledgerKey } from '@/shared/api'
 import type { PortfolioGroup } from '@/shared/lib/portfolio-scope'
 
 // Order of the account type list in the forms.
-export const accountKinds = ['CurrentAccount', 'VirtualBank', 'DepositAccount', 'Investments', 'SavingsPlan', 'Cash', 'Valuables', 'Other'] as const
+export const accountKinds = ['CurrentAccount', 'VirtualBank', 'DepositAccount', 'Investments', 'SavingsPlan', 'VirtualCurrency', 'Cash', 'Valuables', 'Other'] as const
 export type AccountKind = (typeof accountKinds)[number]
 
 // Mirrors AccountView in FinHorizon.MySync.Application.
@@ -18,7 +18,14 @@ export interface Account {
   balance: number
   /** Day-to-day, stable (valuables) or investments and deposits: what the UC12 switches show or hide. */
   group: PortfolioGroup
+  /** ISO code or crypto ticker: initial balance and balance are in it (UC13). */
+  currency: string
+  /** The balance in the display currency; null when the rate was not at hand. */
+  displayBalance: number | null
 }
+
+/** UC13: "Moneta virtuale" holds cryptocurrencies, every other kind a traditional currency. */
+export const currencyTypeOf = (kind: AccountKind) => (kind === 'VirtualCurrency' ? 'Crypto' : 'Fiat')
 
 export interface AccountList {
   items: Account[]
@@ -31,6 +38,7 @@ export interface NewAccount {
   description?: string
   tag?: string
   initialBalance: number
+  currency: string
 }
 
 export const accountsQueryKey = [ledgerKey, 'accounts'] as const

@@ -14,6 +14,7 @@ internal sealed class AccountConfiguration : IEntityTypeConfiguration<Account>
         builder.Property(account => account.Id).ValueGeneratedNever();
         builder.Property(account => account.OwnerId).IsRequired();
         builder.Property(account => account.Kind).HasConversion<string>().HasMaxLength(32);
+        builder.Property(account => account.Currency).HasMaxLength(CurrencyConfiguration.CodeLength).IsRequired();
         builder.MapDescriptor(account => account.Descriptor);
         builder.Property(account => account.NormalizedName).HasMaxLength(Descriptor.MaxNameLength).IsRequired();
         // UC2-R2: the last guard against two requests with the same name.

@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowTrendUp, faBuildingColumns, faCoins, faGem, faMobileScreenButton, faPiggyBank, faVault, faWallet } from '@fortawesome/free-solid-svg-icons'
+import { faArrowTrendUp, faBitcoinSign, faBuildingColumns, faCoins, faGem, faMobileScreenButton, faPiggyBank, faVault, faWallet } from '@fortawesome/free-solid-svg-icons'
 import type { AccountKind } from '../api/accounts'
 
 const icons = {
@@ -11,6 +11,7 @@ const icons = {
   DepositAccount: faVault,
   Investments: faArrowTrendUp,
   SavingsPlan: faPiggyBank,
+  VirtualCurrency: faBitcoinSign,
 } as const
 
 export function AccountKindIcon({ kind }: { kind: AccountKind }) {

@@ -12,7 +12,7 @@ public sealed class EntitiesTests
     [Fact]
     public void Account_OpensTodayWithItsInitialBalance()
     {
-        var account = Domain.Accounts.Account.Open(Mario, AccountKind.CurrentAccount, new Descriptor("Conto BPM", null, null), Euro(-300m), Today);
+        var account = Domain.Accounts.Account.Open(Mario, AccountKind.CurrentAccount, new Descriptor("Conto BPM", null, null), "EUR", Euro(-300m), Today);
 
         Assert.Equal(Today, account.OpenedOn);
         Assert.Equal(Euro(-300m), account.InitialBalance);
@@ -21,17 +21,17 @@ public sealed class EntitiesTests
 
     [Fact]
     public void Account_RejectsSubCentBalance() =>
-        Assert.Throws<ArgumentException>(() => Domain.Accounts.Account.Open(Mario, AccountKind.Cash, new Descriptor("x", null, null), Euro(1.001m), Today));
+        Assert.Throws<ArgumentException>(() => Domain.Accounts.Account.Open(Mario, AccountKind.Cash, new Descriptor("x", null, null), "EUR", Euro(1.001m), Today));
 
     [Theory]
     [InlineData(0)]
     [InlineData(-100)]
     public void Debt_NeedsAPositiveResidual(decimal residual) =>
-        Assert.Throws<ArgumentException>(() => Domain.Debts.Debt.Take(Mario, DebtKind.Mortgage, new Descriptor("Mutuo", null, null), Guid.NewGuid(), Euro(residual), Today));
+        Assert.Throws<ArgumentException>(() => Domain.Debts.Debt.Take(Mario, DebtKind.Mortgage, new Descriptor("Mutuo", null, null), Guid.NewGuid(), "EUR", Euro(residual), Today));
 
     [Fact]
     public void Debt_ResidualDropsWithInstallments() =>
-        Assert.Equal(Euro(119_350m), Domain.Debts.Debt.Take(Mario, DebtKind.Mortgage, new Descriptor("Mutuo", null, null), Guid.NewGuid(), Euro(120_000m), Today).ResidualAfter(Euro(650m)));
+        Assert.Equal(Euro(119_350m), Domain.Debts.Debt.Take(Mario, DebtKind.Mortgage, new Descriptor("Mutuo", null, null), Guid.NewGuid(), "EUR", Euro(120_000m), Today).ResidualAfter(Euro(650m)));
 
     [Fact]
     public void Category_KeepsTheTypedNameAndNormalizesTheKey()

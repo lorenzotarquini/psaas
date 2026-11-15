@@ -44,7 +44,7 @@ export function DebtsCard({ debts, max, scope = { stable: true, investments: tru
                   {debt.paidOff ? (
                     <span className="badge badge-success badge-soft badge-sm">{t('debts.paidOff')}</span>
                   ) : (
-                    <Amount value={debt.residual} className="font-semibold" />
+                    <Amount value={debt.residual} currency={debt.currency} className="font-semibold" />
                   )}
                 </div>
                 <progress

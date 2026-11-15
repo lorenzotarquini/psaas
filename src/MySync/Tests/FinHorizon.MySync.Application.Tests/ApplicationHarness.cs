@@ -36,11 +36,18 @@ internal sealed class ApplicationHarness : IDisposable
         var ledger = new FakeLedger(Store);
         services.AddSingleton<ILedgerReader>(ledger);
         services.AddSingleton<ITransactionReader>(ledger);
+        services.AddSingleton<IPreferencesRepository>(Preferences);
+        services.AddSingleton<Abstractions.Currencies.ICurrencyCatalog>(Currencies);
+        services.AddSingleton<Abstractions.Currencies.IExchangeRates>(Currencies);
         _provider = services.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true, ValidateScopes = true });
         _scope = _provider.CreateScope();
     }
 
     public FakeStore Store { get; } = new();
+
+    public FakePreferences Preferences { get; } = new();
+
+    public FakeCurrencies Currencies { get; } = new();
 
     public IRequestHandler<TRequest, TResponse> Handler<TRequest, TResponse>()
         where TRequest : notnull =>
@@ -52,16 +59,16 @@ internal sealed class ApplicationHarness : IDisposable
 
     // ---- Given ----
 
-    public Account GivenAccount(string name = "Conto Intesa", decimal balance = 1000m, OwnerId? owner = null, int openedDaysAgo = 30)
+    public Account GivenAccount(string name = "Conto Intesa", decimal balance = 1000m, OwnerId? owner = null, int openedDaysAgo = 30, string currency = "EUR", AccountKind kind = AccountKind.CurrentAccount)
     {
-        var account = Account.Open(owner ?? Store.Id, AccountKind.CurrentAccount, new Descriptor(name, null, null), new Money(balance), Store.Today.AddDays(-openedDaysAgo));
+        var account = Account.Open(owner ?? Store.Id, kind, new Descriptor(name, null, null), currency, new Money(balance), Store.Today.AddDays(-openedDaysAgo));
         Store.Accounts.Add(account);
         return account;
     }
 
     public Debt GivenDebt(Account account, string name = "Auto", decimal residual = 300m)
     {
-        var debt = Debt.Take(account.OwnerId, DebtKind.Loan, new Descriptor(name, null, null), account.Id, new Money(residual), account.OpenedOn);
+        var debt = Debt.Take(account.OwnerId, DebtKind.Loan, new Descriptor(name, null, null), account.Id, account.Currency, new Money(residual), account.OpenedOn);
         Store.Debts.Add(debt);
         return debt;
     }

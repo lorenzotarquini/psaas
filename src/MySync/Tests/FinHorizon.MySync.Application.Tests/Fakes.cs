@@ -1,4 +1,5 @@
 using FinHorizon.MySync.Application.Abstractions;
+using FinHorizon.MySync.Application.Abstractions.Currencies;
 using FinHorizon.MySync.Application.Abstractions.Limits;
 using FinHorizon.MySync.Application.Abstractions.Persistence;
 using FinHorizon.MySync.Application.Abstractions.Reading;
@@ -6,8 +7,10 @@ using FinHorizon.MySync.Application.Features.Transactions;
 using FinHorizon.MySync.Domain.Accounts;
 using FinHorizon.MySync.Domain.Categories;
 using FinHorizon.MySync.Domain.Common;
+using FinHorizon.MySync.Domain.Currencies;
 using FinHorizon.MySync.Domain.Debts;
 using FinHorizon.MySync.Domain.NetWorth;
+using FinHorizon.MySync.Domain.Preferences;
 using FinHorizon.MySync.Domain.Transactions;
 
 namespace FinHorizon.MySync.Application.Tests;
@@ -118,6 +121,9 @@ internal sealed class FakeLedger(FakeStore store) : ILedgerReader, ITransactionR
             .GroupBy(posting => posting.AccountId)
             .ToDictionary(group => group.Key, group => Money.Sum(group.Select(posting => posting.Amount))));
 
+    public Task<bool> HasMovementsAsync(OwnerId owner, Guid accountId, CancellationToken cancellationToken = default) =>
+        Task.FromResult(Of(owner).Any(transaction => transaction.AccountId == accountId || transaction.CounterAccountId == accountId));
+
     public Task<IReadOnlyDictionary<Guid, Money>> InstallmentsByDebtAsync(OwnerId owner, CancellationToken cancellationToken = default) =>
         Task.FromResult<IReadOnlyDictionary<Guid, Money>>(Of(owner)
             .Where(transaction => transaction.DebtId is not null)
@@ -134,29 +140,34 @@ internal sealed class FakeLedger(FakeStore store) : ILedgerReader, ITransactionR
         var accounts = store.Accounts.Where(a => a.OwnerId == owner && scope.Includes(a.Kind)).ToList();
         var debts = store.Debts.Where(d => d.OwnerId == owner && scope.Includes(d.Kind)).ToList();
         return Task.FromResult(new LedgerHistory(
-            accounts.Select(a => new OpeningValue(a.OpenedOn, a.InitialBalance)).ToList(),
-            debts.Select(d => new OpeningValue(d.CreatedOn, d.InitialResidual)).ToList(),
-            Of(owner).GroupBy(t => t.Date).Select(g => new DailyMovement(
+            accounts.Select(a => new OpeningValue(a.OpenedOn, a.InitialBalance, a.Currency)).ToList(),
+            debts.Select(d => new OpeningValue(d.CreatedOn, d.InitialResidual, d.Currency)).ToList(),
+            Of(owner).GroupBy(t => t.Date).SelectMany(g => accounts.Select(a => a.Currency).Distinct().Select(currency => new DailyMovement(
                 g.Key,
-                Money.Sum(g.SelectMany(t => t.Postings).Where(p => accounts.Any(a => a.Id == p.AccountId)).Select(p => p.Amount)),
-                Money.Sum(g.Where(t => debts.Any(d => d.Id == t.DebtId)).Select(t => t.Amount)))).ToList()));
+                Money.Sum(g.SelectMany(t => t.Postings).Where(p => accounts.Any(a => a.Id == p.AccountId && a.Currency == currency)).Select(p => p.Amount)),
+                Money.Sum(g.Where(t => debts.Any(d => d.Id == t.DebtId && d.Currency == currency)).Select(t => t.Amount)),
+                currency))).ToList()));
     }
 
     public Task<TransactionView?> GetAsync(OwnerId owner, Guid id, CancellationToken cancellationToken = default) =>
         Task.FromResult(Of(owner).Where(transaction => transaction.Id == id).Select(View).SingleOrDefault());
 
-    public Task<TransactionPage> ListAsync(OwnerId owner, TransactionFilter filter, CancellationToken cancellationToken = default)
+    public Task<TransactionSlice> ListAsync(OwnerId owner, TransactionFilter filter, CancellationToken cancellationToken = default)
     {
         var all = Of(owner).OrderByDescending(t => t.Date).ThenByDescending(t => t.RecordedAt).ToList();
         var items = all.Skip((filter.Page - 1) * filter.PageSize).Take(filter.PageSize).Select(View).ToList();
-        return Task.FromResult(new TransactionPage(
-            items,
-            filter.Page,
-            filter.PageSize,
-            all.Count,
-            all.Where(t => t.Kind == TransactionKind.Expense).Sum(t => t.Amount.Amount),
-            all.Where(t => t.Kind == TransactionKind.Income).Sum(t => t.Amount.Amount)));
+        var totals = all
+            .GroupBy(t => (t.Date, CurrencyOf(t.AccountId)))
+            .Select(g => new DailyTotal(
+                g.Key.Date,
+                g.Key.Item2,
+                g.Where(t => t.Kind == TransactionKind.Expense).Sum(t => t.Amount.Amount),
+                g.Where(t => t.Kind == TransactionKind.Income).Sum(t => t.Amount.Amount)))
+            .ToList();
+        return Task.FromResult(new TransactionSlice(items, all.Count, totals));
     }
+
+    private string CurrencyOf(Guid accountId) => store.Accounts.Single(a => a.Id == accountId).Currency;
 
     private IEnumerable<Transaction> Of(OwnerId owner) => store.Transactions.Where(transaction => transaction.OwnerId == owner);
 
@@ -174,5 +185,72 @@ internal sealed class FakeLedger(FakeStore store) : ILedgerReader, ITransactionR
         t.Note,
         t.RecordedAt,
         t.CounterAccountId,
-        store.Accounts.SingleOrDefault(a => a.Id == t.CounterAccountId)?.Descriptor.Name);
+        store.Accounts.SingleOrDefault(a => a.Id == t.CounterAccountId)?.Descriptor.Name,
+        CurrencyOf(t.AccountId),
+        t.CounterAmount?.Amount,
+        store.Accounts.SingleOrDefault(a => a.Id == t.CounterAccountId)?.Currency);
+}
+
+/// <summary>Stored preferences, one per user.</summary>
+internal sealed class FakePreferences : IPreferencesRepository
+{
+    private readonly List<UserPreferences> _items = [];
+
+    public Task<UserPreferences?> GetAsync(OwnerId owner, CancellationToken cancellationToken = default) =>
+        Task.FromResult(_items.SingleOrDefault(item => item.OwnerId == owner));
+
+    public void Add(UserPreferences preferences) => _items.Add(preferences);
+}
+
+/// <summary>
+/// The currency service of UC13 with fixed values: 1 EUR = 1.10 USD, 1 BTC = 50,000 EUR, 1 ETH = 3,000 EUR.
+/// Rates of single days can be set, and the service can be switched off (UC13-5a).
+/// </summary>
+internal sealed class FakeCurrencies : ICurrencyCatalog, IExchangeRates
+{
+    private static readonly Dictionary<string, decimal> ValueInEuro = new()
+    {
+        ["EUR"] = 1m,
+        ["USD"] = 1m / 1.1m,
+        ["GBP"] = 1.15m,
+        ["BTC"] = 50_000m,
+        ["ETH"] = 3_000m,
+    };
+
+    public List<DailyRate> DayRates { get; } = [];
+
+    public bool Unavailable { get; set; }
+
+    public Task<IReadOnlyList<CurrencyInfo>> ListAsync(CancellationToken cancellationToken = default)
+    {
+        ThrowIfUnavailable();
+        return Task.FromResult<IReadOnlyList<CurrencyInfo>>(
+        [
+            new("EUR", "Euro", "€", CurrencyType.Fiat),
+            new("USD", "United States Dollar", "$", CurrencyType.Fiat),
+            new("GBP", "British Pound", "£", CurrencyType.Fiat),
+            new("BTC", "Bitcoin", "₿", CurrencyType.Crypto),
+            new("ETH", "Ethereum", "Ξ", CurrencyType.Crypto),
+        ]);
+    }
+
+    public Task<IReadOnlyList<DailyRate>> SeriesAsync(string currency, string displayCurrency, DateOnly from, DateOnly to, CancellationToken cancellationToken = default)
+    {
+        ThrowIfUnavailable();
+        var days = DayRates.Where(rate => rate.Currency == currency && rate.Date >= from && rate.Date <= to).ToList();
+        if (days.Count > 0 || !ValueInEuro.TryGetValue(currency, out var value) || !ValueInEuro.TryGetValue(displayCurrency, out var display))
+        {
+            return Task.FromResult<IReadOnlyList<DailyRate>>(days);
+        }
+
+        return Task.FromResult<IReadOnlyList<DailyRate>>([new DailyRate(currency, from, value / display)]);
+    }
+
+    private void ThrowIfUnavailable()
+    {
+        if (Unavailable)
+        {
+            throw new CurrencyServiceUnavailableException("off");
+        }
+    }
 }

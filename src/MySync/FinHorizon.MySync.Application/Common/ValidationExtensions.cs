@@ -1,4 +1,5 @@
 using FinHorizon.MySync.Domain.Common;
+using FinHorizon.MySync.Domain.Currencies;
 using FluentValidation;
 
 namespace FinHorizon.MySync.Application.Common;
@@ -25,6 +26,17 @@ public static class ValidationExtensions
         rule
             .NotNull().WithErrorCode(ErrorCodes.Required)
             .Must(value => value is null || Money.HasValidPrecision(value.Value)).WithErrorCode(ErrorCodes.InvalidFormat);
+
+    /// <summary>Up to the decimals of a cryptocurrency; the decimals of the actual currency are checked where it is known (UC13-R2).</summary>
+    public static IRuleBuilderOptions<T, decimal?> RequiredAmount<T>(this IRuleBuilder<T, decimal?> rule) =>
+        rule
+            .NotNull().WithErrorCode(ErrorCodes.Required)
+            .Must(value => value is null || Money.HasValidPrecision(value.Value, CurrencyRules.MaxDecimals)).WithErrorCode(ErrorCodes.InvalidFormat);
+
+    public static IRuleBuilderOptions<T, decimal?> RequiredPositiveAmount<T>(this IRuleBuilder<T, decimal?> rule) =>
+        rule
+            .RequiredAmount()
+            .Must(value => value is null || value.Value > 0).WithErrorCode(ErrorCodes.InvalidValue);
 
     public static IRuleBuilderOptions<T, decimal?> RequiredPositiveCents<T>(this IRuleBuilder<T, decimal?> rule) =>
         rule

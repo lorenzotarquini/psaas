@@ -6,17 +6,19 @@ import { hiddenAmount, useAmountsHidden } from '@/shared/ui'
 
 interface NetWorthChartProps {
   points: NetWorthPoint[]
+  /** The display currency of the points (UC13). */
+  currency?: string
   /** Dashboard card: net worth only, no legend. */
   compact?: boolean
 }
 
 /** UC7: net worth as the main area, the debts still to pay as a line. Colours come from theme.css. */
-export function NetWorthChart({ points, compact = false }: NetWorthChartProps) {
+export function NetWorthChart({ points, currency = 'EUR', compact = false }: NetWorthChartProps) {
   const { t } = useTranslation()
   const format = useFormat()
   // UC12 eye: the shape of the trend stays, the figures do not.
   const hidden = useAmountsHidden()
-  const money = (value: number) => (hidden ? hiddenAmount : format.money(value))
+  const money = (value: number) => (hidden ? hiddenAmount : format.money(value, currency))
   const tick = { fill: 'var(--chart-text)', fontSize: 12 }
 
   return (

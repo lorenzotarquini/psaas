@@ -9,6 +9,7 @@
 ## Flusso principale
 1. L'utente apre MySync per la prima volta.
 2. Il sistema vede che non ha conti e mostra la configurazione guidata invece della dashboard.
+2b. **Passo "Valuta":** l'utente sceglie la valuta in cui vedere patrimonio e andamento (UC13); è proposto l'euro.
 3. **Passo "Conti":** l'utente crea uno o più conti (UC2). Il sistema mostra i conti creati e quanti ne può ancora aggiungere.
 4. L'utente passa al passo successivo.
 5. **Passo "Debiti":** l'utente crea zero o più debiti (UC3), scegliendo il conto collegato tra quelli appena creati.

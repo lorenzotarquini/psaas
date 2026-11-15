@@ -6,25 +6,41 @@ import { faArrowsUpDown } from '@fortawesome/free-solid-svg-icons'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
-import { useAccounts, type Account } from '@/entities/account'
+import { currencyTypeOf, useAccounts, type Account } from '@/entities/account'
+import { decimalsOf } from '@/entities/currency'
 import { amendTransaction, recordTransaction, type Transaction } from '@/entities/transaction'
 import { invalidateLedger } from '@/shared/api'
 import { todayIso } from '@/shared/lib/date'
-import { amountField, amountText, applyServerErrors, parseAmount, useErrorText, type ServerFieldMap } from '@/shared/lib/form'
+import { amountField, amountText, applyServerErrors, fitsDecimals, parseAmount, useErrorText, type ServerFieldMap } from '@/shared/lib/form'
 import { Field, LoadError, Loading } from '@/shared/ui'
 
-const schema = z
-  .object({
-    topAccountId: z.string().min(1, 'Required'),
-    bottomAccountId: z.string().min(1, 'Required'),
-    amount: amountField({ positive: true }),
-    date: z.string().min(1, 'Required'),
-    note: z.string().trim().max(250, 'MaxLengthExceeded'),
-  })
-  // UC9-R2: money moves between two different accounts.
-  .refine((values) => values.topAccountId !== values.bottomAccountId, { path: ['bottomAccountId'], message: 'SameAccount' })
+const baseSchema = z.object({
+  topAccountId: z.string().min(1, 'Required'),
+  bottomAccountId: z.string().min(1, 'Required'),
+  /** The amount of the top row. */
+  amount: amountField({ positive: true, decimals: decimalsOf('Crypto') }),
+  /** The amount of the bottom row, typed only between two currencies (UC13-R7). */
+  otherAmount: z.string().trim(),
+  date: z.string().min(1, 'Required'),
+  note: z.string().trim().max(250, 'MaxLengthExceeded'),
+})
 
-type Values = z.infer<typeof schema>
+type Values = z.infer<typeof baseSchema>
+
+const decimalsOfAccount = (account: Account | undefined) => decimalsOf(currencyTypeOf(account?.kind ?? 'CurrentAccount'))
+
+/** UC9-R2 and UC13: two different accounts, each amount with the decimals of its account currency. */
+const schemaFor = (accounts: Account[]) =>
+  baseSchema.superRefine((values, context) => {
+    const top = accounts.find((account) => account.id === values.topAccountId)
+    const bottom = accounts.find((account) => account.id === values.bottomAccountId)
+    if (values.topAccountId === values.bottomAccountId) context.addIssue({ code: 'custom', path: ['bottomAccountId'], message: 'SameAccount' })
+    if (values.amount && !fitsDecimals(values.amount, decimalsOfAccount(top))) context.addIssue({ code: 'custom', path: ['amount'], message: 'InvalidFormat' })
+    if (!top || !bottom || top.currency === bottom.currency) return
+    if (!values.otherAmount) context.addIssue({ code: 'custom', path: ['otherAmount'], message: 'Required' })
+    else if (!fitsDecimals(values.otherAmount, decimalsOfAccount(bottom))) context.addIssue({ code: 'custom', path: ['otherAmount'], message: 'InvalidFormat' })
+    else if (parseAmount(values.otherAmount) <= 0) context.addIssue({ code: 'custom', path: ['otherAmount'], message: 'InvalidValue' })
+  })
 
 /** Which row the money leaves: the top one (shown as "-x") or the bottom one. */
 type Direction = 'topToBottom' | 'bottomToTop'
@@ -57,17 +73,23 @@ function TransferFields({ transaction, onDone, accounts }: TransferFormProps & {
   const [direction, setDirection] = useState<Direction>('topToBottom')
   const [formErrors, setFormErrors] = useState<string[]>([])
   const form = useForm<Values>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(schemaFor(accounts)),
     defaultValues: {
       topAccountId: transaction?.accountId ?? accounts[0]?.id ?? '',
       bottomAccountId: transaction?.counterAccountId ?? accounts[1]?.id ?? '',
       amount: amountText(transaction?.amount),
+      otherAmount: amountText(transaction?.counterAmount ?? undefined),
       date: transaction?.date ?? todayIso(),
       note: transaction?.note ?? '',
     },
   })
   const { errors } = form.formState
   const amount = useWatch({ control: form.control, name: 'amount' })
+  const [topId, bottomId] = useWatch({ control: form.control, name: ['topAccountId', 'bottomAccountId'] })
+  const topCurrency = accounts.find((account) => account.id === topId)?.currency
+  const bottomCurrency = accounts.find((account) => account.id === bottomId)?.currency
+  // UC13-R7: between two currencies the bottom row is typed too, it is not a copy of the top one.
+  const twoCurrencies = !!topCurrency && !!bottomCurrency && topCurrency !== bottomCurrency
   const topSign = direction === 'topToBottom' ? '-' : '+'
   const bottomSign = direction === 'topToBottom' ? '+' : '-'
   const tone = (sign: string) => (sign === '-' ? 'text-error' : 'text-success')
@@ -75,7 +97,18 @@ function TransferFields({ transaction, onDone, accounts }: TransferFormProps & {
   const mutation = useMutation({
     mutationFn: (values: Values) => {
       const [from, to] = direction === 'topToBottom' ? [values.topAccountId, values.bottomAccountId] : [values.bottomAccountId, values.topAccountId]
-      const input = { kind: 'Transfer' as const, date: values.date, amount: parseAmount(values.amount), accountId: from, counterAccountId: to, note: values.note || undefined }
+      const top = parseAmount(values.amount)
+      const bottom = twoCurrencies ? parseAmount(values.otherAmount) : top
+      const [sent, received] = direction === 'topToBottom' ? [top, bottom] : [bottom, top]
+      const input = {
+        kind: 'Transfer' as const,
+        date: values.date,
+        amount: sent,
+        accountId: from,
+        counterAccountId: to,
+        counterAmount: twoCurrencies ? received : null,
+        note: values.note || undefined,
+      }
       return transaction ? amendTransaction(transaction.id, input) : recordTransaction(input)
     },
     onSuccess: async () => {
@@ -86,8 +119,8 @@ function TransferFields({ transaction, onDone, accounts }: TransferFormProps & {
       // The backend speaks of source and destination; the form of top and bottom rows.
       const fields: ServerFieldMap<Values> =
         direction === 'topToBottom'
-          ? { accountId: 'topAccountId', counterAccountId: 'bottomAccountId', amount: 'amount', date: 'date', note: 'note' }
-          : { accountId: 'bottomAccountId', counterAccountId: 'topAccountId', amount: 'amount', date: 'date', note: 'note' }
+          ? { accountId: 'topAccountId', counterAccountId: 'bottomAccountId', amount: 'amount', counterAmount: 'otherAmount', date: 'date', note: 'note' }
+          : { accountId: 'bottomAccountId', counterAccountId: 'topAccountId', amount: 'otherAmount', counterAmount: 'amount', date: 'date', note: 'note' }
       setFormErrors(applyServerErrors(error, form.setError, fields))
     },
   })
@@ -117,7 +150,7 @@ function TransferFields({ transaction, onDone, accounts }: TransferFormProps & {
               inputMode="decimal"
               autoComplete="off"
               className={`input w-full text-right font-semibold ${tone(topSign)}`}
-              placeholder={`${topSign}0`}
+              placeholder={twoCurrencies ? `${topSign}0 ${topCurrency}` : `${topSign}0`}
               aria-invalid={!!errors.amount}
               value={field.value ? `${topSign}${field.value}` : ''}
               onChange={(event) => field.onChange(digitsOnly(event.target.value))}
@@ -146,18 +179,39 @@ function TransferFields({ transaction, onDone, accounts }: TransferFormProps & {
             </option>
           ))}
         </select>
-        <input
-          readOnly
-          tabIndex={-1}
-          aria-label={t(direction === 'topToBottom' ? 'transfer.amountIn' : 'transfer.amountOut')}
-          className={`input w-full text-right font-semibold ${tone(bottomSign)}`}
-          placeholder={`${bottomSign}0`}
-          value={amount ? `${bottomSign}${amount}` : ''}
-        />
+        {twoCurrencies ? (
+          <Controller
+            control={form.control}
+            name="otherAmount"
+            render={({ field }) => (
+              <input
+                aria-label={t(direction === 'topToBottom' ? 'transfer.amountIn' : 'transfer.amountOut')}
+                inputMode="decimal"
+                autoComplete="off"
+                className={`input w-full text-right font-semibold ${tone(bottomSign)}`}
+                placeholder={`${bottomSign}0 ${bottomCurrency}`}
+                aria-invalid={!!errors.otherAmount}
+                value={field.value ? `${bottomSign}${field.value}` : ''}
+                onChange={(event) => field.onChange(digitsOnly(event.target.value))}
+                onBlur={field.onBlur}
+              />
+            )}
+          />
+        ) : (
+          <input
+            readOnly
+            tabIndex={-1}
+            aria-label={t(direction === 'topToBottom' ? 'transfer.amountIn' : 'transfer.amountOut')}
+            className={`input w-full text-right font-semibold ${tone(bottomSign)}`}
+            placeholder={`${bottomSign}0`}
+            value={amount ? `${bottomSign}${amount}` : ''}
+          />
+        )}
       </div>
-      {(errors.bottomAccountId || errors.amount) && (
+      {twoCurrencies && <p className="muted text-xs">{t('transfer.twoCurrencies', { from: topCurrency, to: bottomCurrency })}</p>}
+      {(errors.bottomAccountId || errors.amount || errors.otherAmount) && (
         <p role="alert" className="label text-error">
-          {errorText(errors.bottomAccountId?.message ?? errors.amount?.message)}
+          {errorText(errors.bottomAccountId?.message ?? errors.amount?.message ?? errors.otherAmount?.message)}
         </p>
       )}
 

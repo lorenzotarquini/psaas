@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
 import { useAccounts, useTags } from '@/entities/account'
+import { CurrencySelect, usePreferences } from '@/entities/currency'
 import { createDebt, debtKinds, updateDebt, type Debt } from '@/entities/debt'
 import { invalidateLedger } from '@/shared/api'
 import { amountField, amountText, applyServerErrors, parseAmount, sameFields, useErrorText } from '@/shared/lib/form'
@@ -17,11 +18,12 @@ const schema = z.object({
   description: z.string().trim().max(250, 'MaxLengthExceeded'),
   tag: z.string().trim().max(30, 'MaxLengthExceeded'),
   accountId: z.string().min(1, 'Required'),
+  currency: z.string().min(1, 'Required'),
   residual: amountField({ positive: true }),
 })
 
 type Values = z.infer<typeof schema>
-const fields = sameFields<Values>('kind', 'name', 'description', 'tag', 'accountId', 'residual')
+const fields = sameFields<Values>('kind', 'name', 'description', 'tag', 'accountId', 'currency', 'residual')
 
 interface DebtFormProps {
   /** The debt to edit (UC10); a new one when missing (UC3). */
@@ -36,14 +38,30 @@ export function DebtForm({ debt, onSaved }: DebtFormProps) {
   const queryClient = useQueryClient()
   const accounts = useAccounts()
   const tags = useTags()
+  const displayCurrency = usePreferences().data?.displayCurrency ?? 'EUR'
   const [formErrors, setFormErrors] = useState<string[]>([])
   const form = useForm<Values>({
     resolver: zodResolver(schema),
     defaultValues: debt
-      ? { kind: debt.kind, name: debt.name, description: debt.description ?? '', tag: debt.tag ?? '', accountId: debt.accountId, residual: amountText(debt.initialResidual) }
-      : { kind: 'Loan', name: '', description: '', tag: '', accountId: '', residual: '' },
+      ? {
+          kind: debt.kind,
+          name: debt.name,
+          description: debt.description ?? '',
+          tag: debt.tag ?? '',
+          accountId: debt.accountId,
+          currency: debt.currency,
+          residual: amountText(debt.initialResidual),
+        }
+      : { kind: 'Loan', name: '', description: '', tag: '', accountId: '', currency: displayCurrency, residual: '' },
   })
   const { errors } = form.formState
+  const accountId = form.watch('accountId')
+
+  // UC13-R8: installments leave from an account in the debt currency, so a new debt proposes the currency of its account.
+  useEffect(() => {
+    const linked = accounts.data?.items.find((account) => account.id === accountId)
+    if (!debt && linked && linked.kind !== 'VirtualCurrency') form.setValue('currency', linked.currency)
+  }, [accountId, accounts.data, debt, form])
 
   const mutation = useMutation({
     mutationFn: (values: Values) => {
@@ -53,6 +71,7 @@ export function DebtForm({ debt, onSaved }: DebtFormProps) {
         description: values.description || undefined,
         tag: values.tag || undefined,
         accountId: values.accountId,
+        currency: values.currency,
         residual: parseAmount(values.residual),
       }
       return debt ? updateDebt(debt.id, input) : createDebt(input)
@@ -95,9 +114,12 @@ export function DebtForm({ debt, onSaved }: DebtFormProps) {
           ))}
         </select>
       </Field>
+      <Field label={t('debts.fields.currency')} htmlFor="debt-currency" error={errorText(errors.currency?.message)}>
+        <CurrencySelect id="debt-currency" type="Fiat" aria-invalid={!!errors.currency} {...form.register('currency')} />
+      </Field>
       <Field label={t(debt ? 'debts.fields.initialResidual' : 'debts.fields.residual')} htmlFor="debt-residual" error={errorText(errors.residual?.message)}>
         <label className="input w-full">
-          <span className="muted">€</span>
+          <span className="muted">{form.watch('currency')}</span>
           <input id="debt-residual" inputMode="decimal" autoComplete="off" aria-invalid={!!errors.residual} {...form.register('residual')} />
         </label>
       </Field>

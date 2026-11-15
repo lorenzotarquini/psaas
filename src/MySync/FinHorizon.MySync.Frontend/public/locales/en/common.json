@@ -33,7 +33,9 @@
     "signedMoney": "{{value, currency(currency: EUR; signDisplay: exceptZero)}}",
     "date": "{{value, datetime(dateStyle: medium; timeZone: UTC)}}",
     "shortDate": "{{value, datetime(day: numeric; month: short; timeZone: UTC)}}",
-    "percent": "{{value, number(style: percent; signDisplay: exceptZero; maximumFractionDigits: 1)}}"
+    "percent": "{{value, number(style: percent; signDisplay: exceptZero; maximumFractionDigits: 1)}}",
+    "number": "{{value, number}}",
+    "signedNumber": "{{value, number(signDisplay: exceptZero)}}"
   },
   "errors": {
     "loadFailed": "Could not load the data.",
@@ -68,7 +70,8 @@
     "fields": {
       "kind": "Account type",
       "name": "Name",
-      "initialBalance": "Opening balance"
+      "initialBalance": "Opening balance",
+      "currency": "Currency"
     },
     "kinds": {
       "CurrentAccount": "Current account",
@@ -78,13 +81,15 @@
       "Other": "Other",
       "DepositAccount": "Deposit account",
       "Investments": "Investments",
-      "SavingsPlan": "Savings plan (PAC)"
+      "SavingsPlan": "Savings plan (PAC)",
+      "VirtualCurrency": "Virtual currency"
     },
     "confirmEdit": "Editing the account recalculates your current net worth and its trend. Do you want to proceed?",
     "stableHidden_one": "{{count}} stable asset hidden",
     "stableHidden_other": "{{count}} stable assets hidden",
     "investmentsHidden_one": "{{count}} investment or deposit hidden",
-    "investmentsHidden_other": "{{count}} investments or deposits hidden"
+    "investmentsHidden_other": "{{count}} investments or deposits hidden",
+    "currencyHint": "For a virtual currency account pick a cryptocurrency (Bitcoin, Ethereum, …)."
   },
   "debts": {
     "title": "Debts",
@@ -101,7 +106,8 @@
       "name": "Name",
       "account": "Linked account",
       "residual": "Amount still due",
-      "initialResidual": "Initial amount due"
+      "initialResidual": "Initial amount due",
+      "currency": "Currency"
     },
     "kinds": {
       "Loan": "Loan",
@@ -165,7 +171,8 @@
     "subtitle": "Tell us where your money is and what you still owe.",
     "steps": {
       "accounts": "Accounts",
-      "debts": "Debts"
+      "debts": "Debts",
+      "currency": "Currency"
     },
     "accountsTitle": "Your accounts",
     "accountsHelp_zero": "You have reached the maximum number of accounts.",
@@ -174,7 +181,9 @@
     "needAccount": "Create at least one account to continue.",
     "debtsTitle": "Your debts",
     "debtsHelp": "Optional: you can add them later from the dashboard.",
-    "finish": "Finish"
+    "finish": "Finish",
+    "currencyTitle": "Which currency do you want to see your net worth in?",
+    "currencyHelp": "Each account keeps its own currency; net worth and trend are converted into this one. You can change it in Settings."
   },
   "dashboard": {
     "title": "Dashboard",
@@ -215,7 +224,8 @@
     "bottomAccount": "Second account",
     "amountOut": "Amount out",
     "amountIn": "Amount in",
-    "route": "{{from}} → {{to}}"
+    "route": "{{from}} → {{to}}",
+    "twoCurrencies": "Accounts in different currencies: type what leaves in {{from}} and what arrives in {{to}}."
   },
   "portfolio": {
     "title": "Accounts and debts",
@@ -254,5 +264,9 @@
   "scope": {
     "stable": "Stable assets and long-term debts",
     "investments": "Investments and deposits"
+  },
+  "currency": {
+    "display": "Display currency",
+    "displayHint": "Net worth, debts, trend and totals are shown in this currency, converted with the rate of each day."
   }
 }

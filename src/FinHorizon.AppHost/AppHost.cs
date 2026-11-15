@@ -35,6 +35,8 @@ var mySyncMaxAccounts = builder.AddParameter("mysync-max-accounts");
 var mySyncMaxDebts = builder.AddParameter("mysync-max-debts");
 var mySyncTimeZone = builder.AddParameter("mysync-time-zone");
 var mySyncMigrateOnStartup = builder.AddParameter("mysync-migrate-on-startup");
+// UC13: catalog of currencies and exchange rates (Frankfurter v2, no key).
+var mySyncRatesUrl = builder.AddParameter("mysync-rates-url");
 
 var mySyncBackend = builder.AddProject<Projects.FinHorizon_MySync_Backend>("mysync-backend")
     .WithReference(mySyncDb)
@@ -42,7 +44,8 @@ var mySyncBackend = builder.AddProject<Projects.FinHorizon_MySync_Backend>("mysy
     .WithEnvironment("MySync__MaxAccounts", mySyncMaxAccounts)
     .WithEnvironment("MySync__MaxDebts", mySyncMaxDebts)
     .WithEnvironment("Calendar__TimeZone", mySyncTimeZone)
-    .WithEnvironment("Database__MigrateOnStartup", mySyncMigrateOnStartup);
+    .WithEnvironment("Database__MigrateOnStartup", mySyncMigrateOnStartup)
+    .WithEnvironment("Currencies__Url", mySyncRatesUrl);
 
 // Fixed port: it must match the redirect URIs and web origins of the Keycloak client mysync-frontend.
 builder.AddViteApp("mysync-frontend", "../MySync/FinHorizon.MySync.Frontend")

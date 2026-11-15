@@ -14,9 +14,11 @@ interface AccountsCardProps {
   max: number
   /** UC12: the groups to show; the count and the limit still include the hidden ones. */
   scope?: PortfolioScope
+  /** The currency of the totals; balances in another currency show their converted value (UC13). */
+  displayCurrency?: string
 }
 
-export function AccountsCard({ accounts, max, scope = { stable: true, investments: true } }: AccountsCardProps) {
+export function AccountsCard({ accounts, max, scope = { stable: true, investments: true }, displayCurrency = 'EUR' }: AccountsCardProps) {
   const { t } = useTranslation()
   const [creating, setCreating] = useState(false)
   const [transferring, setTransferring] = useState(false)
@@ -52,7 +54,15 @@ export function AccountsCard({ accounts, max, scope = { stable: true, investment
                 {account.tag && ` · ${account.tag}`}
               </div>
             </div>
-            <Amount value={account.balance} highlightNegative className="font-semibold" />
+            <div className="text-right">
+              <Amount value={account.balance} currency={account.currency} highlightNegative className="font-semibold" />
+              {/* UC13: an account in another currency also shows what it is worth in the display currency. */}
+              {account.displayBalance !== null && account.currency !== displayCurrency && (
+                <div className="muted text-xs">
+                  ≈ <Amount value={account.displayBalance} currency={displayCurrency} />
+                </div>
+              )}
+            </div>
           </li>
         ))}
       </ul>

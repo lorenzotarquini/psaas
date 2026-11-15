@@ -1,7 +1,8 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { session } from '@/shared/auth'
+import { renderWithApi } from '@/test/renderApp'
 import { SettingsPage } from './SettingsPage'
 
 vi.mock('@/shared/auth', () => ({
@@ -20,7 +21,7 @@ vi.mock('@/shared/auth', () => ({
 // docs/mysync/use-cases/UC11-gestire-il-proprio-profilo.md
 describe('UC11_GestireIlProprioProfilo', () => {
   it('S1_DatiDalToken', () => {
-    render(<SettingsPage />)
+    renderWithApi(<SettingsPage />)
 
     expect(screen.getByText('Mario')).toBeTruthy()
     expect(screen.getByText('Rossi')).toBeTruthy()
@@ -28,7 +29,7 @@ describe('UC11_GestireIlProprioProfilo', () => {
   })
 
   it('S2_ModificaDatiSuKeycloak', async () => {
-    render(<SettingsPage />)
+    renderWithApi(<SettingsPage />)
 
     await userEvent.click(screen.getByRole('button', { name: 'Modifica i tuoi dati' }))
 
@@ -36,7 +37,7 @@ describe('UC11_GestireIlProprioProfilo', () => {
   })
 
   it('S3_ReimpostaPasswordSuKeycloak', async () => {
-    render(<SettingsPage />)
+    renderWithApi(<SettingsPage />)
 
     await userEvent.click(screen.getByRole('button', { name: 'Reimposta la password' }))
 

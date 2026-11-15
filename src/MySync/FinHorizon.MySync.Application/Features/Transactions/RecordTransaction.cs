@@ -16,7 +16,8 @@ public sealed record RecordTransactionCommand(
     Guid? CategoryId,
     Guid? DebtId,
     string? Note,
-    Guid? CounterAccountId = null) : ITransactionInput;
+    Guid? CounterAccountId = null,
+    decimal? CounterAmount = null) : ITransactionInput;
 
 public sealed class RecordTransactionValidator : TransactionInputValidator<RecordTransactionCommand>;
 

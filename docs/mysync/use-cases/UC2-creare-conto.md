@@ -18,7 +18,8 @@
 - R1. Tipo, nome e saldo iniziale sono obbligatori; descrizione e tag sono facoltativi.
 - R2. Nome al massimo 50 caratteri, unico tra i conti dell'utente ignorando maiuscole e spazi iniziali e finali.
 - R3. Descrizione al massimo 250 caratteri; tag al massimo 30 caratteri, uno solo per conto, testo libero. Il frontend suggerisce i tag già usati dall'utente.
-- R4. Saldo iniziale in euro con al massimo 2 decimali; può essere 0 o negativo (scoperto, D7).
+- R4. Saldo iniziale nella valuta del conto, con al massimo 2 decimali (8 per le criptovalute); può essere 0 o negativo (scoperto, D7).
+- R8. Ogni conto ha una valuta (UC13): per "Moneta virtuale" una criptovaluta, obbligatoria; per gli altri tipi una valuta tradizionale, la valuta di visualizzazione se non indicata.
 - R5. La data di apertura è la data di creazione e non si sceglie (D3): i movimenti del conto non possono essere precedenti.
 - R6. Il limite `MySync:MaxAccounts` è un intero ≥ 1 letto all'avvio; se manca vale 2 (D2). Un valore non valido impedisce l'avvio del backend.
 - R7. Il conto appartiene all'utente autenticato; il proprietario non arriva mai dalla richiesta.

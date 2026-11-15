@@ -27,6 +27,7 @@ public sealed class TransactionsTests : IDisposable
         Assert.Single(_app.Store.Transactions);
     }
 
+    // 10.005: the cents of the euro are a domain rule (UC13-R2), checked once the account is known.
     [Theory]
     [InlineData("0", ErrorCodes.InvalidValue)]
     [InlineData("-10", ErrorCodes.InvalidValue)]
@@ -35,7 +36,7 @@ public sealed class TransactionsTests : IDisposable
     {
         var account = _app.GivenAccount();
 
-        var result = await Record(new("Expense", _app.Store.Today, decimal.Parse(amount, System.Globalization.CultureInfo.InvariantCulture), account.Id, Guid.NewGuid(), null, null));
+        var result = await Record(new("Expense", _app.Store.Today, decimal.Parse(amount, System.Globalization.CultureInfo.InvariantCulture), account.Id, _app.GivenCategory().Id, null, null));
 
         Assert.Equal([new FieldError("amount", code)], result.Errors);
     }

@@ -1,6 +1,7 @@
 using FinHorizon.MySync.Application.Abstractions;
 using FinHorizon.MySync.Application.Abstractions.Reading;
 using FinHorizon.MySync.Application.Common;
+using FinHorizon.MySync.Application.Features.Currencies;
 using FinHorizon.MySync.Domain.Common;
 using FinHorizon.MySync.Domain.NetWorth;
 using FluentValidation;
@@ -21,9 +22,10 @@ public sealed class GetNetWorthTrendValidator : AbstractValidator<GetNetWorthTre
 
 public sealed record NetWorthPointView(DateOnly Date, decimal NetWorth, decimal Debts);
 
-public sealed record NetWorthTrendView(string Period, IReadOnlyList<NetWorthPointView> Points, decimal Change, decimal? ChangePercent);
+/// <summary>The trend in <see cref="Currency"/>, the display currency, converted day by day (UC13-R3).</summary>
+public sealed record NetWorthTrendView(string Period, IReadOnlyList<NetWorthPointView> Points, decimal Change, decimal? ChangePercent, string Currency);
 
-public sealed class GetNetWorthTrendHandler(ICurrentUser user, ILedgerReader ledger, ICalendar calendar)
+public sealed class GetNetWorthTrendHandler(ICurrentUser user, ILedgerReader ledger, ICalendar calendar, CurrencyConverter converter)
     : IRequestHandler<GetNetWorthTrendQuery, NetWorthTrendView>
 {
     public async Task<Result<NetWorthTrendView>> HandleAsync(GetNetWorthTrendQuery request, CancellationToken cancellationToken = default)
@@ -36,11 +38,16 @@ public sealed class GetNetWorthTrendHandler(ICurrentUser user, ILedgerReader led
         }
 
         var history = await ledger.HistoryAsync(user.Id, PortfolioScope.For(request.IncludeStable, request.IncludeInvestments), cancellationToken).ConfigureAwait(false);
-        var trend = NetWorthCalculator.Trend(history, period, calendar.Today);
+        var today = calendar.Today;
+        var display = await converter.DisplayCurrencyAsync(user.Id, cancellationToken).ConfigureAwait(false);
+        var from = history.Start is { } start ? period.StartFor(today, start) : today;
+        var rates = await converter.RatesAsync(display, history.Currencies, from, today, cancellationToken).ConfigureAwait(false);
+        var trend = NetWorthCalculator.Trend(history, period, today, rates);
         return Result<NetWorthTrendView>.Ok(new NetWorthTrendView(
             period.Code,
             trend.Points.Select(point => new NetWorthPointView(point.Date, point.NetWorth.Amount, point.Debts.Amount)).ToList(),
             trend.Change.Amount,
-            trend.ChangePercent));
+            trend.ChangePercent,
+            display));
     }
 }

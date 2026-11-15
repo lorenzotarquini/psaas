@@ -16,5 +16,8 @@ public enum AccountKind
     Investments = 6,
 
     /// <summary>PAC (piano di accumulo): regular contributions into a fund.</summary>
-    SavingsPlan = 7
+    SavingsPlan = 7,
+
+    /// <summary>Moneta virtuale: cryptocurrencies such as bitcoin; its currency comes from the crypto catalog (UC13).</summary>
+    VirtualCurrency = 8
 }

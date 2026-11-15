@@ -55,11 +55,11 @@ export function NetWorthPage() {
                 {t('netWorth.change')}
               </h2>
               <span className={`text-2xl font-semibold ${trend.data.change < 0 ? 'text-error' : 'text-success'}`}>
-                {format.signedMoney(trend.data.change)}
+                {format.signedMoney(trend.data.change, trend.data.currency)}
               </span>
               {trend.data.changePercent !== null && <span className="muted">{format.percent(trend.data.changePercent)}</span>}
             </div>
-            {trend.data.points.length > 1 ? <NetWorthChart points={trend.data.points} /> : <EmptyState>{t('netWorth.buildingUp')}</EmptyState>}
+            {trend.data.points.length > 1 ? <NetWorthChart points={trend.data.points} currency={trend.data.currency} /> : <EmptyState>{t('netWorth.buildingUp')}</EmptyState>}
           </section>
 
           <details className="surface p-5">
@@ -78,10 +78,10 @@ export function NetWorthPage() {
                     <tr key={point.date}>
                       <td>{format.date(point.date)}</td>
                       <td className="text-right font-medium">
-                        <Amount value={point.netWorth} highlightNegative />
+                        <Amount value={point.netWorth} currency={trend.data.currency} highlightNegative />
                       </td>
                       <td className="text-right">
-                        <Amount value={point.debts} />
+                        <Amount value={point.debts} currency={trend.data.currency} />
                       </td>
                     </tr>
                   ))}

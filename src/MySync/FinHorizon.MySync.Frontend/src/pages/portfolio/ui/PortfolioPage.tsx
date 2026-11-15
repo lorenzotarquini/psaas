@@ -75,10 +75,10 @@ export function PortfolioPage() {
                   </td>
                   <td className="hidden whitespace-nowrap md:table-cell">{format.date(account.openedOn)}</td>
                   <td className="text-right">
-                    <Amount value={account.initialBalance} highlightNegative />
+                    <Amount value={account.initialBalance} currency={account.currency} highlightNegative />
                   </td>
                   <td className="text-right font-semibold">
-                    <Amount value={account.balance} highlightNegative />
+                    <Amount value={account.balance} currency={account.currency} highlightNegative />
                   </td>
                   <td className="text-right">
                     <button
@@ -139,10 +139,10 @@ export function PortfolioPage() {
                       </td>
                       <td className="hidden md:table-cell">{accountName(debt.accountId)}</td>
                       <td className="text-right">
-                        <Amount value={debt.initialResidual} />
+                        <Amount value={debt.initialResidual} currency={debt.currency} />
                       </td>
                       <td className="text-right font-semibold">
-                        {debt.paidOff ? <span className="badge badge-success badge-soft badge-sm">{t('debts.paidOff')}</span> : <Amount value={debt.residual} />}
+                        {debt.paidOff ? <span className="badge badge-success badge-soft badge-sm">{t('debts.paidOff')}</span> : <Amount value={debt.residual} currency={debt.currency} />}
                       </td>
                       <td className="text-right">
                         <button

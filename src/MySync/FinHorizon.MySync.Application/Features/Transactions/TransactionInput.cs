@@ -1,5 +1,6 @@
 using FinHorizon.MySync.Application.Common;
 using FinHorizon.MySync.Domain.Common;
+using FinHorizon.MySync.Domain.Currencies;
 using FinHorizon.MySync.Domain.Transactions;
 using FinHorizon.MySync.Domain.Transactions.Kinds;
 using FluentValidation;
@@ -19,6 +20,9 @@ public interface ITransactionInput
 
     /// <summary>The destination account of a transfer (UC9).</summary>
     Guid? CounterAccountId { get; }
+
+    /// <summary>What reaches the destination of a transfer between two currencies (UC13-R7).</summary>
+    decimal? CounterAmount { get; }
 
     Guid? CategoryId { get; }
 
@@ -41,7 +45,8 @@ public static class TransactionInputExtensions
             input.CategoryId,
             input.DebtId,
             input.Note,
-            input.CounterAccountId);
+            input.CounterAccountId,
+            input.CounterAmount is { } counter ? new Money(counter) : null);
     }
 }
 
@@ -56,7 +61,11 @@ public abstract class TransactionInputValidator<T> : AbstractValidator<T>
     {
         RuleFor(input => input.Kind).RequiredEnumName<T, TransactionKind>();
         RuleFor(input => input.Date).Required();
-        RuleFor(input => input.Amount).RequiredPositiveCents();
+        // The decimals of the account currency are checked by the domain rules (UC13-R2).
+        RuleFor(input => input.Amount).RequiredPositiveAmount();
+        RuleFor(input => input.CounterAmount)
+            .Must(value => value is null || (value.Value > 0 && Money.HasValidPrecision(value.Value, CurrencyRules.MaxDecimals)))
+            .WithErrorCode(ErrorCodes.InvalidValue);
         RuleFor(input => input.AccountId).Required();
         // Which fields a kind needs comes from the kind itself (IMovementKind).
         RuleFor(input => input.CategoryId).Required().When(input => Uses(input, kind => kind.UsesCategory));

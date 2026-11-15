@@ -1,25 +1,35 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
-import { accountKinds, createAccount, updateAccount, useTags, type Account } from '@/entities/account'
+import { accountKinds, createAccount, currencyTypeOf, updateAccount, useTags, type Account } from '@/entities/account'
+import { CurrencySelect, decimalsOf, usePreferences } from '@/entities/currency'
 import { invalidateLedger } from '@/shared/api'
-import { amountField, amountText, applyServerErrors, parseAmount, sameFields, useErrorText } from '@/shared/lib/form'
+import { amountField, amountText, applyServerErrors, fitsDecimals, parseAmount, sameFields, useErrorText } from '@/shared/lib/form'
 import { Field } from '@/shared/ui'
 
-// UC2-R1..R4, with the backend's error codes.
-const schema = z.object({
-  kind: z.enum(accountKinds, 'Required'),
-  name: z.string().trim().min(1, 'Required').max(50, 'MaxLengthExceeded'),
-  description: z.string().trim().max(250, 'MaxLengthExceeded'),
-  tag: z.string().trim().max(30, 'MaxLengthExceeded'),
-  initialBalance: amountField({ positive: false }),
-})
+// UC2-R1..R4 and UC13-R2 (the decimals of the currency), with the backend's error codes.
+const schema = z
+  .object({
+    kind: z.enum(accountKinds, 'Required'),
+    name: z.string().trim().min(1, 'Required').max(50, 'MaxLengthExceeded'),
+    description: z.string().trim().max(250, 'MaxLengthExceeded'),
+    tag: z.string().trim().max(30, 'MaxLengthExceeded'),
+    currency: z.string().min(1, 'Required'),
+    initialBalance: amountField({ positive: false, decimals: decimalsOf('Crypto') }),
+  })
+  .refine((values) => fitsDecimals(values.initialBalance, decimalsOf(currencyTypeOf(values.kind))), {
+    message: 'InvalidFormat',
+    path: ['initialBalance'],
+  })
 
 type Values = z.infer<typeof schema>
-const fields = sameFields<Values>('kind', 'name', 'description', 'tag', 'initialBalance')
+const fields = sameFields<Values>('kind', 'name', 'description', 'tag', 'currency', 'initialBalance')
+
+/** The currency a new account of this type starts with: the display currency, or bitcoin for "Moneta virtuale". */
+const defaultCurrency = (type: 'Fiat' | 'Crypto', displayCurrency: string) => (type === 'Crypto' ? 'BTC' : displayCurrency)
 
 interface AccountFormProps {
   /** The account to edit (UC10); a new one when missing (UC2). */
@@ -36,15 +46,33 @@ export function AccountForm({ account, onSaved }: AccountFormProps) {
   const errorText = useErrorText()
   const queryClient = useQueryClient()
   const tags = useTags()
+  const displayCurrency = usePreferences().data?.displayCurrency ?? 'EUR'
   const [formErrors, setFormErrors] = useState<string[]>([])
   const [toConfirm, setToConfirm] = useState<Values | null>(null)
   const form = useForm<Values>({
     resolver: zodResolver(schema),
     defaultValues: account
-      ? { kind: account.kind, name: account.name, description: account.description ?? '', tag: account.tag ?? '', initialBalance: amountText(account.initialBalance) }
-      : { kind: 'CurrentAccount', name: '', description: '', tag: '', initialBalance: '' },
+      ? {
+          kind: account.kind,
+          name: account.name,
+          description: account.description ?? '',
+          tag: account.tag ?? '',
+          currency: account.currency,
+          initialBalance: amountText(account.initialBalance),
+        }
+      : { kind: 'CurrentAccount', name: '', description: '', tag: '', currency: displayCurrency, initialBalance: '' },
   })
   const { errors } = form.formState
+  const currencyType = currencyTypeOf(form.watch('kind'))
+  const currency = form.watch('currency')
+
+  // UC13: switching between "Moneta virtuale" and the other kinds switches catalog, so the currency starts over.
+  const previousType = useRef(currencyType)
+  useEffect(() => {
+    if (previousType.current === currencyType) return
+    previousType.current = currencyType
+    form.setValue('currency', account && currencyTypeOf(account.kind) === currencyType ? account.currency : defaultCurrency(currencyType, displayCurrency))
+  }, [account, currencyType, displayCurrency, form])
 
   const mutation = useMutation({
     mutationFn: (values: Values) => {
@@ -54,6 +82,7 @@ export function AccountForm({ account, onSaved }: AccountFormProps) {
         description: values.description || undefined,
         tag: values.tag || undefined,
         initialBalance: parseAmount(values.initialBalance),
+        currency: values.currency,
       }
       return account ? updateAccount(account.id, input) : createAccount(input)
     },
@@ -89,9 +118,12 @@ export function AccountForm({ account, onSaved }: AccountFormProps) {
       <Field label={t('accounts.fields.name')} htmlFor="account-name" error={errorText(errors.name?.message)}>
         <input id="account-name" className="input w-full" autoComplete="off" aria-invalid={!!errors.name} {...form.register('name')} />
       </Field>
+      <Field label={t('accounts.fields.currency')} htmlFor="account-currency" hint={t('accounts.currencyHint')} error={errorText(errors.currency?.message)}>
+        <CurrencySelect id="account-currency" type={currencyType} aria-invalid={!!errors.currency} {...form.register('currency')} />
+      </Field>
       <Field label={t('accounts.fields.initialBalance')} htmlFor="account-balance" hint={t('accounts.balanceHint')} error={errorText(errors.initialBalance?.message)}>
         <label className="input w-full">
-          <span className="muted">€</span>
+          <span className="muted">{currency}</span>
           <input id="account-balance" inputMode="decimal" autoComplete="off" aria-invalid={!!errors.initialBalance} {...form.register('initialBalance')} />
         </label>
       </Field>

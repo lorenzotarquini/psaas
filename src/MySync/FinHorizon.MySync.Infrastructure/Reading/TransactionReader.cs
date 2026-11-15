@@ -34,7 +34,8 @@ internal sealed class TransactionReader(MySyncDbContext db) : ITransactionReader
     private const string Columns = """
         SELECT t."Id", t."Kind", t."Date", t."Amount", t."AccountId", a."Name" AS "AccountName",
                t."CategoryId", c."Name" AS "CategoryName", t."DebtId", d."Name" AS "DebtName", t."Note", t."RecordedAt",
-               t."CounterAccountId", ca."Name" AS "CounterAccountName"
+               t."CounterAccountId", ca."Name" AS "CounterAccountName",
+               a."Currency", t."CounterAmount", ca."Currency" AS "CounterCurrency"
         """;
 
     public async Task<TransactionView?> GetAsync(OwnerId owner, Guid id, CancellationToken cancellationToken = default)
@@ -46,7 +47,7 @@ internal sealed class TransactionReader(MySyncDbContext db) : ITransactionReader
         return rows.Select(ToView).SingleOrDefault();
     }
 
-    public async Task<TransactionPage> ListAsync(OwnerId owner, TransactionFilter filter, CancellationToken cancellationToken = default)
+    public async Task<TransactionSlice> ListAsync(OwnerId owner, TransactionFilter filter, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(filter);
         var page = new NpgsqlParameter("limit", NpgsqlDbType.Integer) { Value = filter.PageSize };
@@ -56,17 +57,22 @@ internal sealed class TransactionReader(MySyncDbContext db) : ITransactionReader
                 $"""{Columns} {FromWhere} ORDER BY t."Date" DESC, t."RecordedAt" DESC LIMIT @limit OFFSET @offset""",
                 [.. Parameters(owner, filter, null), page, offset])
             .ToListAsync(cancellationToken).ConfigureAwait(false);
+        // Per day and currency: the handler converts each with the rate of its day (UC13).
         var totals = await db.Database
             .SqlQueryRaw<Totals>(
                 $"""
-                 SELECT COUNT(*)::int AS "Count",
+                 SELECT t."Date", a."Currency", COUNT(*)::int AS "Count",
                         COALESCE(SUM(t."Amount") FILTER (WHERE t."Kind" = 'Expense'), 0) AS "Expenses",
                         COALESCE(SUM(t."Amount") FILTER (WHERE t."Kind" = 'Income'), 0) AS "Incomes"
                  {FromWhere}
+                 GROUP BY t."Date", a."Currency"
                  """,
                 Parameters(owner, filter, null))
-            .SingleAsync(cancellationToken).ConfigureAwait(false);
-        return new TransactionPage(rows.Select(ToView).ToList(), filter.Page, filter.PageSize, totals.Count, totals.Expenses, totals.Incomes);
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+        return new TransactionSlice(
+            rows.Select(ToView).ToList(),
+            totals.Sum(total => total.Count),
+            totals.Select(total => new DailyTotal(total.Date, total.Currency, total.Expenses, total.Incomes)).ToList());
     }
 
     /// <summary>Fresh, typed parameters for each command: a null filter must still have a type for Postgres.</summary>
@@ -89,7 +95,7 @@ internal sealed class TransactionReader(MySyncDbContext db) : ITransactionReader
         row.Id,
         Enum.Parse<TransactionKind>(row.Kind),
         row.Date,
-        row.Amount,
+        new Money(row.Amount).Amount,
         row.AccountId,
         row.AccountName,
         row.CategoryId,
@@ -99,7 +105,10 @@ internal sealed class TransactionReader(MySyncDbContext db) : ITransactionReader
         row.Note,
         row.RecordedAt,
         row.CounterAccountId,
-        row.CounterAccountName);
+        row.CounterAccountName,
+        row.Currency,
+        row.CounterAmount is { } counter ? new Money(counter).Amount : null,
+        row.CounterCurrency);
 
     private sealed class Row
     {
@@ -130,10 +139,20 @@ internal sealed class TransactionReader(MySyncDbContext db) : ITransactionReader
         public Guid? CounterAccountId { get; init; }
 
         public string? CounterAccountName { get; init; }
+
+        public string Currency { get; init; } = string.Empty;
+
+        public decimal? CounterAmount { get; init; }
+
+        public string? CounterCurrency { get; init; }
     }
 
     private sealed class Totals
     {
+        public DateOnly Date { get; init; }
+
+        public string Currency { get; init; } = string.Empty;
+
         public int Count { get; init; }
 
         public decimal Expenses { get; init; }

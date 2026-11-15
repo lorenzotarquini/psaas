@@ -14,7 +14,7 @@
 4. L'utente preme l'**occhio** ("Mostra") e le cifre diventano visibili; il pulsante diventa l'occhio barrato con "Nascondi", che le nasconde di nuovo. Da nascosti, tutti gli importi della dashboard sono `••••`, grafico compreso (resta la forma, non le cifre). L'icona mostra cosa fa il clic.
 
 ## Regole
-- R1. Gruppi: **patrimonio stabile e debiti a lungo termine** = conti Preziosi e debiti Mutuo; **investimenti e depositi** = conti Conto deposito, Investimenti, PAC; tutto il resto è **di tutti i giorni**. La regola sta in un solo punto del dominio (`PortfolioScope`).
+- R1. Gruppi: **patrimonio stabile e debiti a lungo termine** = conti Preziosi e debiti Mutuo; **investimenti e depositi** = conti Conto deposito, Investimenti, PAC, Moneta virtuale; tutto il resto è **di tutti i giorni**. La regola sta in un solo punto del dominio (`PortfolioScope`).
 - R2. Ogni sessione di lavoro parte con gli switch spenti e gli importi nascosti. Le scelte dell'utente valgono per tutta la sessione: restano cambiando pagina o ricaricando, e si perdono chiudendo la scheda (sessionStorage del browser). Ogni switch è una scelta sola per dashboard e Andamento.
 - R3. I movimenti verso o da un conto di un gruppo nascosto contano per la parte visibile: un trasferimento di 1.000 € da "Credem" a "Oro" abbassa di 1.000 € il patrimonio di tutti i giorni.
 - R4. Conteggi e limiti di conti e debiti (UC2-R6, UC3-R5) contano sempre anche le voci nascoste.

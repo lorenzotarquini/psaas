@@ -15,10 +15,10 @@ internal static class Builders
     public static Money Euro(decimal amount) => new(amount);
 
     public static Account Account(decimal initialBalance = 1000m, DateOnly? openedOn = null, string name = "Conto Intesa") =>
-        Domain.Accounts.Account.Open(Mario, AccountKind.CurrentAccount, new Descriptor(name, null, null), Euro(initialBalance), openedOn ?? Today.AddDays(-30));
+        Domain.Accounts.Account.Open(Mario, AccountKind.CurrentAccount, new Descriptor(name, null, null), "EUR", Euro(initialBalance), openedOn ?? Today.AddDays(-30));
 
     public static Debt Debt(Account account, decimal residual = 500m, DateOnly? createdOn = null) =>
-        Domain.Debts.Debt.Take(Mario, DebtKind.Loan, new Descriptor("Auto", null, null), account.Id, Euro(residual), createdOn ?? account.OpenedOn);
+        Domain.Debts.Debt.Take(Mario, DebtKind.Loan, new Descriptor("Auto", null, null), account.Id, "EUR", Euro(residual), createdOn ?? account.OpenedOn);
 
     public static Category Category(TransactionKind kind = TransactionKind.Expense, string name = "Spesa") =>
         Domain.Categories.Category.Create(Mario, kind, name);

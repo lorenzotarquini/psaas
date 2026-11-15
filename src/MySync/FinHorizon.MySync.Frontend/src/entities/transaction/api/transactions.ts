@@ -26,6 +26,11 @@ export interface Transaction {
   debtName: string | null
   note: string | null
   recordedAt: string
+  /** The currency of the account: `amount` is in it (UC13). */
+  currency: string
+  /** What reached the destination of a transfer between two currencies, in `counterCurrency`. */
+  counterAmount: number | null
+  counterCurrency: string | null
 }
 
 export interface TransactionPage {
@@ -35,6 +40,8 @@ export interface TransactionPage {
   totalCount: number
   expenseTotal: number
   incomeTotal: number
+  /** The display currency of the totals (UC13). */
+  currency: string
 }
 
 export interface TransactionInput {
@@ -43,6 +50,8 @@ export interface TransactionInput {
   amount: number
   accountId: string
   counterAccountId?: string | null
+  /** Only for a transfer between two currencies (UC13-R7). */
+  counterAmount?: number | null
   categoryId?: string | null
   debtId?: string | null
   note?: string

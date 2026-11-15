@@ -3,6 +3,7 @@ using FinHorizon.MySync.Domain.Accounts;
 using FinHorizon.MySync.Domain.Categories;
 using FinHorizon.MySync.Domain.Common;
 using FinHorizon.MySync.Domain.Debts;
+using FinHorizon.MySync.Domain.Preferences;
 using FinHorizon.MySync.Domain.Transactions;
 using FinHorizon.MySync.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -52,6 +53,14 @@ internal sealed class CategoryRepository(MySyncDbContext db) : OwnedRepository<C
 
         return await query.OrderBy(category => category.Name).Take(limit).ToListAsync(cancellationToken).ConfigureAwait(false);
     }
+}
+
+internal sealed class PreferencesRepository(MySyncDbContext db) : IPreferencesRepository
+{
+    public Task<UserPreferences?> GetAsync(OwnerId owner, CancellationToken cancellationToken = default) =>
+        db.Preferences.SingleOrDefaultAsync(preferences => preferences.OwnerId == owner, cancellationToken);
+
+    public void Add(UserPreferences preferences) => db.Preferences.Add(preferences);
 }
 
 internal sealed class TransactionRepository(MySyncDbContext db) : OwnedRepository<Transaction>(db), ITransactionRepository

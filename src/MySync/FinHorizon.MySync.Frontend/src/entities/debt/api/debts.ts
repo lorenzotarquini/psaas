@@ -19,6 +19,9 @@ export interface Debt {
   paidOff: boolean
   /** Day-to-day or long-term (mortgages): what the UC12 stable switch shows or hides. */
   group: PortfolioGroup
+  /** A traditional currency: residuals and installments are in it (UC13). */
+  currency: string
+  displayResidual: number | null
 }
 
 export interface DebtList {
@@ -33,6 +36,7 @@ export interface NewDebt {
   tag?: string
   accountId: string
   residual: number
+  currency: string
 }
 
 export const useDebts = () =>

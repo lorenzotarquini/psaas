@@ -14,7 +14,8 @@ describe('UC1_ConfigurareMySync', () => {
     renderApp('/')
 
     expect(await screen.findByRole('heading', { name: 'Configura MySync' })).toBeTruthy()
-    expect(screen.getByRole('heading', { name: 'I tuoi conti' })).toBeTruthy()
+    // UC13: the first step is the display currency, then the accounts.
+    expect(await screen.findByRole('heading', { name: 'In che valuta vuoi vedere il tuo patrimonio?' })).toBeTruthy()
     expect(screen.queryByRole('heading', { name: 'Dashboard' })).toBeNull()
   })
 
@@ -22,6 +23,8 @@ describe('UC1_ConfigurareMySync', () => {
     renderApp('/setup')
 
     await userEvent.click(await screen.findByRole('button', { name: 'Avanti' }))
+    await screen.findByRole('heading', { name: 'I tuoi conti' })
+    await userEvent.click(screen.getByRole('button', { name: 'Avanti' }))
 
     expect(screen.getByRole('alert').textContent).toBe('Crea almeno un conto per continuare.')
     expect(screen.getByRole('heading', { name: 'I tuoi conti' })).toBeTruthy()
@@ -30,6 +33,7 @@ describe('UC1_ConfigurareMySync', () => {
   it('S3_ConfigurazioneCompleta', async () => {
     const { api, router } = renderApp('/setup')
     const user = userEvent.setup()
+    await user.click(await screen.findByRole('button', { name: 'Avanti' }))
 
     await user.type(await screen.findByLabelText('Nome'), 'Conto Intesa')
     await user.type(screen.getByLabelText('Saldo iniziale'), '2500')

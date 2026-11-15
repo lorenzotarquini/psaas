@@ -33,7 +33,11 @@ export function DeleteTransactionButton({ transaction }: { transaction: Transact
           <dd>{format.date(transaction.date)}</dd>
           <dt className="muted">{t('transactions.fields.amount')}</dt>
           <dd>
-            {isTransfer(transaction) ? <Amount value={transaction.amount} /> : <Amount value={signedAmount(transaction)} signed />}
+            {isTransfer(transaction) ? (
+              <Amount value={transaction.amount} currency={transaction.currency} />
+            ) : (
+              <Amount value={signedAmount(transaction)} currency={transaction.currency} signed />
+            )}
           </dd>
           <dt className="muted">{t('transactions.fields.account')}</dt>
           <dd>{isTransfer(transaction) ? t('transfer.route', { from: transaction.accountName, to: transaction.counterAccountName }) : transaction.accountName}</dd>

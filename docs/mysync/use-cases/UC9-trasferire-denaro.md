@@ -22,6 +22,7 @@
 ## Regole
 - R1. Un trasferimento non è né una spesa né un ricavo: non entra nei totali di spese e ricavi e non cambia il patrimonio netto, cambia solo i saldi dei due conti.
 - R2. I due conti sono dell'utente e diversi tra loro.
+- R6. Tra due conti di valute diverse l'utente scrive anche quanto arriva sul conto di destinazione (UC13-R7): la riga di sotto diventa modificabile. In questo caso il patrimonio netto cambia della differenza tra i due controvalori.
 - R3. Un trasferimento non ha categoria e non può essere la rata di un debito.
 - R4. La data va dalla più recente delle due aperture dei conti a oggi, inclusi.
 - R5. Si consulta, si modifica (anche invertendo la direzione) e si elimina come gli altri movimenti (UC8); nel filtro dei movimenti ha il tipo "Trasferimento" e compare filtrando per uno qualunque dei due conti.

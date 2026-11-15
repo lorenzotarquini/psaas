@@ -34,7 +34,9 @@ Da questi dati MySync calcola il **patrimonio netto** e ne mostra l'andamento ne
 | Termine | Significato |
 |---|---|
 | Conto | Un contenitore di valore dell'utente: ha un tipo, un nome, una descrizione, un tag e un saldo iniziale. Il suo saldo cambia solo con i movimenti. |
-| Tipo di conto | Conto corrente, Banca virtuale, Conto deposito, Investimenti, PAC (piano di accumulo), Contanti, Preziosi, Altro. |
+| Tipo di conto | Conto corrente, Banca virtuale, Conto deposito, Investimenti, PAC (piano di accumulo), Moneta virtuale, Contanti, Preziosi, Altro. |
+| Valuta | Ogni conto e debito ha la sua: una valuta tradizionale (EUR, USD, …) o, per la moneta virtuale, una criptovaluta (BTC, ETH, …) (UC13). |
+| Valuta di visualizzazione | La valuta in cui l'utente vede patrimonio, debiti residui e andamento; scelta alla configurazione e nelle Impostazioni (UC13). |
 | Saldo iniziale | Il saldo del conto al giorno in cui l'utente lo crea (la **data di apertura** in MySync). |
 | Saldo | Saldo iniziale + ricavi − spese del conto, fino a una data. |
 | Debito | Una somma che l'utente deve restituire: ha un tipo, un nome, una descrizione, un tag, il conto da cui si paga e il residuo da pagare alla creazione. |
@@ -45,7 +47,7 @@ Da questi dati MySync calcola il **patrimonio netto** e ne mostra l'andamento ne
 | Categoria | Etichetta dell'utente per raggruppare i movimenti (es. "Spesa alimentare", "Stipendio"). Le categorie di spesa e quelle di ricavo sono separate. |
 | Patrimonio netto | Somma dei saldi di tutti i conti, a una certa data. I debiti non vengono sottratti: si mostrano accanto come debiti residui (D9). |
 | Patrimonio stabile e debiti a lungo termine | Conti di tipo Preziosi (beni che restano lì e cambiano poco, come i gioielli) e debiti di tipo Mutuo; nascosti finché il loro switch è spento (UC12). |
-| Investimenti e depositi | Conti di tipo Conto deposito, Investimenti e PAC; nascosti finché il loro switch è spento (UC12). |
+| Investimenti e depositi | Conti di tipo Conto deposito, Investimenti, PAC e Moneta virtuale; nascosti finché il loro switch è spento (UC12). |
 | Debiti residui | Somma dei residui di tutti i debiti, a una certa data. |
 
 ## Requisiti
@@ -69,6 +71,9 @@ Da questi dati MySync calcola il **patrimonio netto** e ne mostra l'andamento ne
 | RF13 | L'utente modifica conti e debiti da una sezione dedicata; modificare un conto chiede conferma perché il patrimonio viene ricalcolato. I pulsanti di aggiunta sono disabilitati oltre i limiti. | UC10 |
 | RF14 | L'utente vede e modifica i propri dati e reimposta la password dalle Impostazioni, tramite le pagine di Keycloak. | UC11 |
 | RF15 | Dashboard e Andamento hanno due switch, spenti di default: "Patrimonio stabile e debiti a lungo termine" e "Investimenti e depositi"; la dashboard ha anche un occhio per nascondere gli importi. | UC12 |
+| RF16 | Ogni conto e debito ha una valuta; il tipo di conto "Moneta virtuale" usa le criptovalute. Il catalogo delle valute viene da un servizio esterno. | UC13 |
+| RF17 | Patrimonio, debiti residui e andamento si vedono nella valuta di visualizzazione dell'utente, convertendo con il tasso di cambio di ogni giorno. | UC13 |
+| RF18 | L'utente sceglie la valuta di visualizzazione alla configurazione e la cambia nelle Impostazioni. | UC1, UC11, UC13 |
 
 ### Non funzionali
 
@@ -76,7 +81,7 @@ Da questi dati MySync calcola il **patrimonio netto** e ne mostra l'andamento ne
 |---|---|
 | RNF1 | Ogni operazione richiede un utente autenticato su Keycloak con ruolo `enduser` (policy `User`). |
 | RNF2 | Isolamento: ogni dato appartiene a un utente (`sub` del token) e nessuna operazione legge o modifica dati di un altro utente. Un id di un altro utente si comporta come un id inesistente (404, mai 403, per non rivelarne l'esistenza). |
-| RNF3 | Gli importi sono in euro, con 2 decimali, e si salvano come `decimal` (mai `float`/`double`). |
+| RNF3 | Gli importi sono nella valuta del loro conto, con 2 decimali per le valute tradizionali e 8 per le criptovalute, e si salvano come `decimal` (mai `float`/`double`). |
 | RNF4 | Le date dei movimenti sono date di calendario (senza ora né fuso). |
 | RNF5 | Stessi codici d'errore per campo dell'Admin Portal (`Required`, `InvalidFormat`, `MaxLengthExceeded`, `NotUnique`, `InvalidValue`) più `LimitReached` per i limiti di RF2 e RF4; il frontend li traduce. |
 | RNF6 | Interfaccia in italiano e inglese, tema chiaro e scuro, utilizzabile da telefono (la registrazione di una spesa si fa spesso in mobilità). |
@@ -98,6 +103,7 @@ Da questi dati MySync calcola il **patrimonio netto** e ne mostra l'andamento ne
 | [UC10](UC10-modificare-conti-e-debiti.md) | Modificare conti e debiti | in ambito |
 | [UC11](UC11-gestire-il-proprio-profilo.md) | Gestire il proprio profilo (dati, password, preferenze) | in ambito |
 | [UC12](UC12-vista-leggera-e-importi-nascosti.md) | Vista leggera e importi nascosti | in ambito |
+| [UC13](UC13-valute-e-moneta-virtuale.md) | Valute e moneta virtuale | in ambito |
 
 Contratto HTTP: [API.md](API.md).
 
@@ -105,7 +111,7 @@ Contratto HTTP: [API.md](API.md).
 
 - Finanze aziendali: conti, debiti e movimenti di un'organizzazione B2B (fase 2, D8).
 - Eliminazione di conti e debiti; modifica ed eliminazione delle categorie. Conti e debiti si modificano (UC10), i movimenti hanno il CRUD completo (D1).
-- Valute diverse dall'euro, rivalutazione dei preziosi.
+- Rivalutazione dei preziosi; prezzi di azioni e fondi dei conti Investimenti e PAC.
 - Movimenti ricorrenti, piani di ammortamento, separazione tra quota capitale e interessi di una rata.
 - Import da estratto conto o collegamento alle banche (open banking).
 - Budget, obiettivi di risparmio, notifiche.
@@ -126,6 +132,12 @@ Prese il 2026-11-15.
 | D7 | Il saldo di un conto può essere negativo (scoperto)? | Sì per tutti i tipi; MySync non blocca la spesa, la dashboard evidenzia il saldo negativo. |
 | D8 | MySync è per le finanze personali o anche per quelle di un'azienda? | Fase 1 (MVP) solo privati: i dati sono personali e legati all'utente (`sub`), non a un'organizzazione. Il conto aziendale arriva nella fase 2. Nella fase 1 l'accesso resta regolato solo dal ruolo `enduser`, senza controllare il tipo di organizzazione dei profili. |
 | D9 | Il patrimonio netto sottrae i debiti? | No: è la somma dei saldi dei conti; i debiti residui si mostrano accanto, in una card e una linea del grafico a parte. Decisa il 2026-11-15 dopo la prova della dashboard. |
+
+| D10 | Da dove vengono il catalogo delle valute e i tassi di cambio? | Da [Frankfurter](https://frankfurter.dev) v2: gratuito e senza chiave, 160+ valute tradizionali e 35 criptovalute, tassi giornalieri con storico. Alternative valutate: CoinGecko (17.000+ criptovalute, ma chiave obbligatoria e solo 1 anno di storico gratis). Il provider sta dietro alle interfacce `ICurrencyCatalog` e `IExchangeRates`: cambiarlo è una classe in più. Decisa il 2026-11-15. |
+| D11 | Dove si sceglie la valuta di visualizzazione? | Alla configurazione (UC1) e nelle Impostazioni (UC11); si salva in MySync, l'euro finché non è scelta. |
+| D12 | I debiti hanno una valuta? | Sì, tradizionale; la rata esce da un conto nella stessa valuta. |
+| D13 | Trasferimento tra valute diverse? | L'utente indica l'importo che esce e quello che entra; il cambio applicato è il suo. |
+| D14 | Si può cambiare la valuta di un conto? | Solo finché non ha movimenti (di un debito: finché non ha rate), perché gli importi già registrati sono in quella valuta. |
 
 Non ci sono domande aperte.
 

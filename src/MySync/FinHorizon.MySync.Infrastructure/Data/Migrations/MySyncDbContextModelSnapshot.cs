@@ -28,9 +28,14 @@ namespace FinHorizon.MySync.Infrastructure.Data.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
                     b.Property<decimal>("InitialBalance")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
+                        .HasPrecision(28, 8)
+                        .HasColumnType("numeric(28,8)");
 
                     b.Property<string>("Kind")
                         .IsRequired()
@@ -123,9 +128,14 @@ namespace FinHorizon.MySync.Infrastructure.Data.Migrations
                     b.Property<DateOnly>("CreatedOn")
                         .HasColumnType("date");
 
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
                     b.Property<decimal>("InitialResidual")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
+                        .HasPrecision(28, 8)
+                        .HasColumnType("numeric(28,8)");
 
                     b.Property<string>("Kind")
                         .IsRequired()
@@ -173,6 +183,29 @@ namespace FinHorizon.MySync.Infrastructure.Data.Migrations
                     b.ToTable("Debts", (string)null);
                 });
 
+            modelBuilder.Entity("FinHorizon.MySync.Domain.Preferences.UserPreferences", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("DisplayCurrency")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerId")
+                        .IsUnique();
+
+                    b.ToTable("Preferences", (string)null);
+                });
+
             modelBuilder.Entity("FinHorizon.MySync.Domain.Transactions.Transaction", b =>
                 {
                     b.Property<Guid>("Id")
@@ -182,14 +215,18 @@ namespace FinHorizon.MySync.Infrastructure.Data.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<decimal>("Amount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
+                        .HasPrecision(28, 8)
+                        .HasColumnType("numeric(28,8)");
 
                     b.Property<Guid?>("CategoryId")
                         .HasColumnType("uuid");
 
                     b.Property<Guid?>("CounterAccountId")
                         .HasColumnType("uuid");
+
+                    b.Property<decimal?>("CounterAmount")
+                        .HasPrecision(28, 8)
+                        .HasColumnType("numeric(28,8)");
 
                     b.Property<DateOnly>("Date")
                         .HasColumnType("date");
@@ -276,8 +313,8 @@ namespace FinHorizon.MySync.Infrastructure.Data.Migrations
                                 .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
-                                .HasPrecision(18, 2)
-                                .HasColumnType("numeric(18,2)");
+                                .HasPrecision(28, 8)
+                                .HasColumnType("numeric(28,8)");
 
                             b1.HasKey("TransactionId", "Id");
 

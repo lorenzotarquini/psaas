@@ -60,7 +60,11 @@ export function TransactionTable({ items }: { items: Transaction[] }) {
               </td>
               <td className="muted hidden max-w-56 truncate lg:table-cell">{transaction.note}</td>
               <td className="text-right font-medium">
-                {isTransfer(transaction) ? <Amount value={transaction.amount} /> : <Amount value={signedAmount(transaction)} signed />}
+                {isTransfer(transaction) ? (
+                  <TransferAmounts transaction={transaction} />
+                ) : (
+                  <Amount value={signedAmount(transaction)} currency={transaction.currency} signed />
+                )}
               </td>
               <td className="whitespace-nowrap text-right">
                 <button type="button" className="btn btn-ghost btn-sm btn-square" aria-label={t('actions.edit')} onClick={() => setEditing(transaction)}>
@@ -75,5 +79,19 @@ export function TransactionTable({ items }: { items: Transaction[] }) {
       <TransactionDialog open={editing !== undefined && !isTransfer(editing)} transaction={editing} onClose={() => setEditing(undefined)} />
       <TransferDialog open={editing !== undefined && isTransfer(editing)} transaction={editing} onClose={() => setEditing(undefined)} />
     </div>
+  )
+}
+
+/** UC9, UC13: a transfer shows what left and, between two currencies, also what arrived. */
+function TransferAmounts({ transaction }: { transaction: Transaction }) {
+  return (
+    <>
+      <Amount value={transaction.amount} currency={transaction.currency} />
+      {transaction.counterAmount !== null && transaction.counterCurrency && (
+        <div className="muted text-xs">
+          → <Amount value={transaction.counterAmount} currency={transaction.counterCurrency} />
+        </div>
+      )}
+    </>
   )
 }

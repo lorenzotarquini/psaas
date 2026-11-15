@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AdminPortal\FinHorizon.AdminPortal.Backend\FinHorizon.AdminPortal.Backend.csproj" />
+    <ProjectReference Include="..\MySync\FinHorizon.MySync.Backend\FinHorizon.MySync.Backend.csproj" />
   </ItemGroup>
 
   <ItemGroup>

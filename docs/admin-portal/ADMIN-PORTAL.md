@@ -52,22 +52,23 @@ Restano fuori, come proposte nella [sezione 6](#6-proposta-di-espansione-analisi
 
 ```
 src/
-├─ FinHorizon.slnx                     solution: AdminPortal/, AdminPortal/Tests/, Shared/, Shared/Tests/, Orchestration/
-├─ FinHorizon.AppHost/                 Aspire: Postgres (adminportal-db), backend, frontend
+├─ FinHorizon.slnx                     solution: AdminPortal/, MySync/ (ognuna con Tests/), Shared/, Orchestration/
+├─ FinHorizon.AppHost/                 Aspire: Postgres (adminportal-db, mysync-db), backend e frontend di ogni applicazione
 ├─ AdminPortal/
 │  ├─ FinHorizon.AdminPortal.Domain/
 │  ├─ FinHorizon.AdminPortal.Application/      porte, servizi, contratti
 │  ├─ FinHorizon.AdminPortal.Infrastructure/   EF Core (AdminPortalDbContext, migrazioni), Keycloak, SMTP, hook
 │  ├─ FinHorizon.AdminPortal.Backend/          API
-│  ├─ FinHorizon.AdminPortal.Frontend/         React (fuori dalla solution, avviato da Aspire)
+│  ├─ FinHorizon.AdminPortal.Frontend/         React; .esproj per aprirlo, avviarlo e testarlo da Visual Studio
 │  └─ Tests/                                   un progetto di test per strato
+├─ MySync/                             stessa struttura, vedi docs/mysync/README.md
 └─ Shared/
    ├─ FinHorizon.Auth/
    ├─ FinHorizon.Modules.Sdk/
    └─ Tests/
 ```
 
-Regole: la clean architecture è del portale e nessun altro progetto la referenzia; `Shared/` non dipende dal portale; ogni modulo futuro avrà la propria cartella con i propri strati e il proprio database, e userà solo `Shared/`.
+Regole: ogni applicazione ha la sua clean architecture e il suo database, e nessun'altra la referenzia; `Shared/` non dipende da nessuna applicazione. I frontend sono nella solution come progetti `.esproj` (`npm run dev`, test Vitest); `dotnet build` non lancia `vite build`, ed è sempre Aspire ad avviarli insieme ai backend.
 
 Contratto HTTP: [`docs/use-cases/API.md`](../use-cases/API.md). Collection Postman: [`docs/postman`](../postman/FinHorizon.AdminPortal.postman_collection.json).
 

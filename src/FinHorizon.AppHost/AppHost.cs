@@ -7,12 +7,13 @@ var postgres = builder.AddPostgres("postgres", postgresUsername, postgresPasswor
     .WithDataBindMount("../postgres_data");
 
 var adminPortalDb = postgres.AddDatabase("adminportal-db", "adminportal-db");
+var mySyncDb = postgres.AddDatabase("mysync-db", "mysync-db");
 
 // Secret of the confidential client adminportal-api: its service account manages users, reads login events
 // and exchanges tokens for impersonation. Set it with: dotnet user-secrets set "Parameters:admin-portal-client-secret" "<value>"
 var keycloakClientSecret = builder.AddParameter("admin-portal-client-secret", secret: true);
 
-var backend = builder.AddProject<Projects.FinHorizon_AdminPortal_Backend>("adminportal-backend")
+var adminPortalBackend = builder.AddProject<Projects.FinHorizon_AdminPortal_Backend>("adminportal-backend")
     .WithReference(adminPortalDb)
     .WaitFor(adminPortalDb)
     .WithEnvironment("Keycloak__ClientSecret", keycloakClientSecret)
@@ -23,8 +24,20 @@ var backend = builder.AddProject<Projects.FinHorizon_AdminPortal_Backend>("admin
 // Fixed port: it must match the redirect URIs and web origins of the Keycloak client adminportal-frontend.
 builder.AddViteApp("adminportal-frontend", "../AdminPortal/FinHorizon.AdminPortal.Frontend")
     .WithEndpoint("http", endpoint => endpoint.Port = 5173)
-    .WithEnvironment("BACKEND_URL", backend.GetEndpoint("https"))
+    .WithEnvironment("BACKEND_URL", adminPortalBackend.GetEndpoint("https"))
     .WithExternalHttpEndpoints()
-    .WaitFor(backend);
+    .WaitFor(adminPortalBackend);
+
+// MySync: its own database, backend and frontend; users sign in with the same realm.
+var mySyncBackend = builder.AddProject<Projects.FinHorizon_MySync_Backend>("mysync-backend")
+    .WithReference(mySyncDb)
+    .WaitFor(mySyncDb);
+
+// Fixed port: it must match the redirect URIs and web origins of the Keycloak client mysync-frontend.
+builder.AddViteApp("mysync-frontend", "../MySync/FinHorizon.MySync.Frontend")
+    .WithEndpoint("http", endpoint => endpoint.Port = 5174)
+    .WithEnvironment("BACKEND_URL", mySyncBackend.GetEndpoint("https"))
+    .WithExternalHttpEndpoints()
+    .WaitFor(mySyncBackend);
 
 builder.Build().Run();

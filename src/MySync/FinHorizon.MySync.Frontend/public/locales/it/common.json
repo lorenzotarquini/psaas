@@ -1,0 +1,13 @@
+{
+  "appName": "FinHorizon MySync",
+  "loading": "Caricamento…",
+  "logout": "Esci",
+  "home": {
+    "title": "Benvenuto in MySync",
+    "signedInAs": "Accesso effettuato come {{name}}",
+    "empty": "Qui arriveranno le funzionalità di MySync."
+  },
+  "errors": {
+    "loadFailed": "Caricamento non riuscito."
+  }
+}

@@ -1,15 +1,35 @@
 <Solution>
   <Folder Name="/AdminPortal/">
-    <Project Path="AdminPortal/FinHorizon.AdminPortal.Domain/FinHorizon.AdminPortal.Domain.csproj" />
     <Project Path="AdminPortal/FinHorizon.AdminPortal.Application/FinHorizon.AdminPortal.Application.csproj" />
-    <Project Path="AdminPortal/FinHorizon.AdminPortal.Infrastructure/FinHorizon.AdminPortal.Infrastructure.csproj" />
     <Project Path="AdminPortal/FinHorizon.AdminPortal.Backend/FinHorizon.AdminPortal.Backend.csproj" />
+    <Project Path="AdminPortal/FinHorizon.AdminPortal.Domain/FinHorizon.AdminPortal.Domain.csproj" />
+    <Project Path="AdminPortal/FinHorizon.AdminPortal.Frontend/FinHorizon.AdminPortal.Frontend.esproj">
+      <Build />
+      <Deploy />
+    </Project>
+    <Project Path="AdminPortal/FinHorizon.AdminPortal.Infrastructure/FinHorizon.AdminPortal.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/AdminPortal/Tests/">
-    <Project Path="AdminPortal/Tests/FinHorizon.AdminPortal.Domain.Tests/FinHorizon.AdminPortal.Domain.Tests.csproj" />
     <Project Path="AdminPortal/Tests/FinHorizon.AdminPortal.Application.Tests/FinHorizon.AdminPortal.Application.Tests.csproj" />
-    <Project Path="AdminPortal/Tests/FinHorizon.AdminPortal.Infrastructure.Tests/FinHorizon.AdminPortal.Infrastructure.Tests.csproj" />
     <Project Path="AdminPortal/Tests/FinHorizon.AdminPortal.Backend.Tests/FinHorizon.AdminPortal.Backend.Tests.csproj" />
+    <Project Path="AdminPortal/Tests/FinHorizon.AdminPortal.Domain.Tests/FinHorizon.AdminPortal.Domain.Tests.csproj" />
+    <Project Path="AdminPortal/Tests/FinHorizon.AdminPortal.Infrastructure.Tests/FinHorizon.AdminPortal.Infrastructure.Tests.csproj" />
+  </Folder>
+  <Folder Name="/MySync/">
+    <Project Path="MySync/FinHorizon.MySync.Application/FinHorizon.MySync.Application.csproj" />
+    <Project Path="MySync/FinHorizon.MySync.Backend/FinHorizon.MySync.Backend.csproj" />
+    <Project Path="MySync/FinHorizon.MySync.Domain/FinHorizon.MySync.Domain.csproj" />
+    <Project Path="MySync/FinHorizon.MySync.Frontend/FinHorizon.MySync.Frontend.esproj">
+      <Build />
+      <Deploy />
+    </Project>
+    <Project Path="MySync/FinHorizon.MySync.Infrastructure/FinHorizon.MySync.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/MySync/Tests/">
+    <Project Path="MySync/Tests/FinHorizon.MySync.Application.Tests/FinHorizon.MySync.Application.Tests.csproj" />
+    <Project Path="MySync/Tests/FinHorizon.MySync.Backend.Tests/FinHorizon.MySync.Backend.Tests.csproj" />
+    <Project Path="MySync/Tests/FinHorizon.MySync.Domain.Tests/FinHorizon.MySync.Domain.Tests.csproj" />
+    <Project Path="MySync/Tests/FinHorizon.MySync.Infrastructure.Tests/FinHorizon.MySync.Infrastructure.Tests.csproj" />
   </Folder>
   <Folder Name="/Shared/">
     <Project Path="Shared/FinHorizon.Auth/FinHorizon.Auth.csproj" />

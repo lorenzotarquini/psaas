@@ -268,5 +268,22 @@
   "currency": {
     "display": "Display currency",
     "displayHint": "Net worth, debts, trend and totals are shown in this currency, converted with the rate of each day."
+  },
+  "calculator": {
+    "title": "Calculator",
+    "expression": "Expression",
+    "result": "Result",
+    "angle": "Degrees or radians",
+    "backspace": "Delete the last character",
+    "clear": "Clear",
+    "ans": "Previous result",
+    "equals": "Calculate",
+    "errors": {
+      "invalid": "Invalid expression",
+      "notReal": "The result is not a real number"
+    },
+    "open": "Open a calculator",
+    "copy": "Copy the result",
+    "copied": "Copied"
   }
 }

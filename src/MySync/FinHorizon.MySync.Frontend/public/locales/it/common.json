@@ -268,5 +268,22 @@
   "currency": {
     "display": "Valuta di visualizzazione",
     "displayHint": "Patrimonio, debiti, andamento e totali sono mostrati in questa valuta, convertiti con il cambio di ogni giorno."
+  },
+  "calculator": {
+    "title": "Calcolatrice",
+    "expression": "Espressione",
+    "result": "Risultato",
+    "angle": "Gradi o radianti",
+    "backspace": "Cancella l'ultimo carattere",
+    "clear": "Azzera",
+    "ans": "Risultato precedente",
+    "equals": "Calcola",
+    "errors": {
+      "invalid": "Espressione non valida",
+      "notReal": "Il risultato non è un numero reale"
+    },
+    "open": "Apri una calcolatrice",
+    "copy": "Copia il risultato",
+    "copied": "Copiato"
   }
 }

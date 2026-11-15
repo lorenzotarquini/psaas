@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { NavLink, Outlet } from 'react-router'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faChartLine, faGear, faHouse, faRightLeft, faSeedling, faTableColumns, faWallet } from '@fortawesome/free-solid-svg-icons'
+import { CalculatorButton } from '@/features/calculator'
 import { LanguageSwitcher } from '@/features/preferences'
 import { storageKeys, useSessionState } from '@/shared/lib/session-state'
 import { UserMenu } from '@/widgets/user-menu'
@@ -66,6 +67,7 @@ export function AppLayout() {
             <FontAwesomeIcon icon={faTableColumns} />
           </button>
         </div>
+        <CalculatorButton />
         <LanguageSwitcher />
         <UserMenu />
       </header>

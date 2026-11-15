@@ -1,19 +1,6 @@
 import { useTranslation } from 'react-i18next'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { CurrencySelect, preferencesQueryKey, updatePreferences, usePreferences } from '@/entities/currency'
-import { invalidateLedger } from '@/shared/api'
-
-/** Saves the display currency and recomputes everything shown in it (UC13). */
-export function useSaveDisplayCurrency() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: (displayCurrency: string) => updatePreferences({ displayCurrency }),
-    onSuccess: async (saved) => {
-      queryClient.setQueryData(preferencesQueryKey, saved)
-      await invalidateLedger(queryClient)
-    },
-  })
-}
+import { CurrencySelect, usePreferences } from '@/entities/currency'
+import { useSaveDisplayCurrency } from '../model/useSaveDisplayCurrency'
 
 /** UC11, UC13: the currency of net worth, debts, trend and totals; saved as soon as it changes. */
 export function DisplayCurrencySetting() {

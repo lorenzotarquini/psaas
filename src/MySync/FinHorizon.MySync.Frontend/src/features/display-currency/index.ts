@@ -1,1 +1,2 @@
-export { DisplayCurrencySetting, useSaveDisplayCurrency } from './ui/DisplayCurrencySetting'
+export { useSaveDisplayCurrency } from './model/useSaveDisplayCurrency'
+export { DisplayCurrencySetting } from './ui/DisplayCurrencySetting'

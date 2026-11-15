@@ -5,9 +5,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
 import { useAccounts, useTags } from '@/entities/account'
-import { createDebt, debtKinds, type Debt } from '@/entities/debt'
+import { createDebt, debtKinds, updateDebt, type Debt } from '@/entities/debt'
 import { invalidateLedger } from '@/shared/api'
-import { amountField, applyServerErrors, parseAmount, sameFields, useErrorText } from '@/shared/lib/form'
+import { amountField, amountText, applyServerErrors, parseAmount, sameFields, useErrorText } from '@/shared/lib/form'
 import { Field } from '@/shared/ui'
 
 // UC3-R1..R3, with the backend's error codes.
@@ -23,8 +23,14 @@ const schema = z.object({
 type Values = z.infer<typeof schema>
 const fields = sameFields<Values>('kind', 'name', 'description', 'tag', 'accountId', 'residual')
 
-/** UC3: a new debt, linked to the account its installments usually come from. */
-export function CreateDebtForm({ onCreated }: { onCreated?: (debt: Debt) => void }) {
+interface DebtFormProps {
+  /** The debt to edit (UC10); a new one when missing (UC3). */
+  debt?: Debt
+  onSaved?: (debt: Debt) => void
+}
+
+/** UC3 and UC10: creates a debt, linked to the account its installments usually come from, or edits one. */
+export function DebtForm({ debt, onSaved }: DebtFormProps) {
   const { t } = useTranslation()
   const errorText = useErrorText()
   const queryClient = useQueryClient()
@@ -33,25 +39,29 @@ export function CreateDebtForm({ onCreated }: { onCreated?: (debt: Debt) => void
   const [formErrors, setFormErrors] = useState<string[]>([])
   const form = useForm<Values>({
     resolver: zodResolver(schema),
-    defaultValues: { kind: 'Loan', name: '', description: '', tag: '', accountId: '', residual: '' },
+    defaultValues: debt
+      ? { kind: debt.kind, name: debt.name, description: debt.description ?? '', tag: debt.tag ?? '', accountId: debt.accountId, residual: amountText(debt.initialResidual) }
+      : { kind: 'Loan', name: '', description: '', tag: '', accountId: '', residual: '' },
   })
   const { errors } = form.formState
 
   const mutation = useMutation({
-    mutationFn: (values: Values) =>
-      createDebt({
+    mutationFn: (values: Values) => {
+      const input = {
         kind: values.kind,
         name: values.name,
         description: values.description || undefined,
         tag: values.tag || undefined,
         accountId: values.accountId,
         residual: parseAmount(values.residual),
-      }),
-    onSuccess: async (debt) => {
-      form.reset()
+      }
+      return debt ? updateDebt(debt.id, input) : createDebt(input)
+    },
+    onSuccess: async (saved) => {
+      if (!debt) form.reset()
       setFormErrors([])
       await invalidateLedger(queryClient)
-      onCreated?.(debt)
+      onSaved?.(saved)
     },
     onError: (error) => setFormErrors(applyServerErrors(error, form.setError, fields)),
   })
@@ -85,7 +95,7 @@ export function CreateDebtForm({ onCreated }: { onCreated?: (debt: Debt) => void
           ))}
         </select>
       </Field>
-      <Field label={t('debts.fields.residual')} htmlFor="debt-residual" error={errorText(errors.residual?.message)}>
+      <Field label={t(debt ? 'debts.fields.initialResidual' : 'debts.fields.residual')} htmlFor="debt-residual" error={errorText(errors.residual?.message)}>
         <label className="input w-full">
           <span className="muted">€</span>
           <input id="debt-residual" inputMode="decimal" autoComplete="off" aria-invalid={!!errors.residual} {...form.register('residual')} />
@@ -102,7 +112,7 @@ export function CreateDebtForm({ onCreated }: { onCreated?: (debt: Debt) => void
       </Field>
       <button type="submit" className="btn btn-primary mt-2" disabled={mutation.isPending}>
         {mutation.isPending && <span className="loading loading-spinner loading-xs" />}
-        {t('debts.create')}
+        {t(debt ? 'actions.save' : 'debts.create')}
       </button>
     </form>
   )

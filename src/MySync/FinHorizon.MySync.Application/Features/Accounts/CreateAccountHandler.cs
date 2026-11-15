@@ -27,7 +27,7 @@ public sealed class CreateAccountHandler(
             return Result<AccountView>.Invalid(LimitField.Name, ErrorCodes.LimitReached);
         }
 
-        if (await accounts.NameExistsAsync(user.Id, descriptor.NormalizedName, cancellationToken).ConfigureAwait(false))
+        if (await accounts.NameExistsAsync(user.Id, descriptor.NormalizedName, cancellationToken: cancellationToken).ConfigureAwait(false))
         {
             return Result<AccountView>.Invalid(NameField, ErrorCodes.NotUnique);
         }

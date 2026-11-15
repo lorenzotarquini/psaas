@@ -36,7 +36,7 @@ public sealed class CreateDebtHandler(
             return Result<DebtView>.Invalid(AccountField, ErrorCodes.InvalidValue);
         }
 
-        if (await debts.NameExistsAsync(user.Id, descriptor.NormalizedName, cancellationToken).ConfigureAwait(false))
+        if (await debts.NameExistsAsync(user.Id, descriptor.NormalizedName, cancellationToken: cancellationToken).ConfigureAwait(false))
         {
             return Result<DebtView>.Invalid(NameField, ErrorCodes.NotUnique);
         }

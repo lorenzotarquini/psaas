@@ -10,5 +10,6 @@ public interface IDebtRepository : IOwnedRepository<Debt>
     /// <summary>Paid-off debts included (UC3-R6).</summary>
     Task<int> CountAsync(OwnerId owner, CancellationToken cancellationToken = default);
 
-    Task<bool> NameExistsAsync(OwnerId owner, string normalizedName, CancellationToken cancellationToken = default);
+    /// <summary>Whether another record of the owner has the name; <paramref name="exceptId"/> is the one being renamed (UC10).</summary>
+    Task<bool> NameExistsAsync(OwnerId owner, string normalizedName, Guid? exceptId = null, CancellationToken cancellationToken = default);
 }

@@ -51,6 +51,29 @@ public sealed class Account : Entity
         return new Account(Guid.NewGuid(), ownerId, kind, descriptor, initialBalance, today);
     }
 
+    /// <summary>
+    /// UC10: kind, name, description, tag and initial balance can change; the opening day cannot (movements depend on it).
+    /// A new initial balance changes every balance and the whole net worth trend, which are computed from it.
+    /// </summary>
+    public void Update(AccountKind kind, Descriptor descriptor, Money initialBalance)
+    {
+        ArgumentNullException.ThrowIfNull(descriptor);
+        if (!Enum.IsDefined(kind))
+        {
+            throw new ArgumentOutOfRangeException(nameof(kind));
+        }
+
+        if (!Money.HasValidPrecision(initialBalance.Amount))
+        {
+            throw new ArgumentException("The initial balance has more than 2 decimals.", nameof(initialBalance));
+        }
+
+        Kind = kind;
+        Descriptor = descriptor;
+        NormalizedName = descriptor.NormalizedName;
+        InitialBalance = initialBalance;
+    }
+
     /// <summary>Balance after the signed movements of this account (UC4-R1).</summary>
     public Money BalanceAfter(Money signedMovements) => InitialBalance + signedMovements;
 }

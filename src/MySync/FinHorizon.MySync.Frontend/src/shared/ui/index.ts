@@ -1,3 +1,4 @@
+export { AddButton } from './AddButton'
 export { Amount } from './Amount'
 export { Field } from './Field'
 export { Modal } from './Modal'

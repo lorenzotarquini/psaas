@@ -112,6 +112,16 @@ export class FakeApi {
       return ok({ items: this.transactions, page: 1, pageSize: 25, totalCount: this.transactions.length, expenseTotal: 0, incomeTotal: 0 })
     }
     if (method === 'POST' && path === '/api/transactions') return ok({ id: this.id(), ...body }, 201)
+    if (method === 'PUT' && path.startsWith('/api/accounts/')) {
+      const account = this.accounts.find((a) => a.id === path.split('/').pop())!
+      Object.assign(account, body)
+      return ok(account)
+    }
+    if (method === 'PUT' && path.startsWith('/api/debts/')) {
+      const debt = this.debts.find((d) => d.id === path.split('/').pop())!
+      Object.assign(debt, body)
+      return ok(debt)
+    }
     if (method === 'DELETE' && path.startsWith('/api/transactions/')) {
       this.transactions = this.transactions.filter((t) => t.id !== path.split('/').pop())
       return new Response(null, { status: 204 })

@@ -6,7 +6,8 @@
     "label": "Main navigation",
     "dashboard": "Dashboard",
     "transactions": "Transactions",
-    "netWorth": "Trend"
+    "netWorth": "Trend",
+    "portfolio": "Accounts and debts"
   },
   "actions": {
     "title": "Actions",
@@ -17,7 +18,8 @@
     "delete": "Delete",
     "edit": "Edit",
     "next": "Next",
-    "back": "Back"
+    "back": "Back",
+    "proceed": "Proceed"
   },
   "fields": {
     "description": "Description",
@@ -71,7 +73,8 @@
       "Cash": "Cash",
       "Valuables": "Valuables",
       "Other": "Other"
-    }
+    },
+    "confirmEdit": "Editing the account recalculates your current net worth and its trend. Do you want to proceed?"
   },
   "debts": {
     "title": "Debts",
@@ -87,7 +90,8 @@
       "kind": "Debt type",
       "name": "Name",
       "account": "Linked account",
-      "residual": "Amount still due"
+      "residual": "Amount still due",
+      "initialResidual": "Initial amount due"
     },
     "kinds": {
       "Loan": "Loan",
@@ -197,5 +201,16 @@
     "amountOut": "Amount out",
     "amountIn": "Amount in",
     "route": "{{from}} → {{to}}"
+  },
+  "portfolio": {
+    "title": "Accounts and debts",
+    "subtitle": "Add and edit your accounts and debts.",
+    "openedOn": "Opened on",
+    "balance": "Current balance",
+    "residual": "Still due",
+    "editAccount": "Edit account {{name}}",
+    "editDebt": "Edit debt {{name}}",
+    "editAccountTitle": "Edit account",
+    "editDebtTitle": "Edit debt"
   }
 }

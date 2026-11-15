@@ -11,8 +11,10 @@ Tutte le rotte sono sotto `/api`, richiedono un token Keycloak con audience `mys
 | `GET /api/me` | — | — | `{ keycloakId, name, email, roles }` dal token |
 | `GET /api/accounts` | UC1, UC4 | — | `{ items: [{ id, kind, name, description, tag, initialBalance, openedOn, balance }], max }` |
 | `POST /api/accounts` | UC2 | `{ kind, name, description?, tag?, initialBalance }` | `201` con il conto |
+| `PUT /api/accounts/{id}` | UC10 | come `POST`; la data di apertura non cambia | `200` con il conto e il saldo ricalcolato |
 | `GET /api/debts` | UC1, UC4 | — | `{ items: [{ id, kind, name, description, tag, accountId, initialResidual, residual, createdOn, paidOff }], max }`; attivi per residuo decrescente, estinti in fondo |
 | `POST /api/debts` | UC3 | `{ kind, name, description?, tag?, accountId, residual }` | `201` con il debito |
+| `PUT /api/debts/{id}` | UC10 | come `POST`; `residual` è il residuo iniziale e non può scendere sotto le rate già pagate (`InvalidValue`) | `200` con il debito |
 | `GET /api/tags` | UC2, UC3 | — | Tag già usati su conti e debiti, distinti e ordinati |
 | `GET /api/categories?kind=&term=` | UC6 | — | Categorie dell'utente (di quel tipo, se indicato) il cui nome contiene `term`; al massimo 50 |
 | `POST /api/categories` | UC6 | `{ kind, name }` | `201` con la categoria nuova, `200` con quella esistente (UC6-R4) |

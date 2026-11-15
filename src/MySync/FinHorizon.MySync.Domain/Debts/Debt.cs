@@ -53,6 +53,30 @@ public sealed class Debt : Entity
         return new Debt(Guid.NewGuid(), ownerId, kind, descriptor, accountId, initialResidual, today);
     }
 
+    /// <summary>
+    /// UC10: everything but the creation day can change. The new initial residual cannot be below what was already paid,
+    /// or the residual would turn negative (UC10-R4).
+    /// </summary>
+    public void Update(DebtKind kind, Descriptor descriptor, Guid accountId, Money initialResidual, Money paidInstallments)
+    {
+        ArgumentNullException.ThrowIfNull(descriptor);
+        if (!Enum.IsDefined(kind))
+        {
+            throw new ArgumentOutOfRangeException(nameof(kind));
+        }
+
+        if (!initialResidual.IsPositive || !Money.HasValidPrecision(initialResidual.Amount) || initialResidual < paidInstallments)
+        {
+            throw new ArgumentException("The residual must be a positive amount in cents, not below what was already paid.", nameof(initialResidual));
+        }
+
+        Kind = kind;
+        Descriptor = descriptor;
+        NormalizedName = descriptor.NormalizedName;
+        AccountId = accountId;
+        InitialResidual = initialResidual;
+    }
+
     /// <summary>What is left to pay after the given installments (UC4-R2).</summary>
     public Money ResidualAfter(Money paidInstallments) => InitialResidual - paidInstallments;
 }

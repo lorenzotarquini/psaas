@@ -1,10 +1,8 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPlus } from '@fortawesome/free-solid-svg-icons'
 import type { Debt } from '@/entities/debt'
-import { CreateDebtForm } from '@/features/create-debt'
-import { Amount, EmptyState, Modal } from '@/shared/ui'
+import { DebtForm } from '@/features/debt-form'
+import { AddButton, Amount, EmptyState, Modal } from '@/shared/ui'
 
 /** UC4: debts by residual, paid-off ones last; "New debt" while the limit allows it (UC3). */
 export function DebtsCard({ debts, max }: { debts: Debt[]; max: number }) {
@@ -20,11 +18,7 @@ export function DebtsCard({ debts, max }: { debts: Debt[]; max: number }) {
         <h2 id="debts-title" className="surface-title">
           {t('debts.title')} <span className="muted text-xs font-normal">{t('debts.count', { count: debts.length, max })}</span>
         </h2>
-        {debts.length < max && (
-          <button type="button" className="btn btn-ghost btn-sm text-primary" onClick={() => setCreating(true)}>
-            <FontAwesomeIcon icon={faPlus} /> {t('debts.new')}
-          </button>
-        )}
+        <AddButton label={t('debts.new')} limitReached={debts.length >= max} limitMessage={t('debts.limitReached')} onClick={() => setCreating(true)} />
       </header>
       {debts.length === 0 ? (
         <EmptyState>{t('debts.empty')}</EmptyState>
@@ -56,7 +50,7 @@ export function DebtsCard({ debts, max }: { debts: Debt[]; max: number }) {
         </ul>
       )}
       <Modal open={creating} title={t('debts.new')} onClose={() => setCreating(false)}>
-        <CreateDebtForm onCreated={() => setCreating(false)} />
+        <DebtForm onSaved={() => setCreating(false)} />
       </Modal>
     </section>
   )

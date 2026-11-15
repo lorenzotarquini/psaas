@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { FakeApi } from '@/test/fakeApi'
 import { renderWithApi } from '@/test/renderApp'
-import { AccountsCard } from '@/widgets/portfolio-lists'
+import { AccountsCard } from './AccountsCard'
 
 vi.mock('@/shared/auth', () => ({
   session: { headers: () => Promise.resolve({}), userName: () => 'Mario', login: vi.fn(), logout: vi.fn(), init: vi.fn() },

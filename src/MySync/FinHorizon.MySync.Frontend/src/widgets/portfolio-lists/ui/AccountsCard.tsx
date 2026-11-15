@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPlus, faRightLeft } from '@fortawesome/free-solid-svg-icons'
+import { faRightLeft } from '@fortawesome/free-solid-svg-icons'
 import { AccountKindIcon, type Account } from '@/entities/account'
-import { CreateAccountForm } from '@/features/create-account'
+import { AccountForm } from '@/features/account-form'
 import { TransferDialog } from '@/features/transfer-money'
-import { Amount, Modal } from '@/shared/ui'
+import { AddButton, Amount, Modal } from '@/shared/ui'
 
 /** UC4: the accounts with today's balance; "New account" while the limit allows it (UC2). */
 export function AccountsCard({ accounts, max }: { accounts: Account[]; max: number }) {
@@ -20,11 +20,7 @@ export function AccountsCard({ accounts, max }: { accounts: Account[]; max: numb
           {t('accounts.title')} <span className="muted text-xs font-normal">{t('accounts.count', { count: accounts.length, max })}</span>
         </h2>
         <div className="flex items-center gap-1">
-          {accounts.length < max && (
-            <button type="button" className="btn btn-ghost btn-sm text-primary" onClick={() => setCreating(true)}>
-              <FontAwesomeIcon icon={faPlus} /> {t('accounts.new')}
-            </button>
-          )}
+          <AddButton label={t('accounts.new')} limitReached={accounts.length >= max} limitMessage={t('accounts.limitReached')} onClick={() => setCreating(true)} />
           {/* UC9: moving money needs two accounts. */}
           {accounts.length >= 2 && (
             <span className="tooltip tooltip-left" data-tip={t('transfer.title')}>
@@ -52,7 +48,7 @@ export function AccountsCard({ accounts, max }: { accounts: Account[]; max: numb
       </ul>
       <TransferDialog open={transferring} onClose={() => setTransferring(false)} />
       <Modal open={creating} title={t('accounts.new')} onClose={() => setCreating(false)}>
-        <CreateAccountForm onCreated={() => setCreating(false)} />
+        <AccountForm onSaved={() => setCreating(false)} />
       </Modal>
     </section>
   )

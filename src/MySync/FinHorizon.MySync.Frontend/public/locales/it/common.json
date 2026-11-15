@@ -6,7 +6,8 @@
     "label": "Navigazione principale",
     "dashboard": "Dashboard",
     "transactions": "Movimenti",
-    "netWorth": "Andamento"
+    "netWorth": "Andamento",
+    "portfolio": "Conti e debiti"
   },
   "actions": {
     "title": "Azioni",
@@ -17,7 +18,8 @@
     "delete": "Elimina",
     "edit": "Modifica",
     "next": "Avanti",
-    "back": "Indietro"
+    "back": "Indietro",
+    "proceed": "Procedi"
   },
   "fields": {
     "description": "Descrizione",
@@ -71,7 +73,8 @@
       "Cash": "Contanti",
       "Valuables": "Preziosi",
       "Other": "Altro"
-    }
+    },
+    "confirmEdit": "Modificando il conto, il patrimonio attuale e il suo andamento verranno ricalcolati. Vuoi procedere?"
   },
   "debts": {
     "title": "Debiti",
@@ -87,7 +90,8 @@
       "kind": "Tipo di debito",
       "name": "Nome",
       "account": "Conto collegato",
-      "residual": "Residuo da pagare"
+      "residual": "Residuo da pagare",
+      "initialResidual": "Residuo iniziale"
     },
     "kinds": {
       "Loan": "Finanziamento",
@@ -197,5 +201,16 @@
     "amountOut": "Importo in uscita",
     "amountIn": "Importo in entrata",
     "route": "{{from}} → {{to}}"
+  },
+  "portfolio": {
+    "title": "Conti e debiti",
+    "subtitle": "Aggiungi e modifica i tuoi conti e i tuoi debiti.",
+    "openedOn": "Aperto il",
+    "balance": "Saldo attuale",
+    "residual": "Residuo attuale",
+    "editAccount": "Modifica il conto {{name}}",
+    "editDebt": "Modifica il debito {{name}}",
+    "editAccountTitle": "Modifica conto",
+    "editDebtTitle": "Modifica debito"
   }
 }

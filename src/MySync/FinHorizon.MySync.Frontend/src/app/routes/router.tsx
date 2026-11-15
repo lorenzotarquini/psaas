@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router'
 import { DashboardPage } from '@/pages/dashboard'
 import { NetWorthPage } from '@/pages/net-worth'
+import { PortfolioPage } from '@/pages/portfolio'
 import { SetupPage } from '@/pages/setup'
 import { TransactionsPage } from '@/pages/transactions'
 import { AppLayout } from '../layout/AppLayout'
@@ -12,6 +13,7 @@ export const routes = [
       { index: true, Component: DashboardPage },
       { path: 'setup', Component: SetupPage },
       { path: 'transactions', Component: TransactionsPage },
+      { path: 'portfolio', Component: PortfolioPage },
       { path: 'net-worth', Component: NetWorthPage },
       { path: '*', element: <Navigate to="/" replace /> },
     ],

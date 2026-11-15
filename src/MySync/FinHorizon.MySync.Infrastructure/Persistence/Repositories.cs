@@ -16,8 +16,8 @@ internal sealed class AccountRepository(MySyncDbContext db) : OwnedRepository<Ac
 
     public Task<int> CountAsync(OwnerId owner, CancellationToken cancellationToken = default) => Of(owner).CountAsync(cancellationToken);
 
-    public Task<bool> NameExistsAsync(OwnerId owner, string normalizedName, CancellationToken cancellationToken = default) =>
-        Of(owner).AnyAsync(account => account.NormalizedName == normalizedName, cancellationToken);
+    public Task<bool> NameExistsAsync(OwnerId owner, string normalizedName, Guid? exceptId = null, CancellationToken cancellationToken = default) =>
+        Of(owner).AnyAsync(account => account.NormalizedName == normalizedName && account.Id != exceptId, cancellationToken);
 }
 
 internal sealed class DebtRepository(MySyncDbContext db) : OwnedRepository<Debt>(db), IDebtRepository
@@ -27,8 +27,8 @@ internal sealed class DebtRepository(MySyncDbContext db) : OwnedRepository<Debt>
 
     public Task<int> CountAsync(OwnerId owner, CancellationToken cancellationToken = default) => Of(owner).CountAsync(cancellationToken);
 
-    public Task<bool> NameExistsAsync(OwnerId owner, string normalizedName, CancellationToken cancellationToken = default) =>
-        Of(owner).AnyAsync(debt => debt.NormalizedName == normalizedName, cancellationToken);
+    public Task<bool> NameExistsAsync(OwnerId owner, string normalizedName, Guid? exceptId = null, CancellationToken cancellationToken = default) =>
+        Of(owner).AnyAsync(debt => debt.NormalizedName == normalizedName && debt.Id != exceptId, cancellationToken);
 }
 
 internal sealed class CategoryRepository(MySyncDbContext db) : OwnedRepository<Category>(db), ICategoryRepository

@@ -64,6 +64,7 @@ Da questi dati MySync calcola il **patrimonio netto** e ne mostra l'andamento ne
 | RF10 | MySync mostra l'andamento del patrimonio netto e dei debiti residui su un periodo scelto. | UC7 |
 | RF11 | L'utente consulta tutti i suoi movimenti con filtri, li modifica e li elimina; saldi, residui e andamento si ricalcolano di conseguenza. | UC8 |
 | RF12 | L'utente trasferisce denaro tra due suoi conti; il trasferimento compare tra i movimenti ma non è né una spesa né un ricavo. | UC9 |
+| RF13 | L'utente modifica conti e debiti da una sezione dedicata; modificare un conto chiede conferma perché il patrimonio viene ricalcolato. I pulsanti di aggiunta sono disabilitati oltre i limiti. | UC10 |
 
 ### Non funzionali
 
@@ -90,13 +91,14 @@ Da questi dati MySync calcola il **patrimonio netto** e ne mostra l'andamento ne
 | [UC7](UC7-andamento-patrimonio.md) | Vedere l'andamento del patrimonio | in ambito |
 | [UC8](UC8-gestire-movimenti.md) | Consultare, modificare ed eliminare i movimenti | in ambito |
 | [UC9](UC9-trasferire-denaro.md) | Trasferire denaro tra due conti | in ambito |
+| [UC10](UC10-modificare-conti-e-debiti.md) | Modificare conti e debiti | in ambito |
 
 Contratto HTTP: [API.md](API.md).
 
 ## Fuori ambito per l'MVP
 
 - Finanze aziendali: conti, debiti e movimenti di un'organizzazione B2B (fase 2, D8).
-- Modifica ed eliminazione di conti, debiti e categorie (i movimenti invece hanno il CRUD completo, D1).
+- Eliminazione di conti e debiti; modifica ed eliminazione delle categorie. Conti e debiti si modificano (UC10), i movimenti hanno il CRUD completo (D1).
 - Valute diverse dall'euro, rivalutazione dei preziosi.
 - Movimenti ricorrenti, piani di ammortamento, separazione tra quota capitale e interessi di una rata.
 - Import da estratto conto o collegamento alle banche (open banking).

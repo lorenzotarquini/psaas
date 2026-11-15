@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { apiGet, apiPost, ledgerKey } from '@/shared/api'
+import { apiGet, apiPost, apiPut, ledgerKey } from '@/shared/api'
 
 export const accountKinds = ['CurrentAccount', 'VirtualBank', 'Cash', 'Valuables', 'Other'] as const
 export type AccountKind = (typeof accountKinds)[number]
@@ -35,6 +35,9 @@ export const useAccounts = () =>
   useQuery({ queryKey: accountsQueryKey, queryFn: ({ signal }) => apiGet<AccountList>('/api/accounts', signal) })
 
 export const createAccount = (account: NewAccount) => apiPost<Account>('/api/accounts', account)
+
+/** UC10: the opening day does not change; balances and the trend are recomputed from the new values. */
+export const updateAccount = (id: string, account: NewAccount) => apiPut<Account>(`/api/accounts/${id}`, account)
 
 /** Tags already used on accounts and debts, suggested while typing. */
 export const useTags = () => useQuery({ queryKey: [ledgerKey, 'tags'], queryFn: ({ signal }) => apiGet<string[]>('/api/tags', signal) })

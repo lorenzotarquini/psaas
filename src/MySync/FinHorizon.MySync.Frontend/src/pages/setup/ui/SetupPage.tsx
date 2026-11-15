@@ -5,8 +5,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheck } from '@fortawesome/free-solid-svg-icons'
 import { useAccounts } from '@/entities/account'
 import { useDebts } from '@/entities/debt'
-import { CreateAccountForm } from '@/features/create-account'
-import { CreateDebtForm } from '@/features/create-debt'
+import { AccountForm } from '@/features/account-form'
+import { DebtForm } from '@/features/debt-form'
 import { Amount, LoadError, Loading } from '@/shared/ui'
 
 type Step = 'accounts' | 'debts'
@@ -80,7 +80,7 @@ export function SetupPage() {
               {t('setup.needAccount')}
             </p>
           )}
-          {accountList.length < accounts.data.max && <CreateAccountForm onCreated={() => setNeedAccount(false)} />}
+          {accountList.length < accounts.data.max && <AccountForm onSaved={() => setNeedAccount(false)} />}
         </section>
       ) : (
         <section className="surface flex flex-col gap-4 p-5" aria-labelledby="setup-debts">
@@ -99,7 +99,7 @@ export function SetupPage() {
               ))}
             </ul>
           )}
-          {debtList.length < debts.data.max && <CreateDebtForm />}
+          {debtList.length < debts.data.max && <DebtForm />}
         </section>
       )}
 

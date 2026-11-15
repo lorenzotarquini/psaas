@@ -75,8 +75,8 @@ internal sealed class FakeAccounts(FakeStore store) : FakeRepository<Account>(st
 
     public Task<int> CountAsync(OwnerId owner, CancellationToken cancellationToken = default) => Task.FromResult(Of(owner).Count());
 
-    public Task<bool> NameExistsAsync(OwnerId owner, string normalizedName, CancellationToken cancellationToken = default) =>
-        Task.FromResult(Of(owner).Any(account => account.Descriptor.NormalizedName == normalizedName));
+    public Task<bool> NameExistsAsync(OwnerId owner, string normalizedName, Guid? exceptId = null, CancellationToken cancellationToken = default) =>
+        Task.FromResult(Of(owner).Any(account => account.Descriptor.NormalizedName == normalizedName && account.Id != exceptId));
 }
 
 internal sealed class FakeDebts(FakeStore store) : FakeRepository<Debt>(store.Debts), IDebtRepository
@@ -86,8 +86,8 @@ internal sealed class FakeDebts(FakeStore store) : FakeRepository<Debt>(store.De
 
     public Task<int> CountAsync(OwnerId owner, CancellationToken cancellationToken = default) => Task.FromResult(Of(owner).Count());
 
-    public Task<bool> NameExistsAsync(OwnerId owner, string normalizedName, CancellationToken cancellationToken = default) =>
-        Task.FromResult(Of(owner).Any(debt => debt.Descriptor.NormalizedName == normalizedName));
+    public Task<bool> NameExistsAsync(OwnerId owner, string normalizedName, Guid? exceptId = null, CancellationToken cancellationToken = default) =>
+        Task.FromResult(Of(owner).Any(debt => debt.Descriptor.NormalizedName == normalizedName && debt.Id != exceptId));
 }
 
 internal sealed class FakeCategories(FakeStore store) : FakeRepository<Category>(store.Categories), ICategoryRepository

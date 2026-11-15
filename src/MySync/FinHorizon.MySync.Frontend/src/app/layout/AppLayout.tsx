@@ -1,13 +1,14 @@
 import { useTranslation } from 'react-i18next'
 import { NavLink, Outlet } from 'react-router'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faChartLine, faHouse, faRightFromBracket, faRightLeft, faSeedling } from '@fortawesome/free-solid-svg-icons'
+import { faChartLine, faHouse, faRightFromBracket, faRightLeft, faSeedling, faWallet } from '@fortawesome/free-solid-svg-icons'
 import { LanguageSwitcher, ThemeToggle } from '@/features/preferences'
 import { session } from '@/shared/auth'
 
 const navigation = [
   { to: '/', icon: faHouse, label: 'nav.dashboard', end: true },
   { to: '/transactions', icon: faRightLeft, label: 'nav.transactions', end: false },
+  { to: '/portfolio', icon: faWallet, label: 'nav.portfolio', end: false },
   { to: '/net-worth', icon: faChartLine, label: 'nav.netWorth', end: false },
 ] as const
 

@@ -4,9 +4,9 @@ import { useTranslation } from 'react-i18next'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
-import { accountKinds, createAccount, useTags, type Account } from '@/entities/account'
+import { accountKinds, createAccount, updateAccount, useTags, type Account } from '@/entities/account'
 import { invalidateLedger } from '@/shared/api'
-import { amountField, applyServerErrors, parseAmount, sameFields, useErrorText } from '@/shared/lib/form'
+import { amountField, amountText, applyServerErrors, parseAmount, sameFields, useErrorText } from '@/shared/lib/form'
 import { Field } from '@/shared/ui'
 
 // UC2-R1..R4, with the backend's error codes.
@@ -21,39 +21,57 @@ const schema = z.object({
 type Values = z.infer<typeof schema>
 const fields = sameFields<Values>('kind', 'name', 'description', 'tag', 'initialBalance')
 
-/** UC2: a new account. Used by the first setup (UC1) and by the dashboard. */
-export function CreateAccountForm({ onCreated }: { onCreated?: (account: Account) => void }) {
+interface AccountFormProps {
+  /** The account to edit (UC10); a new one when missing (UC2). */
+  account?: Account
+  onSaved?: (account: Account) => void
+}
+
+/**
+ * UC2 and UC10: creates an account or edits one. Editing asks for confirmation first, because a new
+ * initial balance recomputes today's net worth and the whole trend (UC10-R2).
+ */
+export function AccountForm({ account, onSaved }: AccountFormProps) {
   const { t } = useTranslation()
   const errorText = useErrorText()
   const queryClient = useQueryClient()
   const tags = useTags()
   const [formErrors, setFormErrors] = useState<string[]>([])
+  const [toConfirm, setToConfirm] = useState<Values | null>(null)
   const form = useForm<Values>({
     resolver: zodResolver(schema),
-    defaultValues: { kind: 'CurrentAccount', name: '', description: '', tag: '', initialBalance: '' },
+    defaultValues: account
+      ? { kind: account.kind, name: account.name, description: account.description ?? '', tag: account.tag ?? '', initialBalance: amountText(account.initialBalance) }
+      : { kind: 'CurrentAccount', name: '', description: '', tag: '', initialBalance: '' },
   })
   const { errors } = form.formState
 
   const mutation = useMutation({
-    mutationFn: (values: Values) =>
-      createAccount({
+    mutationFn: (values: Values) => {
+      const input = {
         kind: values.kind,
         name: values.name,
         description: values.description || undefined,
         tag: values.tag || undefined,
         initialBalance: parseAmount(values.initialBalance),
-      }),
-    onSuccess: async (account) => {
-      form.reset()
-      setFormErrors([])
-      await invalidateLedger(queryClient)
-      onCreated?.(account)
+      }
+      return account ? updateAccount(account.id, input) : createAccount(input)
     },
-    onError: (error) => setFormErrors(applyServerErrors(error, form.setError, fields)),
+    onSuccess: async (saved) => {
+      if (!account) form.reset()
+      setFormErrors([])
+      setToConfirm(null)
+      await invalidateLedger(queryClient)
+      onSaved?.(saved)
+    },
+    onError: (error) => {
+      setToConfirm(null)
+      setFormErrors(applyServerErrors(error, form.setError, fields))
+    },
   })
 
   return (
-    <form noValidate className="flex flex-col gap-1" onSubmit={form.handleSubmit((values) => mutation.mutate(values))}>
+    <form noValidate className="flex flex-col gap-1" onSubmit={form.handleSubmit((values) => (account ? setToConfirm(values) : mutation.mutate(values)))}>
       {formErrors.map((code) => (
         <p key={code} role="alert" className="alert alert-warning alert-soft">
           {t(code === 'LimitReached' ? 'accounts.limitReached' : 'errors.saveFailed')}
@@ -86,10 +104,25 @@ export function CreateAccountForm({ onCreated }: { onCreated?: (account: Account
           {tags.data?.map((tag) => <option key={tag} value={tag} />)}
         </datalist>
       </Field>
-      <button type="submit" className="btn btn-primary mt-2" disabled={mutation.isPending}>
-        {mutation.isPending && <span className="loading loading-spinner loading-xs" />}
-        {t('accounts.create')}
-      </button>
+      {toConfirm ? (
+        <div role="alertdialog" aria-labelledby="account-confirm" className="alert alert-warning alert-soft mt-2 flex flex-col items-stretch gap-3">
+          <p id="account-confirm">{t('accounts.confirmEdit')}</p>
+          <div className="flex justify-end gap-2">
+            <button type="button" className="btn btn-sm" onClick={() => setToConfirm(null)}>
+              {t('actions.cancel')}
+            </button>
+            <button type="button" className="btn btn-sm btn-warning" disabled={mutation.isPending} onClick={() => mutation.mutate(toConfirm)}>
+              {mutation.isPending && <span className="loading loading-spinner loading-xs" />}
+              {t('actions.proceed')}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button type="submit" className="btn btn-primary mt-2" disabled={mutation.isPending}>
+          {mutation.isPending && <span className="loading loading-spinner loading-xs" />}
+          {t(account ? 'actions.save' : 'accounts.create')}
+        </button>
+      )}
     </form>
   )
 }

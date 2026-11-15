@@ -137,7 +137,7 @@ Scenario: Un trasferimento non ha categoria
 
 ### UC9-S8
 
-Test: [`UC9_TrasferireDenaro.S8_ModaleDelTrasferimento`](../../../src/MySync/FinHorizon.MySync.Frontend/src/features/transfer-money/ui/UC9_TrasferireDenaro.test.tsx) (frontend, Vitest)
+Test: [`UC9_TrasferireDenaro.S8_ModaleDelTrasferimento`](../../../src/MySync/FinHorizon.MySync.Frontend/src/widgets/portfolio-lists/ui/UC9_TrasferireDenaro.test.tsx) (frontend, Vitest)
 
 ```gherkin
 # language: it

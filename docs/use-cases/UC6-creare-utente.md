@@ -24,6 +24,7 @@
 - R4. I profili sono facoltativi; un utente può avere profili di clienti diversi.
 - R5. In Keycloak si salvano solo i profili dell'utente (attributo `profileIds`); i suoi clienti si ricavano dai profili.
 - R6. La password non passa mai dall'Admin Portal.
+- R7. Ogni utente creato dal portale (anche con l'import CSV, UC20, e l'onboarding, UC14) entra nel gruppo Keycloak `end_users`, che gli dà il ruolo di realm `enduser` per accedere a MySync. Se il gruppo non esiste Keycloak rifiuta la creazione.
 
 ## Scenari di accettazione
 

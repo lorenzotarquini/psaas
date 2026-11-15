@@ -70,9 +70,10 @@ public sealed class GEN_Sicurezza(PostgresFixture database) : AcceptanceTest(dat
 
     [Theory, Trait("Scenario", "GEN-S2")]
     [MemberData(nameof(Operazioni))]
-    public async Task S2_OgniOperazioneRichiedeIlRuoloAdministrator(string method, string url)
+    public async Task S2_OgniOperazioneRichiedeIlRuoloSystemAdministrator(string method, string url)
     {
-        var response = await ClientWith(KeycloakTokens.Create(roles: ["User"])).SendAsync(Request(method, url));
+        // An end user, and the old client role name, no longer open the portal.
+        var response = await ClientWith(KeycloakTokens.Create(roles: ["enduser", "Administrator"])).SendAsync(Request(method, url));
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }

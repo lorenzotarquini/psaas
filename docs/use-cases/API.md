@@ -1,6 +1,6 @@
 # Analisi delle API (Admin Portal Backend)
 
-Contratto HTTP che i test di accettazione esercitano. Tutti gli endpoint `/api/*` richiedono un token Keycloak valido (audience `adminportal-api`) con ruolo `Administrator`: senza token o con token non valido → `401`, senza ruolo → `403`.
+Contratto HTTP che i test di accettazione esercitano. Tutti gli endpoint `/api/*` richiedono un token Keycloak valido (audience `adminportal-api`) con ruolo `systemadministrator`: senza token o con token non valido → `401`, senza ruolo → `403`.
 
 Errori di validazione: `400` `ValidationProblem` con un codice per campo in `errors`, ad esempio `{"errors": {"companyName": ["Required"], "profiles[1].name": ["NotUnique"]}}`. Codici: `Required`, `InvalidFormat`, `MaxLengthExceeded`, `NotUnique`, `InvalidValue`, `LimitExceeded` (limite del piano, UC17).
 
@@ -110,7 +110,7 @@ Risposta: `{ items: [utente], totalCount, page, pageSize }` con utente = `{ id, 
 
 ### UC25 – Uso del cliente
 - `POST /api/usage` `{ records: [{ tenantId, moduleId, metric, value, kind: counter|gauge, at? }] }` (1–500 righe) → `204` · `400` con `records[i].<campo>` (`tenantId` `Required`/`InvalidValue`; `moduleId` `InvalidValue` se il modulo non è attivo per il cliente; `metric` `InvalidFormat`, minuscole/cifre/`._-` fino a 60; `value` `InvalidValue` se negativo; `kind` `InvalidValue`; `at` `InvalidValue` se futuro o più vecchio di 366 giorni). Nessuna riga viene salvata se una è sbagliata.
-- Autorizzazione: policy `UsageReporter` (ruoli `UsageReporter` o `Administrator`). È l'unico endpoint fuori dalla policy `Administrator`: un service account con il solo `UsageReporter` riceve `403` sul resto dell'API.
+- Autorizzazione: policy `UsageReporter` (ruoli `UsageReporter` o `systemadministrator`). È l'unico endpoint fuori dalla policy `Administrator`: un service account con il solo `UsageReporter` riceve `403` sul resto dell'API.
 - Aggregazione giornaliera per cliente, modulo e metrica: i contatori si sommano, le misure tengono l'ultimo valore del giorno.
 - `GET /api/tenants/{id}/usage?days=30` (1–365) → `{ days, users, maxUsers, activeUsers, productiveUnits, maxProductiveUnits, metrics: [{ moduleId, moduleName, metric, kind, total, points: [{ day, value }] }] }` · `404`. `users`/`activeUsers` `null` se Keycloak non risponde; attivo = accesso negli ultimi 30 giorni.
 
@@ -157,6 +157,7 @@ Body `{ rows: [{ firstName, lastName, email, profiles: "Cliente:Profilo|…" }],
 Il backend chiama l'API di amministrazione di Keycloak (`{Authority}` con `/realms/` → `/admin/realms/`) con il service account del client `adminportal-api`. Configurazione richiesta:
 - client `adminportal-api` con *Client authentication* e *Service accounts* attivi; il segreto va in `Keycloak:ClientSecret` (user secrets o variabile d'ambiente `Keycloak__ClientSecret`, mai in `appsettings.json`);
 - al service account vanno assegnati i ruoli `view-users`, `manage-users` e `view-events` (ultimo accesso) del client `realm-management`;
+- gli utenti creati entrano nel gruppo `end_users` (campo `groups` della creazione): il gruppo deve esistere nel realm;
 - per l'ultimo accesso vanno salvati gli eventi utente `LOGIN` del realm (*Realm settings → Events*);
 - nel *User profile* del realm vanno dichiarati gli attributi `profileIds` (multivalore), `mfaRequired` e `lastInviteAt`, modificabili solo dall'amministratore (non abilitare gli *Unmanaged attributes* in modalità "Enabled": l'utente potrebbe cambiarsi i profili dalla console account): da Keycloak 24 gli attributi non dichiarati vengono scartati senza errore;
 - il realm deve avere l'SMTP configurato, altrimenti la creazione risponde `503`.

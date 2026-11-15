@@ -9,7 +9,7 @@
 
 ## Flussi alternativi
 - **1a. Nessun token, token scaduto o emesso per un'altra applicazione:** accesso negato (non autenticato).
-- **1b. Token valido ma senza ruolo `Administrator`:** accesso negato (non autorizzato).
+- **1b. Token valido ma senza ruolo `systemadministrator`:** accesso negato (non autorizzato).
 
 ## Regole
 - R1. Le informazioni vengono solo dal token: nessun dato dell'amministratore è salvato in FinHorizon.
@@ -27,9 +27,9 @@ Test: `UC8_ChiSono.S1_IdentitaLettaDalToken`
 Funzionalità: Sapere chi sono
 
 Scenario: Identità letta dal token
-  Dato che l'amministratore è autenticato come "admin.fnhz" con email "admin@finhorizon.it" e ruolo "Administrator"
+  Dato che l'amministratore è autenticato come "admin.fnhz" con email "admin@finhorizon.it" e ruolo "systemadministrator"
   Quando chiede chi è
-  Allora vede il suo identificativo Keycloak, "admin.fnhz", "admin@finhorizon.it" e il ruolo "Administrator"
+  Allora vede il suo identificativo Keycloak, "admin.fnhz", "admin@finhorizon.it" e il ruolo "systemadministrator"
 ```
 
 ### UC8-S2
@@ -79,7 +79,7 @@ Test: `UC8_ChiSono.S5_SenzaRuoloAdministrator`
 # language: it
 Funzionalità: Sapere chi sono
 
-Scenario: Utente autenticato senza ruolo Administrator
-  Quando chiede chi è con un token valido ma senza ruolo "Administrator"
+Scenario: Utente autenticato senza ruolo systemadministrator
+  Quando chiede chi è con un token valido ma senza ruolo "systemadministrator"
   Allora l'accesso è negato come non autorizzato
 ```

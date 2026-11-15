@@ -34,6 +34,10 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
 
     private static readonly string[] PasswordSetupActions = ["UPDATE_PASSWORD"];
 
+    // Users created by the portal are end users: the group gives them the realm role enduser (MySync access).
+    // Keycloak refuses the creation if the group does not exist, so a missing group shows up at once.
+    private const string EndUsersGroupPath = "/end_users";
+
     public async Task<DirectoryUser> CreateAsync(NewDirectoryUser user, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(user);
@@ -46,6 +50,7 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
             Enabled = true,
             // UC19-R1: the open action marks the invitation as pending until the password is set.
             RequiredActions = [UpdatePasswordAction],
+            Groups = [EndUsersGroupPath],
             Attributes = new Dictionary<string, string[]>
             {
                 [ProfileIdsAttribute] = user.ProfileIds.ToArray(),
@@ -372,6 +377,10 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
         public bool Enabled { get; set; }
         public long? CreatedTimestamp { get; set; }
         public string[]? RequiredActions { get; set; }
+
+        /// <summary>Group paths, honored by Keycloak only when the user is created.</summary>
+        public string[]? Groups { get; set; }
+
         public Dictionary<string, string[]>? Attributes { get; set; }
     }
 

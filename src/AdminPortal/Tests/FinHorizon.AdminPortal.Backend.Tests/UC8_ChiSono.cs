@@ -15,7 +15,7 @@ public sealed class UC8_ChiSono(PostgresFixture database) : AcceptanceTest(datab
         Assert.Equal(KeycloakTokens.AdminSubject, me.KeycloakId);
         Assert.Equal("admin.fnhz", me.Name);
         Assert.Equal("admin@fnhz.it", me.Email);
-        Assert.Equal(["Administrator"], me.Roles);
+        Assert.Equal([KeycloakTokens.AdministratorRole], me.Roles);
     }
 
     [Fact, Trait("Scenario", "UC8-S2")]
@@ -29,7 +29,7 @@ public sealed class UC8_ChiSono(PostgresFixture database) : AcceptanceTest(datab
     [Fact, Trait("Scenario", "UC8-S3")]
     public async Task S3_TokenScaduto()
     {
-        var response = await ClientWith(KeycloakTokens.Create(roles: ["Administrator"], expired: true)).GetAsync("/api/me");
+        var response = await ClientWith(KeycloakTokens.Create(roles: [KeycloakTokens.AdministratorRole], expired: true)).GetAsync("/api/me");
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
@@ -37,7 +37,7 @@ public sealed class UC8_ChiSono(PostgresFixture database) : AcceptanceTest(datab
     [Fact, Trait("Scenario", "UC8-S4")]
     public async Task S4_TokenPerUnAltraApplicazione()
     {
-        var response = await ClientWith(KeycloakTokens.Create(roles: ["Administrator"], audience: "altra-app")).GetAsync("/api/me");
+        var response = await ClientWith(KeycloakTokens.Create(roles: [KeycloakTokens.AdministratorRole], audience: "altra-app")).GetAsync("/api/me");
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }

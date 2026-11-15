@@ -14,7 +14,7 @@
 
 ## Regole
 - R1. Una metrica è un **contatore** (i valori dello stesso giorno si sommano, es. documenti creati) o una **misura** (vale l'ultimo valore del giorno, es. spazio occupato).
-- R2. L'invio richiede il ruolo `UsageReporter` (o `Administrator`) e accetta fino a 500 righe; chi ha solo `UsageReporter` non può usare il resto dell'API.
+- R2. L'invio richiede il ruolo `UsageReporter` (o `systemadministrator`) e accetta fino a 500 righe; chi ha solo `UsageReporter` non può usare il resto dell'API.
 - R3. Il totale del periodo è la somma per i contatori e l'ultimo valore per le misure.
 - R4. Utente attivo = ultimo accesso Keycloak negli ultimi 30 giorni.
 

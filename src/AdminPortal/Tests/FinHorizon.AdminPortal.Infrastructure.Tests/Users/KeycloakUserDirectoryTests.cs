@@ -45,6 +45,8 @@ public sealed class KeycloakUserDirectoryTests
         var json = JsonDocument.Parse(body!).RootElement;
         Assert.Equal("mario.rossi@example.com", json.GetProperty("username").GetString());
         Assert.Equal(2, json.GetProperty("attributes").GetProperty("profileIds").GetArrayLength());
+        // Created as an end user: the group carries the realm role enduser.
+        Assert.Equal(["/end_users"], json.GetProperty("groups").EnumerateArray().Select(group => group.GetString()));
         Assert.Equal(
             (HttpMethod.Put, $"{BaseUrl}users/kc-1/execute-actions-email", """["UPDATE_PASSWORD"]"""),
             handler.Requests[1]);

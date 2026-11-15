@@ -12,7 +12,7 @@ public sealed class UC22_VisteSalvate(PostgresFixture database) : AcceptanceTest
         client.PostAsJsonAsync("/api/saved-views", new { area = "tenants", name, query });
 
     private HttpClient OtherAdmin() =>
-        ClientWith(KeycloakTokens.Create(["Administrator"], subject: "kc-other-admin", userName: "altro.admin"));
+        ClientWith(KeycloakTokens.Create([KeycloakTokens.AdministratorRole], subject: "kc-other-admin", userName: "altro.admin"));
 
     [Fact, Trait("Scenario", "UC22-S1")]
     public async Task S1_SalvareERitrovare()

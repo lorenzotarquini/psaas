@@ -20,7 +20,10 @@ public static class KeycloakTokens
     public static readonly SymmetricSecurityKey SigningKey =
         new(Encoding.UTF8.GetBytes("fnhz-acceptance-tests-signing-key-0123456789"));
 
-    public static string Administrator() => Create(roles: ["Administrator"]);
+    /// <summary>The realm role that opens the portal (group Service Administrators).</summary>
+    public const string AdministratorRole = "systemadministrator";
+
+    public static string Administrator() => Create(roles: [AdministratorRole]);
 
     public static string Create(
         string[] roles,

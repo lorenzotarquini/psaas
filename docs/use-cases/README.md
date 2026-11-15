@@ -19,7 +19,7 @@ Nell'interfaccia la voce "Clienti" si chiama **Organizzazioni**; negli use case 
 
 | Attore | Descrizione |
 |---|---|
-| Amministratore | Il gestore della piattaforma o un suo collaboratore. Oggi è l'unico ruolo (`Administrator`, il più alto); in futuro potranno esserci ruoli con permessi ridotti. |
+| Amministratore | Il gestore della piattaforma o un suo collaboratore. Ruolo di realm Keycloak `systemadministrator`, assegnato dal gruppo `Service Administrators`. Oggi è l'unico ruolo del portale; in futuro potranno esserci ruoli con permessi ridotti. |
 | Keycloak | Sistema esterno di identità: autentica l'amministratore e custodisce gli utenti dei clienti. |
 | Lista comuni | Sistema esterno con i comuni italiani e i loro CAP. |
 
@@ -70,7 +70,7 @@ Nell'interfaccia la voce "Clienti" si chiama **Organizzazioni**; negli use case 
 
 Contratto HTTP: [API.md](API.md) (collection Postman: [FinHorizon.AdminPortal.postman_collection.json](../postman/FinHorizon.AdminPortal.postman_collection.json)). Test unitari derivati dagli scenari: [TEST-UNITARI.md](TEST-UNITARI.md).
 
-Regola comune a tutti gli use case: l'amministratore deve essere autenticato su Keycloak e avere il ruolo `Administrator`; altrimenti nessuna operazione è consentita.
+Regola comune a tutti gli use case: l'amministratore deve essere autenticato su Keycloak e avere il ruolo `systemadministrator`; altrimenti nessuna operazione è consentita.
 
 ## Fuori ambito per ora
 
@@ -114,14 +114,14 @@ Schema dello scenario: Ogni operazione richiede un amministratore autenticato
 
 ### GEN-S2
 
-Test: `GEN_Sicurezza.S2_OgniOperazioneRichiedeIlRuoloAdministrator`
+Test: `GEN_Sicurezza.S2_OgniOperazioneRichiedeIlRuoloSystemAdministrator`
 
 ```gherkin
 # language: it
 Funzionalità: Accesso all'Admin Portal
 
-Schema dello scenario: Ogni operazione richiede il ruolo Administrator
-  Quando un utente autenticato senza ruolo "Administrator" chiama "<operazione>"
+Schema dello scenario: Ogni operazione richiede il ruolo systemadministrator
+  Quando un utente autenticato senza ruolo "systemadministrator" (per esempio un utente finale con "enduser") chiama "<operazione>"
   Allora l'accesso è negato come non autorizzato
 
   Esempi: le stesse operazioni di GEN-S1

@@ -30,7 +30,7 @@ L'**Admin Portal** è il pannello di controllo del gestore della piattaforma ("A
 - **comunicare**: annunci ed email ai clienti per segmento, con esito per cliente;
 - **sapere chi ha fatto cosa**: audit log completo e storico per cliente; uso dei moduli per cliente e stato dei sistemi collegati.
 
-Ha un solo attore umano, l'**Amministratore** (ruolo Keycloak `Administrator`); i **moduli** inviano l'uso con il proprio service account (ruolo `UsageReporter`). Sistemi esterni: **Keycloak** (identità, archivio utenti, eventi di login, token exchange), **lista dei comuni italiani**, **hook di provisioning dei moduli**, **SMTP**; la trasmissione delle fatture (SDI) è una porta pronta ma non collegata.
+Ha un solo attore umano, l'**Amministratore** (ruolo Keycloak `systemadministrator`); i **moduli** inviano l'uso con il proprio service account (ruolo `UsageReporter`). Sistemi esterni: **Keycloak** (identità, archivio utenti, eventi di login, token exchange), **lista dei comuni italiani**, **hook di provisioning dei moduli**, **SMTP**; la trasmissione delle fatture (SDI) è una porta pronta ma non collegata.
 
 Restano fuori, come proposte nella [sezione 6](#6-proposta-di-espansione-analisi-di-business): permessi per modulo sui profili (EXP-05), configurazione per cliente e modulo (EXP-07), ruoli del portale (EXP-13), KPI di business (EXP-14), API per i clienti (EXP-15), rilascio graduale dei moduli (EXP-16), conformità (EXP-17).
 
@@ -39,7 +39,7 @@ Restano fuori, come proposte nella [sezione 6](#6-proposta-di-espansione-analisi
 | Parte | Tecnologia | Responsabilità |
 |---|---|---|
 | Frontend | React 19, Vite, TypeScript, Tailwind + daisyUI, TanStack Query, react-hook-form + zod, i18next (it/en) | UI dell'amministratore; login Keycloak con PKCE; validazione lato client con gli stessi codici d'errore del backend |
-| Backend | ASP.NET Core (.NET 10), clean architecture tutta interna al portale: `FinHorizon.AdminPortal.Domain`, `.Application`, `.Infrastructure`, `.Backend` | API REST `/api/*`, protette dal ruolo `Administrator`; `POST /api/usage` dal ruolo `UsageReporter` |
+| Backend | ASP.NET Core (.NET 10), clean architecture tutta interna al portale: `FinHorizon.AdminPortal.Domain`, `.Application`, `.Infrastructure`, `.Backend` | API REST `/api/*`, protette dal ruolo `systemadministrator`; `POST /api/usage` dal ruolo `UsageReporter` |
 | Codice condiviso | `FinHorizon.Auth` (Keycloak), `FinHorizon.Modules.Sdk` (contratti con i moduli: manifest, hook di provisioning, invio dell'uso) | Usabile da portale e moduli; non contiene logica di business del portale |
 | Dati | PostgreSQL (EF Core, migrazioni in `FinHorizon.AdminPortal.Infrastructure/Data/Migrations`) | Clienti e organizzazione, audit, catalogo, piani e sottoscrizioni, fatture, uso giornaliero, comunicazioni, viste salvate |
 | Processi in background | `BackgroundService` del backend | Riprova del provisioning (`Provisioning:RetryMinutes`), fatturazione giornaliera (`Billing:RunHours`) |
@@ -117,7 +117,7 @@ Stato rilevato dal codice e dalla suite di test di accettazione (aggiornato a og
 | [UC29](../use-cases/UC29-panoramica.md) | Panoramica del giorno (mock 1b) | Indicatori, coda "Da gestire" con azioni dirette (riprova, apri fattura, converti, proponi upgrade, reinvia inviti), servizi, attività recente | `GET /api/overview`, `GET /api/notifications`, `POST /api/users/invites/resend` | Pagina iniziale del mock 1b | ✅ |
 | [UC30](../use-cases/UC30-ricerca-globale.md) | Ricerca globale ⌘K | Clienti e utenti insieme, azioni rapide, scorciatoie ⌘K/Ctrl+K, N, Esc | `GET /api/search` | Barra di ricerca nell'intestazione e palette | ✅ |
 | [UC31](../use-cases/UC31-impersonificazione.md) | Impersonificazione (EXP-12) | Utente attivo, motivo, 5–60 minuti, audit; token nel frammento dell'indirizzo | `GET /api/impersonation`, `POST /api/users/{id}/impersonate` | Pulsante "Impersona" nella scheda cliente (mock 1d), disattivato se non configurata | ✅ (richiede token exchange in Keycloak) |
-| GEN | Sicurezza | Ogni operazione richiede autenticazione e ruolo `Administrator` (l'invio dell'uso anche `UsageReporter`); `/health` anonimo | Policy globale sui controller | Login obbligatorio, logout | ✅ |
+| GEN | Sicurezza | Ogni operazione richiede autenticazione e ruolo `systemadministrator` (l'invio dell'uso anche `UsageReporter`); `/health` anonimo | Policy globale sui controller | Login obbligatorio, logout | ✅ |
 
 Funzionalità trasversali già presenti:
 
@@ -143,7 +143,7 @@ Funzionalità trasversali già presenti:
 
 | # | Passo | UC | Atteso | Esito | Osservato | Screenshot |
 |---|---|---|---|---|---|---|
-| 01 | Home e utente corrente | UC8 | Dati dell'amministratore autenticato | ✅ | ID Keycloak, nome, email e ruoli (`Administrator` compreso) letti dal token; `GET /api/me` 200 | [01](screenshots/01-home-e-utente-corrente.png) |
+| 01 | Home e utente corrente | UC8 | Dati dell'amministratore autenticato | ✅ | ID Keycloak, nome, email e ruoli (`systemadministrator` compreso) letti dal token; `GET /api/me` 200 | [01](screenshots/01-home-e-utente-corrente.png) |
 | 02 | Menu profilo | UC8 | Menu con identità e logout | ✅ | Nome, email, "Impostazioni" ed "Esci" | [02](screenshots/02-menu-profilo.png) |
 | 03 | Elenco clienti | UC1 | Elenco paginato | ✅ | 3 clienti ordinati per ragione sociale, con P.IVA, P.IVA completa, PEC e città; paginazione. Al primo caricamento dopo l'avvio la risposta arriva dopo qualche secondo (avvio a freddo) | [03](screenshots/03-elenco-clienti.png) |
 | 04 | Ricerca senza risultati | UC1 | Stato vuoto | ✅ | "Nessun cliente corrisponde a "zzzz-nessuno"", non un errore | [04](screenshots/04-ricerca-clienti-senza-risultati.png) |
@@ -341,7 +341,7 @@ Completa UC6 e UC7 (oggi modifica e cancellazione sono fuori ambito).
 - Collegamento ai ticket di un sistema esterno (es. Jira, Zendesk).
 
 #### EXP-13 Ruoli dell'Admin Portal · **S**
-Oggi esiste solo `Administrator`.
+Oggi esiste solo `systemadministrator`.
 - Ruoli con permessi ridotti: Supporto (lettura e impersonificazione), Commerciale (piani e sottoscrizioni), Amministrazione (fatturazione), Sola lettura.
 - Doppia approvazione (*four-eyes*) per le azioni critiche: cessazione di un cliente, cancellazione di dati, note di credito.
 

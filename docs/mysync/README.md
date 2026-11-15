@@ -21,3 +21,15 @@ Con Aspire (`src/FinHorizon.AppHost`): Postgres crea `mysync-db`, poi partono `m
 |---|---|---|
 | `mysync-frontend` | Pubblico (Client authentication off), Standard flow, PKCE `S256` | Valid redirect URIs `http://localhost:5174/*`; Web origins `http://localhost:5174`; Valid post logout redirect URIs `http://localhost:5174/*`; mapper *Audience* che aggiunge `mysync-api` all'access token |
 | `mysync-api` | Confidenziale, nessun flusso abilitato | Serve solo come audience del backend (`Keycloak:ValidAudiences`); ruoli client da aggiungere quando serviranno |
+
+### Chi accede a cosa
+
+| Gruppo | Ruolo di realm | Applicazione |
+|---|---|---|
+| `Service Administrators` | `systemadministrator` | Admin Portal (gli altri ricevono 403) |
+| `end_users` | `enduser` | MySync |
+
+Gli utenti creati dall'Admin Portal entrano da soli in `end_users` (UC6-R7). I ruoli si assegnano ai gruppi, non ai *Service account roles* dei client: quelli valgono solo per l'identità tecnica del client.
+
+Ancora da fare: oggi il backend di MySync accetta qualsiasi utente autenticato; va ristretto al ruolo `enduser`.
+

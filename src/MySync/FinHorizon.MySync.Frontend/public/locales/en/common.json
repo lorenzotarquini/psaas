@@ -7,7 +7,10 @@
     "dashboard": "Dashboard",
     "transactions": "Transactions",
     "netWorth": "Trend",
-    "portfolio": "Accounts and debts"
+    "portfolio": "Accounts and debts",
+    "settings": "Settings",
+    "expand": "Expand the menu",
+    "collapse": "Collapse the menu"
   },
   "actions": {
     "title": "Actions",
@@ -72,9 +75,16 @@
       "VirtualBank": "Virtual bank",
       "Cash": "Cash",
       "Valuables": "Valuables",
-      "Other": "Other"
+      "Other": "Other",
+      "DepositAccount": "Deposit account",
+      "Investments": "Investments",
+      "SavingsPlan": "Savings plan (PAC)"
     },
-    "confirmEdit": "Editing the account recalculates your current net worth and its trend. Do you want to proceed?"
+    "confirmEdit": "Editing the account recalculates your current net worth and its trend. Do you want to proceed?",
+    "stableHidden_one": "{{count}} stable asset hidden",
+    "stableHidden_other": "{{count}} stable assets hidden",
+    "investmentsHidden_one": "{{count}} investment or deposit hidden",
+    "investmentsHidden_other": "{{count}} investments or deposits hidden"
   },
   "debts": {
     "title": "Debts",
@@ -98,7 +108,9 @@
       "Mortgage": "Mortgage",
       "Overdraft": "Credit line",
       "Other": "Other"
-    }
+    },
+    "stableHidden_one": "{{count}} long-term debt hidden",
+    "stableHidden_other": "{{count}} long-term debts hidden"
   },
   "categories": {
     "placeholder": "Search or create a category",
@@ -166,13 +178,16 @@
   },
   "dashboard": {
     "title": "Dashboard",
-    "subtitle": "Your net worth today.",
     "change30": "Last 30 days",
     "trendTitle": "Net worth trend",
     "seeTrend": "See the trend",
     "recentTitle": "Latest transactions",
     "seeAll": "See all",
-    "noTransactions": "No transactions yet: record your first expense or income."
+    "noTransactions": "No transactions yet: record your first expense or income.",
+    "hideAmounts": "Hide amounts",
+    "showAmounts": "Show amounts",
+    "show": "Show",
+    "hide": "Hide"
   },
   "netWorth": {
     "title": "Net worth trend",
@@ -212,5 +227,32 @@
     "editDebt": "Edit debt {{name}}",
     "editAccountTitle": "Edit account",
     "editDebtTitle": "Edit debt"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Your data, password and preferences.",
+    "profileTitle": "Your data",
+    "editProfile": "Edit your data",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "Email",
+    "username": "Username",
+    "passwordTitle": "Password",
+    "passwordHelp": "You set it on the secure sign-in page: MySync never sees it.",
+    "changePassword": "Reset your password",
+    "preferencesTitle": "Language and theme"
+  },
+  "amounts": {
+    "hidden": "Hidden amount"
+  },
+  "version": "Version",
+  "userMenu": {
+    "open": "Open the profile menu",
+    "label": "Profile",
+    "darkTheme": "Dark theme"
+  },
+  "scope": {
+    "stable": "Stable assets and long-term debts",
+    "investments": "Investments and deposits"
   }
 }

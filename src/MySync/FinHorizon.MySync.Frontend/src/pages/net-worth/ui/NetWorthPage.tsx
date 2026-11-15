@@ -2,17 +2,20 @@ import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 import { netWorthPeriods, useNetWorth, type NetWorthPeriod } from '@/entities/portfolio'
 import { useFormat } from '@/shared/lib/format'
-import { Amount, EmptyState, LoadError, Loading } from '@/shared/ui'
+import { usePortfolioScope } from '@/shared/lib/portfolio-scope'
+import { Amount, EmptyState, LoadError, Loading, ScopeSwitches } from '@/shared/ui'
 import { NetWorthChart } from '@/widgets/net-worth-chart'
 
-/** UC7: the trend over a chosen period, with the change and an accessible table of the same data (R5). */
+/** UC7: the trend over a chosen period, with the change and an accessible table of the same data (R5); the switches of UC12, off by default. */
 export function NetWorthPage() {
   const { t } = useTranslation()
   const format = useFormat()
   const [params, setParams] = useSearchParams()
   const requested = params.get('period')
   const period: NetWorthPeriod = netWorthPeriods.includes(requested as NetWorthPeriod) ? (requested as NetWorthPeriod) : '30d'
-  const trend = useNetWorth(period)
+  // The same choices as the dashboard, for the whole working session (UC12-R2).
+  const [scope, setScope] = usePortfolioScope()
+  const trend = useNetWorth(period, scope)
 
   return (
     <div className="flex flex-col gap-6">
@@ -20,6 +23,9 @@ export function NetWorthPage() {
         <div>
           <h1 className="text-2xl font-semibold">{t('netWorth.title')}</h1>
           <p className="muted">{t('netWorth.subtitle')}</p>
+          <div className="mt-1 flex flex-wrap items-center gap-3">
+            <ScopeSwitches scope={scope} onChange={setScope} />
+          </div>
         </div>
         <div role="tablist" aria-label={t('netWorth.period')} className="tabs tabs-box">
           {netWorthPeriods.map((option) => (

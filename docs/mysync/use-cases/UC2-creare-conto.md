@@ -4,7 +4,7 @@
 **Obiettivo:** registrare un posto dove l'utente tiene soldi o valore, con quanto c'è oggi.
 
 ## Flusso principale
-1. L'utente sceglie il tipo di conto: Conto corrente, Banca virtuale, Contanti, Preziosi, Altro.
+1. L'utente sceglie il tipo di conto: Conto corrente, Banca virtuale, Conto deposito, Investimenti, PAC (piano di accumulo), Contanti, Preziosi, Altro.
 2. Inserisce nome, descrizione, tag e saldo iniziale.
 3. Il sistema verifica i dati e il limite di conti, poi crea il conto con data di apertura oggi.
 4. Il sistema mostra il conto con il suo saldo.
@@ -144,4 +144,23 @@ Funzionalità: Creare un conto
 Scenario: Conto in scoperto
   Quando "Mario" crea il conto corrente "Conto BPM" con saldo iniziale -300,00 €
   Allora il conto è creato con saldo -300,00 €
+```
+
+### UC2-S9
+
+Test: `UC2_CreareConto.S9_NuoviTipiDiConto`
+
+```gherkin
+# language: it
+Funzionalità: Creare un conto
+
+Schema dello scenario: Conto deposito, investimenti e PAC
+  Quando "Mario" crea il conto "Risparmi" di tipo <tipo>
+  Allora il conto è creato e nel gruppo "Investimenti e depositi" (UC12)
+
+  Esempi:
+    | tipo            |
+    | Conto deposito  |
+    | Investimenti    |
+    | PAC             |
 ```

@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { Area, CartesianGrid, ComposedChart, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import type { NetWorthPoint } from '@/entities/portfolio'
 import { useFormat } from '@/shared/lib/format'
+import { hiddenAmount, useAmountsHidden } from '@/shared/ui'
 
 interface NetWorthChartProps {
   points: NetWorthPoint[]
@@ -13,6 +14,9 @@ interface NetWorthChartProps {
 export function NetWorthChart({ points, compact = false }: NetWorthChartProps) {
   const { t } = useTranslation()
   const format = useFormat()
+  // UC12 eye: the shape of the trend stays, the figures do not.
+  const hidden = useAmountsHidden()
+  const money = (value: number) => (hidden ? hiddenAmount : format.money(value))
   const tick = { fill: 'var(--chart-text)', fontSize: 12 }
 
   return (
@@ -27,10 +31,10 @@ export function NetWorthChart({ points, compact = false }: NetWorthChartProps) {
           </defs>
           <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" vertical={false} />
           <XAxis dataKey="date" tick={tick} tickFormatter={format.shortDate} tickLine={false} axisLine={false} minTickGap={24} />
-          <YAxis tick={tick} tickFormatter={(value: number) => format.money(value)} tickLine={false} axisLine={false} width={96} />
+          <YAxis tick={tick} tickFormatter={(value: number) => money(value)} tickLine={false} axisLine={false} width={96} />
           <Tooltip
             labelFormatter={(label: string) => format.date(label)}
-            formatter={(value: number, name: string) => [format.money(value), name]}
+            formatter={(value: number, name: string) => [money(value), name]}
             contentStyle={{ background: 'var(--color-base-100)', border: '1px solid var(--color-base-300)', borderRadius: 12 }}
           />
           {!compact && <Legend />}

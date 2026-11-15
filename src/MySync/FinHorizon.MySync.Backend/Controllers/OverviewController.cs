@@ -15,15 +15,19 @@ public sealed class OverviewController : ControllerBase
     [HttpGet("dashboard")]
     public async Task<ActionResult<DashboardView>> Dashboard(
         [FromServices] IRequestHandler<GetDashboardQuery, DashboardView> handler,
-        CancellationToken cancellationToken) =>
-        (await handler.HandleAsync(new GetDashboardQuery(), cancellationToken)).ToActionResult(this);
+        CancellationToken cancellationToken,
+        [FromQuery] bool includeStable = true,
+        [FromQuery] bool includeInvestments = true) =>
+        (await handler.HandleAsync(new GetDashboardQuery(includeStable, includeInvestments), cancellationToken)).ToActionResult(this);
 
     [HttpGet("net-worth")]
     public async Task<ActionResult<NetWorthTrendView>> NetWorth(
         [FromQuery] string? period,
         [FromServices] IRequestHandler<GetNetWorthTrendQuery, NetWorthTrendView> handler,
-        CancellationToken cancellationToken) =>
-        (await handler.HandleAsync(new GetNetWorthTrendQuery(period), cancellationToken)).ToActionResult(this);
+        CancellationToken cancellationToken,
+        [FromQuery] bool includeStable = true,
+        [FromQuery] bool includeInvestments = true) =>
+        (await handler.HandleAsync(new GetNetWorthTrendQuery(period, includeStable, includeInvestments), cancellationToken)).ToActionResult(this);
 
     /// <summary>Tags already used, for the suggestions of UC2 and UC3.</summary>
     [HttpGet("tags")]

@@ -6,7 +6,7 @@ import { renderWithApi } from '@/test/renderApp'
 import { AccountsCard } from './AccountsCard'
 
 vi.mock('@/shared/auth', () => ({
-  session: { headers: () => Promise.resolve({}), userName: () => 'Mario', login: vi.fn(), logout: vi.fn(), init: vi.fn() },
+  session: { headers: () => Promise.resolve({}), userName: () => 'Mario', profile: () => ({ firstName: 'Mario', lastName: 'Rossi', email: 'mario@example.com', username: 'mario' }), login: vi.fn(), logout: vi.fn(), init: vi.fn() },
 }))
 
 function givenTwoAccounts() {

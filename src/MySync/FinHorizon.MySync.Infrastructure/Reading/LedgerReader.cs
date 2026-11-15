@@ -44,14 +44,19 @@ internal sealed class LedgerReader(MySyncDbContext db) : ILedgerReader
         return new Money(paid);
     }
 
-    public async Task<LedgerHistory> HistoryAsync(OwnerId owner, CancellationToken cancellationToken = default)
+    public async Task<LedgerHistory> HistoryAsync(OwnerId owner, PortfolioScope scope, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(scope);
+        var excludedAccounts = scope.ExcludedAccountKinds.ToList();
+        var excludedDebts = scope.ExcludedDebtKinds.ToList();
+        var excludedAccountNames = excludedAccounts.Select(kind => kind.ToString()).ToArray();
+        var excludedDebtNames = excludedDebts.Select(kind => kind.ToString()).ToArray();
         var accounts = await db.Accounts.AsNoTracking()
-            .Where(account => account.OwnerId == owner)
+            .Where(account => account.OwnerId == owner && !excludedAccounts.Contains(account.Kind))
             .Select(account => new OpeningValue(account.OpenedOn, account.InitialBalance))
             .ToListAsync(cancellationToken).ConfigureAwait(false);
         var debts = await db.Debts.AsNoTracking()
-            .Where(debt => debt.OwnerId == owner)
+            .Where(debt => debt.OwnerId == owner && !excludedDebts.Contains(debt.Kind))
             .Select(debt => new OpeningValue(debt.CreatedOn, debt.InitialResidual))
             .ToListAsync(cancellationToken).ConfigureAwait(false);
         var days = await db.Database.SqlQuery<DailyRow>($"""
@@ -60,11 +65,13 @@ internal sealed class LedgerReader(MySyncDbContext db) : ILedgerReader
                 SELECT t."Date", p."Amount" AS "BalanceChange", 0 AS "InstallmentsPaid"
                 FROM "Postings" p
                 JOIN "Transactions" t ON t."Id" = p."TransactionId"
-                WHERE t."OwnerId" = {owner.Value}
+                JOIN "Accounts" a ON a."Id" = p."AccountId"
+                WHERE t."OwnerId" = {owner.Value} AND NOT (a."Kind" = ANY({excludedAccountNames}))
                 UNION ALL
-                SELECT "Date", 0, "Amount"
-                FROM "Transactions"
-                WHERE "OwnerId" = {owner.Value} AND "DebtId" IS NOT NULL
+                SELECT t."Date", 0, t."Amount"
+                FROM "Transactions" t
+                JOIN "Debts" d ON d."Id" = t."DebtId"
+                WHERE t."OwnerId" = {owner.Value} AND NOT (d."Kind" = ANY({excludedDebtNames}))
             ) AS day
             GROUP BY "Date"
             """).ToListAsync(cancellationToken).ConfigureAwait(false);

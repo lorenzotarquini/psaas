@@ -1,5 +1,6 @@
 using FinHorizon.MySync.Domain.Accounts;
 using FinHorizon.MySync.Domain.Common;
+using FinHorizon.MySync.Domain.NetWorth;
 
 namespace FinHorizon.MySync.Application.Features.Accounts;
 
@@ -11,7 +12,8 @@ public sealed record AccountView(
     string? Tag,
     decimal InitialBalance,
     DateOnly OpenedOn,
-    decimal Balance)
+    decimal Balance,
+    PortfolioGroup Group)
 {
     public static AccountView From(Account account, Money movements)
     {
@@ -24,7 +26,8 @@ public sealed record AccountView(
             account.Descriptor.Tag,
             account.InitialBalance.Amount,
             account.OpenedOn,
-            account.BalanceAfter(movements).Amount);
+            account.BalanceAfter(movements).Amount,
+            PortfolioScope.GroupOf(account.Kind));
     }
 }
 

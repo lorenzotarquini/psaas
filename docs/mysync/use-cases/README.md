@@ -34,7 +34,7 @@ Da questi dati MySync calcola il **patrimonio netto** e ne mostra l'andamento ne
 | Termine | Significato |
 |---|---|
 | Conto | Un contenitore di valore dell'utente: ha un tipo, un nome, una descrizione, un tag e un saldo iniziale. Il suo saldo cambia solo con i movimenti. |
-| Tipo di conto | Conto corrente, Banca virtuale, Contanti, Preziosi, Altro. |
+| Tipo di conto | Conto corrente, Banca virtuale, Conto deposito, Investimenti, PAC (piano di accumulo), Contanti, Preziosi, Altro. |
 | Saldo iniziale | Il saldo del conto al giorno in cui l'utente lo crea (la **data di apertura** in MySync). |
 | Saldo | Saldo iniziale + ricavi − spese del conto, fino a una data. |
 | Debito | Una somma che l'utente deve restituire: ha un tipo, un nome, una descrizione, un tag, il conto da cui si paga e il residuo da pagare alla creazione. |
@@ -44,6 +44,8 @@ Da questi dati MySync calcola il **patrimonio netto** e ne mostra l'andamento ne
 | Trasferimento | Soldi spostati da un conto dell'utente a un altro (UC9): né spesa né ricavo, il patrimonio netto non cambia. |
 | Categoria | Etichetta dell'utente per raggruppare i movimenti (es. "Spesa alimentare", "Stipendio"). Le categorie di spesa e quelle di ricavo sono separate. |
 | Patrimonio netto | Somma dei saldi di tutti i conti, a una certa data. I debiti non vengono sottratti: si mostrano accanto come debiti residui (D9). |
+| Patrimonio stabile e debiti a lungo termine | Conti di tipo Preziosi (beni che restano lì e cambiano poco, come i gioielli) e debiti di tipo Mutuo; nascosti finché il loro switch è spento (UC12). |
+| Investimenti e depositi | Conti di tipo Conto deposito, Investimenti e PAC; nascosti finché il loro switch è spento (UC12). |
 | Debiti residui | Somma dei residui di tutti i debiti, a una certa data. |
 
 ## Requisiti
@@ -65,6 +67,8 @@ Da questi dati MySync calcola il **patrimonio netto** e ne mostra l'andamento ne
 | RF11 | L'utente consulta tutti i suoi movimenti con filtri, li modifica e li elimina; saldi, residui e andamento si ricalcolano di conseguenza. | UC8 |
 | RF12 | L'utente trasferisce denaro tra due suoi conti; il trasferimento compare tra i movimenti ma non è né una spesa né un ricavo. | UC9 |
 | RF13 | L'utente modifica conti e debiti da una sezione dedicata; modificare un conto chiede conferma perché il patrimonio viene ricalcolato. I pulsanti di aggiunta sono disabilitati oltre i limiti. | UC10 |
+| RF14 | L'utente vede e modifica i propri dati e reimposta la password dalle Impostazioni, tramite le pagine di Keycloak. | UC11 |
+| RF15 | Dashboard e Andamento hanno due switch, spenti di default: "Patrimonio stabile e debiti a lungo termine" e "Investimenti e depositi"; la dashboard ha anche un occhio per nascondere gli importi. | UC12 |
 
 ### Non funzionali
 
@@ -92,6 +96,8 @@ Da questi dati MySync calcola il **patrimonio netto** e ne mostra l'andamento ne
 | [UC8](UC8-gestire-movimenti.md) | Consultare, modificare ed eliminare i movimenti | in ambito |
 | [UC9](UC9-trasferire-denaro.md) | Trasferire denaro tra due conti | in ambito |
 | [UC10](UC10-modificare-conti-e-debiti.md) | Modificare conti e debiti | in ambito |
+| [UC11](UC11-gestire-il-proprio-profilo.md) | Gestire il proprio profilo (dati, password, preferenze) | in ambito |
+| [UC12](UC12-vista-leggera-e-importi-nascosti.md) | Vista leggera e importi nascosti | in ambito |
 
 Contratto HTTP: [API.md](API.md).
 

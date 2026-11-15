@@ -102,4 +102,16 @@ public sealed class UC2_CreareConto(PostgresFixture database) : AcceptanceTest(d
 
         Assert.Equal(-300m, (await AccountAsync(account.Id)).Balance);
     }
+
+    [Theory]
+    [InlineData("DepositAccount")]
+    [InlineData("Investments")]
+    [InlineData("SavingsPlan")]
+    public async Task S9_NuoviTipiDiConto(string kind)
+    {
+        var account = await GivenAccountAsync("Risparmi", 1000m, kind);
+
+        Assert.Equal(kind, account.Kind.ToString());
+        Assert.Equal(Domain.NetWorth.PortfolioGroup.Investments, account.Group);
+    }
 }

@@ -1,5 +1,6 @@
 using FinHorizon.MySync.Domain.Common;
 using FinHorizon.MySync.Domain.Debts;
+using FinHorizon.MySync.Domain.NetWorth;
 
 namespace FinHorizon.MySync.Application.Features.Debts;
 
@@ -13,7 +14,8 @@ public sealed record DebtView(
     decimal InitialResidual,
     decimal Residual,
     DateOnly CreatedOn,
-    bool PaidOff)
+    bool PaidOff,
+    PortfolioGroup Group)
 {
     public static DebtView From(Debt debt, Money installmentsPaid)
     {
@@ -29,7 +31,8 @@ public sealed record DebtView(
             debt.InitialResidual.Amount,
             residual.Amount,
             debt.CreatedOn,
-            !residual.IsPositive);
+            !residual.IsPositive,
+            PortfolioScope.GroupOf(debt.Kind));
     }
 }
 

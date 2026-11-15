@@ -129,14 +129,18 @@ internal sealed class FakeLedger(FakeStore store) : ILedgerReader, ITransactionR
             .Where(transaction => transaction.DebtId == debtId && transaction.Id != exceptTransactionId)
             .Select(transaction => transaction.Amount)));
 
-    public Task<LedgerHistory> HistoryAsync(OwnerId owner, CancellationToken cancellationToken = default) =>
-        Task.FromResult(new LedgerHistory(
-            store.Accounts.Where(a => a.OwnerId == owner).Select(a => new OpeningValue(a.OpenedOn, a.InitialBalance)).ToList(),
-            store.Debts.Where(d => d.OwnerId == owner).Select(d => new OpeningValue(d.CreatedOn, d.InitialResidual)).ToList(),
+    public Task<LedgerHistory> HistoryAsync(OwnerId owner, PortfolioScope scope, CancellationToken cancellationToken = default)
+    {
+        var accounts = store.Accounts.Where(a => a.OwnerId == owner && scope.Includes(a.Kind)).ToList();
+        var debts = store.Debts.Where(d => d.OwnerId == owner && scope.Includes(d.Kind)).ToList();
+        return Task.FromResult(new LedgerHistory(
+            accounts.Select(a => new OpeningValue(a.OpenedOn, a.InitialBalance)).ToList(),
+            debts.Select(d => new OpeningValue(d.CreatedOn, d.InitialResidual)).ToList(),
             Of(owner).GroupBy(t => t.Date).Select(g => new DailyMovement(
                 g.Key,
-                Money.Sum(g.SelectMany(t => t.Postings).Select(p => p.Amount)),
-                Money.Sum(g.Where(t => t.DebtId is not null).Select(t => t.Amount)))).ToList()));
+                Money.Sum(g.SelectMany(t => t.Postings).Where(p => accounts.Any(a => a.Id == p.AccountId)).Select(p => p.Amount)),
+                Money.Sum(g.Where(t => debts.Any(d => d.Id == t.DebtId)).Select(t => t.Amount)))).ToList()));
+    }
 
     public Task<TransactionView?> GetAsync(OwnerId owner, Guid id, CancellationToken cancellationToken = default) =>
         Task.FromResult(Of(owner).Where(transaction => transaction.Id == id).Select(View).SingleOrDefault());

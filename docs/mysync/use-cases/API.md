@@ -4,7 +4,7 @@ Tutte le rotte sono sotto `/api`, richiedono un token Keycloak con audience `mys
 
 **Errori.** `400` con `ValidationProblemDetails`: in `errors` un codice per campo, gli stessi dell'Admin Portal (`Required`, `InvalidFormat`, `MaxLengthExceeded`, `NotUnique`, `InvalidValue`) più `LimitReached`, che arriva sul campo `limit` perché non riguarda un singolo input. Un id nell'URL inesistente o di un altro utente risponde `404`; un id nel corpo (conto, categoria, debito) di un altro utente è `InvalidValue` su quel campo.
 
-**Enumerazioni** per nome, senza distinzione di maiuscole (in risposta in PascalCase): conto `CurrentAccount`, `VirtualBank`, `Cash`, `Valuables`, `Other`; debito `Loan`, `Mortgage`, `Overdraft`, `Other`; movimento `Expense`, `Income`, `Transfer`; categoria `Expense`, `Income`; periodo `30d`, `90d`, `12m`, `all`.
+**Enumerazioni** per nome, senza distinzione di maiuscole (in risposta in PascalCase): conto `CurrentAccount`, `VirtualBank`, `DepositAccount`, `Investments`, `SavingsPlan` (PAC), `Cash`, `Valuables`, `Other`; debito `Loan`, `Mortgage`, `Overdraft`, `Other`; movimento `Expense`, `Income`, `Transfer`; categoria `Expense`, `Income`; periodo `30d`, `90d`, `12m`, `all`.
 
 | Metodo e rotta | Use case | Richiesta | Risposta |
 |---|---|---|---|
@@ -23,14 +23,16 @@ Tutte le rotte sono sotto `/api`, richiedono un token Keycloak con audience `mys
 | `POST /api/transactions` | UC5, UC9 | `{ kind, date, amount, accountId, categoryId?, counterAccountId?, debtId?, note? }`: `categoryId` obbligatorio per spese e ricavi, `counterAccountId` (destinazione) per i trasferimenti | `201` con il movimento |
 | `PUT /api/transactions/{id}` | UC8 | come `POST` | `200` con il movimento aggiornato |
 | `DELETE /api/transactions/{id}` | UC8 | — | `204` |
-| `GET /api/dashboard` | UC4 | — | `{ netWorth, debtsResidual, accounts, debts, recentTransactions (10), limits: { maxAccounts, maxDebts } }`; `netWorth` è la somma dei saldi, i debiti non vengono sottratti (D9) |
-| `GET /api/net-worth?period=` | UC7 | — | `{ period, points: [{ date, netWorth, debts }], change, changePercent }`; 30 giorni se `period` manca; `changePercent` è `null` se il patrimonio iniziale è 0 |
+| `GET /api/dashboard?includeStable=&includeInvestments=` | UC4, UC12 | — | `{ netWorth, debtsResidual, accounts, debts, recentTransactions (10), limits: { maxAccounts, maxDebts } }`; `netWorth` è la somma dei saldi, i debiti non vengono sottratti (D9); con `includeStable=false` i totali escludono preziosi e mutui, con `includeInvestments=false` conti deposito, investimenti e PAC (predefiniti `true`); le liste restano complete e ogni voce ha il suo `group` (`Everyday`, `Stable`, `Investments`) |
+| `GET /api/net-worth?period=&includeStable=&includeInvestments=` | UC7, UC12 | — | `{ period, points: [{ date, netWorth, debts }], change, changePercent }`; 30 giorni se `period` manca; `changePercent` è `null` se il patrimonio iniziale è 0; `includeStable` e `includeInvestments` come per la dashboard |
 
 ## Configurazione del backend
 
-| Chiave | Variabile d'ambiente | Predefinito | Note |
+Tutta la configurazione sta nell'AppHost di Aspire: parametri in `src/FinHorizon.AppHost/appsettings.json` (sezione `Parameters`), passati a `mysync-backend` come variabili d'ambiente in `AppHost.cs`. Gli `appsettings` del backend non la contengono; nel codice resta solo un valore predefinito.
+
+| Parametro Aspire | Variabile d'ambiente | Valore | Note |
 |---|---|---|---|
-| `MySync:MaxAccounts` | `MySync__MaxAccounts` | 2 | 1–1000; un valore fuori intervallo blocca l'avvio (UC2-R6) |
-| `MySync:MaxDebts` | `MySync__MaxDebts` | 1 | 0–1000; 0 disattiva i debiti (UC3-R5) |
-| `Calendar:TimeZone` | `Calendar__TimeZone` | `Europe/Rome` | Decide cos'è "oggi" (RNF4) |
-| `Database:MigrateOnStartup` | `Database__MigrateOnStartup` | `false` (`true` in Development) | Applica le migrazioni EF all'avvio |
+| `mysync-max-accounts` | `MySync__MaxAccounts` | 2 | 1–1000; un valore fuori intervallo blocca l'avvio (UC2-R6) |
+| `mysync-max-debts` | `MySync__MaxDebts` | 1 | 0–1000; 0 disattiva i debiti (UC3-R5) |
+| `mysync-time-zone` | `Calendar__TimeZone` | `Europe/Rome` | Decide cos'è "oggi" (RNF4) |
+| `mysync-migrate-on-startup` | `Database__MigrateOnStartup` | `true` | Applica le migrazioni EF all'avvio |

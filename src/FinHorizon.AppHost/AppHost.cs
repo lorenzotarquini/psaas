@@ -29,9 +29,20 @@ builder.AddViteApp("adminportal-frontend", "../AdminPortal/FinHorizon.AdminPorta
     .WaitFor(adminPortalBackend);
 
 // MySync: its own database, backend and frontend; users sign in with the same realm.
+// MySync settings, all here (Parameters in appsettings.json): accounts and debts per user (UC2-R6, UC3-R5),
+// the time zone that decides "today", and the migrations applied at start.
+var mySyncMaxAccounts = builder.AddParameter("mysync-max-accounts");
+var mySyncMaxDebts = builder.AddParameter("mysync-max-debts");
+var mySyncTimeZone = builder.AddParameter("mysync-time-zone");
+var mySyncMigrateOnStartup = builder.AddParameter("mysync-migrate-on-startup");
+
 var mySyncBackend = builder.AddProject<Projects.FinHorizon_MySync_Backend>("mysync-backend")
     .WithReference(mySyncDb)
-    .WaitFor(mySyncDb);
+    .WaitFor(mySyncDb)
+    .WithEnvironment("MySync__MaxAccounts", mySyncMaxAccounts)
+    .WithEnvironment("MySync__MaxDebts", mySyncMaxDebts)
+    .WithEnvironment("Calendar__TimeZone", mySyncTimeZone)
+    .WithEnvironment("Database__MigrateOnStartup", mySyncMigrateOnStartup);
 
 // Fixed port: it must match the redirect URIs and web origins of the Keycloak client mysync-frontend.
 builder.AddViteApp("mysync-frontend", "../MySync/FinHorizon.MySync.Frontend")

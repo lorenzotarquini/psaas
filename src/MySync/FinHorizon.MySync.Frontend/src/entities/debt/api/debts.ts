@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { apiGet, apiPost, apiPut, ledgerKey } from '@/shared/api'
+import type { PortfolioGroup } from '@/shared/lib/portfolio-scope'
 
 export const debtKinds = ['Loan', 'Mortgage', 'Overdraft', 'Other'] as const
 export type DebtKind = (typeof debtKinds)[number]
@@ -16,6 +17,8 @@ export interface Debt {
   residual: number
   createdOn: string
   paidOff: boolean
+  /** Day-to-day or long-term (mortgages): what the UC12 stable switch shows or hides. */
+  group: PortfolioGroup
 }
 
 export interface DebtList {

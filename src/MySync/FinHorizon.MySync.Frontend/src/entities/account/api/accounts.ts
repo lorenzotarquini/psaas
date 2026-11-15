@@ -1,7 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 import { apiGet, apiPost, apiPut, ledgerKey } from '@/shared/api'
+import type { PortfolioGroup } from '@/shared/lib/portfolio-scope'
 
-export const accountKinds = ['CurrentAccount', 'VirtualBank', 'Cash', 'Valuables', 'Other'] as const
+// Order of the account type list in the forms.
+export const accountKinds = ['CurrentAccount', 'VirtualBank', 'DepositAccount', 'Investments', 'SavingsPlan', 'Cash', 'Valuables', 'Other'] as const
 export type AccountKind = (typeof accountKinds)[number]
 
 // Mirrors AccountView in FinHorizon.MySync.Application.
@@ -14,6 +16,8 @@ export interface Account {
   initialBalance: number
   openedOn: string
   balance: number
+  /** Day-to-day, stable (valuables) or investments and deposits: what the UC12 switches show or hide. */
+  group: PortfolioGroup
 }
 
 export interface AccountList {

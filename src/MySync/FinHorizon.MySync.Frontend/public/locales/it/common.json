@@ -7,7 +7,10 @@
     "dashboard": "Dashboard",
     "transactions": "Movimenti",
     "netWorth": "Andamento",
-    "portfolio": "Conti e debiti"
+    "portfolio": "Conti e debiti",
+    "settings": "Impostazioni",
+    "expand": "Espandi il menu",
+    "collapse": "Riduci il menu"
   },
   "actions": {
     "title": "Azioni",
@@ -72,9 +75,16 @@
       "VirtualBank": "Banca virtuale",
       "Cash": "Contanti",
       "Valuables": "Preziosi",
-      "Other": "Altro"
+      "Other": "Altro",
+      "DepositAccount": "Conto deposito",
+      "Investments": "Investimenti",
+      "SavingsPlan": "PAC"
     },
-    "confirmEdit": "Modificando il conto, il patrimonio attuale e il suo andamento verranno ricalcolati. Vuoi procedere?"
+    "confirmEdit": "Modificando il conto, il patrimonio attuale e il suo andamento verranno ricalcolati. Vuoi procedere?",
+    "stableHidden_one": "{{count}} bene stabile nascosto",
+    "stableHidden_other": "{{count}} beni stabili nascosti",
+    "investmentsHidden_one": "{{count}} investimento o deposito nascosto",
+    "investmentsHidden_other": "{{count}} investimenti o depositi nascosti"
   },
   "debts": {
     "title": "Debiti",
@@ -98,7 +108,9 @@
       "Mortgage": "Mutuo",
       "Overdraft": "Fido",
       "Other": "Altro"
-    }
+    },
+    "stableHidden_one": "{{count}} debito a lungo termine nascosto",
+    "stableHidden_other": "{{count}} debiti a lungo termine nascosti"
   },
   "categories": {
     "placeholder": "Cerca o crea una categoria",
@@ -166,13 +178,16 @@
   },
   "dashboard": {
     "title": "Dashboard",
-    "subtitle": "Il tuo patrimonio oggi.",
     "change30": "Ultimi 30 giorni",
     "trendTitle": "Andamento del patrimonio",
     "seeTrend": "Vedi l'andamento",
     "recentTitle": "Ultimi movimenti",
     "seeAll": "Vedi tutti",
-    "noTransactions": "Nessun movimento: registra la tua prima spesa o il tuo primo ricavo."
+    "noTransactions": "Nessun movimento: registra la tua prima spesa o il tuo primo ricavo.",
+    "hideAmounts": "Nascondi gli importi",
+    "showAmounts": "Mostra gli importi",
+    "show": "Mostra",
+    "hide": "Nascondi"
   },
   "netWorth": {
     "title": "Andamento del patrimonio",
@@ -212,5 +227,32 @@
     "editDebt": "Modifica il debito {{name}}",
     "editAccountTitle": "Modifica conto",
     "editDebtTitle": "Modifica debito"
+  },
+  "settings": {
+    "title": "Impostazioni",
+    "subtitle": "I tuoi dati, la password e le preferenze.",
+    "profileTitle": "I tuoi dati",
+    "editProfile": "Modifica i tuoi dati",
+    "firstName": "Nome",
+    "lastName": "Cognome",
+    "email": "Email",
+    "username": "Nome utente",
+    "passwordTitle": "Password",
+    "passwordHelp": "La imposti sulla pagina sicura di accesso: MySync non la vede mai.",
+    "changePassword": "Reimposta la password",
+    "preferencesTitle": "Lingua e tema"
+  },
+  "amounts": {
+    "hidden": "Importo nascosto"
+  },
+  "version": "Versione",
+  "userMenu": {
+    "open": "Apri il menu del profilo",
+    "label": "Profilo",
+    "darkTheme": "Tema scuro"
+  },
+  "scope": {
+    "stable": "Patrimonio stabile e debiti a lungo termine",
+    "investments": "Investimenti e depositi"
   }
 }

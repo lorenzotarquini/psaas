@@ -2,12 +2,21 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Debt } from '@/entities/debt'
 import { DebtForm } from '@/features/debt-form'
+import { inScope, type PortfolioScope } from '@/shared/lib/portfolio-scope'
 import { AddButton, Amount, EmptyState, Modal } from '@/shared/ui'
 
 /** UC4: debts by residual, paid-off ones last; "New debt" while the limit allows it (UC3). */
-export function DebtsCard({ debts, max }: { debts: Debt[]; max: number }) {
+interface DebtsCardProps {
+  debts: Debt[]
+  max: number
+  /** UC12: the groups to show; the count and the limit still include the hidden ones. */
+  scope?: PortfolioScope
+}
+
+export function DebtsCard({ debts, max, scope = { stable: true, investments: true } }: DebtsCardProps) {
   const { t } = useTranslation()
   const [creating, setCreating] = useState(false)
+  const shown = debts.filter((debt) => inScope(debt.group, scope))
 
   // UC3-R5: with a limit of 0 debts are switched off.
   if (max === 0) return null
@@ -20,11 +29,11 @@ export function DebtsCard({ debts, max }: { debts: Debt[]; max: number }) {
         </h2>
         <AddButton label={t('debts.new')} limitReached={debts.length >= max} limitMessage={t('debts.limitReached')} onClick={() => setCreating(true)} />
       </header>
-      {debts.length === 0 ? (
+      {shown.length === 0 ? (
         <EmptyState>{t('debts.empty')}</EmptyState>
       ) : (
         <ul className="flex flex-col gap-3">
-          {debts.map((debt) => {
+          {shown.map((debt) => {
             const paid = debt.initialResidual - debt.residual
             return (
               <li key={debt.id} className={debt.paidOff ? 'opacity-60' : ''}>
@@ -49,6 +58,7 @@ export function DebtsCard({ debts, max }: { debts: Debt[]; max: number }) {
           })}
         </ul>
       )}
+      {shown.length < debts.length && <p className="muted text-xs">{t('debts.stableHidden', { count: debts.length - shown.length })}</p>}
       <Modal open={creating} title={t('debts.new')} onClose={() => setCreating(false)}>
         <DebtForm onSaved={() => setCreating(false)} />
       </Modal>

@@ -17,5 +17,6 @@ public interface ILedgerReader
     /// <summary>Installments paid on one debt, leaving out the movement being amended (UC8-M3b).</summary>
     Task<Money> InstallmentsPaidAsync(OwnerId owner, Guid debtId, Guid? exceptTransactionId, CancellationToken cancellationToken = default);
 
-    Task<LedgerHistory> HistoryAsync(OwnerId owner, CancellationToken cancellationToken = default);
+    /// <summary>The history of the accounts and debts in <paramref name="scope"/> only (UC12).</summary>
+    Task<LedgerHistory> HistoryAsync(OwnerId owner, PortfolioScope scope, CancellationToken cancellationToken = default);
 }

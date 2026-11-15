@@ -2,6 +2,11 @@ import type { Account } from '@/entities/account'
 import type { Category } from '@/entities/category'
 import type { Debt } from '@/entities/debt'
 import type { Transaction } from '@/entities/transaction'
+import { inScope, type PortfolioGroup } from '@/shared/lib/portfolio-scope'
+
+// The same mapping as PortfolioScope in the domain, for the fake only.
+const groupOf = (kind: Account['kind']): PortfolioGroup =>
+  kind === 'Valuables' ? 'Stable' : ['DepositAccount', 'Investments', 'SavingsPlan'].includes(kind) ? 'Investments' : 'Everyday'
 
 type Json = Record<string, unknown>
 
@@ -13,10 +18,12 @@ export class FakeApi {
   transactions: Transaction[] = []
   limits = { maxAccounts: 2, maxDebts: 1 }
   requests: { method: string; path: string; body?: Json }[] = []
+  /** Path and query of every call, in order. */
+  urls: string[] = []
   private nextId = 1
 
-  givenAccount(name: string, balance = 1000): Account {
-    const account: Account = { id: this.id(), kind: 'CurrentAccount', name, description: null, tag: null, initialBalance: balance, openedOn: '2026-11-01', balance }
+  givenAccount(name: string, balance = 1000, kind: Account['kind'] = 'CurrentAccount'): Account {
+    const account: Account = { id: this.id(), kind, name, description: null, tag: null, initialBalance: balance, openedOn: '2026-11-01', balance, group: groupOf(kind) }
     this.accounts.push(account)
     return account
   }
@@ -47,6 +54,7 @@ export class FakeApi {
     const method = init?.method ?? 'GET'
     const body = init?.body ? (JSON.parse(String(init.body)) as Json) : undefined
     this.requests.push({ method, path: url.pathname, body })
+    this.urls.push(url.pathname + url.search)
     return this.route(method, url, body)
   }
 
@@ -75,6 +83,7 @@ export class FakeApi {
         initialBalance: Number(body!.initialBalance),
         openedOn: '2026-11-15',
         balance: Number(body!.initialBalance),
+        group: groupOf(body!.kind as Account['kind']),
       }
       this.accounts.push(account)
       return ok(account, 201)
@@ -91,13 +100,15 @@ export class FakeApi {
         residual: Number(body!.residual),
         createdOn: '2026-11-15',
         paidOff: false,
+        group: body!.kind === 'Mortgage' ? 'Stable' : 'Everyday',
       }
       this.debts.push(debt)
       return ok(debt, 201)
     }
     if (method === 'GET' && path === '/api/dashboard') {
-      const netWorth = this.accounts.reduce((sum, a) => sum + a.balance, 0)
-      const debtsResidual = this.debts.reduce((sum, d) => sum + d.residual, 0)
+      const scope = { stable: url.searchParams.get('includeStable') !== 'false', investments: url.searchParams.get('includeInvestments') !== 'false' }
+      const netWorth = this.accounts.filter((a) => inScope(a.group, scope)).reduce((sum, a) => sum + a.balance, 0)
+      const debtsResidual = this.debts.filter((d) => inScope(d.group, scope)).reduce((sum, d) => sum + d.residual, 0)
       return ok({
         netWorth,
         debtsResidual,

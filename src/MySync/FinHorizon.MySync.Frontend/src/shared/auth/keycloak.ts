@@ -31,6 +31,18 @@ export const keycloakSession: AuthSession = {
 
   userName: () => keycloak.tokenParsed?.name ?? keycloak.tokenParsed?.preferred_username ?? '',
 
+  profile: () => ({
+    firstName: keycloak.tokenParsed?.given_name ?? '',
+    lastName: keycloak.tokenParsed?.family_name ?? '',
+    email: keycloak.tokenParsed?.email ?? '',
+    username: keycloak.tokenParsed?.preferred_username ?? '',
+  }),
+
+  // Application Initiated Actions: Keycloak shows its own page and comes back with a fresh token.
+  updateProfile: () => keycloak.login({ action: 'UPDATE_PROFILE', redirectUri: window.location.href }),
+
+  changePassword: () => keycloak.login({ action: 'UPDATE_PASSWORD', redirectUri: window.location.href }),
+
   login: () => keycloak.login(),
 
   logout() {

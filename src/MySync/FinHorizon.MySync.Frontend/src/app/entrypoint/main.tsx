@@ -1,5 +1,6 @@
 import { StrictMode, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
+import 'flag-icons/css/flag-icons.min.css'
 import '../styles/index.css'
 import '@/shared/i18n'
 import { QueryClientProvider } from '@tanstack/react-query'

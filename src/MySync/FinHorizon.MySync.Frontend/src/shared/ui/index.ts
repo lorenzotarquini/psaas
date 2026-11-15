@@ -1,5 +1,7 @@
 export { AddButton } from './AddButton'
 export { Amount } from './Amount'
+export { AmountVisibility, hiddenAmount, useAmountsHidden } from './AmountVisibility'
 export { Field } from './Field'
 export { Modal } from './Modal'
+export { ScopeSwitches } from './ScopeSwitches'
 export { EmptyState, LoadError, Loading } from './States'

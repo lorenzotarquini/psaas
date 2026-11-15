@@ -6,7 +6,7 @@ import { renderWithApi } from '@/test/renderApp'
 import { PortfolioPage } from './PortfolioPage'
 
 vi.mock('@/shared/auth', () => ({
-  session: { headers: () => Promise.resolve({}), userName: () => 'Mario', login: vi.fn(), logout: vi.fn(), init: vi.fn() },
+  session: { headers: () => Promise.resolve({}), userName: () => 'Mario', profile: () => ({ firstName: 'Mario', lastName: 'Rossi', email: 'mario@example.com', username: 'mario' }), login: vi.fn(), logout: vi.fn(), init: vi.fn() },
 }))
 
 // docs/mysync/use-cases/UC10-modificare-conti-e-debiti.md
@@ -63,6 +63,7 @@ describe('UC10_ModificareContiEDebiti', () => {
       residual: 170,
       createdOn: '2026-11-01',
       paidOff: false,
+      group: 'Stable',
     })
     renderWithApi(<PortfolioPage />, api)
     const user = userEvent.setup()

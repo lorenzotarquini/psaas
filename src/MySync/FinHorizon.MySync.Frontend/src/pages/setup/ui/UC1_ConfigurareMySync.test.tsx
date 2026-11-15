@@ -5,7 +5,7 @@ import { renderApp } from '@/test/renderApp'
 import { FakeApi } from '@/test/fakeApi'
 
 vi.mock('@/shared/auth', () => ({
-  session: { headers: () => Promise.resolve({}), userName: () => 'Mario', login: vi.fn(), logout: vi.fn(), init: vi.fn() },
+  session: { headers: () => Promise.resolve({}), userName: () => 'Mario', profile: () => ({ firstName: 'Mario', lastName: 'Rossi', email: 'mario@example.com', username: 'mario' }), login: vi.fn(), logout: vi.fn(), init: vi.fn() },
 }))
 
 // docs/mysync/use-cases/UC1-configurare-mysync.md

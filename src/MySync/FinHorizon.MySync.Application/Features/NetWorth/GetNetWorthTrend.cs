@@ -8,7 +8,8 @@ using FluentValidation;
 namespace FinHorizon.MySync.Application.Features.NetWorth;
 
 /// <summary>UC7: the trend over "30d", "90d", "12m" or "all"; 30 days when not given.</summary>
-public sealed record GetNetWorthTrendQuery(string? Period);
+/// <summary>UC7; the switches of UC12 decide whether stable assets and investments are in.</summary>
+public sealed record GetNetWorthTrendQuery(string? Period, bool IncludeStable = true, bool IncludeInvestments = true);
 
 public sealed class GetNetWorthTrendValidator : AbstractValidator<GetNetWorthTrendQuery>
 {
@@ -34,7 +35,7 @@ public sealed class GetNetWorthTrendHandler(ICurrentUser user, ILedgerReader led
             period = NetWorthPeriod.Days30;
         }
 
-        var history = await ledger.HistoryAsync(user.Id, cancellationToken).ConfigureAwait(false);
+        var history = await ledger.HistoryAsync(user.Id, PortfolioScope.For(request.IncludeStable, request.IncludeInvestments), cancellationToken).ConfigureAwait(false);
         var trend = NetWorthCalculator.Trend(history, period, calendar.Today);
         return Result<NetWorthTrendView>.Ok(new NetWorthTrendView(
             period.Code,

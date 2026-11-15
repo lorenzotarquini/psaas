@@ -14,4 +14,9 @@ void i18n.use(initReactI18next).init({
   interpolation: { escapeValue: false },
 })
 
-afterEach(() => cleanup())
+// Session choices (UC12) must not leak from one test to the next.
+afterEach(() => {
+  cleanup()
+  sessionStorage.clear()
+  localStorage.clear()
+})

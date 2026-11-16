@@ -14,14 +14,17 @@ public static class KeycloakTokens
     public const string Issuer = "https://auth.fin-horizon.com/realms/PSAAS";
     public const string Audience = "mysync-api";
 
-    /// <summary>The realm role of MySync users (group end_users).</summary>
+    /// <summary>The realm role the Admin Portal gives to the users with the MySync module (UC32).</summary>
+    public const string MySyncRole = "module-mysync";
+
+    /// <summary>The realm role of every platform user (group end_users): alone it does not open MySync.</summary>
     public const string EndUserRole = "enduser";
 
     public static readonly SymmetricSecurityKey SigningKey =
         new(Encoding.UTF8.GetBytes("fnhz-mysync-tests-signing-key-0123456789"));
 
     /// <summary>A MySync user: "Mario" becomes subject "kc-mario", email "mario@example.com".</summary>
-    public static string EndUser(string name) => Create(name, [EndUserRole]);
+    public static string EndUser(string name) => Create(name, [EndUserRole, MySyncRole]);
 
     public static string Create(string name, string[] roles, string audience = Audience)
     {

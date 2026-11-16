@@ -263,6 +263,10 @@
       "enable": "User enabled again."
     },
     "groupedByTenant": "grouped by organization",
+    "modules": "Modules",
+    "modulesHint": "Each module is an access: without it the user cannot enter the application.",
+    "noModules": "No modules in the catalog.",
+    "revokeNote": "Taking a module away signs the user out of every application.",
     "addTenantProfile": "Add a profile of another organization",
     "save": "Save changes",
     "details": "Details",
@@ -395,7 +399,9 @@
         "passwordReset": "requested a password reset for",
         "disabled": "disabled the user",
         "enabled": "enabled the user",
-        "impersonated": "impersonated"
+        "impersonated": "impersonated",
+        "moduleGranted": "gave a module to",
+        "moduleRevoked": "took a module away from"
       },
       "subscription": {
         "created": "subscribed a plan for",
@@ -583,7 +589,6 @@
     "permissionCount_other": "{{count}} permissions",
     "tenants": "Organizations",
     "tenant": "Organization",
-    "core": "core",
     "deprecate": "Deprecate",
     "restore": "Make available",
     "moduleStatus": {

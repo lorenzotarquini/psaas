@@ -15,6 +15,8 @@ namespace FinHorizon.AdminPortal.Infrastructure.Users;
 /// The realm user profile must declare the attributes profileIds, mfaRequired and lastInviteAt, editable by admins only:
 /// since Keycloak 24 undeclared attributes are silently dropped.
 /// Last logins need user events (LOGIN) saved in the realm and the view-events role.
+/// A module given to a user is the realm role module-&lt;moduleId&gt; (e.g. module-mysync), created here the first time
+/// the module is given: the module checks the role in the token. Creating realm roles needs the manage-realm role.
 /// </remarks>
 public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
 {
@@ -37,6 +39,8 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
     // Users created by the portal are end users: the group gives them the realm role enduser (MySync access).
     // Keycloak refuses the creation if the group does not exist, so a missing group shows up at once.
     private const string EndUsersGroupPath = "/end_users";
+
+    private const string ModuleRolePrefix = "module-";
 
     public async Task<DirectoryUser> CreateAsync(NewDirectoryUser user, CancellationToken cancellationToken = default)
     {
@@ -235,6 +239,63 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
         await PutAsync(user, enabled ? "enable a user" : "disable a user", cancellationToken);
     }
 
+    public async Task<IReadOnlyList<string>?> GetModulesAsync(string id, CancellationToken cancellationToken = default)
+    {
+        var roles = await RealmRolesAsync(id, cancellationToken);
+        return roles?.Select(role => role.Name ?? string.Empty)
+            .Where(name => name.StartsWith(ModuleRolePrefix, StringComparison.Ordinal))
+            .Select(name => name[ModuleRolePrefix.Length..])
+            .Order(StringComparer.Ordinal)
+            .ToArray();
+    }
+
+    public async Task GrantModuleAsync(string id, string moduleId, CancellationToken cancellationToken = default)
+    {
+        var roleName = ModuleRolePrefix + moduleId;
+        var roles = await RealmRolesAsync(id, cancellationToken)
+            ?? throw new InvalidOperationException($"Keycloak user {id} disappeared while giving it a module");
+        if (roles.Any(role => role.Name == roleName)) return;
+
+        var role = await EnsureModuleRoleAsync(moduleId, cancellationToken);
+        await CallAsync(async () =>
+        {
+            using var response = await http.PostAsJsonAsync($"users/{Uri.EscapeDataString(id)}/role-mappings/realm", new[] { role }, cancellationToken);
+            await EnsureSuccessAsync(response, "give a module to a user");
+            return true;
+        }, cancellationToken);
+        Logger.Info("Granted module {ModuleId} to Keycloak user {KeycloakUserId}", moduleId, id);
+    }
+
+    public async Task RevokeModuleAsync(string id, string moduleId, CancellationToken cancellationToken = default)
+    {
+        var roleName = ModuleRolePrefix + moduleId;
+        var roles = await RealmRolesAsync(id, cancellationToken)
+            ?? throw new InvalidOperationException($"Keycloak user {id} disappeared while taking a module away");
+        var role = roles.FirstOrDefault(r => r.Name == roleName);
+        if (role is not null)
+        {
+            await CallAsync(async () =>
+            {
+                using var request = new HttpRequestMessage(HttpMethod.Delete, $"users/{Uri.EscapeDataString(id)}/role-mappings/realm")
+                {
+                    Content = JsonContent.Create(new[] { role }),
+                };
+                using var response = await http.SendAsync(request, cancellationToken);
+                await EnsureSuccessAsync(response, "take a module away from a user");
+                return true;
+            }, cancellationToken);
+        }
+
+        // The tokens already issued keep the role until they expire: ending the sessions stops their refresh.
+        await CallAsync(async () =>
+        {
+            using var response = await http.PostAsync($"users/{Uri.EscapeDataString(id)}/logout", null, cancellationToken);
+            await EnsureSuccessAsync(response, "end the sessions of a user");
+            return true;
+        }, cancellationToken);
+        Logger.Info("Revoked module {ModuleId} from Keycloak user {KeycloakUserId} and ended its sessions", moduleId, id);
+    }
+
     public async Task<IReadOnlyDictionary<string, DateTimeOffset>> GetLastLoginsAsync(
         IReadOnlyCollection<string> userIds,
         CancellationToken cancellationToken = default)
@@ -261,6 +322,44 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
 
         return result;
     }
+
+    // UC32-R2: the realm role of the module, created the first time the module is given to someone.
+    private Task<RoleRepresentation> EnsureModuleRoleAsync(string moduleId, CancellationToken cancellationToken) =>
+        CallAsync(async () =>
+        {
+            var roleName = ModuleRolePrefix + moduleId;
+            var url = $"roles/{Uri.EscapeDataString(roleName)}";
+            using (var existing = await http.GetAsync(url, cancellationToken))
+            {
+                if (existing.StatusCode != HttpStatusCode.NotFound)
+                {
+                    await EnsureSuccessAsync(existing, "read the role of a module");
+                    return (await existing.Content.ReadFromJsonAsync<RoleRepresentation>(cancellationToken))!;
+                }
+            }
+
+            var newRole = new RoleRepresentation { Name = roleName, Description = $"Accesso al modulo {moduleId} (assegnato dall'Admin Portal)" };
+            using (var created = await http.PostAsJsonAsync("roles", newRole, cancellationToken))
+            {
+                // 409: created in the meantime by another request, which is fine.
+                if (created.StatusCode != HttpStatusCode.Conflict) await EnsureSuccessAsync(created, "create the role of a module");
+            }
+
+            Logger.Info("Created Keycloak realm role {RoleName}", roleName);
+            using var read = await http.GetAsync(url, cancellationToken);
+            await EnsureSuccessAsync(read, "read the role of a module");
+            return (await read.Content.ReadFromJsonAsync<RoleRepresentation>(cancellationToken))!;
+        }, cancellationToken);
+
+    // Roles given to the user directly; null when the user does not exist.
+    private async Task<RoleRepresentation[]?> RealmRolesAsync(string id, CancellationToken cancellationToken) =>
+        await CallAsync(async () =>
+        {
+            using var response = await http.GetAsync($"users/{Uri.EscapeDataString(id)}/role-mappings/realm", cancellationToken);
+            if (response.StatusCode == HttpStatusCode.NotFound) return null;
+            await EnsureSuccessAsync(response, "read the roles of a user");
+            return await response.Content.ReadFromJsonAsync<RoleRepresentation[]>(cancellationToken) ?? [];
+        }, cancellationToken);
 
     private async Task<UserRepresentation?> FindAsync(string id, CancellationToken cancellationToken) =>
         await CallAsync(async () =>
@@ -382,6 +481,13 @@ public sealed class KeycloakUserDirectory(HttpClient http) : IUserDirectory
         public string[]? Groups { get; set; }
 
         public Dictionary<string, string[]>? Attributes { get; set; }
+    }
+
+    private sealed class RoleRepresentation
+    {
+        public string? Id { get; set; }
+        public string? Name { get; set; }
+        public string? Description { get; set; }
     }
 
     private sealed class EventRepresentation

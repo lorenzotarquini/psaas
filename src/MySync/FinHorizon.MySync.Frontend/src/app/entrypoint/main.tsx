@@ -10,6 +10,7 @@ import { getLogger } from '@/shared/lib/logger'
 import { initTheme } from '@/shared/theme'
 import { queryClient } from '../api/queryClient'
 import { createAppRouter } from '../routes/router'
+import { NoAccess } from './NoAccess'
 
 const logger = getLogger('main')
 const root = createRoot(document.getElementById('root')!)
@@ -19,7 +20,12 @@ initTheme()
 // Keycloak docs: init before rendering/routing, since login changes the URL.
 session
   .init()
-  .then(() =>
+  .then(() => {
+    if (!session.hasAccess()) {
+      logger.warn('Signed-in user without the MySync module')
+      root.render(<NoAccess />)
+      return
+    }
     root.render(
       <StrictMode>
         <Suspense fallback={<span className="loading loading-spinner loading-lg m-8" />}>
@@ -28,8 +34,8 @@ session
           </QueryClientProvider>
         </Suspense>
       </StrictMode>,
-    ),
-  )
+    )
+  })
   .catch((error: unknown) => {
     logger.fatal({ err: error }, 'Authentication initialization failed')
     // Translations may not be loaded yet: plain bilingual fallback.

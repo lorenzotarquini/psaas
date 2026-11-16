@@ -19,7 +19,6 @@ public sealed class MySyncHost(string connectionString, IReadOnlyDictionary<stri
     {
         builder.UseEnvironment("Testing");
         builder.UseSetting("ConnectionStrings:mysync-db", connectionString);
-        builder.UseSetting("Database:MigrateOnStartup", "false");
         builder.UseSetting("Currencies:Url", "https://frankfurter.test/");
         foreach (var (key, value) in settings ?? new Dictionary<string, string>())
         {

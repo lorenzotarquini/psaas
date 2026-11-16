@@ -12,6 +12,8 @@ export interface AuthSession {
   init(): Promise<void>
   /** Headers that authenticate one API call. */
   headers(): Promise<Record<string, string>>
+  /** UC32 (Admin Portal): the user has the MySync module; without it the app does not open. */
+  hasAccess(): boolean
   /** Display name of the signed-in user. */
   userName(): string
   profile(): UserProfile

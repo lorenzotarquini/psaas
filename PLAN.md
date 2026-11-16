@@ -8,7 +8,7 @@ Obiettivo: rendere `FinHorizon.AdminPortal.Backend` (Web API .NET 10, presentati
 - Autenticazione: `FinHorizon.Auth` in modalità `Api` (JWT Bearer), audience validata.
 - Client Keycloak del backend: `adminportal-api` (parametro AppHost, da creare in Keycloak).
 - CORS: origini consentite da configurazione (`Cors:AllowedOrigins`), vuota = nessuna origine.
-- Migration: applicate a mano (`dotnet ef database update`), non all'avvio.
+- Migration: applicate automaticamente all'avvio del backend se ce ne sono di nuove (regola per tutti i progetti della solution).
 - Logging: NLog (`NLog.Web.AspNetCore`), configurazione in `appsettings.json` come il vecchio AdminPortal.
 - Test: solo `FinHorizon.AdminPortal.Backend.Tests` per ora (niente `FinHorizon.AdminPortal.Application.Tests`).
 

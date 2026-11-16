@@ -81,7 +81,7 @@ public sealed class TenantListRepository(AdminPortalDbContext dbContext) : ITena
         var pageIds = page.Select(r => r.Tenant.Id).ToArray();
         var modules = (await dbContext.TenantModules.AsNoTracking()
                 .Where(m => pageIds.Contains(m.TenantId))
-                .Join(dbContext.Modules, tm => tm.ModuleId, m => m.Id, (tm, m) => new { tm.TenantId, m.Id, m.Name, m.Icon, tm.Status, m.IsCore })
+                .Join(dbContext.Modules, tm => tm.ModuleId, m => m.Id, (tm, m) => new { tm.TenantId, m.Id, m.Name, m.Icon, tm.Status })
                 .ToListAsync(cancellationToken).ConfigureAwait(false))
             .ToLookup(m => m.TenantId);
         var profiles = (await dbContext.Profiles.AsNoTracking()
@@ -108,8 +108,7 @@ public sealed class TenantListRepository(AdminPortalDbContext dbContext) : ITena
                 r.Subscription?.Status,
                 r.Subscription?.MaxUsers,
                 r.Subscription is null ? null : r.Subscription.TrialEndsAt ?? r.Subscription.RenewsAt,
-                // Core first, then by name, as in mock 1c.
-                modules[r.Tenant.Id].OrderByDescending(m => m.IsCore).ThenBy(m => m.Name)
+                modules[r.Tenant.Id].OrderBy(m => m.Name)
                     .Select(m => new TenantListModule(m.Id, m.Name, m.Icon, m.Status)).ToArray(),
                 profiles[r.Tenant.Id].ToArray(),
                 Kind: r.Tenant.Kind)).ToArray(),

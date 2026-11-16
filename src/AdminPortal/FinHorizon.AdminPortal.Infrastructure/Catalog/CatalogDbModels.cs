@@ -8,7 +8,6 @@ public sealed class ModuleDbModel
     public string? Icon { get; set; }
     public string Status { get; set; } = "Available";
     public string Version { get; set; } = string.Empty;
-    public bool IsCore { get; set; }
     public string[] Requires { get; set; } = [];
     public string[] Permissions { get; set; } = [];
     public string? ProvisionUrl { get; set; }

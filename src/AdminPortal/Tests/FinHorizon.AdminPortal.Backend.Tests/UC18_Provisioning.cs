@@ -15,7 +15,6 @@ public sealed class UC18_Provisioning(PostgresFixture database) : AcceptanceTest
         var subscription = await GetOkAsync<SubscriptionView>($"/api/tenants/{alfa}/subscription");
 
         Assert.Equal(("Failed", "hook provision → timeout"), (subscription.Module("warehouse").Status, subscription.Module("warehouse").LastError));
-        Assert.Equal("Active", subscription.Module("core").Status);
     }
 
     [Fact, Trait("Scenario", "UC18-S2")]

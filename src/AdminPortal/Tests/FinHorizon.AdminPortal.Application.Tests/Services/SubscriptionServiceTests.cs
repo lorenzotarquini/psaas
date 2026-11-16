@@ -50,7 +50,7 @@ public sealed class SubscriptionServiceTests
     }
 
     [Fact]
-    public async Task UC17_S1_SavesThePlanModulesWithCoreAndProvisionsThem()
+    public async Task UC17_S1_SavesThePlanModulesAndProvisionsThem()
     {
         _catalog.Modules.Add(FakeCatalogRepository.Module("warehouse"));
         var plan = GivenPlan(modules: "warehouse");
@@ -58,7 +58,7 @@ public sealed class SubscriptionServiceTests
         var result = await Service.SubscribeAsync(TenantId, new(plan.Id));
 
         Assert.True(result.Succeeded);
-        Assert.Equal(["core", "warehouse"], _provisioner.Provisioned.Order());
+        Assert.Equal(["warehouse"], _provisioner.Provisioned);
         Assert.All(_subscriptions.Modules.Values, m => Assert.Equal(ProvisioningStatuses.Active, m.Status));
         Assert.Contains(_audit.Records, r => r.Action == "subscription.changed");
     }
@@ -117,9 +117,10 @@ public sealed class SubscriptionServiceTests
     [Fact]
     public async Task UC18_RetryOfAnActiveModule_IsInvalidValue()
     {
-        await Service.SubscribeAsync(TenantId, new(GivenPlan().Id));
+        _catalog.Modules.Add(FakeCatalogRepository.Module("warehouse"));
+        await Service.SubscribeAsync(TenantId, new(GivenPlan(modules: "warehouse").Id));
 
-        var result = await Service.RetryAsync(TenantId, "core");
+        var result = await Service.RetryAsync(TenantId, "warehouse");
 
         Assert.Equal("InvalidValue", result.Errors["moduleId"]);
     }

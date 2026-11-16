@@ -6,6 +6,7 @@ import {
   faPuzzlePiece,
   faTruck,
   faUserTie,
+  faWallet,
   faWrench,
   type IconDefinition,
 } from '@fortawesome/free-solid-svg-icons'
@@ -36,6 +37,7 @@ export function SubscriptionStatusBadge({ status }: { status: SubscriptionStatus
 // Manifest icons are names (UC15); unknown ones fall back to the puzzle piece of the catalog.
 const icons: Record<string, IconDefinition> = {
   cube: faCube,
+  wallet: faWallet,
   warehouse: faBoxesStacked,
   boxes: faBoxesStacked,
   hr: faUserTie,

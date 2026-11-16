@@ -263,6 +263,10 @@
       "enable": "Utente riattivato."
     },
     "groupedByTenant": "raggruppati per organizzazione",
+    "modules": "Moduli",
+    "modulesHint": "Ogni modulo è un accesso: senza, l'utente non entra nell'applicazione.",
+    "noModules": "Nessun modulo nel catalogo.",
+    "revokeNote": "Togliere un modulo disconnette l'utente da tutte le applicazioni.",
     "addTenantProfile": "Aggiungi profilo di un'altra organizzazione",
     "save": "Salva modifiche",
     "details": "Dettagli",
@@ -395,7 +399,9 @@
         "passwordReset": "ha chiesto il reset della password di",
         "disabled": "ha disattivato l'utente",
         "enabled": "ha riattivato l'utente",
-        "impersonated": "ha impersonato"
+        "impersonated": "ha impersonato",
+        "moduleGranted": "ha assegnato un modulo a",
+        "moduleRevoked": "ha tolto un modulo a"
       },
       "subscription": {
         "created": "ha sottoscritto un piano per",
@@ -583,7 +589,6 @@
     "permissionCount_other": "{{count}} permessi",
     "tenants": "Organizzazioni",
     "tenant": "Organizzazione",
-    "core": "core",
     "deprecate": "Depreca",
     "restore": "Rendi disponibile",
     "moduleStatus": {

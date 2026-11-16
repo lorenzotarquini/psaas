@@ -37,6 +37,7 @@ public static class DependencyInjection
         services.AddSingleton(new Services.Billing.BillingOptions());
         services.AddScoped<Services.Views.SavedViewService>();
         services.AddScoped<UserManagementService>();
+        services.AddScoped<UserModuleService>();
         services.AddScoped<UserImportService>();
 
         return services;

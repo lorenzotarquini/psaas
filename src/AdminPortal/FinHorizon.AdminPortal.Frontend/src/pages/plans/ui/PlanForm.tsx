@@ -8,7 +8,7 @@ import { ErrorAlert } from '@/shared/ui/error-alert'
 import { FieldError, TextField } from '@/shared/ui/form-field'
 import { emptyPlan, planSchema, planToValues, toPlanRequest } from '../model/planForm'
 
-// UC16: a plan, its limits and the modules it includes (the core always, added by the backend).
+// UC16: a plan, its limits and the modules it includes.
 export function PlanForm({ plan, onClose }: { plan: Plan | null; onClose: () => void }) {
   const { t } = useTranslation()
   const { data: modules = [] } = useModules()
@@ -60,8 +60,7 @@ export function PlanForm({ plan, onClose }: { plan: Plan | null; onClose: () => 
                   <input
                     type="checkbox"
                     className="checkbox checkbox-sm"
-                    checked={module.isCore || chosen.includes(module.id)}
-                    disabled={module.isCore}
+                    checked={chosen.includes(module.id)}
                     onChange={() => toggle(module.id)}
                   />
                   <ModuleIcon icon={module.icon} />

@@ -72,7 +72,7 @@ public sealed record AuditEventView(
 
 public sealed record LifecycleView(string Status, string? Reason, DateTimeOffset ChangedAt, DateTimeOffset CreatedAt);
 
-public sealed record ModuleView(string Id, string Name, string Status, string Version, bool IsCore, List<string> Requires, List<string> Permissions, int TenantCount);
+public sealed record ModuleView(string Id, string Name, string Status, string Version, List<string> Requires, List<string> Permissions, int TenantCount);
 
 public sealed record PlanView(Guid Id, string Code, string Name, decimal Price, string BillingPeriod, int TrialDays, int? MaxUsers, List<string> ModuleIds, bool Active);
 

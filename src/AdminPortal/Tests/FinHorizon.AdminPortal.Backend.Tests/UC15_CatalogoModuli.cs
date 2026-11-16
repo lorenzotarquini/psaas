@@ -9,12 +9,12 @@ namespace FinHorizon.AdminPortal.Backend.Tests;
 public sealed class UC15_CatalogoModuli(PostgresFixture database) : AcceptanceTest(database)
 {
     [Fact, Trait("Scenario", "UC15-S1")]
-    public async Task S1_IlCoreCeSempre()
+    public async Task S1_MySyncNelCatalogoSenzaCore()
     {
-        var core = (await GetOkAsync<List<ModuleView>>("/api/modules")).Single(m => m.Id == "core");
+        var modules = await GetOkAsync<List<ModuleView>>("/api/modules");
 
-        Assert.True(core.IsCore);
-        Assert.Equal("Available", core.Status);
+        Assert.Equal("Available", modules.Single(m => m.Id == "mysync").Status);
+        Assert.DoesNotContain(modules, m => m.Id == "core");
     }
 
     [Fact, Trait("Scenario", "UC15-S2")]
@@ -49,12 +49,12 @@ public sealed class UC15_CatalogoModuli(PostgresFixture database) : AcceptanceTe
     }
 
     [Fact, Trait("Scenario", "UC15-S5")]
-    public async Task S5_DeprecareMaNonIlCore()
+    public async Task S5_DeprecareUnModulo()
     {
         await GivenModuleAsync("warehouse");
 
         var deprecated = await ReadAsync<ModuleView>(await Admin.PutAsJsonAsync("/api/modules/warehouse/status", new { status = "Deprecated" }), HttpStatusCode.OK);
-        var errors = await ErrorsAsync(await Admin.PutAsJsonAsync("/api/modules/core/status", new { status = "Deprecated" }));
+        var errors = await ErrorsAsync(await Admin.PutAsJsonAsync("/api/modules/warehouse/status", new { status = "Retired" }));
 
         Assert.Equal("Deprecated", deprecated.Status);
         Assert.Equal("InvalidValue", errors["status"]);

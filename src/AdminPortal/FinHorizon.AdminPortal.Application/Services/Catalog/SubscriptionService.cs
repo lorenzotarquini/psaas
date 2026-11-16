@@ -14,7 +14,7 @@ namespace FinHorizon.AdminPortal.Application.Services.Catalog;
 
 /// <summary>
 /// UC17 (EXP-03): the plan of a tenant and the modules it gets from it. The values of the plan are frozen
-/// in the subscription (later plan changes do not touch it), modules come with their dependencies and core,
+/// in the subscription (later plan changes do not touch it), modules come with their dependencies,
 /// new modules are provisioned through their hook; a failure is kept with its error and can be retried (UC18).
 /// </summary>
 public sealed class SubscriptionService(
@@ -67,7 +67,7 @@ public sealed class SubscriptionService(
         var startsAt = current?.StartsAt ?? now;
         var trialEndsAt = trial ? now.AddDays(plan.TrialDays) : null as DateTimeOffset?;
         var renewsAt = trial ? trialEndsAt!.Value : current is { Status: SubscriptionStatuses.Active } ? current.RenewsAt : now.Add(period);
-        var wanted = WithDependencies(plan.ModuleIds.Concat(addOns).Append(CatalogService.CoreModuleId), modules);
+        var wanted = WithDependencies(plan.ModuleIds.Concat(addOns), modules);
         var subscription = new SubscriptionReadModel(
             tenantId, tenant.CompanyName, plan.Id, plan.Name,
             trial ? SubscriptionStatuses.Trial : SubscriptionStatuses.Active,

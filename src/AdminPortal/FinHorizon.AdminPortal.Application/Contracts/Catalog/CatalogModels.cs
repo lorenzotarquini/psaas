@@ -7,7 +7,6 @@ public sealed record ModuleReadModel(
     string? Icon,
     string Status,
     string Version,
-    bool IsCore,
     IReadOnlyList<string> Requires,
     IReadOnlyList<string> Permissions,
     string? ProvisionUrl,

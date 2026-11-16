@@ -22,8 +22,6 @@ public sealed partial class CatalogService(ICatalogRepository catalog, IAuditLog
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    public const string CoreModuleId = "core";
-
     public async Task<CatalogSaveResult> RegisterModuleAsync(ModuleManifest manifest, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(manifest);
@@ -69,7 +67,7 @@ public sealed partial class CatalogService(ICatalogRepository catalog, IAuditLog
                 Name = manifest.Name!.Trim(),
                 Version = version,
                 Status = status,
-                Requires = requires.Where(r => r != CoreModuleId).Distinct().ToArray(),
+                Requires = requires.Distinct().ToArray(),
                 Permissions = (manifest.Permissions ?? []).Select(p => p.Trim()).Where(p => p.Length > 0).Distinct().ToArray(),
             },
             cancellationToken);
@@ -80,12 +78,12 @@ public sealed partial class CatalogService(ICatalogRepository catalog, IAuditLog
         return new CatalogSaveResult(id, errors);
     }
 
-    /// <summary>Beta, Available or Deprecated; core stays available.</summary>
+    /// <summary>Beta, Available or Deprecated.</summary>
     public async Task<CatalogSaveResult?> SetModuleStatusAsync(string moduleId, string? status, CancellationToken cancellationToken = default)
     {
         var module = await catalog.GetModuleAsync(moduleId, cancellationToken);
         if (module is null) return null;
-        if (status is null || !ModuleStatuses.All.Contains(status) || (module.IsCore && status != ModuleStatuses.Available))
+        if (status is null || !ModuleStatuses.All.Contains(status))
         {
             return new CatalogSaveResult(null, new Dictionary<string, string> { ["status"] = TenantFieldValidationErrorCodes.InvalidValue });
         }
@@ -135,8 +133,7 @@ public sealed partial class CatalogService(ICatalogRepository catalog, IAuditLog
                 Code = code,
                 Name = request.Name!.Trim(),
                 TrialDays = request.TrialDays ?? 0,
-                // Core is in every plan.
-                ModuleIds = modules.Append(CoreModuleId).Distinct().ToArray(),
+                ModuleIds = modules.Distinct().ToArray(),
             },
             cancellationToken);
         await audit.RecordAsync(

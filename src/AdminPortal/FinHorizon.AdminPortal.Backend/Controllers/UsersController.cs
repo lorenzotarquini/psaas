@@ -80,6 +80,29 @@ public sealed class UsersController : ControllerBase
     public async Task<ActionResult<UserReadModel>> Enable(string id, [FromServices] UserManagementService users, CancellationToken cancellationToken) =>
         ToResponse(await users.SetEnabledAsync(id, true, cancellationToken));
 
+    /// <summary>UC32: the modules given to the user (e.g. MySync).</summary>
+    [HttpGet("{id}/modules")]
+    public async Task<ActionResult<IReadOnlyList<string>>> Modules(string id, [FromServices] UserModuleService modules, CancellationToken cancellationToken) =>
+        await modules.GetAsync(id, cancellationToken) is { } moduleIds ? Ok(moduleIds) : NotFound();
+
+    /// <summary>UC32: gives the module to the user; answers with the modules the user has now.</summary>
+    [HttpPut("{id}/modules/{moduleId}")]
+    public async Task<ActionResult<IReadOnlyList<string>>> GrantModule(
+        string id,
+        string moduleId,
+        [FromServices] UserModuleService modules,
+        CancellationToken cancellationToken) =>
+        ToResponse(await modules.GrantAsync(id, moduleId, cancellationToken));
+
+    /// <summary>UC32: takes the module away and ends the sessions of the user.</summary>
+    [HttpDelete("{id}/modules/{moduleId}")]
+    public async Task<ActionResult<IReadOnlyList<string>>> RevokeModule(
+        string id,
+        string moduleId,
+        [FromServices] UserModuleService modules,
+        CancellationToken cancellationToken) =>
+        ToResponse(await modules.RevokeAsync(id, moduleId, cancellationToken));
+
     /// <summary>UC20: preview (confirm false) or import of the valid rows.</summary>
     [HttpPost("import")]
     public async Task<ActionResult<IReadOnlyList<UserImportRowResult>>> Import(
@@ -96,6 +119,11 @@ public sealed class UsersController : ControllerBase
         : result.Conflict ? Conflict()
         : !result.Succeeded ? Problem(result.Errors)
         : result.User!;
+
+    private ActionResult<IReadOnlyList<string>> ToResponse(UserModulesResult result) =>
+        !result.Found ? NotFound()
+        : !result.Succeeded ? Problem(result.Errors)
+        : Ok(result.ModuleIds);
 
     private ActionResult Problem(IReadOnlyDictionary<string, string> errors) =>
         ValidationProblem(new ValidationProblemDetails(errors.ToDictionary(error => error.Key, error => new[] { error.Value })));

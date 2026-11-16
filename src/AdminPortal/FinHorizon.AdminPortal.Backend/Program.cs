@@ -66,6 +66,9 @@ try
 
     var app = builder.Build();
 
+    // Every project of the solution brings its database up to date at start.
+    await app.Services.MigrateAdminPortalDatabaseAsync();
+
     app.UseExceptionHandler(new ExceptionHandlerOptions
     {
         StatusCodeSelector = exception => exception switch

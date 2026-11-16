@@ -1,9 +1,11 @@
 export {
   useCreateUser,
   useImportUsers,
+  useSetUserModule,
   useUpdateUser,
   useUser,
   useUserAction,
+  useUserModules,
   userStatuses,
   useUsers,
   type CreateUserRequest,

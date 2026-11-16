@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <PropertyGroup>
+    <PackageJsonName Condition="$(PackageJsonName) == ''">finhorizon-mysync-frontend</PackageJsonName>
+    <PackageJsonPrivate Condition="$(PackageJsonPrivate) == ''">true</PackageJsonPrivate>
+    <PackageJsonVersion Condition="$(PackageJsonVersion) == ''">0.1.0</PackageJsonVersion>
+    <PackageJsonType Condition="$(PackageJsonType) == ''">module</PackageJsonType>
+    <PackageJsonScriptsDev Condition="$(PackageJsonScriptsDev) == ''">vite</PackageJsonScriptsDev>
+    <PackageJsonScriptsBuild Condition="$(PackageJsonScriptsBuild) == ''">tsc -b &amp;&amp; vite build</PackageJsonScriptsBuild>
+    <PackageJsonScriptsLint Condition="$(PackageJsonScriptsLint) == ''">oxlint &amp;&amp; steiger ./src</PackageJsonScriptsLint>
+    <PackageJsonScriptsTest Condition="$(PackageJsonScriptsTest) == ''">vitest run</PackageJsonScriptsTest>
+    <PackageJsonScriptsPreview Condition="$(PackageJsonScriptsPreview) == ''">vite preview</PackageJsonScriptsPreview>
+    <PackageJsonDependenciesFontsourcePoppins Condition="$(PackageJsonDependenciesFontsourcePoppins) == ''">^5.2.6</PackageJsonDependenciesFontsourcePoppins>
+    <PackageJsonDependenciesFortawesomeFontawesomeSvgCore Condition="$(PackageJsonDependenciesFortawesomeFontawesomeSvgCore) == ''">^7.3.1</PackageJsonDependenciesFortawesomeFontawesomeSvgCore>
+    <PackageJsonDependenciesFortawesomeFreeRegularSvgIcons Condition="$(PackageJsonDependenciesFortawesomeFreeRegularSvgIcons) == ''">^7.3.1</PackageJsonDependenciesFortawesomeFreeRegularSvgIcons>
+    <PackageJsonDependenciesFortawesomeFreeSolidSvgIcons Condition="$(PackageJsonDependenciesFortawesomeFreeSolidSvgIcons) == ''">^7.3.1</PackageJsonDependenciesFortawesomeFreeSolidSvgIcons>
+    <PackageJsonDependenciesFortawesomeReactFontawesome Condition="$(PackageJsonDependenciesFortawesomeReactFontawesome) == ''">^3.5.0</PackageJsonDependenciesFortawesomeReactFontawesome>
+    <PackageJsonDependenciesHookformResolvers Condition="$(PackageJsonDependenciesHookformResolvers) == ''">^5.9.2</PackageJsonDependenciesHookformResolvers>
+    <PackageJsonDependenciesTanstackReactQuery Condition="$(PackageJsonDependenciesTanstackReactQuery) == ''">^5.104.5</PackageJsonDependenciesTanstackReactQuery>
+    <PackageJsonDependenciesFlagIcons Condition="$(PackageJsonDependenciesFlagIcons) == ''">^7.2.3</PackageJsonDependenciesFlagIcons>
+    <PackageJsonDependenciesI18next Condition="$(PackageJsonDependenciesI18next) == ''">^26.5.4</PackageJsonDependenciesI18next>
+    <PackageJsonDependenciesI18nextBrowserLanguagedetector Condition="$(PackageJsonDependenciesI18nextBrowserLanguagedetector) == ''">^8.2.1</PackageJsonDependenciesI18nextBrowserLanguagedetector>
+    <PackageJsonDependenciesI18nextHttpBackend Condition="$(PackageJsonDependenciesI18nextHttpBackend) == ''">^4.0.4</PackageJsonDependenciesI18nextHttpBackend>
+    <PackageJsonDependenciesKeycloakJs Condition="$(PackageJsonDependenciesKeycloakJs) == ''">^26.2.4</PackageJsonDependenciesKeycloakJs>
+    <PackageJsonDependenciesMathjs Condition="$(PackageJsonDependenciesMathjs) == ''">^15.2.0</PackageJsonDependenciesMathjs>
+    <PackageJsonDependenciesPino Condition="$(PackageJsonDependenciesPino) == ''">^10.4.0</PackageJsonDependenciesPino>
+    <PackageJsonDependenciesReact Condition="$(PackageJsonDependenciesReact) == ''">^19.3.1</PackageJsonDependenciesReact>
+    <PackageJsonDependenciesReactDom Condition="$(PackageJsonDependenciesReactDom) == ''">^19.3.1</PackageJsonDependenciesReactDom>
+    <PackageJsonDependenciesReactDraggable Condition="$(PackageJsonDependenciesReactDraggable) == ''">^4.7.2</PackageJsonDependenciesReactDraggable>
+    <PackageJsonDependenciesReactHookForm Condition="$(PackageJsonDependenciesReactHookForm) == ''">^7.90.0</PackageJsonDependenciesReactHookForm>
+    <PackageJsonDependenciesReactI18next Condition="$(PackageJsonDependenciesReactI18next) == ''">^17.1.0</PackageJsonDependenciesReactI18next>
+    <PackageJsonDependenciesReactRouter Condition="$(PackageJsonDependenciesReactRouter) == ''">^7.18.4</PackageJsonDependenciesReactRouter>
+    <PackageJsonDependenciesRecharts Condition="$(PackageJsonDependenciesRecharts) == ''">^2.15.4</PackageJsonDependenciesRecharts>
+    <PackageJsonDependenciesZod Condition="$(PackageJsonDependenciesZod) == ''">^4.6.7</PackageJsonDependenciesZod>
+    <PackageJsonDevdependenciesFeatureSlicedSteigerPlugin Condition="$(PackageJsonDevdependenciesFeatureSlicedSteigerPlugin) == ''">^0.8.0</PackageJsonDevdependenciesFeatureSlicedSteigerPlugin>
+    <PackageJsonDevdependenciesTailwindcssVite Condition="$(PackageJsonDevdependenciesTailwindcssVite) == ''">^4.3.3</PackageJsonDevdependenciesTailwindcssVite>
+    <PackageJsonDevdependenciesTestingLibraryReact Condition="$(PackageJsonDevdependenciesTestingLibraryReact) == ''">^16.3.3</PackageJsonDevdependenciesTestingLibraryReact>
+    <PackageJsonDevdependenciesTestingLibraryUserEvent Condition="$(PackageJsonDevdependenciesTestingLibraryUserEvent) == ''">^14.6.1</PackageJsonDevdependenciesTestingLibraryUserEvent>
+    <PackageJsonDevdependenciesTypesNode Condition="$(PackageJsonDevdependenciesTypesNode) == ''">^24.19.2</PackageJsonDevdependenciesTypesNode>
+    <PackageJsonDevdependenciesTypesReact Condition="$(PackageJsonDevdependenciesTypesReact) == ''">^19.3.0</PackageJsonDevdependenciesTypesReact>
+    <PackageJsonDevdependenciesTypesReactDom Condition="$(PackageJsonDevdependenciesTypesReactDom) == ''">^19.3.0</PackageJsonDevdependenciesTypesReactDom>
+    <PackageJsonDevdependenciesVitejsPluginReact Condition="$(PackageJsonDevdependenciesVitejsPluginReact) == ''">^6.1.2</PackageJsonDevdependenciesVitejsPluginReact>
+    <PackageJsonDevdependenciesDaisyui Condition="$(PackageJsonDevdependenciesDaisyui) == ''">^5.7.50</PackageJsonDevdependenciesDaisyui>
+    <PackageJsonDevdependenciesJsdom Condition="$(PackageJsonDevdependenciesJsdom) == ''">^29.1.1</PackageJsonDevdependenciesJsdom>
+    <PackageJsonDevdependenciesOxlint Condition="$(PackageJsonDevdependenciesOxlint) == ''">^1.88.0</PackageJsonDevdependenciesOxlint>
+    <PackageJsonDevdependenciesSteiger Condition="$(PackageJsonDevdependenciesSteiger) == ''">^0.6.0</PackageJsonDevdependenciesSteiger>
+    <PackageJsonDevdependenciesTailwindcss Condition="$(PackageJsonDevdependenciesTailwindcss) == ''">^4.3.3</PackageJsonDevdependenciesTailwindcss>
+    <PackageJsonDevdependenciesTypescript Condition="$(PackageJsonDevdependenciesTypescript) == ''">~6.0.3</PackageJsonDevdependenciesTypescript>
+    <PackageJsonDevdependenciesVite Condition="$(PackageJsonDevdependenciesVite) == ''">^8.3.4</PackageJsonDevdependenciesVite>
+    <PackageJsonDevdependenciesVitest Condition="$(PackageJsonDevdependenciesVitest) == ''">^5.0.5</PackageJsonDevdependenciesVitest>
+  </PropertyGroup>
+</Project>

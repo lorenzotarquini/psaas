@@ -4,6 +4,9 @@ import type { AuthSession } from './session'
 
 const logger = getLogger('auth')
 
+/** Realm role the Admin Portal gives with the MySync module (UC32); the backend requires it too. */
+const mySyncRole = 'module-mysync'
+
 // Single instance created outside React: keycloak-js throws if init() runs twice (StrictMode).
 const keycloak = new Keycloak({
   url: import.meta.env.VITE_KEYCLOAK_URL,
@@ -28,6 +31,8 @@ export const keycloakSession: AuthSession = {
     }
     return { Authorization: `Bearer ${keycloak.token!}` }
   },
+
+  hasAccess: () => keycloak.hasRealmRole(mySyncRole),
 
   userName: () => keycloak.tokenParsed?.name ?? keycloak.tokenParsed?.preferred_username ?? '',
 

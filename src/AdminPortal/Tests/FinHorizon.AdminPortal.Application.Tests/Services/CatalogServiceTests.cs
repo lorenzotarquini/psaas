@@ -50,18 +50,20 @@ public sealed class CatalogServiceTests
     }
 
     [Fact]
-    public async Task UC15_S5_CoreCannotBeDeprecated_UnknownModuleIsNotFound()
+    public async Task UC15_S5_AnyModuleCanBeDeprecated_UnknownModuleIsNotFound()
     {
-        Assert.Equal("InvalidValue", (await Service.SetModuleStatusAsync("core", "Deprecated"))!.Errors["status"]);
+        _catalog.Modules.Add(FakeCatalogRepository.Module("mysync"));
+
+        Assert.Empty((await Service.SetModuleStatusAsync("mysync", "Deprecated"))!.Errors);
         Assert.Null(await Service.SetModuleStatusAsync("nope", "Deprecated"));
     }
 
     [Fact]
-    public async Task UC16_S1_PlanAlwaysIncludesCore()
+    public async Task UC16_S1_PlanHasOnlyTheChosenModules()
     {
         var result = await Service.SavePlanAsync(null, Plan("pro"));
 
-        Assert.Equal(["core"], _catalog.Plans.Single(p => p.Id == Guid.Parse(result!.Id!)).ModuleIds);
+        Assert.Empty(_catalog.Plans.Single(p => p.Id == Guid.Parse(result!.Id!)).ModuleIds);
     }
 
     [Fact]

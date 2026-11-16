@@ -19,7 +19,7 @@ public sealed class CatalogRepository(AdminPortalDbContext dbContext, TimeProvid
             .ToDictionaryAsync(g => g.Key, g => g.Count, cancellationToken)
             .ConfigureAwait(false);
         var modules = await dbContext.Modules.AsNoTracking()
-            .OrderByDescending(m => m.IsCore).ThenBy(m => m.Name)
+            .OrderBy(m => m.Name)
             .ToListAsync(cancellationToken).ConfigureAwait(false);
         return modules.Select(m => ToReadModel(m, usage.GetValueOrDefault(m.Id))).ToArray();
     }
@@ -192,7 +192,7 @@ public sealed class CatalogRepository(AdminPortalDbContext dbContext, TimeProvid
             Guid.Parse(r.TenantId), names.GetValueOrDefault(r.TenantId, r.TenantId), r.PlanId, r.PlanName, r.Status, r.Price, r.BillingPeriod,
             r.MaxUsers, r.MaxProductiveUnits, r.StartsAt, r.TrialEndsAt, r.RenewsAt, r.AutoRenew, r.AddOnModuleIds,
             tenantModules.Where(m => m.TenantId == r.TenantId && modules.ContainsKey(m.ModuleId))
-                .OrderByDescending(m => modules[m.ModuleId].IsCore).ThenBy(m => modules[m.ModuleId].Name)
+                .OrderBy(m => modules[m.ModuleId].Name)
                 .Select(m => new TenantModuleReadModel(
                     m.ModuleId, modules[m.ModuleId].Name, modules[m.ModuleId].Icon, modules[m.ModuleId].Version,
                     m.Status, m.Attempts, m.LastError, r.AddOnModuleIds.Contains(m.ModuleId), m.UpdatedAt))
@@ -200,7 +200,7 @@ public sealed class CatalogRepository(AdminPortalDbContext dbContext, TimeProvid
     }
 
     private static ModuleReadModel ToReadModel(ModuleDbModel m, int tenantCount) =>
-        new(m.Id, m.Name, m.Description, m.Icon, m.Status, m.Version, m.IsCore, m.Requires, m.Permissions, m.ProvisionUrl, m.UpdatedAt, tenantCount);
+        new(m.Id, m.Name, m.Description, m.Icon, m.Status, m.Version, m.Requires, m.Permissions, m.ProvisionUrl, m.UpdatedAt, tenantCount);
 
     private static PlanReadModel ToReadModel(PlanDbModel p, int subscribers) =>
         new(p.Id, p.Code, p.Name, p.Description, p.Price, p.BillingPeriod, p.TrialDays, p.MaxUsers, p.MaxProductiveUnits, p.ModuleIds, p.Active, subscribers);

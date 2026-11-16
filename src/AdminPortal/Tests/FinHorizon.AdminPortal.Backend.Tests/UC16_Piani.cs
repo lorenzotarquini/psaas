@@ -14,7 +14,7 @@ public sealed class UC16_Piani(PostgresFixture database) : AcceptanceTest(databa
 
         var pro = await GivenPlanAsync("pro", 99, maxUsers: 50, moduleIds: "warehouse");
 
-        Assert.Equal(["core", "warehouse"], pro.ModuleIds.Order());
+        Assert.Equal(["warehouse"], pro.ModuleIds);
         Assert.Equal((99m, 50), (pro.Price, pro.MaxUsers));
     }
 

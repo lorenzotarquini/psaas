@@ -138,6 +138,34 @@ public sealed class FakeKeycloakUsers : IUserDirectory
         return Task.CompletedTask;
     }
 
+    /// <summary>UC32: modules per user (Keycloak realm roles module-&lt;id&gt;) and the users whose sessions were ended.</summary>
+    public Dictionary<string, SortedSet<string>> Modules { get; } = [];
+
+    public List<string> SignedOut { get; } = [];
+
+    public Task<IReadOnlyList<string>?> GetModulesAsync(string id, CancellationToken cancellationToken = default)
+    {
+        ThrowIfUnavailable();
+        return Task.FromResult<IReadOnlyList<string>?>(
+            Users.Any(user => user.Id == id) ? Modules.GetValueOrDefault(id, []).ToArray() : null);
+    }
+
+    public Task GrantModuleAsync(string id, string moduleId, CancellationToken cancellationToken = default)
+    {
+        ThrowIfUnavailable();
+        if (!Modules.TryGetValue(id, out var modules)) Modules[id] = modules = new SortedSet<string>(StringComparer.Ordinal);
+        modules.Add(moduleId);
+        return Task.CompletedTask;
+    }
+
+    public Task RevokeModuleAsync(string id, string moduleId, CancellationToken cancellationToken = default)
+    {
+        ThrowIfUnavailable();
+        if (Modules.TryGetValue(id, out var modules)) modules.Remove(moduleId);
+        SignedOut.Add(id);
+        return Task.CompletedTask;
+    }
+
     public Task<IReadOnlyDictionary<string, DateTimeOffset>> GetLastLoginsAsync(IReadOnlyCollection<string> userIds, CancellationToken cancellationToken = default) =>
         Task.FromResult<IReadOnlyDictionary<string, DateTimeOffset>>(LastLogins.Where(l => userIds.Contains(l.Key)).ToDictionary());
 

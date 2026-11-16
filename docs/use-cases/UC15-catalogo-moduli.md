@@ -14,7 +14,7 @@
 - **3b. Modulo deprecato:** l'amministratore lo marca come deprecato; resta ai clienti che lo hanno.
 
 ## Regole
-- R1. Il modulo **core** esiste sempre, è in ogni piano e non si depreca.
+- R1. Non c'è un modulo obbligatorio: ogni modulo, MySync compreso, si include nei piani e si depreca come gli altri. Il catalogo nasce con MySync.
 - R2. `id`: lettere minuscole, cifre e trattini; `version`: semantica (`1.4.0`).
 - R3. Un modulo può richiedere solo moduli già nel catalogo, non se stesso.
 - R4. Stati: Beta, Disponibile, Deprecato.
@@ -26,15 +26,15 @@ Test: [`UC15_CatalogoModuli`](../../src/AdminPortal/Tests/FinHorizon.AdminPortal
 
 ### UC15-S1
 
-Test: `UC15_CatalogoModuli.S1_IlCoreCeSempre`
+Test: `UC15_CatalogoModuli.S1_MySyncNelCatalogoSenzaCore`
 
 ```gherkin
 # language: it
 Funzionalità: Catalogo dei moduli
 
-Scenario: Il core è sempre nel catalogo
+Scenario: Il catalogo nasce con MySync e senza core
   Quando l'amministratore apre il catalogo dei moduli
-  Allora vede il modulo "core" disponibile
+  Allora vede il modulo "mysync" disponibile e nessun modulo "core"
 ```
 
 ### UC15-S2
@@ -79,13 +79,13 @@ Scenario: Una nuova versione aggiorna il modulo
 
 ### UC15-S5
 
-Test: `UC15_CatalogoModuli.S5_DeprecareMaNonIlCore`
+Test: `UC15_CatalogoModuli.S5_DeprecareUnModulo`
 
 ```gherkin
 # language: it
 Funzionalità: Catalogo dei moduli
 
-Scenario: Deprecare un modulo, ma non il core
-  Quando l'amministratore depreca "warehouse" e poi prova a deprecare "core"
-  Allora "warehouse" risulta deprecato e la richiesta per "core" è rifiutata
+Scenario: Deprecare un modulo
+  Quando l'amministratore depreca "warehouse" e poi prova a dargli uno stato inesistente
+  Allora "warehouse" risulta deprecato e la richiesta con lo stato inesistente è rifiutata
 ```

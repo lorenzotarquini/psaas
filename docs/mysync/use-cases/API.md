@@ -1,6 +1,6 @@
 # MySync – Contratto HTTP (MVP)
 
-Tutte le rotte sono sotto `/api`, richiedono un token Keycloak con audience `mysync-api` e ruolo di realm `enduser` (GEN-S1, GEN-S3) e operano solo sui dati dell'utente del token (`sub`). Gli importi sono numeri decimali nella valuta del loro conto o debito, con al massimo 2 decimali (8 per le criptovalute); totali e controvalori sono nella valuta di visualizzazione dell'utente (campo `currency`, UC13). Le date sono `yyyy-MM-dd`. `GET /health` è pubblico.
+Tutte le rotte sono sotto `/api`, richiedono un token Keycloak con audience `mysync-api` e ruolo di realm `module-mysync`, dato dall'Admin Portal con il modulo (GEN-S1, GEN-S3) e operano solo sui dati dell'utente del token (`sub`). Gli importi sono numeri decimali nella valuta del loro conto o debito, con al massimo 2 decimali (8 per le criptovalute); totali e controvalori sono nella valuta di visualizzazione dell'utente (campo `currency`, UC13). Le date sono `yyyy-MM-dd`. `GET /health` è pubblico.
 
 **Errori.** `400` con `ValidationProblemDetails`: in `errors` un codice per campo, gli stessi dell'Admin Portal (`Required`, `InvalidFormat`, `MaxLengthExceeded`, `NotUnique`, `InvalidValue`) più `LimitReached`, che arriva sul campo `limit` perché non riguarda un singolo input. Un id nell'URL inesistente o di un altro utente risponde `404`; un id nel corpo (conto, categoria, debito) di un altro utente è `InvalidValue` su quel campo.
 
@@ -38,5 +38,4 @@ Tutta la configurazione sta nell'AppHost di Aspire: parametri in `src/FinHorizon
 | `mysync-max-accounts` | `MySync__MaxAccounts` | 2 | 1–1000; un valore fuori intervallo blocca l'avvio (UC2-R6) |
 | `mysync-max-debts` | `MySync__MaxDebts` | 1 | 0–1000; 0 disattiva i debiti (UC3-R5) |
 | `mysync-time-zone` | `Calendar__TimeZone` | `Europe/Rome` | Decide cos'è "oggi" (RNF4) |
-| `mysync-migrate-on-startup` | `Database__MigrateOnStartup` | `true` | Applica le migrazioni EF all'avvio |
 | `mysync-rates-url` | `Currencies__Url` | `https://api.frankfurter.dev/` | Catalogo delle valute e tassi di cambio (UC13, D10); obbligatorio |

@@ -232,6 +232,34 @@ public sealed class FakeUserDirectory : IUserDirectory
         return Task.CompletedTask;
     }
 
+    /// <summary>UC32: modules per user (Keycloak realm roles module-&lt;id&gt;) and the users whose sessions were ended.</summary>
+    public Dictionary<string, SortedSet<string>> Modules { get; } = [];
+
+    public List<string> SignedOut { get; } = [];
+
+    public Task<IReadOnlyList<string>?> GetModulesAsync(string id, CancellationToken cancellationToken = default)
+    {
+        ThrowIfDown();
+        return Task.FromResult<IReadOnlyList<string>?>(
+            Users.Any(user => user.Id == id) ? Modules.GetValueOrDefault(id, []).ToArray() : null);
+    }
+
+    public Task GrantModuleAsync(string id, string moduleId, CancellationToken cancellationToken = default)
+    {
+        ThrowIfDown();
+        if (!Modules.TryGetValue(id, out var modules)) Modules[id] = modules = new SortedSet<string>(StringComparer.Ordinal);
+        modules.Add(moduleId);
+        return Task.CompletedTask;
+    }
+
+    public Task RevokeModuleAsync(string id, string moduleId, CancellationToken cancellationToken = default)
+    {
+        ThrowIfDown();
+        if (Modules.TryGetValue(id, out var modules)) modules.Remove(moduleId);
+        SignedOut.Add(id);
+        return Task.CompletedTask;
+    }
+
     public Task<IReadOnlyDictionary<string, DateTimeOffset>> GetLastLoginsAsync(IReadOnlyCollection<string> userIds, CancellationToken cancellationToken = default) =>
         Task.FromResult<IReadOnlyDictionary<string, DateTimeOffset>>(LastLogins.Where(l => userIds.Contains(l.Key)).ToDictionary());
 
@@ -321,15 +349,15 @@ public sealed class FakeSubscriptionRepository : ISubscriptionRepository
 
 public sealed class FakeCatalogRepository : ICatalogRepository
 {
-    public List<ModuleReadModel> Modules { get; } = [Module("core", isCore: true)];
+    public List<ModuleReadModel> Modules { get; } = [];
 
     public List<PlanReadModel> Plans { get; } = [];
 
-    public static ModuleReadModel Module(string id, bool isCore = false, string[]? requires = null, string? hook = null) =>
-        new(id, id, null, null, ModuleStatuses.Available, "1.0.0", isCore, requires ?? [], [], hook, DateTimeOffset.UtcNow, 0);
+    public static ModuleReadModel Module(string id, string[]? requires = null, string? hook = null, string status = ModuleStatuses.Available) =>
+        new(id, id, null, null, status, "1.0.0", requires ?? [], [], hook, DateTimeOffset.UtcNow, 0);
 
     public static PlanReadModel Plan(string code, int? maxUsers = null, int trialDays = 0, params string[] modules) =>
-        new(Guid.NewGuid(), code, code, null, 99m, BillingPeriods.Monthly, trialDays, maxUsers, null, ["core", .. modules], true, 0);
+        new(Guid.NewGuid(), code, code, null, 99m, BillingPeriods.Monthly, trialDays, maxUsers, null, [.. modules], true, 0);
 
     public Task<IReadOnlyList<ModuleReadModel>> GetModulesAsync(CancellationToken cancellationToken = default) => Task.FromResult<IReadOnlyList<ModuleReadModel>>(Modules);
 

@@ -67,6 +67,7 @@ Nell'interfaccia la voce "Clienti" si chiama **Organizzazioni**; negli use case 
 | [UC29](UC29-panoramica.md) | Aprire la panoramica del giorno (mock 1b) | in ambito |
 | [UC30](UC30-ricerca-globale.md) | Cercare in tutta la console (⌘K) | in ambito |
 | [UC31](UC31-impersonificazione.md) | Entrare nella piattaforma come un utente (EXP-12) | in ambito |
+| [UC32](UC32-moduli-utente.md) | Assegnare o togliere un modulo (MySync) a un utente | in ambito |
 
 Contratto HTTP: [API.md](API.md) (collection Postman: [FinHorizon.AdminPortal.postman_collection.json](../postman/FinHorizon.AdminPortal.postman_collection.json)). Test unitari derivati dagli scenari: [TEST-UNITARI.md](TEST-UNITARI.md).
 

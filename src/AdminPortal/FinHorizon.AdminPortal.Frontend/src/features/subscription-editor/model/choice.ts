@@ -2,9 +2,9 @@ import type { Module, Plan, Subscription, SubscriptionRequest } from '@/entities
 
 export type SubscriptionChoice = SubscriptionRequest
 
-/** Add-ons: modules the plan does not include, minus the core and the deprecated ones (UC15-R1, R4). */
+/** Add-ons: modules the plan does not include, minus the deprecated ones (UC15-R1, R4). */
 export const addOnCandidates = (plan: Plan | undefined, modules: Module[]) =>
-  plan ? modules.filter((m) => !m.isCore && m.status !== 'Deprecated' && !plan.moduleIds.includes(m.id)) : []
+  plan ? modules.filter((m) => m.status !== 'Deprecated' && !plan.moduleIds.includes(m.id)) : []
 
 /** Nothing to save: no plan chosen, or the same plan, add-ons and renewal as now. */
 export function isUnchanged(choice: SubscriptionChoice, current: Subscription | null) {

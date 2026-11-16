@@ -16,7 +16,6 @@ export interface Module {
   icon: string | null
   status: ModuleStatus
   version: string
-  isCore: boolean
   requires: string[]
   permissions: string[]
   provisionUrl: string | null

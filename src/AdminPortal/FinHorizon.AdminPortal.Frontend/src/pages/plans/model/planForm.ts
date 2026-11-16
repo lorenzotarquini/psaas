@@ -41,7 +41,7 @@ export const planToValues = (plan: Plan): PlanValues => ({
   trialDays: String(plan.trialDays),
   maxUsers: plan.maxUsers?.toString() ?? '',
   maxProductiveUnits: plan.maxProductiveUnits?.toString() ?? '',
-  moduleIds: plan.moduleIds.filter((id) => id !== 'core'),
+  moduleIds: [...plan.moduleIds],
   active: plan.active,
 })
 

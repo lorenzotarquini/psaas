@@ -83,7 +83,7 @@ public sealed class UC21_ElencoClienti(PostgresFixture database) : AcceptanceTes
         var row = (await TenantsAsync()).Items.Single();
 
         Assert.Equal((2, 50), (row.UserCount, row.MaxUsers));
-        Assert.Equal(["core"], row.Modules!.Select(m => m.Id));
+        Assert.Empty(row.Modules!);
     }
 
     [Fact, Trait("Scenario", "UC21-S6")]

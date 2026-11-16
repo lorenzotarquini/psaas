@@ -1,5 +1,5 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
-import { apiGet, apiPost, apiPut, type PagedResult } from '@/shared/api'
+import { apiDelete, apiGet, apiPost, apiPut, type PagedResult } from '@/shared/api'
 
 /** UC19-R1. */
 export type UserStatus = 'Invited' | 'Active' | 'Suspended' | 'Disabled'
@@ -121,6 +121,27 @@ export function useImportUsers() {
     mutationFn: (body: { rows: UserImportRow[]; confirm: boolean }) => apiPost<UserImportResult[]>('/api/users/import', body),
     onSuccess: (_, { confirm }) => {
       if (confirm) onUsersChanged(queryClient)
+    },
+  })
+}
+
+/** UC32: ids of the modules given to the user; each one is an access (e.g. MySync). */
+export const useUserModules = (id: string) =>
+  useQuery({
+    queryKey: ['users', 'modules', id],
+    queryFn: ({ signal }) => apiGet<string[]>(`/api/users/${encodeURIComponent(id)}/modules`, signal),
+  })
+
+/** UC32: gives the module (granted true) or takes it away, which also ends the user's sessions. */
+export function useSetUserModule(id: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ moduleId, granted }: { moduleId: string; granted: boolean }) => {
+      const path = `/api/users/${encodeURIComponent(id)}/modules/${encodeURIComponent(moduleId)}`
+      return granted ? apiPut<string[]>(path, undefined).then(() => undefined) : apiDelete(path)
+    },
+    onSuccess: () => {
+      for (const key of [['users', 'modules', id], ['audit']]) void queryClient.invalidateQueries({ queryKey: key })
     },
   })
 }

@@ -6,7 +6,7 @@
 
 ## Flusso principale
 1. L'amministratore crea un piano con codice, nome, prezzo e periodicità, giorni di prova, limiti (utenti, unità produttive) e moduli inclusi.
-2. Il sistema verifica e salva; il core è incluso sempre.
+2. Il sistema verifica e salva; il piano include solo i moduli scelti.
 3. Un piano si modifica o si archivia (non più vendibile).
 
 ## Flussi alternativi
@@ -31,7 +31,7 @@ Funzionalità: Piani commerciali
 
 Scenario: Creare un piano
   Quando l'amministratore crea il piano "pro" a 99 € al mese con al massimo 50 utenti e il modulo "warehouse"
-  Allora il piano "pro" include "core" e "warehouse"
+  Allora il piano "pro" include solo "warehouse"
 ```
 
 ### UC16-S2

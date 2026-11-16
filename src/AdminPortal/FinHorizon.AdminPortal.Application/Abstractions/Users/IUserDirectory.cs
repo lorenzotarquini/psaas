@@ -51,6 +51,22 @@ public interface IUserDirectory
     /// <exception cref="UserDirectoryUnavailableException">The identity provider cannot be reached.</exception>
     Task SetEnabledAsync(string id, bool enabled, CancellationToken cancellationToken = default);
 
+    /// <summary>UC32: the modules assigned to the user, each one an access the user has (e.g. MySync).</summary>
+    /// <returns>Null when the user does not exist.</returns>
+    /// <exception cref="UserDirectoryUnavailableException">The identity provider cannot be reached or misses the module role.</exception>
+    Task<IReadOnlyList<string>?> GetModulesAsync(string id, CancellationToken cancellationToken = default);
+
+    /// <summary>UC32: gives the user the module; nothing changes when the user already has it.</summary>
+    /// <exception cref="UserDirectoryUnavailableException">The identity provider cannot be reached or misses the module role.</exception>
+    Task GrantModuleAsync(string id, string moduleId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// UC32: takes the module away and ends every session of the user, so the module stops working
+    /// at the next token refresh instead of when the session expires.
+    /// </summary>
+    /// <exception cref="UserDirectoryUnavailableException">The identity provider cannot be reached.</exception>
+    Task RevokeModuleAsync(string id, string moduleId, CancellationToken cancellationToken = default);
+
     /// <summary>UC19-R5: last login of each user that has one; never fails (login events may be off).</summary>
     Task<IReadOnlyDictionary<string, DateTimeOffset>> GetLastLoginsAsync(IReadOnlyCollection<string> userIds, CancellationToken cancellationToken = default);
 }

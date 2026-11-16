@@ -6,7 +6,7 @@
 
 ## Flusso principale
 1. Dalla scheda del cliente (o dal passo 2 dell'onboarding) l'amministratore sceglie piano, prova gratuita e moduli aggiuntivi.
-2. Il sistema verifica i limiti del piano, salva la sottoscrizione e attiva i moduli: quelli del piano, gli add-on, le loro dipendenze e il core.
+2. Il sistema verifica i limiti del piano, salva la sottoscrizione e attiva i moduli: quelli del piano, gli add-on e le loro dipendenze.
 3. Ogni modulo nuovo viene preparato per il cliente tramite il suo hook di provisioning (UC18).
 
 ## Flussi alternativi
@@ -35,7 +35,7 @@ Funzionalità: Sottoscrizione del cliente
 Scenario: I moduli del piano arrivano con le dipendenze
   Dato che "hr" richiede "warehouse" e il piano "pro" include "hr"
   Quando l'amministratore sottoscrive "pro" per "Alfa Srl"
-  Allora "Alfa Srl" ha attivi "core", "hr" e "warehouse"
+  Allora "Alfa Srl" ha attivi "hr" e "warehouse"
 ```
 
 ### UC17-S2

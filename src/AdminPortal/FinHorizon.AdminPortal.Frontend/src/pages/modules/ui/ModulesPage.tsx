@@ -72,7 +72,6 @@ function ModuleRow({ module, busy, onStatus }: { module: Module; busy: boolean; 
           <ModuleIcon icon={module.icon} />
           <span>
             <span className="font-semibold">{module.name}</span>
-            {module.isCore && <span className="badge badge-ghost badge-sm ml-2">{t('catalog.core')}</span>}
             <span className="data block text-[11px] text-base-content/50">{module.id}</span>
           </span>
         </span>
@@ -87,11 +86,9 @@ function ModuleRow({ module, busy, onStatus }: { module: Module; busy: boolean; 
       </td>
       <td className="data text-right">{module.tenantCount}</td>
       <td className="text-right">
-        {!module.isCore && (
-          <button type="button" className="btn btn-ghost btn-xs" disabled={busy} onClick={() => onStatus(module.status === 'Deprecated' ? 'Available' : 'Deprecated')}>
-            {t(module.status === 'Deprecated' ? 'catalog.restore' : 'catalog.deprecate')}
-          </button>
-        )}
+        <button type="button" className="btn btn-ghost btn-xs" disabled={busy} onClick={() => onStatus(module.status === 'Deprecated' ? 'Available' : 'Deprecated')}>
+          {t(module.status === 'Deprecated' ? 'catalog.restore' : 'catalog.deprecate')}
+        </button>
       </td>
     </tr>
   )

@@ -35,6 +35,7 @@ Errori di validazione: `400` `ValidationProblem` con un codice per campo in `err
 | UC29 | `GET /api/overview` · `POST /api/users/invites/resend` | esiste |
 | UC30 | `GET /api/search?q=` | esiste |
 | UC31 | `GET /api/impersonation` · `POST /api/users/{id}/impersonate` | esiste |
+| UC32 | `GET /api/users/{id}/modules` · `PUT/DELETE /api/users/{id}/modules/{moduleId}` | esiste |
 | UC24 | `GET /api/invoices?tenantId=&status=&search=&page=&pageSize=` · `GET /api/invoices/summary` · `GET /api/invoices/{id}` · `POST /api/invoices/{id}/payments` · `POST /api/invoices/{id}/cancel` | esiste |
 
 ## Contratti esistenti (sintesi)
@@ -156,7 +157,7 @@ Body `{ rows: [{ firstName, lastName, email, profiles: "Cliente:Profilo|…" }],
 ### Keycloak come archivio utenti (UC6, UC7, UC19)
 Il backend chiama l'API di amministrazione di Keycloak (`{Authority}` con `/realms/` → `/admin/realms/`) con il service account del client `adminportal-api`. Configurazione richiesta:
 - client `adminportal-api` con *Client authentication* e *Service accounts* attivi; il segreto va in `Keycloak:ClientSecret` (user secrets o variabile d'ambiente `Keycloak__ClientSecret`, mai in `appsettings.json`);
-- al service account vanno assegnati i ruoli `view-users`, `manage-users` e `view-events` (ultimo accesso) del client `realm-management`;
+- al service account vanno assegnati i ruoli `view-users`, `manage-users`, `view-events` (ultimo accesso) e `manage-realm` (crea i ruoli `module-<id>` dei moduli, UC32) del client `realm-management`;
 - gli utenti creati entrano nel gruppo `end_users` (campo `groups` della creazione): il gruppo deve esistere nel realm;
 - per l'ultimo accesso vanno salvati gli eventi utente `LOGIN` del realm (*Realm settings → Events*);
 - nel *User profile* del realm vanno dichiarati gli attributi `profileIds` (multivalore), `mfaRequired` e `lastInviteAt`, modificabili solo dall'amministratore (non abilitare gli *Unmanaged attributes* in modalità "Enabled": l'utente potrebbe cambiarsi i profili dalla console account): da Keycloak 24 gli attributi non dichiarati vengono scartati senza errore;
@@ -218,3 +219,10 @@ Audit log, dal più recente: `{ items: [{ id, occurredAt, actorId, actorName, ac
   - Impersonificazione: porta `IImpersonationGateway` sostituita da un token exchange simulato (`FakeImpersonation`).
   - Tempo: `TimeProvider` sostituito da un orologio che gli scenari spostano in avanti (`DaysPassAsync`) per scadenze e rinnovi; i token restano validati con l'ora reale.
 - Quello che i simulatori nascondono (chiamate HTTP verso Keycloak e verso la lista comuni, ordinamento e limite dei comuni) è verificato dai test unitari di Infrastructure.
+
+### UC32 – Moduli dell'utente
+
+- `GET /api/users/{id}/modules` → `200` `["mysync"]`: gli id dei moduli assegnati (ruoli di realm `module-<id>`) · `404` se l'utente non esiste.
+- `PUT /api/users/{id}/modules/{moduleId}` → `200` con i moduli dopo l'assegnazione (idempotente) · `400` `moduleId: InvalidValue` se il modulo non è nel catalogo o è deprecato · `404` · `503` se Keycloak non risponde o non permette di creare il ruolo `module-<id>` (la prima assegnazione lo crea).
+- `DELETE /api/users/{id}/modules/{moduleId}` → `200` con i moduli rimasti; chiude anche le sessioni Keycloak dell'utente (UC32-R3) · `404` · `503`.
+- Il service account del portale usa `roles` (lettura e creazione del ruolo `module-<id>`, serve `manage-realm`), `users/{id}/role-mappings/realm` (lettura, assegnazione, rimozione) e `users/{id}/logout` (`manage-users`).

@@ -18,7 +18,7 @@ public sealed class UC17_Sottoscrizione(PostgresFixture database) : AcceptanceTe
 
         var subscription = await ReadAsync<SubscriptionView>(await SubscribeAsync(alfa.Id, pro.Id), HttpStatusCode.OK);
 
-        Assert.Equal(["core", "hr", "warehouse"], subscription.Modules.Select(m => m.ModuleId).Order());
+        Assert.Equal(["hr", "warehouse"], subscription.Modules.Select(m => m.ModuleId).Order());
         Assert.All(subscription.Modules, m => Assert.Equal("Active", m.Status));
     }
 
@@ -74,7 +74,7 @@ public sealed class UC17_Sottoscrizione(PostgresFixture database) : AcceptanceTe
 
         var subscription = await ReadAsync<SubscriptionView>(await SubscribeAsync(alfa.Id, basePlan.Id), HttpStatusCode.OK);
 
-        Assert.Equal(["core"], subscription.Modules.Select(m => m.ModuleId));
+        Assert.Empty(subscription.Modules);
     }
 
     [Fact, Trait("Scenario", "UC17-S6")]

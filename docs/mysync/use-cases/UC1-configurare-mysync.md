@@ -4,7 +4,7 @@
 **Obiettivo:** dire a MySync dove sono i propri soldi e cosa si deve ancora pagare, per avere subito una dashboard significativa.
 
 ## Precondizioni
-- L'utente è autenticato con ruolo `enduser` e non ha ancora nessun conto.
+- L'utente è autenticato, ha il modulo MySync (ruolo `module-mysync`, UC32 dell'Admin Portal) e non ha ancora nessun conto.
 
 ## Flusso principale
 1. L'utente apre MySync per la prima volta.

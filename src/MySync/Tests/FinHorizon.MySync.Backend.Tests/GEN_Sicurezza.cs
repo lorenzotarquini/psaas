@@ -42,16 +42,17 @@ public sealed class GEN_Sicurezza(PostgresFixture database) : AcceptanceTest(dat
     [Fact]
     public async Task S2_UnTokenPerUnAltroClientNonVale()
     {
-        var response = await ClientWith(KeycloakTokens.Create("Mario", [KeycloakTokens.EndUserRole], audience: "adminportal-api")).GetAsync("/api/me");
+        var response = await ClientWith(KeycloakTokens.Create("Mario", [KeycloakTokens.MySyncRole], audience: "adminportal-api")).GetAsync("/api/me");
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
     [Theory]
     [MemberData(nameof(Operations))]
-    public async Task S3_OgniOperazioneRichiedeIlRuoloEnduser(string method, string url)
+    public async Task S3_OgniOperazioneRichiedeIlModuloMySync(string method, string url)
     {
-        var response = await ClientWith(KeycloakTokens.Create("Mario", ["systemadministrator"])).SendAsync(Request(method, url));
+        // A platform user (enduser) without the MySync module given by the Admin Portal.
+        var response = await ClientWith(KeycloakTokens.Create("Mario", [KeycloakTokens.EndUserRole])).SendAsync(Request(method, url));
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
@@ -86,7 +87,7 @@ public sealed class GEN_Sicurezza(PostgresFixture database) : AcceptanceTest(dat
 
         Assert.Equal("kc-mario", me.KeycloakId);
         Assert.Equal("mario@example.com", me.Email);
-        Assert.Contains(KeycloakTokens.EndUserRole, me.Roles);
+        Assert.Contains(KeycloakTokens.MySyncRole, me.Roles);
     }
 
     private static HttpRequestMessage Request(string method, string url) =>

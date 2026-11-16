@@ -31,7 +31,7 @@ Funzionalità: Provisioning dei moduli
 Scenario: Hook che non risponde
   Dato che l'hook del modulo "warehouse" non risponde
   Quando "Alfa Srl" sottoscrive un piano con "warehouse"
-  Allora "warehouse" risulta "Provisioning fallito" con l'errore e "core" risulta attivo
+  Allora "warehouse" risulta "Provisioning fallito" con l'errore
 ```
 
 ### UC18-S2

@@ -13,8 +13,19 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { ModuleIcon, useModules } from '@/entities/catalog'
 import { useProfiles } from '@/entities/profile'
-import { UserAvatar, UserStatusBadge, useUpdateUser, useUser, useUserAction, type User, type UserAction } from '@/entities/user'
+import {
+  UserAvatar,
+  UserStatusBadge,
+  useSetUserModule,
+  useUpdateUser,
+  useUser,
+  useUserAction,
+  useUserModules,
+  type User,
+  type UserAction,
+} from '@/entities/user'
 import { ApiError } from '@/shared/api'
 import { formatDate, formatWhen } from '@/shared/lib/format'
 import { ErrorAlert } from '@/shared/ui/error-alert'
@@ -228,6 +239,8 @@ function PanelBody({ user }: { user: User }) {
         </div>
       )}
 
+      <ModulesSection userId={user.id} />
+
       <section className="px-5 py-4">
         <h3 className="panel-title mb-2.5">{t('users.details')}</h3>
         <dl className="grid grid-cols-[7.5rem_1fr] gap-x-3 gap-y-2">
@@ -246,6 +259,55 @@ function PanelBody({ user }: { user: User }) {
         </dl>
       </section>
     </div>
+  )
+}
+
+// UC32: each module given to the user is an access to its application (e.g. MySync); taking it away signs the user out.
+function ModulesSection({ userId }: { userId: string }) {
+  const { t } = useTranslation()
+  const { data: catalog = [] } = useModules()
+  const { data: granted = [], error, isPending } = useUserModules(userId)
+  const setModule = useSetUserModule(userId)
+  // A deprecated module can still be taken away, never given.
+  const modules = catalog.filter((m) => m.status !== 'Deprecated' || granted.includes(m.id))
+
+  return (
+    <section className="flex flex-col gap-2.5 border-b border-base-300 px-5 py-4">
+      <div>
+        <h3 className="panel-title">{t('users.modules')}</h3>
+        <p className="text-[12px] text-base-content/55">{t('users.modulesHint')}</p>
+      </div>
+      {error ? (
+        <ErrorAlert error={error} />
+      ) : isPending ? (
+        <span className="loading loading-spinner loading-sm" aria-label={t('loading')} />
+      ) : modules.length === 0 ? (
+        <p className="text-base-content/60">{t('users.noModules')}</p>
+      ) : (
+        <ul className="flex flex-col gap-1.5">
+          {modules.map((module) => {
+            const on = granted.includes(module.id)
+            return (
+              <li key={module.id}>
+                <label className="flex items-center gap-2.5 rounded-box border border-base-300 px-3 py-2">
+                  <ModuleIcon icon={module.icon} />
+                  <span className="flex-1">{module.name}</span>
+                  <input
+                    type="checkbox"
+                    className="toggle toggle-sm toggle-primary"
+                    checked={on}
+                    disabled={setModule.isPending || (!on && module.status === 'Deprecated')}
+                    onChange={() => setModule.mutate({ moduleId: module.id, granted: !on })}
+                  />
+                </label>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+      {granted.length > 0 && <p className="text-[12px] text-base-content/55">{t('users.revokeNote')}</p>}
+      {setModule.error && <ErrorAlert error={setModule.error} action="save" />}
+    </section>
   )
 }
 

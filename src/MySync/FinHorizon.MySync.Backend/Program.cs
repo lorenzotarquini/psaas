@@ -40,10 +40,8 @@ try
 
     var app = builder.Build();
 
-    if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
-    {
-        await app.Services.MigrateMySyncDatabaseAsync();
-    }
+    // Every project of the solution brings its database up to date at start.
+    await app.Services.MigrateMySyncDatabaseAsync();
 
     app.UseExceptionHandler();
     app.UseStatusCodePages();
@@ -60,7 +58,7 @@ try
 
     app.MapHealthChecks("/health");
 
-    // Every controller requires a MySync user (policy User: role enduser) unless it opts out explicitly.
+    // Every controller requires a MySync user (policy User: role module-mysync, given by the Admin Portal) unless it opts out explicitly.
     app.MapControllers().RequireAuthorization("User");
 
     await app.RunAsync();

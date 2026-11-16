@@ -154,18 +154,6 @@ public sealed class AdminPortalDbContext(DbContextOptions<AdminPortalDbContext> 
             entityBuilder.Property(module => module.Name).IsRequired();
             entityBuilder.Property(module => module.Version).IsRequired();
             entityBuilder.Property(module => module.Status).IsRequired().HasMaxLength(20);
-            // Core is always there (it is in every plan).
-            entityBuilder.HasData(new ModuleDbModel
-            {
-                Id = "core",
-                Name = "Core",
-                Description = "Base comune della piattaforma",
-                Icon = "cube",
-                Status = "Available",
-                Version = "2.0.3",
-                IsCore = true,
-                UpdatedAt = new DateTimeOffset(2026, 10, 22, 0, 0, 0, TimeSpan.Zero),
-            });
         });
 
         modelBuilder.Entity<PlanDbModel>(entityBuilder =>

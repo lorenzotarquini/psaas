@@ -228,4 +228,73 @@ public sealed class KeycloakUserDirectoryTests
         Assert.Equal(DateTimeOffset.FromUnixTimeMilliseconds(1760000000000), logins["kc-1"]);
         Assert.Empty(await Directory(off).GetLastLoginsAsync(["kc-1", "kc-2"]));
     }
+
+    [Fact]
+    public async Task UC32_Modules_AreTheRealmRolesWithTheModulePrefix()
+    {
+        var handler = new Handler(_ => Json("""[{"id":"r1","name":"enduser"},{"id":"r2","name":"module-mysync"}]"""));
+
+        Assert.Equal(["mysync"], await Directory(handler).GetModulesAsync("kc-1"));
+    }
+
+    [Fact]
+    public async Task UC32_S1_Grant_CreatesTheMissingRoleThenGivesIt()
+    {
+        var roleRead = 0;
+        var handler = new Handler(request => request.RequestUri!.AbsolutePath switch
+        {
+            "/admin/realms/PSAAS/users/kc-1/role-mappings/realm" when request.Method == HttpMethod.Get => Json("[]"),
+            "/admin/realms/PSAAS/roles/module-mysync" => roleRead++ == 0 ? new(HttpStatusCode.NotFound) : Json("""{"id":"r9","name":"module-mysync"}"""),
+            _ => new(HttpStatusCode.Created),
+        });
+
+        await Directory(handler).GrantModuleAsync("kc-1", "mysync");
+
+        var created = handler.Requests.Single(r => r.Method == HttpMethod.Post && r.Url == $"{BaseUrl}roles");
+        Assert.Equal("module-mysync", JsonDocument.Parse(created.Body!).RootElement.GetProperty("name").GetString());
+        var mapping = handler.Requests.Single(r => r.Method == HttpMethod.Post && r.Url == $"{BaseUrl}users/kc-1/role-mappings/realm");
+        Assert.Equal("r9", JsonDocument.Parse(mapping.Body!).RootElement[0].GetProperty("id").GetString());
+    }
+
+    [Fact]
+    public async Task UC32_S1_Grant_ExistingRoleIsNotCreatedAgain()
+    {
+        var handler = new Handler(request => request.RequestUri!.AbsolutePath switch
+        {
+            "/admin/realms/PSAAS/users/kc-1/role-mappings/realm" when request.Method == HttpMethod.Get => Json("[]"),
+            "/admin/realms/PSAAS/roles/module-mysync" => Json("""{"id":"r9","name":"module-mysync"}"""),
+            _ => new(HttpStatusCode.NoContent),
+        });
+
+        await Directory(handler).GrantModuleAsync("kc-1", "mysync");
+
+        Assert.DoesNotContain(handler.Requests, r => r.Url == $"{BaseUrl}roles");
+        Assert.Single(handler.Requests, r => r.Method == HttpMethod.Post && r.Url == $"{BaseUrl}users/kc-1/role-mappings/realm");
+    }
+
+    [Fact]
+    public async Task UC32_Grant_WithoutManageRealm_IsUnavailable()
+    {
+        var handler = new Handler(request => request.RequestUri!.AbsolutePath switch
+        {
+            "/admin/realms/PSAAS/users/kc-1/role-mappings/realm" => Json("[]"),
+            "/admin/realms/PSAAS/roles/module-mysync" => new(HttpStatusCode.NotFound),
+            _ => new(HttpStatusCode.Forbidden),
+        });
+
+        await Assert.ThrowsAsync<UserDirectoryUnavailableException>(() => Directory(handler).GrantModuleAsync("kc-1", "mysync"));
+    }
+
+    [Fact]
+    public async Task UC32_S2_Revoke_RemovesTheRoleAndEndsTheSessions()
+    {
+        var handler = new Handler(request => request.Method == HttpMethod.Get
+            ? Json("""[{"id":"r9","name":"module-mysync"}]""")
+            : new(HttpStatusCode.NoContent));
+
+        await Directory(handler).RevokeModuleAsync("kc-1", "mysync");
+
+        Assert.Contains(handler.Requests, r => r.Method == HttpMethod.Delete && r.Url == $"{BaseUrl}users/kc-1/role-mappings/realm" && r.Body!.Contains("r9"));
+        Assert.Contains(handler.Requests, r => r.Method == HttpMethod.Post && r.Url == $"{BaseUrl}users/kc-1/logout");
+    }
 }

@@ -58,7 +58,7 @@ Feature-Sliced Design (controllato da Steiger): `app` (shell, rotte), `pages` (s
 
 ## Avvio
 
-Con Aspire (`src/FinHorizon.AppHost`): Postgres crea `mysync-db`, poi partono `mysync-backend` e `mysync-frontend` su `http://localhost:5174` (porta fissa per Keycloak). La configurazione (limiti di conti e debiti, fuso orario, migrazioni all'avvio) sta nei parametri dell'AppHost: vedi [use-cases/API.md](use-cases/API.md#configurazione-del-backend).
+Con Aspire (`src/FinHorizon.AppHost`): Postgres crea `mysync-db`, poi partono `mysync-backend` e `mysync-frontend` su `http://localhost:5174` (porta fissa per Keycloak). Le migrazioni di `mysync-db` si applicano da sole a ogni avvio del backend, se ce ne sono di nuove. La configurazione (limiti di conti e debiti, fuso orario, valute) sta nei parametri dell'AppHost: vedi [use-cases/API.md](use-cases/API.md#configurazione-del-backend).
 
 ## Keycloak (realm `PSAAS`)
 
@@ -72,6 +72,7 @@ Con Aspire (`src/FinHorizon.AppHost`): Postgres crea `mysync-db`, poi partono `m
 | Gruppo | Ruolo di realm | Applicazione |
 |---|---|---|
 | `Service Administrators` | `systemadministrator` | Admin Portal (gli altri ricevono 403) |
-| `end_users` | `enduser` | MySync (gli altri ricevono 403) |
+| `end_users` | `enduser` | Utente della piattaforma: da solo **non** apre MySync |
+| — (assegnato dall'Admin Portal, UC32) | `module-mysync` | MySync (gli altri ricevono 403 e il frontend mostra "Non hai accesso a MySync") |
 
-Gli utenti creati dall'Admin Portal entrano da soli in `end_users` (UC6-R7). I ruoli si assegnano ai gruppi, non ai *Service account roles* dei client: quelli valgono solo per l'identità tecnica del client.
+Gli utenti creati dall'Admin Portal entrano da soli in `end_users` (UC6-R7); MySync lo apre solo chi ha il modulo, assegnato utente per utente dall'Admin Portal (UC32). Il ruolo di realm `module-mysync` lo crea l'Admin Portal alla prima assegnazione. I ruoli si assegnano ai gruppi, non ai *Service account roles* dei client: quelli valgono solo per l'identità tecnica del client.

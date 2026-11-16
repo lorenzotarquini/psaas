@@ -26,7 +26,7 @@ Da questi dati MySync calcola il **patrimonio netto** e ne mostra l'andamento ne
 
 | Attore | Descrizione |
 |---|---|
-| Utente | Una persona fisica con un account FinHorizon creato dall'Admin Portal (UC6 dell'Admin Portal). Ruolo di realm Keycloak `enduser`, assegnato dal gruppo `end_users`. Vede e modifica **solo i propri dati**. |
+| Utente | Una persona fisica con un account FinHorizon creato dall'Admin Portal (UC6 dell'Admin Portal). Entra solo con il modulo MySync, cioè il ruolo di realm Keycloak `module-mysync` assegnato dall'Admin Portal (UC32). Vede e modifica **solo i propri dati**. |
 | Keycloak | Sistema esterno di identità: autentica l'utente. MySync identifica l'utente con il `sub` del token. |
 
 ## Glossario
@@ -79,7 +79,7 @@ Da questi dati MySync calcola il **patrimonio netto** e ne mostra l'andamento ne
 
 | Id | Requisito |
 |---|---|
-| RNF1 | Ogni operazione richiede un utente autenticato su Keycloak con ruolo `enduser` (policy `User`). |
+| RNF1 | Ogni operazione richiede un utente autenticato su Keycloak con ruolo `module-mysync` (policy `User`); senza, il frontend mostra "Non hai accesso a MySync". |
 | RNF2 | Isolamento: ogni dato appartiene a un utente (`sub` del token) e nessuna operazione legge o modifica dati di un altro utente. Un id di un altro utente si comporta come un id inesistente (404, mai 403, per non rivelarne l'esistenza). |
 | RNF3 | Gli importi sono nella valuta del loro conto, con 2 decimali per le valute tradizionali e 8 per le criptovalute, e si salvano come `decimal` (mai `float`/`double`). |
 | RNF4 | Le date dei movimenti sono date di calendario (senza ora né fuso). |
@@ -130,7 +130,7 @@ Prese il 2026-11-15.
 | D5 | Un ricavo può essere collegato a un debito (es. erogazione di un fido)? | No: solo le spese, come rate. |
 | D6 | La rata di un debito deve uscire dal conto collegato al debito? | No: il conto collegato è solo proposto come predefinito, l'utente può cambiarlo. |
 | D7 | Il saldo di un conto può essere negativo (scoperto)? | Sì per tutti i tipi; MySync non blocca la spesa, la dashboard evidenzia il saldo negativo. |
-| D8 | MySync è per le finanze personali o anche per quelle di un'azienda? | Fase 1 (MVP) solo privati: i dati sono personali e legati all'utente (`sub`), non a un'organizzazione. Il conto aziendale arriva nella fase 2. Nella fase 1 l'accesso resta regolato solo dal ruolo `enduser`, senza controllare il tipo di organizzazione dei profili. |
+| D8 | MySync è per le finanze personali o anche per quelle di un'azienda? | Fase 1 (MVP) solo privati: i dati sono personali e legati all'utente (`sub`), non a un'organizzazione. Il conto aziendale arriva nella fase 2. Nella fase 1 l'accesso è regolato dal modulo MySync assegnato al singolo utente (ruolo `module-mysync`, UC32 dell'Admin Portal), senza controllare il tipo di organizzazione dei profili. |
 | D9 | Il patrimonio netto sottrae i debiti? | No: è la somma dei saldi dei conti; i debiti residui si mostrano accanto, in una card e una linea del grafico a parte. Decisa il 2026-11-15 dopo la prova della dashboard. |
 
 | D10 | Da dove vengono il catalogo delle valute e i tassi di cambio? | Da [Frankfurter](https://frankfurter.dev) v2: gratuito e senza chiave, 160+ valute tradizionali e 35 criptovalute, tassi giornalieri con storico. Alternative valutate: CoinGecko (17.000+ criptovalute, ma chiave obbligatoria e solo 1 anno di storico gratis). Il provider sta dietro alle interfacce `ICurrencyCatalog` e `IExchangeRates`: cambiarlo è una classe in più. Decisa il 2026-11-15. |
@@ -191,14 +191,14 @@ Scenario: Un token emesso per un'altra applicazione non vale
 
 ### GEN-S3
 
-Test: `GEN_Sicurezza.S3_OgniOperazioneRichiedeIlRuoloEnduser`
+Test: `GEN_Sicurezza.S3_OgniOperazioneRichiedeIlModuloMySync`
 
 ```gherkin
 # language: it
 Funzionalità: Accesso a MySync
 
-Schema dello scenario: Ogni operazione richiede il ruolo enduser
-  Quando un utente autenticato senza ruolo "enduser" chiama "<operazione>"
+Schema dello scenario: Ogni operazione richiede il modulo MySync
+  Quando un utente della piattaforma (ruolo "enduser") senza ruolo "module-mysync" chiama "<operazione>"
   Allora l'accesso è negato come non autorizzato
 
   Esempi: le stesse operazioni di GEN-S1

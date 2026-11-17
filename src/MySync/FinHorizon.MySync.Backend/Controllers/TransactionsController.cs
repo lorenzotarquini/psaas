@@ -40,7 +40,7 @@ public sealed class TransactionsController : ControllerBase
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(body);
-        var command = new AmendTransactionCommand(id, body.Kind, body.Date, body.Amount, body.AccountId, body.CategoryId, body.DebtId, body.Note, body.CounterAccountId, body.CounterAmount);
+        var command = new AmendTransactionCommand(id, body.Kind, body.Date, body.Amount, body.AccountId, body.CategoryId, body.DebtId, body.Note, body.CounterAccountId, body.CounterAmount, body.SubscriptionId);
         return (await handler.HandleAsync(command, cancellationToken)).ToActionResult(this);
     }
 

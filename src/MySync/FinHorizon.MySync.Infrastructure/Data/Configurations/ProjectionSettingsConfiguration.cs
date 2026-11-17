@@ -22,12 +22,14 @@ internal sealed class ProjectionSettingsConfiguration : IEntityTypeConfiguration
         builder.Property(settings => settings.AnnualReturn).HasPrecision(6, 3);
         builder.Property(settings => settings.Inflation).HasPrecision(6, 3);
         builder.OwnsMany(settings => settings.Payments, payments => payments.ToJson());
+        builder.OwnsMany(settings => settings.Subscriptions, subscriptions => subscriptions.ToJson());
         builder.OwnsMany(settings => settings.Events, events =>
         {
             events.ToJson();
             events.Property(item => item.Note).HasMaxLength(ProjectionSettings.MaxNoteLength);
         });
         builder.Navigation(settings => settings.Payments).HasField("_payments").UsePropertyAccessMode(PropertyAccessMode.Field);
+        builder.Navigation(settings => settings.Subscriptions).HasField("_subscriptions").UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.Navigation(settings => settings.Events).HasField("_events").UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }

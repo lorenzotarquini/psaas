@@ -24,7 +24,9 @@ public sealed record TransactionView(
     string? CounterAccountName = null,
     string Currency = "EUR",
     decimal? CounterAmount = null,
-    string? CounterCurrency = null);
+    string? CounterCurrency = null,
+    Guid? SubscriptionId = null,
+    string? SubscriptionName = null);
 
 /// <summary>Expenses and incomes of one day in one currency: the totals of a filter before conversion (UC13).</summary>
 public sealed record DailyTotal(DateOnly Date, string Currency, decimal Expenses, decimal Incomes);
@@ -41,7 +43,8 @@ public sealed record TransactionFilter(
     Guid? CategoryId,
     Guid? DebtId,
     int Page,
-    int PageSize);
+    int PageSize,
+    Guid? SubscriptionId = null);
 
 /// <summary>One page of movements and the totals of the whole filter, in <see cref="Currency"/>, the display currency.</summary>
 public sealed record TransactionPage(

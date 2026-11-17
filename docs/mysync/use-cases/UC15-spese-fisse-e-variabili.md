@@ -1,7 +1,7 @@
 # UC15 – Indicare le spese fisse
 
 **Attore:** Utente
-**Obiettivo:** dire quali categorie di spesa sono fisse (affitto, bollette, abbonamenti), così la proiezione separa le spese fisse da quelle variabili.
+**Obiettivo:** dire quali categorie di spesa sono fisse (affitto, bollette), così la proiezione separa le spese fisse da quelle variabili. Gli abbonamenti che si possono annullare hanno un loro use case (UC16).
 **Use case di supporto a:** UC14
 
 ## Flusso principale
@@ -20,6 +20,7 @@
 - R2. Il tipo cambia solo i parametri proposti della proiezione. Movimenti, saldi e andamento non cambiano.
 - R3. Se l'utente ha già salvato una proiezione (UC14-R11), i valori salvati restano com'erano: la nuova classificazione si vede nei parametri proposti e con "Riparti dai miei dati".
 - R4. È l'unica modifica di una categoria nell'MVP: nome ed eliminazione restano fuori ambito.
+- R5. Le spese collegate a un abbonamento (UC16) non sono né fisse né variabili, qualunque sia la loro categoria: nella proiezione conta l'abbonamento, con il suo importo di oggi (UC14-R3, R13). Come le rate dei debiti (D17), così nessuna spesa è contata due volte. Le altre spese della stessa categoria restano fisse o variabili come sempre.
 
 ## Scenari di accettazione
 
@@ -81,4 +82,23 @@ Scenario: Categoria di un altro utente
   Quando "Mario" indica la categoria "Affitto" di "Anna" come fissa
   Allora la risposta è "non trovato"
   E la categoria di "Anna" è ancora variabile
+```
+
+### UC15-S5
+
+Test: `UC15_SpeseFisse.S5_LeSpeseDegliAbbonamentiNonContano`
+
+```gherkin
+# language: it
+Funzionalità: Indicare le spese fisse
+
+Scenario: Le spese di un abbonamento non sono né fisse né variabili
+  Dato i movimenti di UC14-S1
+  E in ogni mese da maggio a ottobre 2026 la spesa di 20,00 € in "Svago" collegata all'abbonamento "Netflix"
+  E in ogni mese da maggio a ottobre 2026 la spesa di 30,00 € in "Svago" senza abbonamento
+  Quando "Mario" apre la proiezione
+  Allora i parametri proposti sono spese fisse 700,00 € e spese variabili 630,00 €
+  Quando "Mario" indica "Svago" come fissa
+  Allora i parametri proposti sono spese fisse 930,00 € e spese variabili 400,00 €
+  E l'abbonamento proposto "Netflix" è sempre 20,00 €
 ```

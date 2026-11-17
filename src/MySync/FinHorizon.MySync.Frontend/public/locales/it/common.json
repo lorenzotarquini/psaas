@@ -11,7 +11,8 @@
     "settings": "Impostazioni",
     "expand": "Espandi il menu",
     "collapse": "Riduci il menu",
-    "projection": "Proiezione"
+    "projection": "Proiezione",
+    "subscriptions": "Abbonamenti"
   },
   "actions": {
     "title": "Azioni",
@@ -163,13 +164,15 @@
       "account": "Conto",
       "category": "Categoria",
       "debt": "Rata di un debito",
-      "note": "Nota"
+      "note": "Nota",
+      "subscription": "Abbonamento"
     },
     "kinds": {
       "Expense": "Spesa",
       "Income": "Ricavo",
       "Transfer": "Trasferimento"
-    }
+    },
+    "noSubscription": "Nessun abbonamento"
   },
   "setup": {
     "title": "Configura MySync",
@@ -366,6 +369,57 @@
       "hint": "Le categorie fisse (affitto, bollette…) contano come spese fisse; le altre restano variabili.",
       "none": "Non hai ancora categorie di spesa: nascono registrando le spese.",
       "label": "Fissa"
+    },
+    "subscriptions": {
+      "title": "Abbonamenti",
+      "hint": "Ognuno costa il suo importo nei mesi in cui si paga. Spegnilo per vedere cosa cambia se lo annulli: l'abbonamento vero non cambia.",
+      "keep": "Tieni {{name}} nella proiezione",
+      "amount": "Importo mensile di {{name}}",
+      "endsOn": "fino al {{date}}"
+    }
+  },
+  "subscriptions": {
+    "title": "Abbonamenti",
+    "intro": "Le spese che si ripetono ogni mese finché non le annulli. MySync ti ricorda quando registrarle, non le registra da solo.",
+    "new": "Nuovo abbonamento",
+    "create": "Crea abbonamento",
+    "editTitle": "Modifica abbonamento",
+    "active": "Attivi",
+    "cancelled": "Annullati",
+    "count_one": "{{count}} di {{max}}",
+    "count_other": "{{count}} di {{max}}",
+    "empty": "Nessun abbonamento attivo.",
+    "monthlyTotal": "Totale mensile",
+    "manage": "Gestisci",
+    "limitReached": "Hai raggiunto il numero massimo di abbonamenti attivi.",
+    "dueTitle": "Da registrare",
+    "chargeOn": "addebito del {{date}}",
+    "nextCharge": "prossimo addebito {{date}}",
+    "endsOn": "fino al {{date}}",
+    "register": "Registra",
+    "registerAria": "Registra il pagamento di {{name}}",
+    "skip": "Salta",
+    "skipAria": "Salta l'addebito di {{name}}",
+    "editAria": "Modifica {{name}}",
+    "cancel": "Annulla",
+    "cancelAria": "Annulla {{name}}",
+    "cancelTitle": "Annulla abbonamento",
+    "cancelHint": "Fino a che giorno paghi {{name}}? Dopo quella data non ci saranno più addebiti.",
+    "endsOnInvalid": "La data non può precedere il primo addebito né l'ultimo pagamento registrato.",
+    "resume": "Riattiva",
+    "resumeAria": "Riattiva {{name}}",
+    "deleteAria": "Elimina {{name}}",
+    "deleteTitle": "Elimina abbonamento",
+    "deleteConfirm": "Eliminare {{name}}? Non si può annullare.",
+    "deleteRefused": "{{name}} ha pagamenti registrati: annullalo invece di eliminarlo, così la storia resta.",
+    "firstChargeHint": "Il giorno di questa data è il giorno di ogni addebito.",
+    "fields": {
+      "name": "Nome",
+      "amount": "Importo mensile",
+      "firstChargeOn": "Primo addebito",
+      "account": "Conto",
+      "category": "Categoria",
+      "endsOn": "Data di fine"
     }
   }
 }

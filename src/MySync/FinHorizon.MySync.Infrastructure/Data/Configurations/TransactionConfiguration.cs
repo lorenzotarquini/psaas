@@ -1,6 +1,7 @@
 using FinHorizon.MySync.Domain.Accounts;
 using FinHorizon.MySync.Domain.Categories;
 using FinHorizon.MySync.Domain.Debts;
+using FinHorizon.MySync.Domain.Subscriptions;
 using FinHorizon.MySync.Domain.Transactions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -32,6 +33,8 @@ internal sealed class TransactionConfiguration : IEntityTypeConfiguration<Transa
         builder.Navigation(transaction => transaction.Postings).HasField("_postings").UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.HasOne<Category>().WithMany().HasForeignKey(transaction => transaction.CategoryId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<Debt>().WithMany().HasForeignKey(transaction => transaction.DebtId).OnDelete(DeleteBehavior.Restrict);
+        // UC16-R15: a subscription with linked expenses cannot be deleted.
+        builder.HasOne<Subscription>().WithMany().HasForeignKey(transaction => transaction.SubscriptionId).OnDelete(DeleteBehavior.Restrict);
         // The order of every list (UC4, UC8) and the per-day sums of the trend (UC7).
         builder.HasIndex(transaction => new { transaction.OwnerId, transaction.Date, transaction.RecordedAt });
     }

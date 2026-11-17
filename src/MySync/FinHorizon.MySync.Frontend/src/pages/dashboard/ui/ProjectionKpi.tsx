@@ -13,7 +13,7 @@ export function ProjectionKpi({ scope }: { scope: PortfolioScope }) {
   const data = projection.data
   // The projection counts everything (D15): with a switch off, the label says so.
   const label = t(scope.stable && scope.investments ? 'dashboard.projectionKpi' : 'dashboard.projectionKpiTotal')
-  const result = data ? project({ today: data.today, start: data.start, debts: data.debts, parameters: { ...initialParameters(data), horizonMonths: 12 } }) : undefined
+  const result = data ? project({ today: data.today, start: data.start, debts: data.debts, subscriptions: data.subscriptions, parameters: { ...initialParameters(data), horizonMonths: 12 } }) : undefined
 
   return (
     <Link to="/projection" className="block rounded-box transition hover:opacity-90" aria-label={label}>

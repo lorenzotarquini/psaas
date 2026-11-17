@@ -13,6 +13,8 @@ public sealed class ExpenseKind : IMovementKind
 
     public bool CanPayDebt => true;
 
+    public bool CanPaySubscription => true;
+
     public IReadOnlyList<Posting> Postings(TransactionData data)
     {
         ArgumentNullException.ThrowIfNull(data);
@@ -30,6 +32,8 @@ public sealed class IncomeKind : IMovementKind
     public bool UsesCounterAccount => false;
 
     public bool CanPayDebt => false;
+
+    public bool CanPaySubscription => false;
 
     public IReadOnlyList<Posting> Postings(TransactionData data)
     {
@@ -51,6 +55,8 @@ public sealed class TransferKind : IMovementKind
     public bool UsesCounterAccount => true;
 
     public bool CanPayDebt => false;
+
+    public bool CanPaySubscription => false;
 
     public IReadOnlyList<Posting> Postings(TransactionData data)
     {

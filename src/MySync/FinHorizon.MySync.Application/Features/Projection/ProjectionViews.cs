@@ -10,6 +10,12 @@ public sealed record ProjectionDebtView(Guid Id, string Name, decimal Residual, 
 
 public sealed record ProjectionPaymentView(Guid DebtId, decimal Amount);
 
+/// <summary>UC14-R3, R13: a subscription not ended before today, its amount in the display currency with today's rate.</summary>
+public sealed record ProjectionSubscriptionView(Guid Id, string Name, decimal Amount, DateOnly FirstChargeOn, DateOnly? EndsOn);
+
+/// <summary>The amount of one subscription in the projection and whether it is counted (UC14 step 3).</summary>
+public sealed record ProjectionSubscriptionParameterView(Guid SubscriptionId, decimal Amount, bool Included);
+
 public sealed record ProjectionEventView(int Month, decimal Amount, string Note);
 
 /// <summary>UC14-R3: the parameters proposed from the movements.</summary>
@@ -20,7 +26,8 @@ public sealed record SuggestedParametersView(
     decimal Saving,
     decimal AnnualReturn,
     decimal Inflation,
-    IReadOnlyList<ProjectionPaymentView> Payments);
+    IReadOnlyList<ProjectionPaymentView> Payments,
+    IReadOnlyList<ProjectionSubscriptionParameterView> Subscriptions);
 
 /// <summary>UC14 step 10: what the user saved, the same shape as the body of PUT /api/projection.</summary>
 public sealed record SavedProjectionView(
@@ -33,10 +40,11 @@ public sealed record SavedProjectionView(
     decimal Inflation,
     bool InflationOn,
     IReadOnlyList<ProjectionPaymentView> Payments,
+    IReadOnlyList<ProjectionSubscriptionParameterView> Subscriptions,
     IReadOnlyList<ProjectionEventView> Events,
     decimal? Goal)
 {
-    public static SavedProjectionView From(ProjectionSettings settings, IReadOnlySet<Guid>? activeDebts = null)
+    public static SavedProjectionView From(ProjectionSettings settings, IReadOnlySet<Guid>? activeDebts = null, IReadOnlySet<Guid>? proposedSubscriptions = null)
     {
         ArgumentNullException.ThrowIfNull(settings);
         return new SavedProjectionView(
@@ -53,6 +61,11 @@ public sealed record SavedProjectionView(
                 .Where(payment => activeDebts is null || activeDebts.Contains(payment.DebtId))
                 .Select(payment => new ProjectionPaymentView(payment.DebtId, payment.Amount))
                 .ToList(),
+            // UC14-R11: the same for a subscription that is gone.
+            settings.Subscriptions
+                .Where(item => proposedSubscriptions is null || proposedSubscriptions.Contains(item.SubscriptionId))
+                .Select(item => new ProjectionSubscriptionParameterView(item.SubscriptionId, item.Amount, item.Included))
+                .ToList(),
             settings.Events.Select(item => new ProjectionEventView(item.Month, item.Amount, item.Note)).ToList(),
             settings.Goal);
     }
@@ -66,6 +79,7 @@ public sealed record ProjectionView(
     DateOnly Today,
     ProjectionStartView Start,
     IReadOnlyList<ProjectionDebtView> Debts,
+    IReadOnlyList<ProjectionSubscriptionView> Subscriptions,
     SuggestedParametersView Suggested,
     int MonthsOfData,
     SavedProjectionView? Saved,

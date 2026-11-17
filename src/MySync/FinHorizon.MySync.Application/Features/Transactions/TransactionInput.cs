@@ -28,6 +28,9 @@ public interface ITransactionInput
 
     Guid? DebtId { get; }
 
+    /// <summary>UC16: the subscription an expense pays.</summary>
+    Guid? SubscriptionId { get; }
+
     string? Note { get; }
 }
 
@@ -46,7 +49,8 @@ public static class TransactionInputExtensions
             input.DebtId,
             input.Note,
             input.CounterAccountId,
-            input.CounterAmount is { } counter ? new Money(counter) : null);
+            input.CounterAmount is { } counter ? new Money(counter) : null,
+            input.SubscriptionId);
     }
 }
 

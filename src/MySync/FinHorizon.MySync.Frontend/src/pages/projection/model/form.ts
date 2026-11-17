@@ -21,11 +21,13 @@ export interface ParameterValues {
   inflation: string
   inflationOn: boolean
   payments: Record<string, string>
+  /** UC14-R13: amount and switch of each subscription, by id. */
+  subscriptions: Record<string, { amount: string; included: boolean }>
   events: EventValues[]
   goal: string
 }
 
-/** Field → error code (the backend's codes, RNF5); nested fields as "events.0.month" and "payments.<debtId>". */
+/** Field → error code (the backend's codes, RNF5); nested fields as "events.0.month", "payments.<debtId>" and "subscriptions.<id>". */
 export type ParameterErrors = Record<string, string>
 
 const percentText = (value: number) => String(value).replace('.', ',')
@@ -41,6 +43,9 @@ export function toValues(parameters: ProjectionParameters): ParameterValues {
     inflation: percentText(parameters.inflation),
     inflationOn: parameters.inflationOn,
     payments: Object.fromEntries(parameters.payments.map((payment) => [payment.debtId, amountText(payment.amount)])),
+    subscriptions: Object.fromEntries(
+      (parameters.subscriptions ?? []).map((item) => [item.subscriptionId, { amount: amountText(item.amount), included: item.included }]),
+    ),
     events: parameters.events.map((item) => ({ month: String(item.month), amount: amountText(item.amount), note: item.note })),
     goal: parameters.goal === null ? '' : amountText(parameters.goal),
   }
@@ -74,6 +79,7 @@ export function parse(values: ParameterValues): { parameters: ProjectionParamete
   set('annualReturn', percent(values.annualReturn, limits.minReturn, limits.maxReturn))
   set('inflation', percent(values.inflation, limits.minInflation, limits.maxInflation))
   for (const [debtId, text] of Object.entries(values.payments)) set(`payments.${debtId}`, monthlyAmount(text))
+  for (const [id, item] of Object.entries(values.subscriptions)) set(`subscriptions.${id}`, monthlyAmount(item.amount))
   if (values.goal.trim()) set('goal', !fitsDecimals(values.goal, 2) ? 'InvalidFormat' : parseAmount(values.goal) <= 0 ? 'InvalidValue' : undefined)
   values.events.forEach((item, index) => {
     const month = Number(item.month)
@@ -96,6 +102,7 @@ export function parse(values: ParameterValues): { parameters: ProjectionParamete
       inflation: parseAmount(values.inflation),
       inflationOn: values.inflationOn,
       payments: Object.entries(values.payments).map(([debtId, text]) => ({ debtId, amount: parseAmount(text) })),
+      subscriptions: Object.entries(values.subscriptions).map(([subscriptionId, item]) => ({ subscriptionId, amount: parseAmount(item.amount), included: item.included })),
       events: values.events.map((item) => ({ month: Number(item.month), amount: parseAmount(item.amount), note: item.note.trim() })),
       goal: values.goal.trim() ? parseAmount(values.goal) : null,
     },

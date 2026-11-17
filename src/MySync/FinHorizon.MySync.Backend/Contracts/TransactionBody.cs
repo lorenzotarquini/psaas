@@ -10,4 +10,5 @@ public sealed record TransactionBody(
     Guid? DebtId,
     string? Note,
     Guid? CounterAccountId = null,
-    decimal? CounterAmount = null);
+    decimal? CounterAmount = null,
+    Guid? SubscriptionId = null);

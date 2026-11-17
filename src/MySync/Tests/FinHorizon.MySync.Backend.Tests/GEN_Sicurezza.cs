@@ -31,7 +31,14 @@ public sealed class GEN_Sicurezza(PostgresFixture database) : AcceptanceTest(dat
         { "GET", "/api/projection" },
         { "PUT", "/api/projection" },
         { "DELETE", "/api/projection" },
-        { "PUT", $"/api/categories/{Guid.Empty}/fixed" }
+        { "PUT", $"/api/categories/{Guid.Empty}/fixed" },
+        { "GET", "/api/subscriptions" },
+        { "POST", "/api/subscriptions" },
+        { "PUT", $"/api/subscriptions/{Guid.Empty}" },
+        { "POST", $"/api/subscriptions/{Guid.Empty}/cancel" },
+        { "POST", $"/api/subscriptions/{Guid.Empty}/resume" },
+        { "POST", $"/api/subscriptions/{Guid.Empty}/skip" },
+        { "DELETE", $"/api/subscriptions/{Guid.Empty}" }
     };
 
     [Theory]

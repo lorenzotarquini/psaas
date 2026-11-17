@@ -6,6 +6,13 @@ export interface ProjectionPayment {
   amount: number
 }
 
+/** UC14-R13: the amount of one subscription and whether it stays in the projection ("e se lo annullassi?"). */
+export interface ProjectionSubscriptionParameter {
+  subscriptionId: string
+  amount: number
+  included: boolean
+}
+
 export interface ProjectionEvent {
   /** 1 is the month after today (UC14-R2). */
   month: number
@@ -25,6 +32,7 @@ export interface ProjectionParameters {
   inflation: number
   inflationOn: boolean
   payments: ProjectionPayment[]
+  subscriptions: ProjectionSubscriptionParameter[]
   events: ProjectionEvent[]
   goal: number | null
 }
@@ -42,12 +50,23 @@ export interface ProjectionDebt {
   monthlyPayment: number | null
 }
 
+/** UC14-R3: a subscription not ended before today (UC16); its dates decide the months it is paid in (R13). */
+export interface ProjectionSubscription {
+  id: string
+  name: string
+  /** Today's amount in the display currency. */
+  amount: number
+  firstChargeOn: string
+  endsOn: string | null
+}
+
 // Mirrors ProjectionView in FinHorizon.MySync.Application.
 export interface ProjectionData {
   /** The backend's today (yyyy-MM-dd): month 1 is the calendar month after it. */
   today: string
   start: ProjectionStart
   debts: ProjectionDebt[]
+  subscriptions: ProjectionSubscription[]
   suggested: Omit<ProjectionParameters, 'horizonMonths' | 'inflationOn' | 'events' | 'goal'>
   /** Whole months the suggestions average over, 0 to 6 (UC14-R3). */
   monthsOfData: number
@@ -65,7 +84,10 @@ export const saveProjection = (parameters: ProjectionParameters) => apiPut<Proje
 /** UC14-10b "Riparti dai miei dati". */
 export const resetProjection = () => apiDelete('/api/projection')
 
-/** UC14 step 3 and R11: the saved parameters, or the suggested ones; every active debt gets its saved payment or the suggested one. */
+/**
+ * UC14 step 3 and R11: the saved parameters, or the suggested ones; every active debt gets its saved payment or the suggested one,
+ * every subscription its saved amount and switch or the suggested ones.
+ */
 export function initialParameters(data: ProjectionData): ProjectionParameters {
   const { suggested, saved, debts } = data
   const payment = (debtId: string) =>
@@ -80,6 +102,11 @@ export function initialParameters(data: ProjectionData): ProjectionParameters {
     inflation: saved?.inflation ?? suggested.inflation,
     inflationOn: saved?.inflationOn ?? false,
     payments: debts.map((debt) => ({ debtId: debt.id, amount: payment(debt.id) })),
+    subscriptions: (data.subscriptions ?? []).map((subscription) => {
+      const kept = saved?.subscriptions?.find((item) => item.subscriptionId === subscription.id)
+      const proposed = suggested.subscriptions?.find((item) => item.subscriptionId === subscription.id)
+      return { subscriptionId: subscription.id, amount: kept?.amount ?? proposed?.amount ?? subscription.amount, included: kept?.included ?? true }
+    }),
     events: saved?.events ?? [],
     goal: saved?.goal ?? null,
   }

@@ -8,15 +8,15 @@ MVP (conti, debiti, movimenti, categorie, dashboard, andamento e proiezione del 
 
 ## Stato
 
-Tutti gli use case dell'MVP (UC1–UC8) sono implementati, backend e frontend, con login Keycloak.
+Tutti gli use case (UC1–UC16) sono implementati, backend e frontend, con login Keycloak.
 
 | Suite | Cosa verifica | Test |
 |---|---|---|
-| `FinHorizon.MySync.Domain.Tests` | Regole del dominio: importi, conti e debiti, regole dei movimenti, calcolo del patrimonio e campionamento dei periodi | 45 |
-| `FinHorizon.MySync.Application.Tests` | Casi d'uso su archivi in memoria: validazione, unicità, limiti, isolamento, composizione dei decoratori | 34 |
-| `FinHorizon.MySync.Infrastructure.Tests` | Configurazione: limiti, fuso orario, stringa di connessione | 7 |
-| `FinHorizon.MySync.Backend.Tests` | Scenari Gherkin di UC2–UC8 e GEN sul backend reale e su **un unico Postgres (Testcontainers) per tutta la suite**, con token firmati localmente e un orologio controllabile | 104 |
-| Frontend (Vitest) | UC1, UC6-S5, UC8-S8 sull'app reale con API finta; formattazione, importi, tema | 26 |
+| `FinHorizon.MySync.Domain.Tests` | Regole del dominio: importi, conti e debiti, regole dei movimenti, calcolo del patrimonio e campionamento dei periodi, proiezione, addebiti degli abbonamenti | 145 |
+| `FinHorizon.MySync.Application.Tests` | Casi d'uso su archivi in memoria: validazione, unicità, limiti, isolamento, composizione dei decoratori | 90 |
+| `FinHorizon.MySync.Infrastructure.Tests` | Configurazione: limiti, fuso orario, stringa di connessione | 12 |
+| `FinHorizon.MySync.Backend.Tests` | Scenari Gherkin di UC2–UC16 e GEN sul backend reale e su **un unico Postgres (Testcontainers) per tutta la suite**, con token firmati localmente e un orologio controllabile | 231 |
+| Frontend (Vitest) | Scenari dell'interfaccia (UC1, UC4, UC6, UC8–UC16) sull'app reale con API finta; calcolo della proiezione; formattazione, importi, tema | 112 |
 
 Per i test di integrazione serve Docker.
 
@@ -58,7 +58,7 @@ Feature-Sliced Design (controllato da Steiger): `app` (shell, rotte), `pages` (s
 
 ## Avvio
 
-Con Aspire (`src/FinHorizon.AppHost`): Postgres crea `mysync-db`, poi partono `mysync-backend` e `mysync-frontend` su `http://localhost:5174` (porta fissa per Keycloak). Le migrazioni di `mysync-db` si applicano da sole a ogni avvio del backend, se ce ne sono di nuove. La configurazione (limiti di conti e debiti, fuso orario, valute) sta nei parametri dell'AppHost: vedi [use-cases/API.md](use-cases/API.md#configurazione-del-backend).
+Con Aspire (`src/FinHorizon.AppHost`): Postgres crea `mysync-db`, poi partono `mysync-backend` e `mysync-frontend` su `http://localhost:5174` (porta fissa per Keycloak). Le migrazioni di `mysync-db` si applicano da sole a ogni avvio del backend, se ce ne sono di nuove. La configurazione (limiti di conti, debiti e abbonamenti, fuso orario, valute) sta nei parametri dell'AppHost: vedi [use-cases/API.md](use-cases/API.md#configurazione-del-backend).
 
 ## Keycloak (realm `PSAAS`)
 

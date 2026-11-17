@@ -21,6 +21,7 @@ public sealed class GetProjectionHandler(
     ICurrentUser user,
     PortfolioReader portfolio,
     IDebtRepository debts,
+    ISubscriptionRepository subscriptions,
     IProjectionReader reader,
     IProjectionRepository projections,
     CurrencyConverter converter,
@@ -47,7 +48,12 @@ public sealed class GetProjectionHandler(
             : await reader.FlowsAsync(user.Id, window.From, window.To, cancellationToken).ConfigureAwait(false);
         var debtList = await debts.ListAsync(user.Id, cancellationToken).ConfigureAwait(false);
         var activeViews = current.Debts.Where(view => !view.PaidOff).ToList();
-        var currencies = flows.Select(flow => flow.Currency).Concat(debtList.Select(debt => debt.Currency));
+        // UC14-R3: the subscriptions not ended before today; their end date stops them month by month (R13).
+        var subscriptionList = (await subscriptions.ListAsync(user.Id, cancellationToken).ConfigureAwait(false))
+            .Where(subscription => subscription.IsActiveOn(today))
+            .OrderBy(subscription => subscription.Descriptor.Name, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+        var currencies = flows.Select(flow => flow.Currency).Concat(debtList.Select(debt => debt.Currency)).Concat(subscriptionList.Select(subscription => subscription.Currency));
         var rates = await converter.RatesAsync(current.Currency, currencies, window.IsEmpty ? today : window.From, today, cancellationToken).ConfigureAwait(false);
 
         decimal Total(ProjectionFlowKind kind, Guid? debtId = null, DateOnly? from = null) =>
@@ -67,6 +73,15 @@ public sealed class GetProjectionHandler(
                 given ?? ProjectionWindow.Average(Total(ProjectionFlowKind.Installment, view.Id, window.InstallmentsFrom), window.InstallmentMonths)));
         }
 
+        var subscriptionViews = subscriptionList
+            .Select(subscription => new ProjectionSubscriptionView(
+                subscription.Id,
+                subscription.Descriptor.Name,
+                RateTable.Round(rates.ToDisplay(subscription.Currency, subscription.Amount.Amount, today)),
+                subscription.FirstChargeOn,
+                subscription.EndsOn))
+            .ToList();
+
         var suggested = new SuggestedParametersView(
             ProjectionWindow.Average(Total(ProjectionFlowKind.Income), window.Months),
             ProjectionWindow.Average(Total(ProjectionFlowKind.FixedExpense), window.Months),
@@ -74,7 +89,8 @@ public sealed class GetProjectionHandler(
             Math.Max(0m, ProjectionWindow.Average(Total(ProjectionFlowKind.Saving), window.Months)),
             DefaultAnnualReturn,
             DefaultInflation,
-            payments);
+            payments,
+            subscriptionViews.Select(view => new ProjectionSubscriptionParameterView(view.Id, view.Amount, true)).ToList());
 
         var saved = await projections.GetAsync(user.Id, cancellationToken).ConfigureAwait(false);
         var active = activeViews.Select(view => view.Id).ToHashSet();
@@ -82,9 +98,10 @@ public sealed class GetProjectionHandler(
             today,
             start,
             debtViews,
+            subscriptionViews,
             suggested,
             window.Months,
-            saved is null ? null : SavedProjectionView.From(saved, active),
+            saved is null ? null : SavedProjectionView.From(saved, active, subscriptionViews.Select(view => view.Id).ToHashSet()),
             current.Currency));
     }
 

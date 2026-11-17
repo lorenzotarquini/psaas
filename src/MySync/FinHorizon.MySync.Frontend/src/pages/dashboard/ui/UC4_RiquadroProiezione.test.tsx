@@ -13,7 +13,7 @@ describe('UC4_ConsultareDashboard', () => {
   it('S6_RiquadroProiezione', async () => {
     const api = new FakeApi()
     api.givenAccount('Conto Intesa', 1000)
-    api.projection.suggested = { income: 2000, fixedExpenses: 700, variableExpenses: 600, saving: 0, annualReturn: 0, inflation: 2, payments: [] }
+    api.projection.suggested = { income: 2000, fixedExpenses: 700, variableExpenses: 600, saving: 0, annualReturn: 0, inflation: 2, payments: [], subscriptions: [] }
     const { router } = renderApp('/', api)
     const user = userEvent.setup()
 

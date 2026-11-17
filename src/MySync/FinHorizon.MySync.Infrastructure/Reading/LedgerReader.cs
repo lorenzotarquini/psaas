@@ -49,6 +49,13 @@ internal sealed class LedgerReader(MySyncDbContext db) : ILedgerReader
         return new Money(paid);
     }
 
+    public async Task<IReadOnlyList<SubscriptionPayment>> SubscriptionPaymentsAsync(OwnerId owner, Guid? subscriptionId = null, CancellationToken cancellationToken = default) =>
+        await db.Transactions.AsNoTracking()
+            .Where(transaction => transaction.OwnerId == owner && transaction.SubscriptionId != null
+                && (subscriptionId == null || transaction.SubscriptionId == subscriptionId))
+            .Select(transaction => new SubscriptionPayment(transaction.SubscriptionId!.Value, transaction.Date))
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+
     public async Task<LedgerHistory> HistoryAsync(OwnerId owner, PortfolioScope scope, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(scope);

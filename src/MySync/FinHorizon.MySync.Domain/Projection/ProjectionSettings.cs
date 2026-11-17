@@ -44,6 +44,28 @@ public sealed class ProjectionPayment
     public decimal Amount { get; private set; }
 }
 
+/// <summary>UC14-R13: the amount the user expects for one subscription (UC16), and whether it stays in the projection.</summary>
+public sealed class ProjectionSubscription
+{
+    public ProjectionSubscription(Guid subscriptionId, decimal amount, bool included)
+    {
+        SubscriptionId = subscriptionId;
+        Amount = amount;
+        Included = included;
+    }
+
+    /// <summary>For materialization by the persistence layer only.</summary>
+    private ProjectionSubscription()
+    {
+    }
+
+    public Guid SubscriptionId { get; private set; }
+
+    public decimal Amount { get; private set; }
+
+    public bool Included { get; private set; }
+}
+
 /// <summary>Everything the user sets in the projection (UC14), amounts in the display currency and percentages as numbers (2 = 2%).</summary>
 public sealed record ProjectionParameters(
     int HorizonMonths,
@@ -55,6 +77,7 @@ public sealed record ProjectionParameters(
     decimal Inflation,
     bool InflationOn,
     IReadOnlyList<ProjectionPayment> Payments,
+    IReadOnlyList<ProjectionSubscription> Subscriptions,
     IReadOnlyList<ProjectionEvent> Events,
     decimal? Goal);
 
@@ -71,6 +94,7 @@ public sealed class ProjectionSettings : Entity
     public const decimal MaxInflation = 20m;
 
     private readonly List<ProjectionPayment> _payments = [];
+    private readonly List<ProjectionSubscription> _subscriptions = [];
     private readonly List<ProjectionEvent> _events = [];
 
     private ProjectionSettings(Guid id, OwnerId ownerId)
@@ -103,6 +127,8 @@ public sealed class ProjectionSettings : Entity
 
     public IReadOnlyList<ProjectionPayment> Payments => _payments;
 
+    public IReadOnlyList<ProjectionSubscription> Subscriptions => _subscriptions;
+
     public IReadOnlyList<ProjectionEvent> Events => _events;
 
     public static ProjectionSettings Save(OwnerId ownerId, ProjectionParameters parameters)
@@ -126,12 +152,14 @@ public sealed class ProjectionSettings : Entity
         Goal = parameters.Goal;
         _payments.Clear();
         _payments.AddRange(parameters.Payments.Select(payment => new ProjectionPayment(payment.DebtId, payment.Amount)));
+        _subscriptions.Clear();
+        _subscriptions.AddRange(parameters.Subscriptions.Select(item => new ProjectionSubscription(item.SubscriptionId, item.Amount, item.Included)));
         _events.Clear();
         _events.AddRange(parameters.Events.Select(item => new ProjectionEvent(item.Month, item.Amount, item.Note.Trim())));
     }
 
     public ProjectionParameters ToParameters() => new(
-        HorizonMonths, Income, FixedExpenses, VariableExpenses, Saving, AnnualReturn, Inflation, InflationOn, Payments, Events, Goal);
+        HorizonMonths, Income, FixedExpenses, VariableExpenses, Saving, AnnualReturn, Inflation, InflationOn, Payments, Subscriptions, Events, Goal);
 
     /// <summary>UC14-R9.</summary>
     public static bool IsValidHorizon(int months) => months is >= MinHorizonMonths and <= MaxHorizonMonths;
@@ -148,7 +176,8 @@ public sealed class ProjectionSettings : Entity
         }
 
         var amounts = new[] { parameters.Income, parameters.FixedExpenses, parameters.VariableExpenses, parameters.Saving }
-            .Concat(parameters.Payments.Select(payment => payment.Amount));
+            .Concat(parameters.Payments.Select(payment => payment.Amount))
+            .Concat(parameters.Subscriptions.Select(item => item.Amount));
         if (!amounts.All(IsValidMonthlyAmount))
         {
             throw new ArgumentException("Monthly amounts must be non-negative amounts in cents.", nameof(parameters));
@@ -182,6 +211,11 @@ public sealed class ProjectionSettings : Entity
         if (parameters.Payments.Select(payment => payment.DebtId).Distinct().Count() != parameters.Payments.Count)
         {
             throw new ArgumentException("A debt has more than one payment.", nameof(parameters));
+        }
+
+        if (parameters.Subscriptions.Select(item => item.SubscriptionId).Distinct().Count() != parameters.Subscriptions.Count)
+        {
+            throw new ArgumentException("A subscription appears more than once.", nameof(parameters));
         }
     }
 }

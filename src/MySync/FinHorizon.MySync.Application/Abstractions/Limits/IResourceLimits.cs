@@ -2,8 +2,8 @@ using FinHorizon.MySync.Domain.Common;
 
 namespace FinHorizon.MySync.Application.Abstractions.Limits;
 
-/// <summary>How many accounts and debts a user may have (RF2, RF4).</summary>
-public sealed record UserLimits(int MaxAccounts, int MaxDebts);
+/// <summary>How many accounts, debts and open subscriptions a user may have (RF2, RF4, RF23).</summary>
+public sealed record UserLimits(int MaxAccounts, int MaxDebts, int MaxSubscriptions = LimitsOptions.DefaultMaxSubscriptions);
 
 /// <summary>
 /// Source of the limits. Today they come from configuration; a later phase can read them from the user's plan

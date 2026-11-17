@@ -5,6 +5,7 @@ import { PortfolioPage } from '@/pages/portfolio'
 import { ProjectionPage } from '@/pages/projection'
 import { SettingsPage } from '@/pages/settings'
 import { SetupPage } from '@/pages/setup'
+import { SubscriptionsPage } from '@/pages/subscriptions'
 import { TransactionsPage } from '@/pages/transactions'
 import { AppLayout } from '../layout/AppLayout'
 
@@ -16,6 +17,7 @@ export const routes = [
       { path: 'setup', Component: SetupPage },
       { path: 'transactions', Component: TransactionsPage },
       { path: 'portfolio', Component: PortfolioPage },
+      { path: 'subscriptions', Component: SubscriptionsPage },
       { path: 'net-worth', Component: NetWorthPage },
       { path: 'projection', Component: ProjectionPage },
       { path: 'settings', Component: SettingsPage },

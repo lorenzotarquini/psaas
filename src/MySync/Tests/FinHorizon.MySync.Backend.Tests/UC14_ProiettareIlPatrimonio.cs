@@ -111,6 +111,8 @@ public sealed class UC14_ProiettareIlPatrimonio(PostgresFixture database) : Acce
         { "events", new[] { new { month = 1, amount = 0m, note = "x" } }, "events[0].amount", "InvalidValue" },
         { "events", new[] { new { month = 1, amount = 10m, note = "" } }, "events[0].note", "Required" },
         { "goal", 0m, "goal", "InvalidValue" },
+        { "subscriptions", new[] { new { subscriptionId = Guid.NewGuid(), amount = -1m, included = true } }, "subscriptions[0].amount", "InvalidValue" },
+        { "subscriptions", new[] { new { subscriptionId = Guid.NewGuid(), amount = 1m, included = true } }, "subscriptions[0].subscriptionId", "InvalidValue" },
     };
 
     [Theory, Trait("Scenario", "UC14-S10")]
@@ -182,6 +184,66 @@ public sealed class UC14_ProiettareIlPatrimonio(PostgresFixture database) : Acce
 
         Assert.Equal("InvalidValue", errors["payments[0].debtId"]);
     }
+
+    [Fact, Trait("Scenario", "UC14-S13")]
+    public async Task S13_AbbonamentiProposti()
+    {
+        await RestartWithAsync(RoomForAll);
+        TodayIs(new DateOnly(2026, 1, 10));
+        var intesa = await GivenAccountAsync("Conto Intesa", 10_000m);
+        var affitto = await GivenCategoryAsync("Affitto");
+        await Mario.PutAsJsonAsync($"/api/categories/{affitto.Id}/fixed", new { @fixed = true });
+        var abbonamenti = await GivenCategoryAsync("Abbonamenti");
+        await Mario.PutAsJsonAsync($"/api/categories/{abbonamenti.Id}/fixed", new { @fixed = true });
+        var spesa = await GivenCategoryAsync("Spesa alimentare");
+        var svago = await GivenCategoryAsync("Svago");
+        var netflix = await SubscriptionAsync(new { name = "Netflix", accountId = intesa.Id, categoryId = abbonamenti.Id, amount = 20m, firstChargeOn = new DateOnly(2026, 5, 5) });
+        var palestra = await SubscriptionAsync(new { name = "Palestra", accountId = intesa.Id, categoryId = abbonamenti.Id, amount = 45m, firstChargeOn = new DateOnly(2026, 5, 3) });
+        TodayIs(ScenarioToday);
+        for (var month = 5; month <= 10; month++)
+        {
+            var day = new DateOnly(2026, month, 10);
+            await GivenExpenseAsync(700m, intesa, affitto, date: day);
+            await GivenExpenseAsync(400m, intesa, spesa, date: day);
+            await GivenExpenseAsync(200m, intesa, svago, date: day);
+            await ReadAsync<object>(
+                await RecordAsync(new { kind = "Expense", date = new DateOnly(2026, month, 5), amount = 20m, accountId = intesa.Id, categoryId = abbonamenti.Id, subscriptionId = netflix }),
+                HttpStatusCode.Created);
+        }
+
+        await ReadAsync<object>(await Mario.PostAsJsonAsync($"/api/subscriptions/{palestra}/cancel", new { endsOn = new DateOnly(2026, 10, 31) }), HttpStatusCode.OK);
+        var cloud = await SubscriptionAsync(new { name = "Cloud", accountId = intesa.Id, categoryId = abbonamenti.Id, amount = 3m, firstChargeOn = new DateOnly(2026, 12, 1) });
+
+        var projection = await ProjectionAsync();
+
+        Assert.Equal((700m, 600m), (projection.Suggested.FixedExpenses, projection.Suggested.VariableExpenses));
+        Assert.Equal(
+            [new ProjectionSubscriptionParameterView(cloud, 3m, true), new ProjectionSubscriptionParameterView(netflix, 20m, true)],
+            projection.Suggested.Subscriptions);
+        Assert.Equal(
+            [new ProjectionSubscriptionView(cloud, "Cloud", 3m, new DateOnly(2026, 12, 1), null), new ProjectionSubscriptionView(netflix, "Netflix", 20m, new DateOnly(2026, 5, 5), null)],
+            projection.Subscriptions);
+    }
+
+    [Fact]
+    public async Task AbbonamentiSalvatiEAbbonamentiNuovi()
+    {
+        var intesa = await GivenAccountAsync("Conto Intesa", 3000m);
+        var abbonamenti = await GivenCategoryAsync("Abbonamenti");
+        var netflix = await SubscriptionAsync(new { name = "Netflix", accountId = intesa.Id, categoryId = abbonamenti.Id, amount = 20m, firstChargeOn = ScenarioToday });
+        var body = ValidBody();
+        body["subscriptions"] = new[] { new { subscriptionId = netflix, amount = 22m, included = false } };
+        await ReadAsync<SavedProjectionView>(await Mario.PutAsJsonAsync("/api/projection", body), HttpStatusCode.OK);
+
+        var spotify = await SubscriptionAsync(new { name = "Spotify", accountId = intesa.Id, categoryId = abbonamenti.Id, amount = 11m, firstChargeOn = ScenarioToday });
+        var projection = await ProjectionAsync();
+
+        Assert.Equal(new ProjectionSubscriptionParameterView(netflix, 22m, false), Assert.Single(projection.Saved!.Subscriptions));
+        Assert.Contains(new ProjectionSubscriptionParameterView(spotify, 11m, true), projection.Suggested.Subscriptions);
+    }
+
+    private async Task<Guid> SubscriptionAsync(object body) =>
+        (await ReadAsync<Application.Features.Subscriptions.SubscriptionView>(await Mario.PostAsJsonAsync("/api/subscriptions", body), HttpStatusCode.Created)).Id;
 
     private async Task TransferAsync(decimal amount, AccountView from, AccountView to, DateOnly date) =>
         await ReadAsync<object>(

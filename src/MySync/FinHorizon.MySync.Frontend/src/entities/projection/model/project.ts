@@ -1,4 +1,4 @@
-import type { ProjectionDebt, ProjectionParameters, ProjectionStart } from '../api/projection'
+import type { ProjectionDebt, ProjectionParameters, ProjectionStart, ProjectionSubscription } from '../api/projection'
 
 export interface ProjectionPoint {
   /** 0 is today. */
@@ -39,6 +39,8 @@ export interface ProjectionInput {
   today: string
   start: ProjectionStart
   debts: ProjectionDebt[]
+  /** UC16: their dates; amounts and switches are in `parameters`. */
+  subscriptions?: ProjectionSubscription[]
   parameters: ProjectionParameters
 }
 
@@ -50,11 +52,24 @@ export function monthAfter(today: string, offset: number): string {
 }
 
 /**
+ * UC14-R13: whether a subscription is paid in the calendar month `month` (yyyy-MM): its charge of that month, on the day of the
+ * first charge or the last of the month (UC16-R6), falls between the first charge and the end.
+ */
+export function chargedIn(subscription: Pick<ProjectionSubscription, 'firstChargeOn' | 'endsOn'>, month: string): boolean {
+  const [year, monthNumber] = month.split('-').map(Number)
+  const lastDay = new Date(Date.UTC(year, monthNumber, 0)).getUTCDate()
+  const day = Math.min(Number(subscription.firstChargeOn.slice(8, 10)), lastDay)
+  const charge = `${month}-${String(day).padStart(2, '0')}`
+  return charge >= subscription.firstChargeOn && (subscription.endsOn === null || charge <= subscription.endsOn)
+}
+
+/**
  * UC14-R4..R8: the projection month by month. Nothing is rounded here (R6): values are rounded to cents only when shown.
  * With the inflation switch on, every value of month m is shown divided by (1 + inflation)^(m/12); the computation does not change (R8).
  */
-export function project({ today, start, debts, parameters }: ProjectionInput): ProjectionResult {
+export function project({ today, start, debts, subscriptions = [], parameters }: ProjectionInput): ProjectionResult {
   const { horizonMonths, income, fixedExpenses, variableExpenses, saving, annualReturn, inflation, inflationOn, payments, events, goal } = parameters
+  const subscriptionParameters = parameters.subscriptions ?? []
   const monthlyReturn = annualReturn / 100 / 12
   const residuals = new Map(debts.map((debt) => [debt.id, debt.residual]))
   const paymentOf = (debtId: string) => payments.find((payment) => payment.debtId === debtId)?.amount ?? 0
@@ -81,7 +96,15 @@ export function project({ today, start, debts, parameters }: ProjectionInput): P
       if (residual - payment <= 0 && payment > 0) payoffMonth.set(debt.id, month)
     }
     const oneOff = events.filter((item) => item.month === month).reduce((sum, item) => sum + item.amount, 0)
-    liquidity = liquidity + income - fixedExpenses - variableExpenses - paid - saving + oneOff
+    // R13: an included subscription costs its amount in the months it is charged.
+    const calendarMonth = monthAfter(today, month)
+    const charged = subscriptionParameters
+      .filter((item) => item.included)
+      .reduce((sum, item) => {
+        const subscription = subscriptions.find((candidate) => candidate.id === item.subscriptionId)
+        return subscription && chargedIn(subscription, calendarMonth) ? sum + item.amount : sum
+      }, 0)
+    liquidity = liquidity + income - fixedExpenses - variableExpenses - paid - charged - saving + oneOff
     raw.push(point(month))
   }
 

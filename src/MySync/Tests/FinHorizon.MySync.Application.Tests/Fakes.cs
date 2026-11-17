@@ -11,6 +11,7 @@ using FinHorizon.MySync.Domain.Currencies;
 using FinHorizon.MySync.Domain.Debts;
 using FinHorizon.MySync.Domain.NetWorth;
 using FinHorizon.MySync.Domain.Preferences;
+using FinHorizon.MySync.Domain.Subscriptions;
 using FinHorizon.MySync.Domain.Transactions;
 
 namespace FinHorizon.MySync.Application.Tests;
@@ -28,6 +29,8 @@ internal sealed class FakeStore : IUnitOfWork, ICurrentUser, ICalendar, IResourc
     public List<Category> Categories { get; } = [];
 
     public List<Transaction> Transactions { get; } = [];
+
+    public List<Subscription> Subscriptions { get; } = [];
 
     public OwnerId Id { get; set; } = Mario;
 
@@ -107,6 +110,20 @@ internal sealed class FakeCategories(FakeStore store) : FakeRepository<Category>
             .ToList());
 }
 
+internal sealed class FakeSubscriptions(FakeStore store) : FakeRepository<Subscription>(store.Subscriptions), ISubscriptionRepository
+{
+    public Task<IReadOnlyList<Subscription>> ListAsync(OwnerId owner, CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyList<Subscription>>(Of(owner).ToList());
+
+    public Task<int> CountOpenAsync(OwnerId owner, CancellationToken cancellationToken = default) =>
+        Task.FromResult(Of(owner).Count(subscription => !subscription.IsCancelled));
+
+    public Task<bool> NameExistsAsync(OwnerId owner, string normalizedName, Guid? exceptId = null, CancellationToken cancellationToken = default) =>
+        Task.FromResult(Of(owner).Any(subscription => subscription.NormalizedName == normalizedName && subscription.Id != exceptId));
+
+    public void Remove(Subscription subscription) => Items.Remove(subscription);
+}
+
 internal sealed class FakeTransactions(FakeStore store) : FakeRepository<Transaction>(store.Transactions), ITransactionRepository
 {
     public void Remove(Transaction transaction) => Items.Remove(transaction);
@@ -134,6 +151,12 @@ internal sealed class FakeLedger(FakeStore store) : ILedgerReader, ITransactionR
         Task.FromResult(Money.Sum(Of(owner)
             .Where(transaction => transaction.DebtId == debtId && transaction.Id != exceptTransactionId)
             .Select(transaction => transaction.Amount)));
+
+    public Task<IReadOnlyList<SubscriptionPayment>> SubscriptionPaymentsAsync(OwnerId owner, Guid? subscriptionId = null, CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyList<SubscriptionPayment>>(Of(owner)
+            .Where(transaction => transaction.SubscriptionId is not null && (subscriptionId is null || transaction.SubscriptionId == subscriptionId))
+            .Select(transaction => new SubscriptionPayment(transaction.SubscriptionId!.Value, transaction.Date))
+            .ToList());
 
     public Task<LedgerHistory> HistoryAsync(OwnerId owner, PortfolioScope scope, CancellationToken cancellationToken = default)
     {
@@ -188,7 +211,9 @@ internal sealed class FakeLedger(FakeStore store) : ILedgerReader, ITransactionR
         store.Accounts.SingleOrDefault(a => a.Id == t.CounterAccountId)?.Descriptor.Name,
         CurrencyOf(t.AccountId),
         t.CounterAmount?.Amount,
-        store.Accounts.SingleOrDefault(a => a.Id == t.CounterAccountId)?.Currency);
+        store.Accounts.SingleOrDefault(a => a.Id == t.CounterAccountId)?.Currency,
+        t.SubscriptionId,
+        store.Subscriptions.SingleOrDefault(s => s.Id == t.SubscriptionId)?.Descriptor.Name);
 }
 
 /// <summary>Stored preferences, one per user.</summary>

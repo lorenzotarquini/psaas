@@ -21,6 +21,7 @@ internal sealed class TransactionReader(MySyncDbContext db) : ITransactionReader
         LEFT JOIN "Categories" c ON c."Id" = t."CategoryId"
         LEFT JOIN "Accounts" ca ON ca."Id" = t."CounterAccountId"
         LEFT JOIN "Debts" d ON d."Id" = t."DebtId"
+        LEFT JOIN "Subscriptions" s ON s."Id" = t."SubscriptionId"
         WHERE t."OwnerId" = @owner
           AND (@id IS NULL OR t."Id" = @id)
           AND (@from IS NULL OR t."Date" >= @from)
@@ -29,13 +30,15 @@ internal sealed class TransactionReader(MySyncDbContext db) : ITransactionReader
           AND (@account IS NULL OR t."AccountId" = @account OR t."CounterAccountId" = @account)
           AND (@category IS NULL OR t."CategoryId" = @category)
           AND (@debt IS NULL OR t."DebtId" = @debt)
+          AND (@subscription IS NULL OR t."SubscriptionId" = @subscription)
         """;
 
     private const string Columns = """
         SELECT t."Id", t."Kind", t."Date", t."Amount", t."AccountId", a."Name" AS "AccountName",
                t."CategoryId", c."Name" AS "CategoryName", t."DebtId", d."Name" AS "DebtName", t."Note", t."RecordedAt",
                t."CounterAccountId", ca."Name" AS "CounterAccountName",
-               a."Currency", t."CounterAmount", ca."Currency" AS "CounterCurrency"
+               a."Currency", t."CounterAmount", ca."Currency" AS "CounterCurrency",
+               t."SubscriptionId", s."Name" AS "SubscriptionName"
         """;
 
     public async Task<TransactionView?> GetAsync(OwnerId owner, Guid id, CancellationToken cancellationToken = default)
@@ -85,7 +88,8 @@ internal sealed class TransactionReader(MySyncDbContext db) : ITransactionReader
         Typed("kind", NpgsqlDbType.Varchar, filter.Kind?.ToString()),
         Typed("account", NpgsqlDbType.Uuid, filter.AccountId),
         Typed("category", NpgsqlDbType.Uuid, filter.CategoryId),
-        Typed("debt", NpgsqlDbType.Uuid, filter.DebtId)
+        Typed("debt", NpgsqlDbType.Uuid, filter.DebtId),
+        Typed("subscription", NpgsqlDbType.Uuid, filter.SubscriptionId)
     ];
 
     private static NpgsqlParameter Typed(string name, NpgsqlDbType type, object? value) =>
@@ -108,7 +112,9 @@ internal sealed class TransactionReader(MySyncDbContext db) : ITransactionReader
         row.CounterAccountName,
         row.Currency,
         row.CounterAmount is { } counter ? new Money(counter).Amount : null,
-        row.CounterCurrency);
+        row.CounterCurrency,
+        row.SubscriptionId,
+        row.SubscriptionName);
 
     private sealed class Row
     {
@@ -145,6 +151,10 @@ internal sealed class TransactionReader(MySyncDbContext db) : ITransactionReader
         public decimal? CounterAmount { get; init; }
 
         public string? CounterCurrency { get; init; }
+
+        public Guid? SubscriptionId { get; init; }
+
+        public string? SubscriptionName { get; init; }
     }
 
     private sealed class Totals

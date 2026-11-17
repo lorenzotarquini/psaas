@@ -31,6 +31,9 @@ export interface Transaction {
   /** What reached the destination of a transfer between two currencies, in `counterCurrency`. */
   counterAmount: number | null
   counterCurrency: string | null
+  /** UC16: the subscription an expense pays. */
+  subscriptionId?: string | null
+  subscriptionName?: string | null
 }
 
 export interface TransactionPage {
@@ -54,6 +57,8 @@ export interface TransactionInput {
   counterAmount?: number | null
   categoryId?: string | null
   debtId?: string | null
+  /** UC16-R10: only on an expense that is not an installment. */
+  subscriptionId?: string | null
   note?: string
 }
 
@@ -64,6 +69,7 @@ export interface TransactionFilter {
   accountId?: string
   categoryId?: string
   debtId?: string
+  subscriptionId?: string
   page?: number
   pageSize?: number
 }

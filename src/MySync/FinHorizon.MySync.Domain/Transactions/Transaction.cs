@@ -43,6 +43,9 @@ public sealed class Transaction : Entity
 
     public Guid? DebtId { get; private set; }
 
+    /// <summary>UC16: the subscription an expense pays; never together with <see cref="DebtId"/>.</summary>
+    public Guid? SubscriptionId { get; private set; }
+
     public string? Note { get; private set; }
 
     /// <summary>When it was entered: orders movements of the same day and survives amendments (UC8-R1).</summary>
@@ -77,6 +80,7 @@ public sealed class Transaction : Entity
         }
 
         if ((data.DebtId is not null && !kind.CanPayDebt)
+            || (data.SubscriptionId is not null && (!kind.CanPaySubscription || data.DebtId is not null))
             || (data.CategoryId is not null) != kind.UsesCategory
             || (data.CounterAccountId is not null) != kind.UsesCounterAccount
             || data.CounterAccountId == data.AccountId)
@@ -92,6 +96,7 @@ public sealed class Transaction : Entity
         CounterAmount = data.CounterAmount;
         CategoryId = data.CategoryId;
         DebtId = data.DebtId;
+        SubscriptionId = data.SubscriptionId;
         Note = TextNormalizer.Clean(data.Note);
         _postings.Clear();
         _postings.AddRange(kind.Postings(data));

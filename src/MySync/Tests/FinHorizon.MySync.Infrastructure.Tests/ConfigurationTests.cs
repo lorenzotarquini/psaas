@@ -19,22 +19,24 @@ public sealed class ConfigurationTests
 
         var limits = provider.GetRequiredService<IOptions<LimitsOptions>>().Value;
 
-        Assert.Equal((2, 1), (limits.MaxAccounts, limits.MaxDebts));
+        Assert.Equal((2, 1, 10), (limits.MaxAccounts, limits.MaxDebts, limits.MaxSubscriptions));
     }
 
     [Fact]
     public void Limits_ComeFromTheMySyncSection()
     {
-        using var provider = Provider(new() { ["MySync:MaxAccounts"] = "7", ["MySync:MaxDebts"] = "0" });
+        using var provider = Provider(new() { ["MySync:MaxAccounts"] = "7", ["MySync:MaxDebts"] = "0", ["MySync:MaxSubscriptions"] = "0" });
 
         var limits = provider.GetRequiredService<IOptions<LimitsOptions>>().Value;
 
-        Assert.Equal((7, 0), (limits.MaxAccounts, limits.MaxDebts));
+        Assert.Equal((7, 0, 0), (limits.MaxAccounts, limits.MaxDebts, limits.MaxSubscriptions));
     }
 
     [Theory]
     [InlineData("MySync:MaxAccounts", "0")]
     [InlineData("MySync:MaxDebts", "-1")]
+    [InlineData("MySync:MaxSubscriptions", "-1")]
+    [InlineData("MySync:MaxSubscriptions", "1001")]
     public void Limits_OutOfRangeAreRefused(string key, string value)
     {
         using var provider = Provider(new() { [key] = value });

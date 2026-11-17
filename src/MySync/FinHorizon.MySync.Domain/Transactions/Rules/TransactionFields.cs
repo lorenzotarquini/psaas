@@ -11,5 +11,6 @@ public static class TransactionFields
     public const string CounterAmount = "counterAmount";
     public const string CategoryId = "categoryId";
     public const string DebtId = "debtId";
+    public const string SubscriptionId = "subscriptionId";
     public const string Note = "note";
 }

@@ -20,8 +20,9 @@ public sealed class ProjectionTests
         decimal inflation = 2m,
         IReadOnlyList<ProjectionEvent>? events = null,
         IReadOnlyList<ProjectionPayment>? payments = null,
-        decimal? goal = null) =>
-        new(horizon, income, 700m, 600m, 300m, annualReturn, inflation, false, payments ?? [], events ?? [], goal);
+        decimal? goal = null,
+        IReadOnlyList<ProjectionSubscription>? subscriptions = null) =>
+        new(horizon, income, 700m, 600m, 300m, annualReturn, inflation, false, payments ?? [], subscriptions ?? [], events ?? [], goal);
 
     [Theory]
     [InlineData("2026-01-10", 6, "2026-05-01", "2026-08-01", 3)]
@@ -132,5 +133,30 @@ public sealed class ProjectionTests
 
         debt.Update(DebtKind.Loan, new Descriptor("Auto", null, null), debt.AccountId, "EUR", Euro(4000m), Money.Zero);
         Assert.Null(debt.MonthlyPayment);
+    }
+
+    [Fact]
+    public void Settings_KeepTheSubscriptions()
+    {
+        var netflix = Guid.NewGuid();
+        var settings = ProjectionSettings.Save(Mario, Parameters(subscriptions: [new ProjectionSubscription(netflix, 17.99m, false)]));
+
+        var saved = Assert.Single(settings.ToParameters().Subscriptions);
+        Assert.Equal((netflix, 17.99m, false), (saved.SubscriptionId, saved.Amount, saved.Included));
+    }
+
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(10.001)]
+    public void Settings_RefuseAWrongSubscriptionAmount(decimal amount) =>
+        Assert.ThrowsAny<ArgumentException>(() => ProjectionSettings.Save(Mario, Parameters(subscriptions: [new ProjectionSubscription(Guid.NewGuid(), amount, true)])));
+
+    [Fact]
+    public void Settings_RefuseTheSameSubscriptionTwice()
+    {
+        var netflix = Guid.NewGuid();
+
+        Assert.ThrowsAny<ArgumentException>(() => ProjectionSettings.Save(Mario, Parameters(subscriptions:
+            [new ProjectionSubscription(netflix, 10m, true), new ProjectionSubscription(netflix, 12m, true)])));
     }
 }

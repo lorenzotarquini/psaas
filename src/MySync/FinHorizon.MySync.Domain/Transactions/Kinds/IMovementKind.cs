@@ -17,6 +17,9 @@ public interface IMovementKind
     /// <summary>Only an expense can be the installment of a debt (D5).</summary>
     bool CanPayDebt { get; }
 
+    /// <summary>Only an expense can pay a subscription (UC16-R10).</summary>
+    bool CanPaySubscription { get; }
+
     /// <summary>How the movement changes the balances of the accounts it touches.</summary>
     IReadOnlyList<Posting> Postings(TransactionData data);
 }

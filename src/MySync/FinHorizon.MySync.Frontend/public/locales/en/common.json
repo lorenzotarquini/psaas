@@ -11,7 +11,8 @@
     "settings": "Settings",
     "expand": "Expand the menu",
     "collapse": "Collapse the menu",
-    "projection": "Projection"
+    "projection": "Projection",
+    "subscriptions": "Subscriptions"
   },
   "actions": {
     "title": "Actions",
@@ -163,13 +164,15 @@
       "account": "Account",
       "category": "Category",
       "debt": "Debt installment",
-      "note": "Note"
+      "note": "Note",
+      "subscription": "Subscription"
     },
     "kinds": {
       "Expense": "Expense",
       "Income": "Income",
       "Transfer": "Transfer"
-    }
+    },
+    "noSubscription": "No subscription"
   },
   "setup": {
     "title": "Set up MySync",
@@ -366,6 +369,57 @@
       "hint": "Fixed categories (rent, bills…) count as fixed expenses; the others stay variable.",
       "none": "You have no expense categories yet: they appear as you record expenses.",
       "label": "Fixed"
+    },
+    "subscriptions": {
+      "title": "Subscriptions",
+      "hint": "Each one costs its amount in the months it is charged. Switch it off to see what changes if you cancel it: the real subscription does not change.",
+      "keep": "Keep {{name}} in the projection",
+      "amount": "Monthly amount of {{name}}",
+      "endsOn": "until {{date}}"
+    }
+  },
+  "subscriptions": {
+    "title": "Subscriptions",
+    "intro": "Expenses that repeat every month until you cancel them. MySync reminds you to register them; it never records them on its own.",
+    "new": "New subscription",
+    "create": "Create subscription",
+    "editTitle": "Edit subscription",
+    "active": "Active",
+    "cancelled": "Cancelled",
+    "count_one": "{{count}} of {{max}}",
+    "count_other": "{{count}} of {{max}}",
+    "empty": "No active subscription.",
+    "monthlyTotal": "Monthly total",
+    "manage": "Manage",
+    "limitReached": "You have reached the maximum number of active subscriptions.",
+    "dueTitle": "To register",
+    "chargeOn": "charge of {{date}}",
+    "nextCharge": "next charge {{date}}",
+    "endsOn": "until {{date}}",
+    "register": "Register",
+    "registerAria": "Register the payment of {{name}}",
+    "skip": "Skip",
+    "skipAria": "Skip the charge of {{name}}",
+    "editAria": "Edit {{name}}",
+    "cancel": "Cancel",
+    "cancelAria": "Cancel {{name}}",
+    "cancelTitle": "Cancel subscription",
+    "cancelHint": "Until which day do you pay {{name}}? There will be no charges after that date.",
+    "endsOnInvalid": "The date cannot precede the first charge or the last registered payment.",
+    "resume": "Resume",
+    "resumeAria": "Resume {{name}}",
+    "deleteAria": "Delete {{name}}",
+    "deleteTitle": "Delete subscription",
+    "deleteConfirm": "Delete {{name}}? This cannot be undone.",
+    "deleteRefused": "{{name}} has registered payments: cancel it instead of deleting it, so the history stays.",
+    "firstChargeHint": "The day of this date is the day of every charge.",
+    "fields": {
+      "name": "Name",
+      "amount": "Monthly amount",
+      "firstChargeOn": "First charge",
+      "account": "Account",
+      "category": "Category",
+      "endsOn": "End date"
     }
   }
 }

@@ -267,6 +267,81 @@ namespace FinHorizon.MySync.Infrastructure.Data.Migrations
                     b.ToTable("ProjectionSettings", (string)null);
                 });
 
+            modelBuilder.Entity("FinHorizon.MySync.Domain.Subscriptions.Subscription", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(28, 8)
+                        .HasColumnType("numeric(28,8)");
+
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly>("CreatedOn")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<DateOnly?>("EndsOn")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly>("FirstChargeOn")
+                        .HasColumnType("date");
+
+                    b.Property<string>("NormalizedName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateOnly?>("SkippedChargeOn")
+                        .HasColumnType("date");
+
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Descriptor", "FinHorizon.MySync.Domain.Subscriptions.Subscription.Descriptor#Descriptor", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("Description")
+                                .HasMaxLength(250)
+                                .HasColumnType("character varying(250)")
+                                .HasColumnName("Description");
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("character varying(50)")
+                                .HasColumnName("Name");
+
+                            b1.Property<string>("Tag")
+                                .HasMaxLength(30)
+                                .HasColumnType("character varying(30)")
+                                .HasColumnName("Tag");
+                        });
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("OwnerId", "NormalizedName")
+                        .IsUnique();
+
+                    b.ToTable("Subscriptions", (string)null);
+                });
+
             modelBuilder.Entity("FinHorizon.MySync.Domain.Transactions.Transaction", b =>
                 {
                     b.Property<Guid>("Id")
@@ -312,6 +387,9 @@ namespace FinHorizon.MySync.Infrastructure.Data.Migrations
                     b.Property<DateTimeOffset>("RecordedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid?>("SubscriptionId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AccountId");
@@ -321,6 +399,8 @@ namespace FinHorizon.MySync.Infrastructure.Data.Migrations
                     b.HasIndex("CounterAccountId");
 
                     b.HasIndex("DebtId");
+
+                    b.HasIndex("SubscriptionId");
 
                     b.HasIndex("OwnerId", "Date", "RecordedAt");
 
@@ -388,9 +468,51 @@ namespace FinHorizon.MySync.Infrastructure.Data.Migrations
                                 .HasForeignKey("ProjectionSettingsId");
                         });
 
+                    b.OwnsMany("FinHorizon.MySync.Domain.Projection.ProjectionSubscription", "Subscriptions", b1 =>
+                        {
+                            b1.Property<Guid>("ProjectionSettingsId");
+
+                            b1.Property<int>("__synthesizedOrdinal")
+                                .ValueGeneratedOnAdd();
+
+                            b1.Property<decimal>("Amount");
+
+                            b1.Property<bool>("Included");
+
+                            b1.Property<Guid>("SubscriptionId");
+
+                            b1.HasKey("ProjectionSettingsId", "__synthesizedOrdinal");
+
+                            b1.ToTable("ProjectionSettings");
+
+                            b1
+                                .ToJson("Subscriptions")
+                                .HasColumnType("jsonb");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ProjectionSettingsId");
+                        });
+
                     b.Navigation("Events");
 
                     b.Navigation("Payments");
+
+                    b.Navigation("Subscriptions");
+                });
+
+            modelBuilder.Entity("FinHorizon.MySync.Domain.Subscriptions.Subscription", b =>
+                {
+                    b.HasOne("FinHorizon.MySync.Domain.Accounts.Account", null)
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("FinHorizon.MySync.Domain.Categories.Category", null)
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("FinHorizon.MySync.Domain.Transactions.Transaction", b =>
@@ -414,6 +536,11 @@ namespace FinHorizon.MySync.Infrastructure.Data.Migrations
                     b.HasOne("FinHorizon.MySync.Domain.Debts.Debt", null)
                         .WithMany()
                         .HasForeignKey("DebtId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("FinHorizon.MySync.Domain.Subscriptions.Subscription", null)
+                        .WithMany()
+                        .HasForeignKey("SubscriptionId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.OwnsMany("FinHorizon.MySync.Domain.Transactions.Posting", "Postings", b1 =>

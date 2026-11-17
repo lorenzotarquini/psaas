@@ -7,5 +7,5 @@ namespace FinHorizon.MySync.Application.Abstractions.Limits;
 public sealed class ConfiguredResourceLimits(IOptions<LimitsOptions> options) : IResourceLimits
 {
     public Task<UserLimits> ForAsync(OwnerId owner, CancellationToken cancellationToken = default) =>
-        Task.FromResult(new UserLimits(options.Value.MaxAccounts, options.Value.MaxDebts));
+        Task.FromResult(new UserLimits(options.Value.MaxAccounts, options.Value.MaxDebts, options.Value.MaxSubscriptions));
 }

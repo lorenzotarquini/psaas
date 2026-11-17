@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { ProjectionDebt, ProjectionParameters } from '../api/projection'
-import { project, type ProjectionInput } from './project'
+import { chargedIn, project, type ProjectionInput } from './project'
 
 const today = '2026-11-17'
 const cents = (value: number) => Math.round(value * 100) / 100
@@ -15,6 +15,7 @@ const parameters = (overrides: Partial<ProjectionParameters> = {}): ProjectionPa
   inflation: 2,
   inflationOn: false,
   payments: [],
+  subscriptions: [],
   events: [],
   goal: null,
   ...overrides,
@@ -95,6 +96,42 @@ describe('UC14_CalcoloProiezione', () => {
 
     expect([on.last.date, cents(on.last.netWorth)]).toEqual(['2027-11', 9803.92])
     expect(off.last.netWorth).toBe(10000)
+  })
+
+  it('S14_AbbonamentiNelTempo', () => {
+    const subscriptions = [
+      { id: 'netflix', name: 'Netflix', amount: 20, firstChargeOn: '2026-01-05', endsOn: '2027-01-10' },
+      { id: 'cloud', name: 'Cloud', amount: 3, firstChargeOn: '2027-01-20', endsOn: null },
+    ]
+    const included = [
+      { subscriptionId: 'netflix', amount: 20, included: true },
+      { subscriptionId: 'cloud', amount: 3, included: true },
+    ]
+
+    const result = project({ ...input({ subscriptions: included }, 1000), subscriptions })
+
+    expect(result.points.slice(1).map((point) => [point.date, point.netWorth])).toEqual([
+      ['2026-12', 980],
+      ['2027-01', 957],
+      ['2027-02', 954],
+    ])
+  })
+
+  it('S14_UnAbbonamentoSpentoNonCosta', () => {
+    const subscriptions = [{ id: 'palestra', name: 'Palestra', amount: 45, firstChargeOn: '2026-10-03', endsOn: null }]
+
+    const result = project({ ...s2({ horizonMonths: 12, subscriptions: [{ subscriptionId: 'palestra', amount: 45, included: false }] }), subscriptions })
+
+    expect(result.last.netWorth).toBe(9400)
+  })
+
+  it.each([
+    ['2026-01-31', null, '2026-02', true],
+    ['2026-01-31', '2026-02-27', '2026-02', false],
+    ['2026-01-31', '2026-02-28', '2026-02', true],
+    ['2027-01-20', null, '2026-12', false],
+  ])('R13_AddebitoNelMese %s fino a %s nel mese %s', (firstChargeOn, endsOn, month, expected) => {
+    expect(chargedIn({ firstChargeOn, endsOn }, month)).toBe(expected)
   })
 
   it('3b_UnDebitoSenzaRataNonScende', () => {

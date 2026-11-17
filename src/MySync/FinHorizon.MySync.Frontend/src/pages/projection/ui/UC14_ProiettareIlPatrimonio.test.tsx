@@ -23,7 +23,7 @@ function givenS2(monthsOfData = 6) {
   const api = new FakeApi()
   api.givenAccount('Conto Intesa', 1000)
   api.projection.monthsOfData = monthsOfData
-  api.projection.suggested = { income: 2000, fixedExpenses: 700, variableExpenses: 600, saving: 0, annualReturn: 0, inflation: 2, payments: [] }
+  api.projection.suggested = { income: 2000, fixedExpenses: 700, variableExpenses: 600, saving: 0, annualReturn: 0, inflation: 2, payments: [], subscriptions: [] }
   api.projection.saved = {
     horizonMonths: 3,
     income: 2000,
@@ -34,6 +34,7 @@ function givenS2(monthsOfData = 6) {
     inflation: 2,
     inflationOn: false,
     payments: [],
+    subscriptions: [],
     events: [],
     goal: null,
   }
@@ -59,6 +60,22 @@ describe('UC14_ProiettareIlPatrimonio', () => {
 
     expect(finalValue()).toMatch(/3700,00/)
     expect(api.requests.length).toBe(calls)
+  })
+
+  it('S15_EStaccassiUnAbbonamento', async () => {
+    const api = givenS2()
+    api.projection.subscriptions = [{ id: 'palestra', name: 'Palestra', amount: 45, firstChargeOn: '2026-10-03', endsOn: null }]
+    api.projection.saved = { ...api.projection.saved!, horizonMonths: 12, subscriptions: [{ subscriptionId: 'palestra', amount: 45, included: true }] }
+    renderApp('/projection', api)
+    const user = userEvent.setup()
+    await waitFor(() => expect(finalValue()).toMatch(/8860,00/))
+    const calls = api.requests.length
+
+    await user.click(screen.getByRole('checkbox', { name: 'Tieni Palestra nella proiezione' }))
+
+    expect(finalValue()).toMatch(/9400,00/)
+    expect(api.requests.length).toBe(calls)
+    expect(api.requests.some((request) => request.path.startsWith('/api/subscriptions/'))).toBe(false)
   })
 
   it('3a_AvvisoConPochiDati', async () => {

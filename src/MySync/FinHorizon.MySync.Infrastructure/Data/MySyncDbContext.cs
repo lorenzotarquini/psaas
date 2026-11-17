@@ -2,6 +2,7 @@ using FinHorizon.MySync.Domain.Accounts;
 using FinHorizon.MySync.Domain.Categories;
 using FinHorizon.MySync.Domain.Debts;
 using FinHorizon.MySync.Domain.Preferences;
+using FinHorizon.MySync.Domain.Subscriptions;
 using FinHorizon.MySync.Domain.Transactions;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,6 +16,8 @@ public sealed class MySyncDbContext(DbContextOptions<MySyncDbContext> options) :
     public DbSet<Debt> Debts => Set<Debt>();
 
     public DbSet<Category> Categories => Set<Category>();
+
+    public DbSet<Subscription> Subscriptions => Set<Subscription>();
 
     public DbSet<Transaction> Transactions => Set<Transaction>();
 

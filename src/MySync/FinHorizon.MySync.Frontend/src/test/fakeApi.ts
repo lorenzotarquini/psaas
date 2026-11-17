@@ -2,6 +2,7 @@ import type { Account } from '@/entities/account'
 import type { Category } from '@/entities/category'
 import type { Debt } from '@/entities/debt'
 import type { ProjectionData, ProjectionParameters } from '@/entities/projection'
+import type { Subscription } from '@/entities/subscription'
 import type { Transaction } from '@/entities/transaction'
 import { inScope, type PortfolioGroup } from '@/shared/lib/portfolio-scope'
 
@@ -25,14 +26,18 @@ export class FakeApi {
   debts: Debt[] = []
   categories: Category[] = []
   transactions: Transaction[] = []
+  subscriptions: Subscription[] = []
   limits = { maxAccounts: 2, maxDebts: 1 }
+  /** UC16-R4. */
+  maxSubscriptions = 10
   /** UC13-R4: the euro until chosen. */
   preferences = { displayCurrency: 'EUR', chosen: false }
   /** UC14: what GET /api/projection answers beyond the starting point, which comes from the accounts. */
   projection: Omit<ProjectionData, 'start' | 'currency'> = {
     today: '2026-11-17',
     debts: [],
-    suggested: { income: 0, fixedExpenses: 0, variableExpenses: 0, saving: 0, annualReturn: 2, inflation: 2, payments: [] },
+    subscriptions: [],
+    suggested: { income: 0, fixedExpenses: 0, variableExpenses: 0, saving: 0, annualReturn: 2, inflation: 2, payments: [], subscriptions: [] },
     monthsOfData: 6,
     saved: null,
   }
@@ -83,6 +88,32 @@ export class FakeApi {
     return transaction
   }
 
+  /** UC16: a subscription of 'Abbonamenti' on the account; `dueOn` set means a charge to register. */
+  givenSubscription(account: Account, name: string, amount: number, overrides: Partial<Subscription> = {}): Subscription {
+    const subscription: Subscription = {
+      id: this.id(),
+      name,
+      description: null,
+      accountId: account.id,
+      accountName: account.name,
+      categoryId: this.id(),
+      categoryName: 'Abbonamenti',
+      amount,
+      currency: account.currency,
+      displayAmount: amount,
+      firstChargeOn: '2026-10-05',
+      endsOn: null,
+      createdOn: '2026-10-01',
+      active: true,
+      nextChargeOn: '2026-12-05',
+      dueOn: null,
+      hasPayments: false,
+      ...overrides,
+    }
+    this.subscriptions.push(subscription)
+    return subscription
+  }
+
   readonly fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
     const url = new URL(String(input), 'http://localhost')
     const method = init?.method ?? 'GET'
@@ -97,6 +128,22 @@ export class FakeApi {
     if (method === 'GET' && path === '/api/accounts') return ok({ items: this.accounts, max: this.limits.maxAccounts })
     if (method === 'GET' && path === '/api/debts') return ok({ items: this.debts, max: this.limits.maxDebts })
     if (method === 'GET' && path === '/api/tags') return ok([])
+    if (method === 'GET' && path === '/api/subscriptions') {
+      const monthlyTotal = this.subscriptions.filter((s) => s.active).reduce((sum, s) => sum + s.displayAmount, 0)
+      return ok({ items: this.subscriptions, monthlyTotal, currency: this.preferences.displayCurrency, max: this.maxSubscriptions })
+    }
+    if (method === 'POST' && path === '/api/subscriptions') {
+      const account = this.accounts.find((a) => a.id === body!.accountId)!
+      const created = this.givenSubscription(account, String(body!.name), Number(body!.amount), { firstChargeOn: String(body!.firstChargeOn), categoryId: String(body!.categoryId) })
+      return ok(created, 201)
+    }
+    if (method === 'POST' && path.startsWith('/api/subscriptions/')) {
+      const [, , , id, action] = path.split('/')
+      const subscription = this.subscriptions.find((s) => s.id === id)!
+      if (action === 'skip' || action === 'resume') Object.assign(subscription, action === 'skip' ? { dueOn: null } : { endsOn: null, active: true })
+      if (action === 'cancel') subscription.endsOn = String(body!.endsOn)
+      return ok(subscription)
+    }
     if (method === 'GET' && path === '/api/currencies') return ok(fakeCurrencies)
     if (method === 'GET' && path === '/api/preferences') return ok(this.preferences)
     if (method === 'PUT' && path === '/api/preferences') {
@@ -185,7 +232,12 @@ export class FakeApi {
     if (method === 'GET' && path === '/api/transactions') {
       return ok({ items: this.transactions, page: 1, pageSize: 25, totalCount: this.transactions.length, expenseTotal: 0, incomeTotal: 0, currency: this.preferences.displayCurrency })
     }
-    if (method === 'POST' && path === '/api/transactions') return ok({ id: this.id(), ...body }, 201)
+    if (method === 'POST' && path === '/api/transactions') {
+      // UC16-R7: a linked expense in the month of the charge settles it.
+      const paid = this.subscriptions.find((s) => s.id === body!.subscriptionId && s.dueOn?.slice(0, 7) === String(body!.date).slice(0, 7))
+      if (paid) paid.dueOn = null
+      return ok({ id: this.id(), ...body }, 201)
+    }
     if (method === 'PUT' && path.startsWith('/api/accounts/')) {
       const account = this.accounts.find((a) => a.id === path.split('/').pop())!
       Object.assign(account, body)

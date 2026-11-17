@@ -22,6 +22,7 @@ internal sealed class ProjectionReader(MySyncDbContext db) : IProjectionReader
                        CASE
                            WHEN t."Kind" = 'Income' THEN {(int)ProjectionFlowKind.Income}
                            WHEN t."DebtId" IS NOT NULL THEN {(int)ProjectionFlowKind.Installment}
+                           WHEN t."SubscriptionId" IS NOT NULL THEN {(int)ProjectionFlowKind.SubscriptionPayment}
                            WHEN c."Fixed" THEN {(int)ProjectionFlowKind.FixedExpense}
                            ELSE {(int)ProjectionFlowKind.VariableExpense}
                        END AS "Kind",

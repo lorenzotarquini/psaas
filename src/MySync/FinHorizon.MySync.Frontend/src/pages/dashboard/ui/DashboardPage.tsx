@@ -12,6 +12,7 @@ import { storageKeys, useSessionState } from '@/shared/lib/session-state'
 import { Amount, AmountVisibility, EmptyState, hiddenAmount, LoadError, Loading, ScopeSwitches } from '@/shared/ui'
 import { NetWorthChart } from '@/widgets/net-worth-chart'
 import { AccountsCard, DebtsCard } from '@/widgets/portfolio-lists'
+import { SubscriptionsCard } from '@/widgets/subscriptions'
 import { TransactionTable } from '@/widgets/transaction-table'
 import { KpiCard } from './KpiCard'
 import { ProjectionKpi } from './ProjectionKpi'
@@ -106,6 +107,7 @@ export function DashboardPage() {
           <div className="flex flex-col gap-6">
             <AccountsCard accounts={accounts} max={limits.maxAccounts} scope={scope} displayCurrency={currency} />
             <DebtsCard debts={debts} max={limits.maxDebts} scope={scope} />
+            <SubscriptionsCard />
           </div>
         </div>
 

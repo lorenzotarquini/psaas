@@ -18,7 +18,8 @@ public sealed record ListTransactionsQuery(
     Guid? CategoryId = null,
     Guid? DebtId = null,
     int? Page = null,
-    int? PageSize = null)
+    int? PageSize = null,
+    Guid? SubscriptionId = null)
 {
     public const int DefaultPageSize = 25;
     public const int MaxPageSize = 100;
@@ -55,7 +56,8 @@ public sealed class ListTransactionsHandler(ICurrentUser user, ITransactionReade
             request.CategoryId,
             request.DebtId,
             request.Page ?? 1,
-            request.PageSize ?? ListTransactionsQuery.DefaultPageSize);
+            request.PageSize ?? ListTransactionsQuery.DefaultPageSize,
+            request.SubscriptionId);
         var slice = await reader.ListAsync(user.Id, filter, cancellationToken).ConfigureAwait(false);
         var display = await converter.DisplayCurrencyAsync(user.Id, cancellationToken).ConfigureAwait(false);
         var rates = slice.Totals.Count == 0

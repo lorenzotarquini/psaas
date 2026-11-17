@@ -37,7 +37,7 @@ function ProjectionEditor({ data, onReset }: { data: ProjectionData; onReset: ()
   // The last valid parameters keep the chart on screen while a field is being corrected.
   const [lastValid, setLastValid] = useState(() => parsed.parameters ?? initialParameters(data))
   if (parsed.parameters && parsed.parameters !== lastValid) setLastValid(parsed.parameters)
-  const result = useMemo(() => project({ today: data.today, start: data.start, debts: data.debts, parameters: lastValid }), [data, lastValid])
+  const result = useMemo(() => project({ today: data.today, start: data.start, debts: data.debts, subscriptions: data.subscriptions, parameters: lastValid }), [data, lastValid])
 
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
@@ -52,7 +52,7 @@ function ProjectionEditor({ data, onReset }: { data: ProjectionData; onReset: ()
               {data.monthsOfData === 0 ? t('projection.noData') : t('projection.fewData', { count: data.monthsOfData })}
             </p>
           )}
-          <ParametersForm values={values} errors={parsed.errors ?? {}} debts={data.debts} currency={data.currency} onChange={setValues} />
+          <ParametersForm values={values} errors={parsed.errors ?? {}} debts={data.debts} subscriptions={data.subscriptions ?? []} currency={data.currency} onChange={setValues} />
           <ProjectionActions parameters={parsed.parameters} onReset={onReset} />
         </section>
         <details className="surface p-5">

@@ -17,7 +17,10 @@ public enum ProjectionFlowKind
     Installment = 3,
 
     /// <summary>A transfer from a day-to-day account to an investment account (positive) or back (negative), D18.</summary>
-    Saving = 4
+    Saving = 4,
+
+    /// <summary>An expense linked to a subscription: the projection counts the subscription itself, never its expenses (UC15-R5).</summary>
+    SubscriptionPayment = 5
 }
 
 /// <summary>The sum of one kind of flow on one day in one currency; <see cref="DebtId"/> only for installments.</summary>

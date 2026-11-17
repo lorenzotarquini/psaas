@@ -18,7 +18,8 @@
    - spese fisse al mese e spese variabili al mese (UC15);
    - quota messa da parte al mese, cioè quanto passa dalla liquidità agli investimenti;
    - rendimento annuo degli investimenti (2%);
-   - la rata mensile di ogni debito (UC3-R8).
+   - la rata mensile di ogni debito (UC3-R8);
+   - gli **abbonamenti** (UC16), uno per uno, ognuno con il suo importo mensile e un interruttore per toglierlo dalla proiezione ("e se lo annullassi?").
 4. L'utente sceglie l'**orizzonte**: da 1 a 360 mesi, con le scorciatoie 6 mesi, 1, 5, 10 e 30 anni (12 mesi all'inizio).
 5. Il sistema mostra:
    - un **grafico** mese per mese con patrimonio netto, quota investita e debiti residui, tratteggiato per distinguerlo dall'andamento reale (UC7);
@@ -44,8 +45,9 @@
 - R2. **Mesi:** il mese 0 è oggi. Il mese *m* è il mese di calendario *m* mesi dopo quello corrente e ha come etichetta il suo nome (oggi è 2026-11-17, quindi il mese 1 è dicembre 2026).
 - R3. **Parametri proposti:** si calcolano sugli ultimi 6 mesi di calendario completi prima di quello corrente, limitati ai mesi completi successivi all'apertura del primo conto (`monthsOfData`, da 0 a 6). Ogni importo è convertito con il tasso del suo giorno (UC13-R3). I valori sono medie mensili:
   - **entrate**: tutti i ricavi;
-  - **spese fisse**: le spese non collegate a un debito, con categoria fissa (UC15);
-  - **spese variabili**: le spese non collegate a un debito, con categoria variabile;
+  - **spese fisse**: le spese non collegate a un debito né a un abbonamento, con categoria fissa (UC15);
+  - **spese variabili**: le spese non collegate a un debito né a un abbonamento, con categoria variabile;
+  - **abbonamento**: il suo importo mensile di oggi (UC16), convertito con il tasso di oggi, incluso. Non è una media: un abbonamento nuovo conta per intero e uno annullato esce dai mesi successivi alla data di fine (R13). Si propongono gli abbonamenti senza data di fine o con data di fine da oggi in poi;
   - **quota messa da parte**: i trasferimenti da conti di tutti i giorni a conti di investimenti e depositi, meno quelli in senso opposto; mai sotto 0;
   - **rata di un debito**: la sua rata mensile (UC3-R8) se c'è, altrimenti la media delle rate pagate negli ultimi 3 mesi completi;
   - **rendimento** 2% e **inflazione** 2%, con l'inflazione spenta. Sono solo i valori iniziali: rendimento e inflazione sono campi che l'utente cambia a piacimento, entro gli intervalli di R9, come ogni altro parametro.
@@ -54,7 +56,7 @@
 - R4. **Calcolo, per ogni mese *m* da 1 all'orizzonte:**
   1. investimenti: I(m) = I(m−1) × (1 + rendimento / 12) + quota messa da parte;
   2. per ogni debito: pagato = min(rata, residuo), residuo −= pagato;
-  3. liquidità: L(m) = L(m−1) + entrate − spese fisse − spese variabili − Σ pagato − quota messa da parte + eventi del mese;
+  3. liquidità: L(m) = L(m−1) + entrate − spese fisse − spese variabili − Σ pagato − Σ abbonamenti del mese (R13) − quota messa da parte + eventi del mese;
   4. patrimonio stabile: costante (i preziosi non si rivalutano, come nel resto dell'MVP);
   5. patrimonio netto: P(m) = L(m) + I(m) + patrimonio stabile; debiti residui: Σ residui. Come in D9, i debiti non si sottraggono.
 - R5. Un debito estinto non si paga più: la sua rata resta nella liquidità, e la crescita mensile aumenta di conseguenza.
@@ -63,13 +65,15 @@
 - R8. **Inflazione:** con l'interruttore acceso ogni valore del mese *m* si mostra diviso per (1 + inflazione)^(m/12). Il calcolo di R4 non cambia.
 - R9. **Validazione** (al salvataggio, e nel frontend mentre si scrive):
   - orizzonte: intero da 1 a 360;
-  - entrate, spese, quota messa da parte e rate: ≥ 0, con 2 decimali;
+  - entrate, spese, quota messa da parte, rate e importi degli abbonamenti: ≥ 0, con 2 decimali;
+  - ogni debito e ogni abbonamento compare al massimo una volta, e deve essere dell'utente;
   - rendimento: da −10% a 20%; inflazione: da 0% a 20%;
   - eventi: al massimo 10, ognuno con mese da 1 all'orizzonte, importo diverso da 0 e descrizione obbligatoria di al massimo 40 caratteri;
   - obiettivo: facoltativo, > 0.
 - R10. Il calcolo di R4 gira nel browser: il backend dà solo punto di partenza, parametri proposti e parametri salvati. Cambiare un parametro non chiama il server.
-- R11. Ogni utente ha **una** proiezione salvata. Le rate salvate sono legate all'id del debito: un debito creato dopo il salvataggio usa la rata proposta, quella di un debito che non c'è più si ignora.
+- R11. Ogni utente ha **una** proiezione salvata. Le rate salvate sono legate all'id del debito: un debito creato dopo il salvataggio usa la rata proposta, quella di un debito che non c'è più si ignora. Lo stesso vale per gli abbonamenti: importo e interruttore salvati sono legati all'id, un abbonamento nuovo usa i valori proposti, uno eliminato si ignora. Primo addebito e data di fine vengono sempre dall'abbonamento di oggi, mai dal salvataggio: annullare un abbonamento cambia subito anche la proiezione salvata.
 - R12. Grafico accessibile come in UC7-R5 (tabella dei dati alternativa, tema chiaro e scuro, telefono); con gli importi nascosti di UC12 la proiezione non nasconde nulla, perché l'occhio vale solo in dashboard.
+- R13. **Abbonamenti nel mese *m*:** un abbonamento incluso costa il suo importo nel mese *m* se il suo addebito in quel mese di calendario (UC16-R6) non precede il primo addebito e non supera la data di fine. Così un abbonamento che parte tra due mesi conta da lì, e uno annullato con data di fine il 10 gennaio paga ancora l'addebito del 5 gennaio e poi smette. Un abbonamento spento con l'interruttore non costa nulla in nessun mese.
 
 ## Fase 2 (fuori ambito)
 - Più scenari con nome, confrontati sullo stesso grafico.
@@ -284,6 +288,8 @@ Schema dello scenario: Dati non validi
     | un evento di importo 0             | InvalidValue  | events[0].amount   |
     | un evento senza descrizione        | Required      | events[0].note     |
     | obiettivo 0                        | InvalidValue  | goal               |
+    | un abbonamento di importo −1,00    | InvalidValue  | subscriptions[0].amount |
+    | un abbonamento di un altro utente  | InvalidValue  | subscriptions[0].subscriptionId |
 ```
 
 ### UC14-S11
@@ -321,6 +327,64 @@ Scenario: Un debito creato dopo il salvataggio
   Quando crea il finanziamento "Moto" con rata mensile 150,00 €
   E riapre la proiezione
   Allora la rata di "Auto" è 300,00 € e quella di "Moto" è 150,00 €
+```
+
+### UC14-S13
+
+Test: `UC14_ProiettareIlPatrimonio.S13_AbbonamentiProposti`
+
+```gherkin
+# language: it
+Funzionalità: Proiettare il patrimonio
+
+Scenario: Gli abbonamenti sono proposti uno per uno
+  Dato i movimenti di UC14-S1
+  E la categoria di spesa fissa "Abbonamenti"
+  E l'abbonamento "Netflix" da "Conto Intesa", 20,00 € al mese, primo addebito il 2026-05-05
+  E in ogni mese da maggio a ottobre 2026 la spesa di 20,00 € in "Abbonamenti" collegata a "Netflix"
+  E l'abbonamento "Palestra" di 45,00 € al mese, annullato con data di fine il 2026-10-31
+  E l'abbonamento "Cloud" di 3,00 € al mese, creato oggi con primo addebito il 2026-12-01 e ancora senza spese
+  Quando "Mario" apre la proiezione
+  Allora i parametri proposti sono spese fisse 700,00 € e spese variabili 600,00 €
+  E gli abbonamenti proposti sono "Netflix" 20,00 € e "Cloud" 3,00 €, entrambi inclusi
+  E "Palestra" non è proposto
+```
+
+### UC14-S14
+
+Test: `UC14_CalcoloProiezione.S14_AbbonamentiNelTempo`
+
+```gherkin
+# language: it
+Funzionalità: Proiettare il patrimonio
+
+Scenario: Abbonamenti che iniziano e finiscono
+  Dato una liquidità di 1.000,00 €
+  E l'abbonamento "Netflix" di 20,00 € con addebito il giorno 5, data di fine il 2027-01-10
+  E l'abbonamento "Cloud" di 3,00 € con primo addebito il 2027-01-20
+  Quando la proiezione è di 3 mesi
+  Allora i punti sono:
+    | mese          | patrimonio netto |
+    | dicembre 2026 | 980,00           |
+    | gennaio 2027  | 957,00           |
+    | febbraio 2027 | 954,00           |
+```
+
+### UC14-S15
+
+Test: `UC14_ProiettareIlPatrimonio.S15_EStaccassiUnAbbonamento` (pagina)
+
+```gherkin
+# language: it
+Funzionalità: Proiettare il patrimonio
+
+Scenario: "E se lo annullassi?"
+  Dato che "Mario" ha aperto la proiezione di UC14-S2 su 12 mesi con l'abbonamento "Palestra" di 45,00 € incluso
+  E il patrimonio di novembre 2027 è 8.860,00 €
+  Quando spegne l'interruttore di "Palestra"
+  Allora il patrimonio di novembre 2027 diventa 9.400,00 €
+  E il frontend non ha fatto nessuna nuova chiamata al server
+  E "Palestra" non è stato annullato
 ```
 
 Oltre agli scenari, la suite della pagina copre il salvataggio e "Riparti dai miei dati" dall'interfaccia (S9) e un campo non valido che blocca il salvataggio lasciando il grafico sull'ultimo valore valido; la suite del calcolo copre il debito senza rata (3b).

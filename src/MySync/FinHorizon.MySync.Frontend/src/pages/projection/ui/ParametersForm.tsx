@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons'
-import type { ProjectionDebt } from '@/entities/projection'
+import type { ProjectionDebt, ProjectionSubscription } from '@/entities/projection'
 import { useErrorText } from '@/shared/lib/form'
 import { Field } from '@/shared/ui'
 import { limits, type ParameterErrors, type ParameterValues } from '../model/form'
@@ -10,6 +10,7 @@ interface ParametersFormProps {
   values: ParameterValues
   errors: ParameterErrors
   debts: ProjectionDebt[]
+  subscriptions: ProjectionSubscription[]
   currency: string
   onChange: (values: ParameterValues) => void
 }
@@ -17,7 +18,7 @@ interface ParametersFormProps {
 const horizons = [6, 12, 60, 120, 360] as const
 
 /** UC14 steps 3–9: every parameter of the projection; each change is passed up at once, so the chart follows (R10). */
-export function ParametersForm({ values, errors, debts, currency, onChange }: ParametersFormProps) {
+export function ParametersForm({ values, errors, debts, subscriptions, currency, onChange }: ParametersFormProps) {
   const { t } = useTranslation()
   const errorText = useErrorText()
   const update = (patch: Partial<ParameterValues>) => onChange({ ...values, ...patch })
@@ -119,6 +120,48 @@ export function ParametersForm({ values, errors, debts, currency, onChange }: Pa
             )
           })}
         </div>
+      )}
+
+      {subscriptions.length > 0 && (
+        <fieldset className="flex flex-col gap-2">
+          <legend className="font-medium">{t('projection.subscriptions.title')}</legend>
+          <p className="muted text-sm">{t('projection.subscriptions.hint')}</p>
+          {subscriptions.map((subscription) => {
+            const item = values.subscriptions[subscription.id] ?? { amount: '', included: true }
+            const error = errors[`subscriptions.${subscription.id}`]
+            const set = (patch: Partial<typeof item>) => update({ subscriptions: { ...values.subscriptions, [subscription.id]: { ...item, ...patch } } })
+            return (
+              <div key={subscription.id} className="grid grid-cols-[auto_1fr_8rem] items-center gap-2">
+                <input
+                  type="checkbox"
+                  className="toggle toggle-sm toggle-primary"
+                  aria-label={t('projection.subscriptions.keep', { name: subscription.name })}
+                  checked={item.included}
+                  onChange={(event) => set({ included: event.target.checked })}
+                />
+                <span className={item.included ? '' : 'muted line-through'}>
+                  {subscription.name}
+                  {subscription.endsOn && <span className="muted text-xs"> · {t('projection.subscriptions.endsOn', { date: subscription.endsOn })}</span>}
+                </span>
+                <div>
+                  <label className="input input-sm w-full">
+                    <span className="muted">{currency}</span>
+                    <input
+                      aria-label={t('projection.subscriptions.amount', { name: subscription.name })}
+                      inputMode="decimal"
+                      autoComplete="off"
+                      aria-invalid={!!error}
+                      disabled={!item.included}
+                      value={item.amount}
+                      onChange={(event) => set({ amount: event.target.value })}
+                    />
+                  </label>
+                  {error && <p className="label text-xs text-error">{errorText(error)}</p>}
+                </div>
+              </div>
+            )
+          })}
+        </fieldset>
       )}
 
       {money('goal', t('projection.parameters.goalHint'))}

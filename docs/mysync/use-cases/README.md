@@ -51,6 +51,8 @@ Da questi dati MySync calcola il **patrimonio netto** e ne mostra l'andamento ne
 | Debiti residui | Somma dei residui di tutti i debiti, a una certa data. |
 | Rata mensile | Quanto l'utente paga ogni mese per un debito; facoltativa, serve alla proiezione (UC3-R8). |
 | Spesa fissa / variabile | Una categoria di spesa è fissa (affitto, bollette) o variabile (tutto il resto, di default) (UC15). |
+| Abbonamento | Una spesa dello stesso importo ogni mese, da un conto e in una categoria, finché l'utente non la annulla (streaming, palestra, telefono). Non registra movimenti da solo: ogni addebito si registra come spesa collegata all'abbonamento (UC16). |
+| Addebito | Il giorno del mese in cui un abbonamento si paga. Un addebito scaduto senza spesa collegata è **da registrare** (UC16). |
 | Proiezione | Stima mese per mese del patrimonio futuro, partendo da oggi e da parametri proposti dalle medie degli ultimi mesi (UC14). |
 
 ## Requisiti
@@ -81,6 +83,9 @@ Da questi dati MySync calcola il **patrimonio netto** e ne mostra l'andamento ne
 | RF20 | L'utente indica quali categorie di spesa sono fisse. | UC15 |
 | RF21 | Un debito può avere una rata mensile. | UC3, UC10 |
 | RF22 | La dashboard mostra il patrimonio previsto tra 12 mesi. | UC4, UC14 |
+| RF23 | L'utente crea, modifica, annulla, riattiva ed elimina i propri abbonamenti mensili. Il numero massimo di abbonamenti non annullati è dato dalla configurazione `MySync:MaxSubscriptions` (variabile d'ambiente `MySync__MaxSubscriptions`). | UC16 |
+| RF24 | La dashboard mostra gli abbonamenti da registrare; un clic apre la spesa già compilata. Una spesa può essere collegata a un abbonamento. | UC4, UC16 |
+| RF25 | La proiezione considera gli abbonamenti uno per uno, con la loro data di fine, e permette di toglierne uno per vedere cosa cambia. | UC14, UC16 |
 
 ### Non funzionali
 
@@ -90,7 +95,7 @@ Da questi dati MySync calcola il **patrimonio netto** e ne mostra l'andamento ne
 | RNF2 | Isolamento: ogni dato appartiene a un utente (`sub` del token) e nessuna operazione legge o modifica dati di un altro utente. Un id di un altro utente si comporta come un id inesistente (404, mai 403, per non rivelarne l'esistenza). |
 | RNF3 | Gli importi sono nella valuta del loro conto, con 2 decimali per le valute tradizionali e 8 per le criptovalute, e si salvano come `decimal` (mai `float`/`double`). |
 | RNF4 | Le date dei movimenti sono date di calendario (senza ora né fuso). |
-| RNF5 | Stessi codici d'errore per campo dell'Admin Portal (`Required`, `InvalidFormat`, `MaxLengthExceeded`, `NotUnique`, `InvalidValue`) più `LimitReached` per i limiti di RF2 e RF4; il frontend li traduce. |
+| RNF5 | Stessi codici d'errore per campo dell'Admin Portal (`Required`, `InvalidFormat`, `MaxLengthExceeded`, `NotUnique`, `InvalidValue`) più `LimitReached` per i limiti di RF2, RF4 e RF23; il frontend li traduce. |
 | RNF6 | Interfaccia in italiano e inglese, tema chiaro e scuro, utilizzabile da telefono (la registrazione di una spesa si fa spesso in mobilità). |
 | RNF7 | Log NLog strutturati in JSON in ogni strato, senza importi né descrizioni nei messaggi (sono dati personali). |
 
@@ -113,6 +118,7 @@ Da questi dati MySync calcola il **patrimonio netto** e ne mostra l'andamento ne
 | [UC13](UC13-valute-e-moneta-virtuale.md) | Valute e moneta virtuale | in ambito |
 | [UC14](UC14-proiettare-il-patrimonio.md) | Proiettare il patrimonio | in ambito |
 | [UC15](UC15-spese-fisse-e-variabili.md) | Indicare le spese fisse (di supporto a UC14) | in ambito |
+| [UC16](UC16-gestire-abbonamenti.md) | Gestire gli abbonamenti | in ambito |
 
 Contratto HTTP: [API.md](API.md).
 
@@ -121,7 +127,7 @@ Contratto HTTP: [API.md](API.md).
 - Finanze aziendali: conti, debiti e movimenti di un'organizzazione B2B (fase 2, D8).
 - Eliminazione di conti e debiti; modifica ed eliminazione delle categorie, tranne il tipo fissa/variabile (UC15). Conti e debiti si modificano (UC10), i movimenti hanno il CRUD completo (D1).
 - Rivalutazione dei preziosi; prezzi di azioni e fondi dei conti Investimenti e PAC.
-- Movimenti ricorrenti, piani di ammortamento, separazione tra quota capitale e interessi di una rata.
+- Movimenti ricorrenti registrati in automatico, anche per gli abbonamenti (fase 2 di UC16, D19); abbonamenti non mensili. Piani di ammortamento, separazione tra quota capitale e interessi di una rata.
 - Import da estratto conto o collegamento alle banche (open banking).
 - Budget, notifiche. L'obiettivo esiste solo nella proiezione (UC14), senza avvisi.
 - Più scenari di proiezione e confronto tra proiezione e realtà (fase 2 di UC14).
@@ -150,8 +156,10 @@ Prese il 2026-11-15.
 | D14 | Si può cambiare la valuta di un conto? | Solo finché non ha movimenti (di un debito: finché non ha rate), perché gli importi già registrati sono in quella valuta. |
 | D15 | La proiezione rispetta gli switch di UC12? | No: proietta sempre tutti i conti e i debiti, perché una proiezione senza investimenti o preziosi sarebbe fuorviante. Decisa il 2026-11-17. |
 | D16 | Dove si calcola la proiezione? | Nel browser: il backend dà punto di partenza, parametri proposti e parametri salvati; così ogni modifica aggiorna il grafico subito. Il calcolo sta in un solo modulo del frontend con i suoi test. Decisa il 2026-11-17. |
-| D17 | Come si separano spese fisse e variabili? | Con il tipo della categoria di spesa (UC15), variabile di default; le rate dei debiti non sono né l'una né l'altra, perché la proiezione le gestisce debito per debito. Decisa il 2026-11-17. |
+| D17 | Come si separano spese fisse e variabili? | Con il tipo della categoria di spesa (UC15), variabile di default; le rate dei debiti e i pagamenti degli abbonamenti non sono né l'una né l'altra, perché la proiezione li gestisce debito per debito e abbonamento per abbonamento (UC15-R5). Decisa il 2026-11-17. |
 | D18 | Mettere soldi da parte cambia il patrimonio? | No, è un trasferimento (UC9). Nella proiezione la quota messa da parte passa dalla liquidità agli investimenti, e conta solo per il rendimento. Decisa il 2026-11-17. |
+| D19 | Gli abbonamenti registrano da soli i loro pagamenti? | No: MySync segnala l'addebito da registrare e un clic apre la spesa già compilata, che l'utente conferma. Il saldo cambia solo con ciò che l'utente salva, non servono job in background e un movimento eliminato non si ricrea da solo. La registrazione automatica è nella fase 2 di UC16. Decisa il 2026-11-17. |
+| D20 | Nella proiezione un abbonamento conta per la media delle sue spese o per il suo importo? | Per il suo importo di oggi, con primo addebito e data di fine: un abbonamento nuovo conta subito per intero e uno annullato esce dai mesi dopo la data di fine, senza aspettare che la media dei 6 mesi se ne accorga. Decisa il 2026-11-17. |
 
 Non ci sono domande aperte.
 
@@ -192,6 +200,13 @@ Schema dello scenario: Ogni operazione richiede un utente autenticato
     | PUT /api/projection        |
     | DELETE /api/projection     |
     | PUT /api/categories/{id}/fixed |
+    | GET /api/subscriptions     |
+    | POST /api/subscriptions    |
+    | PUT /api/subscriptions/{id} |
+    | POST /api/subscriptions/{id}/cancel |
+    | POST /api/subscriptions/{id}/resume |
+    | POST /api/subscriptions/{id}/skip |
+    | DELETE /api/subscriptions/{id} |
 ```
 
 ### GEN-S2

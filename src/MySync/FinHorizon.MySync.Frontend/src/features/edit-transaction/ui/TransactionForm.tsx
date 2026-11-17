@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -7,6 +7,7 @@ import { z } from 'zod'
 import { useAccounts } from '@/entities/account'
 import { CategoryPicker, type Category } from '@/entities/category'
 import { useDebts } from '@/entities/debt'
+import { useSubscriptions } from '@/entities/subscription'
 import {
   amendTransaction,
   recordTransaction,
@@ -28,6 +29,7 @@ const schema = z.object({
   accountId: z.string().min(1, 'Required'),
   category: z.custom<Category | null>().refine((category) => Boolean(category), 'Required'),
   debtId: z.string(),
+  subscriptionId: z.string(),
   note: z.string().trim().max(250, 'MaxLengthExceeded'),
 })
 
@@ -39,17 +41,40 @@ const serverFields: ServerFieldMap<Values> = {
   accountId: 'accountId',
   categoryId: 'category',
   debtId: 'debtId',
+  subscriptionId: 'subscriptionId',
   note: 'note',
+}
+
+/** UC16 step 6: a new expense already filled from the charge of a subscription; the user can still change every field. */
+export interface TransactionPreset {
+  date: string
+  amount: number
+  accountId: string
+  category: Category
+  subscriptionId: string
 }
 
 interface TransactionFormProps {
   /** The movement to amend (UC8); a new one when missing (UC5). */
   transaction?: Transaction
   defaultKind?: CategorizedKind
+  preset?: TransactionPreset
   onDone: () => void
 }
 
-function initialValues(transaction: Transaction | undefined, kind: CategorizedKind): Values {
+function initialValues(transaction: Transaction | undefined, kind: CategorizedKind, preset?: TransactionPreset): Values {
+  if (!transaction && preset) {
+    return {
+      kind: 'Expense',
+      date: preset.date,
+      amount: amountText(preset.amount),
+      accountId: preset.accountId,
+      category: preset.category,
+      debtId: '',
+      subscriptionId: preset.subscriptionId,
+      note: '',
+    }
+  }
   return transaction
     ? {
         kind: transaction.kind as CategorizedKind,
@@ -58,25 +83,38 @@ function initialValues(transaction: Transaction | undefined, kind: CategorizedKi
         accountId: transaction.accountId,
         category: transaction.categoryId ? { id: transaction.categoryId, kind: transaction.kind as CategorizedKind, name: transaction.categoryName ?? '' } : null,
         debtId: transaction.debtId ?? '',
+        subscriptionId: transaction.subscriptionId ?? '',
         note: transaction.note ?? '',
       }
-    : { kind, date: todayIso(), amount: '', accountId: '', category: null, debtId: '', note: '' }
+    : { kind, date: todayIso(), amount: '', accountId: '', category: null, debtId: '', subscriptionId: '', note: '' }
 }
 
 /** UC5 and UC8: records a new movement or amends an existing one, with the same fields and rules. */
-export function TransactionForm({ transaction, defaultKind = 'Expense', onDone }: TransactionFormProps) {
+export function TransactionForm({ transaction, defaultKind = 'Expense', preset, onDone }: TransactionFormProps) {
   const { t } = useTranslation()
   const errorText = useErrorText()
   const queryClient = useQueryClient()
   const accounts = useAccounts()
   const debts = useDebts()
+  const subscriptions = useSubscriptions()
   const [formErrors, setFormErrors] = useState<string[]>([])
-  const form = useForm<Values>({ resolver: zodResolver(schema), defaultValues: initialValues(transaction, defaultKind) })
+  const form = useForm<Values>({ resolver: zodResolver(schema), defaultValues: initialValues(transaction, defaultKind, preset) })
   const { errors } = form.formState
   const kind = useWatch({ control: form.control, name: 'kind' })
   const debtId = useWatch({ control: form.control, name: 'debtId' })
+  const subscriptionId = useWatch({ control: form.control, name: 'subscriptionId' })
   // A paid-off debt stays selectable only for the movement that is already its installment (UC8-R3).
   const debtOptions = debts.data?.items.filter((debt) => !debt.paidOff || debt.id === transaction?.debtId) ?? []
+  // UC16: the active subscriptions, plus the one the movement already pays.
+  const subscriptionOptions = subscriptions.data?.items.filter((item) => item.active || item.id === subscriptionId) ?? []
+
+  // The selects get their options after the first render: a prefilled value (UC8, UC16 step 6) is shown once they arrive.
+  useEffect(() => {
+    if (accounts.data) form.setValue('accountId', form.getValues('accountId'))
+  }, [accounts.data, form])
+  useEffect(() => {
+    if (subscriptions.data) form.setValue('subscriptionId', form.getValues('subscriptionId'))
+  }, [subscriptions.data, form])
 
   const mutation = useMutation({
     mutationFn: (values: Values) => {
@@ -87,6 +125,8 @@ export function TransactionForm({ transaction, defaultKind = 'Expense', onDone }
         accountId: values.accountId,
         categoryId: values.category!.id,
         debtId: values.kind === 'Expense' && values.debtId ? values.debtId : null,
+        // UC16-R10: an expense pays a debt or a subscription, never both.
+        subscriptionId: values.kind === 'Expense' && !values.debtId && values.subscriptionId ? values.subscriptionId : null,
         note: values.note || undefined,
       }
       return transaction ? amendTransaction(transaction.id, input) : recordTransaction(input)
@@ -103,10 +143,12 @@ export function TransactionForm({ transaction, defaultKind = 'Expense', onDone }
     // Categories are per kind and only expenses pay debts (D5).
     form.setValue('category', null)
     form.setValue('debtId', '')
+    form.setValue('subscriptionId', '')
   }
 
   function changeDebt(nextDebtId: string) {
     form.setValue('debtId', nextDebtId)
+    if (nextDebtId) form.setValue('subscriptionId', '')
     // D6: the debt's account is the default, the user may still change it.
     const debt = debts.data?.items.find((item) => item.id === nextDebtId)
     if (debt && !form.getValues('accountId')) form.setValue('accountId', debt.accountId)
@@ -170,6 +212,18 @@ export function TransactionForm({ transaction, defaultKind = 'Expense', onDone }
             {debtOptions.map((debt) => (
               <option key={debt.id} value={debt.id}>
                 {debt.name}
+              </option>
+            ))}
+          </select>
+        </Field>
+      )}
+      {kind === 'Expense' && !debtId && subscriptionOptions.length > 0 && (
+        <Field label={t('transactions.fields.subscription')} htmlFor="tx-subscription" error={errorText(errors.subscriptionId?.message)}>
+          <select id="tx-subscription" className="select w-full" {...form.register('subscriptionId')}>
+            <option value="">{t('transactions.noSubscription')}</option>
+            {subscriptionOptions.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.name}
               </option>
             ))}
           </select>

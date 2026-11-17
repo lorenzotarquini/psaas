@@ -5,6 +5,7 @@ using FinHorizon.MySync.Domain.Common;
 using FinHorizon.MySync.Domain.Debts;
 using FinHorizon.MySync.Domain.Preferences;
 using FinHorizon.MySync.Domain.Projection;
+using FinHorizon.MySync.Domain.Subscriptions;
 using FinHorizon.MySync.Domain.Transactions;
 using FinHorizon.MySync.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -31,6 +32,20 @@ internal sealed class DebtRepository(MySyncDbContext db) : OwnedRepository<Debt>
 
     public Task<bool> NameExistsAsync(OwnerId owner, string normalizedName, Guid? exceptId = null, CancellationToken cancellationToken = default) =>
         Of(owner).AnyAsync(debt => debt.NormalizedName == normalizedName && debt.Id != exceptId, cancellationToken);
+}
+
+internal sealed class SubscriptionRepository(MySyncDbContext db) : OwnedRepository<Subscription>(db), ISubscriptionRepository
+{
+    public async Task<IReadOnlyList<Subscription>> ListAsync(OwnerId owner, CancellationToken cancellationToken = default) =>
+        await Of(owner).AsNoTracking().ToListAsync(cancellationToken).ConfigureAwait(false);
+
+    public Task<int> CountOpenAsync(OwnerId owner, CancellationToken cancellationToken = default) =>
+        Of(owner).CountAsync(subscription => subscription.EndsOn == null, cancellationToken);
+
+    public Task<bool> NameExistsAsync(OwnerId owner, string normalizedName, Guid? exceptId = null, CancellationToken cancellationToken = default) =>
+        Of(owner).AnyAsync(subscription => subscription.NormalizedName == normalizedName && subscription.Id != exceptId, cancellationToken);
+
+    public void Remove(Subscription subscription) => Db.Subscriptions.Remove(subscription);
 }
 
 internal sealed class CategoryRepository(MySyncDbContext db) : OwnedRepository<Category>(db), ICategoryRepository

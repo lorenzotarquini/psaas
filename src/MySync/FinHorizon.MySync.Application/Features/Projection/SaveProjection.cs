@@ -10,6 +10,9 @@ namespace FinHorizon.MySync.Application.Features.Projection;
 
 public sealed record ProjectionPaymentInput(Guid? DebtId, decimal? Amount);
 
+/// <summary>UC14-R13: <see cref="Included"/> false leaves the subscription out ("e se lo annullassi?"); missing means true.</summary>
+public sealed record ProjectionSubscriptionInput(Guid? SubscriptionId, decimal? Amount, bool? Included);
+
 public sealed record ProjectionEventInput(int? Month, decimal? Amount, string? Note);
 
 /// <summary>UC14 step 10: what the user saves; percentages as numbers (2 = 2%).</summary>
@@ -24,7 +27,8 @@ public sealed record SaveProjectionCommand(
     bool InflationOn,
     IReadOnlyList<ProjectionPaymentInput>? Payments,
     IReadOnlyList<ProjectionEventInput>? Events,
-    decimal? Goal);
+    decimal? Goal,
+    IReadOnlyList<ProjectionSubscriptionInput>? Subscriptions = null);
 
 /// <summary>UC14-R9, field by field (UC14-S10).</summary>
 public sealed class SaveProjectionValidator : AbstractValidator<SaveProjectionCommand>
@@ -74,6 +78,11 @@ public sealed class SaveProjectionValidator : AbstractValidator<SaveProjectionCo
             payment.RuleFor(input => input.DebtId).NotNull().WithErrorCode(ErrorCodes.Required);
             payment.RuleFor(input => input.Amount).MonthlyAmount();
         });
+        RuleForEach(command => command.Subscriptions).ChildRules(subscription =>
+        {
+            subscription.RuleFor(input => input.SubscriptionId).NotNull().WithErrorCode(ErrorCodes.Required);
+            subscription.RuleFor(input => input.Amount).MonthlyAmount();
+        });
     }
 }
 
@@ -86,8 +95,8 @@ internal static class ProjectionRules
             .Must(value => value is null || value.Value >= 0).WithErrorCode(ErrorCodes.InvalidValue);
 }
 
-/// <summary>UC14 step 10: replaces the saved projection of the user; a payment of a debt that is not the user's is refused.</summary>
-public sealed class SaveProjectionHandler(ICurrentUser user, IProjectionRepository projections, IDebtRepository debts, IUnitOfWork unitOfWork)
+/// <summary>UC14 step 10: replaces the saved projection of the user; a payment of a debt, or a subscription, that is not the user's is refused.</summary>
+public sealed class SaveProjectionHandler(ICurrentUser user, IProjectionRepository projections, IDebtRepository debts, ISubscriptionRepository subscriptions, IUnitOfWork unitOfWork)
     : IRequestHandler<SaveProjectionCommand, SavedProjectionView>
 {
     public async Task<Result<SavedProjectionView>> HandleAsync(SaveProjectionCommand request, CancellationToken cancellationToken = default)
@@ -101,6 +110,13 @@ public sealed class SaveProjectionHandler(ICurrentUser user, IProjectionReposito
                 || payments.Take(item.index).Any(other => other.DebtId == item.payment.DebtId))
             .Select(item => new FieldError($"payments[{item.index}].debtId", ErrorCodes.InvalidValue))
             .ToList();
+        var subscriptionInputs = request.Subscriptions ?? [];
+        var ownSubscriptions = (await subscriptions.ListAsync(user.Id, cancellationToken).ConfigureAwait(false)).Select(subscription => subscription.Id).ToHashSet();
+        errors.AddRange(subscriptionInputs
+            .Select((item, index) => (item, index))
+            .Where(entry => !ownSubscriptions.Contains(entry.item.SubscriptionId!.Value)
+                || subscriptionInputs.Take(entry.index).Any(other => other.SubscriptionId == entry.item.SubscriptionId))
+            .Select(entry => new FieldError($"subscriptions[{entry.index}].subscriptionId", ErrorCodes.InvalidValue)));
         if (errors.Count > 0)
         {
             return Result<SavedProjectionView>.Invalid(errors);
@@ -116,6 +132,7 @@ public sealed class SaveProjectionHandler(ICurrentUser user, IProjectionReposito
             request.Inflation!.Value,
             request.InflationOn,
             payments.Select(payment => new ProjectionPayment(payment.DebtId!.Value, payment.Amount!.Value)).ToList(),
+            subscriptionInputs.Select(item => new ProjectionSubscription(item.SubscriptionId!.Value, item.Amount!.Value, item.Included ?? true)).ToList(),
             (request.Events ?? []).Select(item => new ProjectionEvent(item.Month!.Value, item.Amount!.Value, item.Note!)).ToList(),
             request.Goal);
 

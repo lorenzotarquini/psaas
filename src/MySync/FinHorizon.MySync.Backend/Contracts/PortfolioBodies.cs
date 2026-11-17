@@ -8,3 +8,12 @@ public sealed record DebtBody(string? Kind, string? Name, string? Description, s
 
 /// <summary>The body of PUT /api/categories/{id}/fixed (UC15).</summary>
 public sealed record CategoryFixedBody(bool Fixed);
+
+/// <summary>The body of PUT /api/subscriptions/{id} (UC16 flow M).</summary>
+public sealed record SubscriptionBody(string? Name, string? Description, Guid? AccountId, Guid? CategoryId, decimal? Amount, DateOnly? FirstChargeOn);
+
+/// <summary>The body of POST /api/subscriptions/{id}/cancel (UC16-R13).</summary>
+public sealed record CancelSubscriptionBody(DateOnly? EndsOn);
+
+/// <summary>The body of POST /api/subscriptions/{id}/skip (UC16-R9).</summary>
+public sealed record SkipChargeBody(DateOnly? DueOn);

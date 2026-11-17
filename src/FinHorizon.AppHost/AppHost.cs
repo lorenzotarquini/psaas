@@ -35,6 +35,7 @@ builder.AddViteApp("adminportal-frontend", "../AdminPortal/FinHorizon.AdminPorta
 // and the time zone that decides "today".
 var mySyncMaxAccounts = builder.AddParameter("mysync-max-accounts");
 var mySyncMaxDebts = builder.AddParameter("mysync-max-debts");
+var mySyncMaxSubscriptions = builder.AddParameter("mysync-max-subscriptions");
 var mySyncTimeZone = builder.AddParameter("mysync-time-zone");
 // UC13: catalog of currencies and exchange rates (Frankfurter v2, no key).
 var mySyncRatesUrl = builder.AddParameter("mysync-rates-url");
@@ -44,6 +45,7 @@ var mySyncBackend = builder.AddProject<Projects.FinHorizon_MySync_Backend>("mysy
     .WaitFor(mySyncDb)
     .WithEnvironment("MySync__MaxAccounts", mySyncMaxAccounts)
     .WithEnvironment("MySync__MaxDebts", mySyncMaxDebts)
+    .WithEnvironment("MySync__MaxSubscriptions", mySyncMaxSubscriptions)
     .WithEnvironment("Calendar__TimeZone", mySyncTimeZone)
     .WithEnvironment("Currencies__Url", mySyncRatesUrl);
 

@@ -7,6 +7,7 @@ using FinHorizon.MySync.Domain.Accounts;
 using FinHorizon.MySync.Domain.Categories;
 using FinHorizon.MySync.Domain.Common;
 using FinHorizon.MySync.Domain.Debts;
+using FinHorizon.MySync.Domain.Subscriptions;
 using FinHorizon.MySync.Domain.Transactions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Time.Testing;
@@ -33,6 +34,7 @@ internal sealed class ApplicationHarness : IDisposable
         services.AddSingleton<IDebtRepository>(new FakeDebts(Store));
         services.AddSingleton<ICategoryRepository>(new FakeCategories(Store));
         services.AddSingleton<ITransactionRepository>(new FakeTransactions(Store));
+        services.AddSingleton<ISubscriptionRepository>(new FakeSubscriptions(Store));
         var ledger = new FakeLedger(Store);
         services.AddSingleton<ILedgerReader>(ledger);
         services.AddSingleton<ITransactionReader>(ledger);
@@ -86,11 +88,19 @@ internal sealed class ApplicationHarness : IDisposable
         return category;
     }
 
-    public Transaction GivenExpense(Account account, Category category, decimal amount, Debt? debt = null)
+    public Subscription GivenSubscription(Account account, Category category, string name = "Netflix", decimal amount = 17.99m, DateOnly? firstChargeOn = null, DateOnly? createdOn = null)
+    {
+        var subscription = Subscription.Start(
+            account.OwnerId, new Descriptor(name, null, null), account.Id, account.Currency, category.Id, new Money(amount), firstChargeOn ?? Store.Today, createdOn ?? Store.Today);
+        Store.Subscriptions.Add(subscription);
+        return subscription;
+    }
+
+    public Transaction GivenExpense(Account account, Category category, decimal amount, Debt? debt = null, Subscription? subscription = null, DateOnly? date = null)
     {
         var transaction = Transaction.Record(
             account.OwnerId,
-            new TransactionData(TransactionKind.Expense, Store.Today, new Money(amount), account.Id, category.Id, debt?.Id, null),
+            new TransactionData(TransactionKind.Expense, date ?? Store.Today, new Money(amount), account.Id, category.Id, debt?.Id, null, SubscriptionId: subscription?.Id),
             DateTimeOffset.UtcNow);
         Store.Transactions.Add(transaction);
         return transaction;

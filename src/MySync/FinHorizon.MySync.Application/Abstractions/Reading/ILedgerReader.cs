@@ -20,6 +20,12 @@ public interface ILedgerReader
     /// <summary>Installments paid on one debt, leaving out the movement being amended (UC8-M3b).</summary>
     Task<Money> InstallmentsPaidAsync(OwnerId owner, Guid debtId, Guid? exceptTransactionId, CancellationToken cancellationToken = default);
 
+    /// <summary>UC16: the dates of the expenses linked to each subscription, or to one when <paramref name="subscriptionId"/> is given.</summary>
+    Task<IReadOnlyList<SubscriptionPayment>> SubscriptionPaymentsAsync(OwnerId owner, Guid? subscriptionId = null, CancellationToken cancellationToken = default);
+
     /// <summary>The history of the accounts and debts in <paramref name="scope"/> only (UC12), in their currencies (UC13).</summary>
     Task<LedgerHistory> HistoryAsync(OwnerId owner, PortfolioScope scope, CancellationToken cancellationToken = default);
 }
+
+/// <summary>An expense linked to a subscription (UC16-R11): only its day matters.</summary>
+public sealed record SubscriptionPayment(Guid SubscriptionId, DateOnly Date);

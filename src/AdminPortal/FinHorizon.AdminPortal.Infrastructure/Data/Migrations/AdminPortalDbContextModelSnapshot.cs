@@ -583,6 +583,30 @@ namespace FinHorizon.AdminPortal.Infrastructure.Data.Migrations
                     b.ToTable("Tenants", (string)null);
                 });
 
+            modelBuilder.Entity("FinHorizon.AdminPortal.Infrastructure.Payments.PaymentEventDbModel", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("ReceivedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReceivedAt");
+
+                    b.ToTable("PaymentEvents", (string)null);
+                });
+
             modelBuilder.Entity("FinHorizon.AdminPortal.Infrastructure.Repositories.Views.SavedViewDbModel", b =>
                 {
                     b.Property<Guid>("Id")

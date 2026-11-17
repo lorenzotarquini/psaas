@@ -1,6 +1,7 @@
 import type { Account } from '@/entities/account'
 import type { Category } from '@/entities/category'
 import type { Debt } from '@/entities/debt'
+import type { Membership } from '@/entities/membership'
 import type { ProjectionData, ProjectionParameters } from '@/entities/projection'
 import type { Subscription } from '@/entities/subscription'
 import type { Transaction } from '@/entities/transaction'
@@ -41,6 +42,22 @@ export class FakeApi {
     monthsOfData: 6,
     saved: null,
   }
+  /** UC17: subscribed by default, so the other scenarios write freely. */
+  membership: Membership = {
+    status: 'Active',
+    canWrite: true,
+    price: 4.99,
+    currency: 'EUR',
+    interval: 'Month',
+    currentPeriodEnd: '2026-12-15T09:00:00+00:00',
+    cancelAtPeriodEnd: false,
+    card: { brand: 'visa', last4: '4242', expMonth: 12, expYear: 2030 },
+    lastFailure: null,
+    payUrl: null,
+    hasCustomer: true,
+  }
+  /** UC17 step 4: what Stripe says when MySync reads the state again. */
+  membershipAfterRefresh: Membership | null = null
   requests: { method: string; path: string; body?: Json }[] = []
   /** Path and query of every call, in order. */
   urls: string[] = []
@@ -143,6 +160,13 @@ export class FakeApi {
       if (action === 'skip' || action === 'resume') Object.assign(subscription, action === 'skip' ? { dueOn: null } : { endsOn: null, active: true })
       if (action === 'cancel') subscription.endsOn = String(body!.endsOn)
       return ok(subscription)
+    }
+    if (method === 'GET' && path === '/api/membership') return ok(this.membership)
+    if (method === 'POST' && path === '/api/membership/checkout') return ok({ url: 'https://checkout.stripe.test/session' })
+    if (method === 'POST' && path === '/api/membership/portal') return ok({ url: 'https://billing.stripe.test/session' })
+    if (method === 'POST' && path === '/api/membership/refresh') {
+      if (this.membershipAfterRefresh) this.membership = this.membershipAfterRefresh
+      return ok(this.membership)
     }
     if (method === 'GET' && path === '/api/currencies') return ok(fakeCurrencies)
     if (method === 'GET' && path === '/api/preferences') return ok(this.preferences)

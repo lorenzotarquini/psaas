@@ -2,11 +2,12 @@ import { useTranslation } from 'react-i18next'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faKey, faUserPen } from '@fortawesome/free-solid-svg-icons'
 import { DisplayCurrencySetting } from '@/features/display-currency'
+import { MembershipSettings } from '@/features/membership-settings'
 import { LanguageSwitcher, ThemeToggle } from '@/features/preferences'
 import { session } from '@/shared/auth'
 
 /**
- * UC11: the user's own data and password. Both are edited on Keycloak's pages (Application Initiated Actions):
+ * UC11: the user's own data and password; UC17: the subscription to MySync. Both are edited on Keycloak's pages (Application Initiated Actions):
  * MySync never sees the password and needs no admin rights on the realm.
  */
 export function SettingsPage() {
@@ -25,6 +26,8 @@ export function SettingsPage() {
         <h1 className="text-2xl font-semibold">{t('settings.title')}</h1>
         <p className="muted">{t('settings.subtitle')}</p>
       </header>
+
+      <MembershipSettings />
 
       <section className="surface flex flex-col gap-4 p-5" aria-labelledby="settings-profile">
         <header className="flex flex-wrap items-center justify-between gap-2">

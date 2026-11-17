@@ -300,3 +300,45 @@ internal sealed class FakeProjections : IProjectionRepository
 
     public void Remove(Domain.Projection.ProjectionSettings settings) => Items.Remove(settings);
 }
+
+/// <summary>UC17: the copies of the subscriptions to MySync.</summary>
+internal sealed class FakeMemberships : IMembershipRepository
+{
+    public List<Domain.Memberships.Membership> Items { get; } = [];
+
+    public Task<Domain.Memberships.Membership?> GetAsync(OwnerId ownerId, CancellationToken cancellationToken = default) =>
+        Task.FromResult(Items.SingleOrDefault(item => item.OwnerId == ownerId));
+
+    public Task<Domain.Memberships.Membership?> GetByCustomerAsync(string customerId, CancellationToken cancellationToken = default) =>
+        Task.FromResult(Items.SingleOrDefault(item => item.CustomerId == customerId));
+
+    public void Add(Domain.Memberships.Membership membership) => Items.Add(membership);
+}
+
+/// <summary>UC17: Stripe answering from a dictionary.</summary>
+internal sealed class FakePaymentProvider : Abstractions.Payments.IPaymentProvider
+{
+    public Dictionary<string, Domain.Memberships.MembershipSnapshot> Snapshots { get; } = [];
+
+    public int CustomersCreated { get; private set; }
+
+    public int SnapshotCalls { get; private set; }
+
+    public Task<string> CreateCustomerAsync(OwnerId ownerId, string? email, string? name, CancellationToken cancellationToken = default)
+    {
+        CustomersCreated++;
+        return Task.FromResult($"cus_{ownerId.Value}");
+    }
+
+    public Task<Uri> CreateCheckoutAsync(string customerId, OwnerId ownerId, Uri returnUrl, CancellationToken cancellationToken = default) =>
+        Task.FromResult(new Uri($"https://checkout.test/{customerId}"));
+
+    public Task<Uri> CreatePortalAsync(string customerId, Uri returnUrl, CancellationToken cancellationToken = default) =>
+        Task.FromResult(new Uri($"https://portal.test/{customerId}"));
+
+    public Task<Domain.Memberships.MembershipSnapshot> GetSnapshotAsync(string customerId, CancellationToken cancellationToken = default)
+    {
+        SnapshotCalls++;
+        return Task.FromResult(Snapshots.GetValueOrDefault(customerId, Domain.Memberships.MembershipSnapshot.None));
+    }
+}

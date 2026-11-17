@@ -28,6 +28,9 @@ public sealed class AdminPortalHost(string connectionString) : WebApplicationFac
 
     public FakeImpersonation Impersonation { get; } = new();
 
+    /// <summary>Secret of the Stripe webhook (UC33); empty = not configured.</summary>
+    public string StripeWebhookSecret { get; init; } = StripeEvents.Secret;
+
     /// <summary>
     /// The clock of the backend: scenarios move it forward (due dates, renewals). It ticks by itself so events keep their order.
     /// </summary>
@@ -39,6 +42,7 @@ public sealed class AdminPortalHost(string connectionString) : WebApplicationFac
         // Scenarios drive retries themselves.
         builder.UseSetting("Provisioning:RetryMinutes", "0");
         builder.UseSetting("Billing:RunHours", "0");
+        builder.UseSetting("Stripe:WebhookSecret", StripeWebhookSecret);
         builder.ConfigureTestServices(services =>
         {
             services.Configure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>

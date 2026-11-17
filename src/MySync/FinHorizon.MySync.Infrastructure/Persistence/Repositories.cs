@@ -93,3 +93,14 @@ internal sealed class TransactionRepository(MySyncDbContext db) : OwnedRepositor
 {
     public void Remove(Transaction transaction) => Db.Transactions.Remove(transaction);
 }
+
+internal sealed class MembershipRepository(MySyncDbContext db) : IMembershipRepository
+{
+    public Task<Domain.Memberships.Membership?> GetAsync(OwnerId ownerId, CancellationToken cancellationToken = default) =>
+        db.Memberships.SingleOrDefaultAsync(membership => membership.OwnerId == ownerId, cancellationToken);
+
+    public Task<Domain.Memberships.Membership?> GetByCustomerAsync(string customerId, CancellationToken cancellationToken = default) =>
+        db.Memberships.SingleOrDefaultAsync(membership => membership.CustomerId == customerId, cancellationToken);
+
+    public void Add(Domain.Memberships.Membership membership) => db.Memberships.Add(membership);
+}

@@ -69,3 +69,4 @@ Ogni scenario di accettazione (`UCn-Sm`) scende negli strati interni: qui si ved
 | UC25 | Righe non valide (metrica, tipo, data), lotti vuoti o oltre 500, totale come somma o ultimo valore, Keycloak giù | `UsageServiceTests.UC25_*` |
 | UC26 | Probe che falliscono o vanno in timeout = Non raggiungibile; stato complessivo peggiore, senza i non configurati | `UsageServiceTests.UC26_*` |
 | UC24-R4 | Pagamento e annullamento consentiti solo su fatture aperte, motivo obbligatorio, sospensione solo dei clienti attivi, soglia 0 = mai | `BillingServiceTests.UC24_*` |
+| UC33-S1, R2 | Evento registrato con la data di ricezione; stesso id una volta sola | `PaymentEventServiceTests.UC33_*` |

@@ -25,6 +25,8 @@ public sealed class MySyncDbContext(DbContextOptions<MySyncDbContext> options) :
 
     public DbSet<Domain.Projection.ProjectionSettings> Projections => Set<Domain.Projection.ProjectionSettings>();
 
+    public DbSet<Domain.Memberships.Membership> Memberships => Set<Domain.Memberships.Membership>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ArgumentNullException.ThrowIfNull(modelBuilder);

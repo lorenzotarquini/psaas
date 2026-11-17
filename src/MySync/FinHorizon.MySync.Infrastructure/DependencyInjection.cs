@@ -36,6 +36,16 @@ public static class DependencyInjection
         services.AddScoped<IPreferencesRepository, PreferencesRepository>();
         services.AddScoped<IProjectionRepository, ProjectionRepository>();
         services.AddScoped<IProjectionReader, ProjectionReader>();
+        services.AddScoped<IMembershipRepository, MembershipRepository>();
+
+        // UC17: Stripe. Without keys MySync works and the payment calls answer 503.
+        services.AddOptions<Payments.StripeOptions>().Bind(configuration.GetSection(Payments.StripeOptions.SectionName));
+        services.AddOptions<Application.Features.Memberships.MembershipOptions>()
+            .Bind(configuration.GetSection(Application.Features.Memberships.MembershipOptions.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+        services.AddSingleton<Application.Abstractions.Payments.IPaymentProvider, Payments.StripePaymentProvider>();
+        services.AddSingleton<Application.Abstractions.Payments.IPaymentWebhook, Payments.StripePaymentWebhook>();
 
         // UC13, D10: catalog and rates from Frankfurter, kept in memory (R9).
         services.AddMemoryCache();

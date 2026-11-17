@@ -52,7 +52,38 @@ public abstract class AcceptanceTest(PostgresFixture database) : IAsyncLifetime
 
     protected HttpClient Anonymous() => Host.CreateClient();
 
-    protected HttpClient UserClient(string name) => ClientWith(KeycloakTokens.EndUser(name));
+    /// <summary>
+    /// A MySync user. Subscribed unless told otherwise: the scenarios of the other use cases write freely,
+    /// UC17 builds the expired and failing users it needs.
+    /// </summary>
+    protected HttpClient UserClient(string name, bool subscribed = true)
+    {
+        if (subscribed)
+        {
+            GivenActiveMembership(name);
+        }
+
+        return ClientWith(KeycloakTokens.EndUser(name));
+    }
+
+    /// <summary>The Stripe customer of a user subscribed by <see cref="UserClient"/>.</summary>
+    protected static string CustomerOf(string name) => $"cus_seed_{name.ToLowerInvariant()}";
+
+    /// <summary>"Dato che ... è abbonato": the copy of an active subscription, as the webhook would have left it.</summary>
+    private void GivenActiveMembership(string name)
+    {
+        using var connection = new Npgsql.NpgsqlConnection(database.ConnectionString);
+        connection.Open();
+        using var command = new Npgsql.NpgsqlCommand(
+            """
+            INSERT INTO "Memberships" ("OwnerId", "CustomerId", "Status", "CancelAtPeriodEnd", "UpdatedAt")
+            VALUES (@owner, @customer, 'Active', false, now()) ON CONFLICT DO NOTHING
+            """,
+            connection);
+        command.Parameters.AddWithValue("owner", $"kc-{name.ToLowerInvariant()}");
+        command.Parameters.AddWithValue("customer", CustomerOf(name));
+        command.ExecuteNonQuery();
+    }
 
     protected HttpClient ClientWith(string token)
     {

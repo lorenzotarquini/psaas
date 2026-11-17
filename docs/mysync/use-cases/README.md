@@ -28,6 +28,7 @@ Da questi dati MySync calcola il **patrimonio netto** e ne mostra l'andamento ne
 |---|---|
 | Utente | Una persona fisica con un account FinHorizon creato dall'Admin Portal (UC6 dell'Admin Portal). Entra solo con il modulo MySync, cioè il ruolo di realm Keycloak `module-mysync` assegnato dall'Admin Portal (UC32). Vede e modifica **solo i propri dati**. |
 | Keycloak | Sistema esterno di identità: autentica l'utente. MySync identifica l'utente con il `sub` del token. |
+| Stripe | Sistema esterno di pagamento: incassa l'abbonamento a MySync, rinnova, riprova i pagamenti falliti e manda fatture ed email (UC17). |
 
 ## Glossario
 
@@ -85,13 +86,14 @@ Da questi dati MySync calcola il **patrimonio netto** e ne mostra l'andamento ne
 | RF22 | La dashboard mostra il patrimonio previsto tra 12 mesi. | UC4, UC14 |
 | RF23 | L'utente crea, modifica, annulla, riattiva ed elimina i propri abbonamenti mensili. Il numero massimo di abbonamenti non annullati è dato dalla configurazione `MySync:MaxSubscriptions` (variabile d'ambiente `MySync__MaxSubscriptions`). | UC16 |
 | RF24 | La dashboard mostra gli abbonamenti da registrare; un clic apre la spesa già compilata. Una spesa può essere collegata a un abbonamento. | UC4, UC16 |
+| RF26 | L'utente paga MySync da solo su Stripe (4,99 € al mese), vede nelle Impostazioni stato, rinnovo, metodo di pagamento ed errore dell'ultimo pagamento, e rinnova; con l'abbonamento scaduto MySync è in sola lettura. | UC17 |
 | RF25 | La proiezione considera gli abbonamenti uno per uno, con la loro data di fine, e permette di toglierne uno per vedere cosa cambia. | UC14, UC16 |
 
 ### Non funzionali
 
 | Id | Requisito |
 |---|---|
-| RNF1 | Ogni operazione richiede un utente autenticato su Keycloak con ruolo `module-mysync` (policy `User`); senza, il frontend mostra "Non hai accesso a MySync". |
+| RNF1 | Ogni operazione richiede un utente autenticato su Keycloak con ruolo `module-mysync` (policy `User`); senza, il frontend mostra "Non hai accesso a MySync". Con l'abbonamento a MySync scaduto le modifiche rispondono `402` (UC17-R4). |
 | RNF2 | Isolamento: ogni dato appartiene a un utente (`sub` del token) e nessuna operazione legge o modifica dati di un altro utente. Un id di un altro utente si comporta come un id inesistente (404, mai 403, per non rivelarne l'esistenza). |
 | RNF3 | Gli importi sono nella valuta del loro conto, con 2 decimali per le valute tradizionali e 8 per le criptovalute, e si salvano come `decimal` (mai `float`/`double`). |
 | RNF4 | Le date dei movimenti sono date di calendario (senza ora né fuso). |
@@ -119,6 +121,7 @@ Da questi dati MySync calcola il **patrimonio netto** e ne mostra l'andamento ne
 | [UC14](UC14-proiettare-il-patrimonio.md) | Proiettare il patrimonio | in ambito |
 | [UC15](UC15-spese-fisse-e-variabili.md) | Indicare le spese fisse (di supporto a UC14) | in ambito |
 | [UC16](UC16-gestire-abbonamenti.md) | Gestire gli abbonamenti | in ambito |
+| [UC17](UC17-abbonamento-mysync.md) | Pagare l'abbonamento a MySync (Stripe) | in ambito |
 
 Contratto HTTP: [API.md](API.md).
 
@@ -160,6 +163,9 @@ Prese il 2026-11-15.
 | D18 | Mettere soldi da parte cambia il patrimonio? | No, è un trasferimento (UC9). Nella proiezione la quota messa da parte passa dalla liquidità agli investimenti, e conta solo per il rendimento. Decisa il 2026-11-17. |
 | D19 | Gli abbonamenti registrano da soli i loro pagamenti? | No: MySync segnala l'addebito da registrare e un clic apre la spesa già compilata, che l'utente conferma. Il saldo cambia solo con ciò che l'utente salva, non servono job in background e un movimento eliminato non si ricrea da solo. La registrazione automatica è nella fase 2 di UC16. Decisa il 2026-11-17. |
 | D20 | Nella proiezione un abbonamento conta per la media delle sue spese o per il suo importo? | Per il suo importo di oggi, con primo addebito e data di fine: un abbonamento nuovo conta subito per intero e uno annullato esce dai mesi dopo la data di fine, senza aspettare che la media dei 6 mesi se ne accorga. Decisa il 2026-11-17. |
+
+| D21 | Chi incassa MySync e dove si decide la sola lettura? | Il backend di MySync, direttamente con Stripe: cliente Stripe = utente Keycloak del gruppo `end_users`, copia dello stato in `mysync-db` aggiornata dai webhook. Così il controllo su ogni modifica legge il database di MySync e non serve un client Keycloak fra MySync e Admin Portal. L'Admin Portal resta il punto di Stripe per le organizzazioni ([STRIPE.md](../../admin-portal/STRIPE.md)). Decisa il 2026-11-17. |
+| D22 | Cosa succede a chi usava MySync prima di Stripe? | Ha l'abbonamento scaduto: entra, vede i suoi dati e rinnova dalle Impostazioni. Nessuna migrazione. Decisa il 2026-11-17. |
 
 Non ci sono domande aperte.
 

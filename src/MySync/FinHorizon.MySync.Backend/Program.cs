@@ -32,6 +32,7 @@ try
         .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
     builder.Services.AddProblemDetails();
     builder.Services.AddExceptionHandler<CurrencyServiceExceptionHandler>();
+    builder.Services.AddExceptionHandler<PaymentProviderExceptionHandler>();
     builder.Services.AddHealthChecks();
     builder.Services.AddOpenApi();
     builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy
@@ -58,6 +59,8 @@ try
     // One line per request and the pseudonymous user on every line (after authentication, before authorization).
     app.UseRequestLogging();
     app.UseAuthorization();
+    // UC17-R4: read-only while the subscription to MySync is expired (after authorization: only users of MySync get here).
+    app.UseMiddleware<MembershipWriteGate>();
 
     app.MapHealthChecks("/health");
 

@@ -121,3 +121,5 @@ public sealed record SearchTenantView(Guid Id, string CompanyName);
 public sealed record SearchView(List<SearchTenantView> Tenants, List<UserView> Users, bool UsersUnavailable);
 
 public sealed record TicketView(string Url, DateTimeOffset ExpiresAt);
+
+public sealed record PaymentEventView(string Id, string Type, DateTimeOffset CreatedAt, DateTimeOffset ReceivedAt);

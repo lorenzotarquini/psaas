@@ -27,6 +27,9 @@ export async function readFieldErrors(response: Response): Promise<FieldErrors> 
   }
 }
 
+/** UC17-R4: a change refused because the subscription to MySync expired (HTTP 402). */
+export const membershipExpiredEvent = 'mysync:membership-expired'
+
 type Method = 'GET' | 'POST' | 'PUT' | 'DELETE'
 
 // Relative /api: proxied to the backend by Vite in dev (vite.config.ts).
@@ -47,6 +50,7 @@ async function request<T>(method: Method, path: string, body?: unknown, signal?:
     logger.error({ method, path, status: response.status, fields: Object.keys(fieldErrors) }, 'API call failed')
     // Token rejected despite the refresh: the session is gone, start a new login.
     if (response.status === 401) void session.login()
+    if (response.status === 402) window.dispatchEvent(new Event(membershipExpiredEvent))
     throw new ApiError(response.status, path, fieldErrors)
   }
   return response.status === 204 ? (undefined as T) : ((await response.json()) as T)

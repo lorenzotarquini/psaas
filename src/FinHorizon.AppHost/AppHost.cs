@@ -60,6 +60,25 @@ var adminPortalBackend = builder.AddProject<Projects.FinHorizon_AdminPortal_Back
     .WithEnvironment("Email__From", "noreply@finhorizon.local")
     .WithEnvironment("Email__PickupDirectory", Path.GetFullPath(Path.Combine(builder.AppHostDirectory, "../mail_pickup")));
 
+// Stripe sandbox (docs/admin-portal/STRIPE.md): the secret key (sk_test_…) and the signing secret of the Stripe CLI
+// (whsec_…), both in appsettings.Development.json or user secrets, never in git.
+var stripeSecretKey = builder.AddParameter("stripe-secret-key", secret: true);
+var stripeWebhookSecret = builder.AddParameter("stripe-webhook-secret", secret: true);
+adminPortalBackend.WithEnvironment("Stripe__WebhookSecret", stripeWebhookSecret);
+
+// UC33 locally: the Stripe CLI receives the events of the sandbox and forwards them to the backend webhook.
+// --skip-verify because the backend uses the development certificate.
+builder.AddContainer("stripe-cli", "stripe/stripe-cli", "v1.55.6")
+    .WithEnvironment("STRIPE_API_KEY", stripeSecretKey)
+    .WithArgs(context =>
+    {
+        context.Args.Add("listen");
+        context.Args.Add("--forward-to");
+        context.Args.Add(ReferenceExpression.Create($"{adminPortalBackend.GetEndpoint("https")}/api/stripe/webhook"));
+        context.Args.Add("--skip-verify");
+    })
+    .WaitFor(adminPortalBackend);
+
 // Fixed port: it must match the redirect URIs and web origins of the Keycloak client adminportal-frontend.
 builder.AddViteApp("adminportal-frontend", "../AdminPortal/FinHorizon.AdminPortal.Frontend")
     .WithEndpoint("http", endpoint => endpoint.Port = 5173)
@@ -86,6 +105,26 @@ var mySyncBackend = builder.AddProject<Projects.FinHorizon_MySync_Backend>("mysy
     .WithEnvironment("MySync__MaxSubscriptions", mySyncMaxSubscriptions)
     .WithEnvironment("Calendar__TimeZone", mySyncTimeZone)
     .WithEnvironment("Currencies__Url", mySyncRatesUrl);
+
+// UC17 of MySync: the subscription of each user to MySync is paid on Stripe (same sandbox). MySync keeps its own copy
+// of the state, so it has its own Stripe CLI forwarding the events to its webhook; Stripe returns to the frontend.
+var mySyncMembershipPrice = builder.AddParameter("mysync-membership-price");
+mySyncBackend
+    .WithEnvironment("Membership__Price", mySyncMembershipPrice)
+    .WithEnvironment("Stripe__SecretKey", stripeSecretKey)
+    .WithEnvironment("Stripe__WebhookSecret", stripeWebhookSecret)
+    .WithEnvironment("Membership__FrontendUrl", "http://localhost:5174");
+
+builder.AddContainer("stripe-cli-mysync", "stripe/stripe-cli", "v1.55.6")
+    .WithEnvironment("STRIPE_API_KEY", stripeSecretKey)
+    .WithArgs(context =>
+    {
+        context.Args.Add("listen");
+        context.Args.Add("--forward-to");
+        context.Args.Add(ReferenceExpression.Create($"{mySyncBackend.GetEndpoint("https")}/api/membership/webhook"));
+        context.Args.Add("--skip-verify");
+    })
+    .WaitFor(mySyncBackend);
 
 // Fixed port: it must match the redirect URIs and web origins of the Keycloak client mysync-frontend.
 builder.AddViteApp("mysync-frontend", "../MySync/FinHorizon.MySync.Frontend")

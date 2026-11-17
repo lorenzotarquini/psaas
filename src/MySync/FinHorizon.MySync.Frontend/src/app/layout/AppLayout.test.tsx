@@ -1,19 +1,29 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { describe, expect, it, vi } from 'vitest'
+import { FakeApi } from '@/test/fakeApi'
 import { AppLayout } from './AppLayout'
 
 vi.mock('@/shared/auth', () => ({
   session: {
+    headers: () => Promise.resolve({}),
     userName: () => 'Mario Rossi',
     profile: () => ({ firstName: 'Mario', lastName: 'Rossi', email: 'mario@example.com', username: 'mario' }),
     logout: vi.fn(),
   },
 }))
 
-const renderLayout = () =>
-  render(<RouterProvider router={createMemoryRouter([{ path: '/', Component: AppLayout, children: [{ index: true, element: <p>Pagina</p> }] }])} />)
+// The layout reads the subscription to MySync (UC17 banner): an active one on the fake API shows nothing.
+const renderLayout = () => {
+  vi.stubGlobal('fetch', new FakeApi().fetch)
+  return render(
+    <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+      <RouterProvider router={createMemoryRouter([{ path: '/', Component: AppLayout, children: [{ index: true, element: <p>Pagina</p> }] }])} />
+    </QueryClientProvider>,
+  )
+}
 
 describe('AppLayout sidebar', () => {
   it('starts collapsed and expands with the sidebar button at the left of the topbar, showing the name and a label per icon', async () => {

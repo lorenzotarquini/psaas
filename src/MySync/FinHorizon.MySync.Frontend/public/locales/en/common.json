@@ -421,5 +421,43 @@
       "category": "Category",
       "endsOn": "End date"
     }
+  },
+  "membership": {
+    "title": "MySync subscription",
+    "status": {
+      "Active": "Active",
+      "PastDue": "Payment failed",
+      "Expired": "Expired"
+    },
+    "price": "Price",
+    "perMonth": "{{amount}} per month",
+    "renewsOn": "Next renewal",
+    "endsOn": "Ends on",
+    "paymentMethod": "Payment method",
+    "card": "{{brand}} •••• {{last4}}, expires {{month}}/{{year}}",
+    "noCard": "None",
+    "expiredHelp": "Your subscription has expired: you can look at your data but not change it. Renew to use MySync again.",
+    "failed": "The payment of {{date}} did not go through: {{reason}}",
+    "failures": {
+      "card_declined": "the card was declined.",
+      "generic_decline": "the card was declined by the bank.",
+      "insufficient_funds": "insufficient funds on the card.",
+      "expired_card": "the card has expired.",
+      "incorrect_cvc": "the security code is incorrect.",
+      "processing_error": "a processing error occurred, please try again.",
+      "authentication_required": "your bank asks you to confirm the payment.",
+      "lost_card": "the card is reported lost.",
+      "stolen_card": "the card is reported stolen.",
+      "other": "try again or use another payment method."
+    },
+    "checking": "Checking the payment…",
+    "unavailable": "The payment service is not answering: try again shortly.",
+    "renew": "Renew",
+    "payNow": "Pay now",
+    "updateMethod": "Update payment method",
+    "manage": "Manage subscription",
+    "fix": "Fix the payment",
+    "bannerExpired": "Subscription expired: MySync is read-only.",
+    "bannerPastDue": "The last payment failed: update your payment method to keep your access."
   }
 }

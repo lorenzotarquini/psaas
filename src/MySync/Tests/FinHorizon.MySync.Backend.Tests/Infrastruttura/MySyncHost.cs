@@ -15,11 +15,18 @@ public sealed class MySyncHost(string connectionString, IReadOnlyDictionary<stri
 
     public FakeCurrencies Currencies { get; } = new();
 
+    /// <summary>UC17: Stripe.</summary>
+    public FakePayments Payments { get; } = new();
+
+    public const string FrontendUrl = "http://mysync.test";
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
         builder.UseSetting("ConnectionStrings:mysync-db", connectionString);
         builder.UseSetting("Currencies:Url", "https://frankfurter.test/");
+        builder.UseSetting("Stripe:WebhookSecret", StripeEvents.Secret);
+        builder.UseSetting("Membership:FrontendUrl", FrontendUrl);
         foreach (var (key, value) in settings ?? new Dictionary<string, string>())
         {
             builder.UseSetting(key, value);
@@ -38,6 +45,7 @@ public sealed class MySyncHost(string connectionString, IReadOnlyDictionary<stri
             // UC13: the scenarios never call Frankfurter.
             services.AddSingleton<Application.Abstractions.Currencies.ICurrencyCatalog>(Currencies);
             services.AddSingleton<Application.Abstractions.Currencies.IExchangeRates>(Currencies);
+            services.AddSingleton<Application.Abstractions.Payments.IPaymentProvider>(Payments);
         });
     }
 }

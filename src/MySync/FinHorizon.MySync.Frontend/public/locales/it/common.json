@@ -421,5 +421,43 @@
       "category": "Categoria",
       "endsOn": "Data di fine"
     }
+  },
+  "membership": {
+    "title": "Abbonamento a MySync",
+    "status": {
+      "Active": "Attivo",
+      "PastDue": "Pagamento non riuscito",
+      "Expired": "Scaduto"
+    },
+    "price": "Prezzo",
+    "perMonth": "{{amount}} al mese",
+    "renewsOn": "Prossimo rinnovo",
+    "endsOn": "Termina il",
+    "paymentMethod": "Metodo di pagamento",
+    "card": "{{brand}} •••• {{last4}}, scade {{month}}/{{year}}",
+    "noCard": "Nessuno",
+    "expiredHelp": "Il tuo abbonamento è scaduto: puoi consultare i tuoi dati ma non modificarli. Rinnova per tornare a usare MySync.",
+    "failed": "Il pagamento del {{date}} non è andato a buon fine: {{reason}}",
+    "failures": {
+      "card_declined": "la carta è stata rifiutata.",
+      "generic_decline": "la carta è stata rifiutata dalla banca.",
+      "insufficient_funds": "fondi insufficienti sulla carta.",
+      "expired_card": "la carta è scaduta.",
+      "incorrect_cvc": "il codice di sicurezza non è corretto.",
+      "processing_error": "errore durante l'elaborazione, riprova.",
+      "authentication_required": "la banca chiede una conferma del pagamento.",
+      "lost_card": "la carta risulta smarrita.",
+      "stolen_card": "la carta risulta rubata.",
+      "other": "riprova o usa un altro metodo di pagamento."
+    },
+    "checking": "Verifica del pagamento in corso…",
+    "unavailable": "Il servizio di pagamento non risponde: riprova tra poco.",
+    "renew": "Rinnova",
+    "payNow": "Paga ora",
+    "updateMethod": "Aggiorna metodo di pagamento",
+    "manage": "Gestisci abbonamento",
+    "fix": "Sistema il pagamento",
+    "bannerExpired": "Abbonamento scaduto: MySync è in sola lettura.",
+    "bannerPastDue": "L'ultimo pagamento non è riuscito: aggiorna il metodo di pagamento per non perdere l'accesso."
   }
 }

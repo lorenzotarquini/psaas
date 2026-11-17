@@ -40,6 +40,8 @@ public static class DependencyInjection
         services.AddScoped<Features.Subscriptions.SubscriptionTargets>();
         services.AddScoped<Features.Subscriptions.SubscriptionReader>();
         services.AddScoped<Features.Currencies.CurrencyConverter>();
+        services.AddScoped<Features.Memberships.MembershipSync>();
+        services.AddOptions<Features.Memberships.MembershipOptions>();
         // Defaults here; the infrastructure binds and validates the configuration section.
         services.AddOptions<LimitsOptions>();
         services.AddScoped<IResourceLimits, ConfiguredResourceLimits>();

@@ -43,6 +43,10 @@ public static class DependencyInjection
         services.AddScoped<FinHorizon.AdminPortal.Application.Abstractions.Health.IServiceProbe, Usage.DatabaseProbe>();
         services.AddScoped<FinHorizon.AdminPortal.Application.Abstractions.Health.IServiceProbe, Usage.InvoiceTransmissionProbe>();
         services.AddScoped<FinHorizon.AdminPortal.Application.Abstractions.Views.ISavedViewRepository, Repositories.Views.SavedViewRepository>();
+        // UC33: Stripe webhooks; without the secret every call answers 503 (see docs/admin-portal/STRIPE.md).
+        services.AddSingleton<FinHorizon.AdminPortal.Application.Abstractions.Payments.IPaymentWebhookVerifier>(
+            new Payments.StripeWebhookVerifier(configuration["Stripe:WebhookSecret"]));
+        services.AddScoped<FinHorizon.AdminPortal.Application.Abstractions.Payments.IPaymentEventStore, Payments.PaymentEventStore>();
         services.AddScoped<ITenantWriteRepository, TenantWriteRepository>();
         services.AddScoped<ITenantUniquenessChecker, TenantUniquenessChecker>();
         services.AddScoped<IProfileReadRepository, ProfileReadRepository>();

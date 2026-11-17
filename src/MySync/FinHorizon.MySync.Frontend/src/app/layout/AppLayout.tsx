@@ -5,6 +5,7 @@ import { faChartLine, faGear, faRepeat, faWandMagicSparkles, faHouse, faRightLef
 import { CalculatorButton } from '@/features/calculator'
 import { LanguageSwitcher } from '@/features/preferences'
 import { storageKeys, useSessionState } from '@/shared/lib/session-state'
+import { MembershipBanner } from '@/widgets/membership-banner'
 import { UserMenu } from '@/widgets/user-menu'
 
 const navigation = [
@@ -73,6 +74,8 @@ export function AppLayout() {
         <LanguageSwitcher />
         <UserMenu />
       </header>
+
+      <MembershipBanner />
 
       <main className="px-4 pb-24 pt-4 md:px-6 md:pb-8">
         <Outlet />

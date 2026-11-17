@@ -36,6 +36,7 @@ Errori di validazione: `400` `ValidationProblem` con un codice per campo in `err
 | UC30 | `GET /api/search?q=` | esiste |
 | UC31 | `GET /api/impersonation` · `POST /api/users/{id}/impersonate` | esiste |
 | UC32 | `GET /api/users/{id}/modules` · `PUT/DELETE /api/users/{id}/modules/{moduleId}` | esiste |
+| UC33 | `POST /api/stripe/webhook` (anonimo, firma `Stripe-Signature`) · `GET /api/stripe/events?take=` | esiste |
 | UC24 | `GET /api/invoices?tenantId=&status=&search=&page=&pageSize=` · `GET /api/invoices/summary` · `GET /api/invoices/{id}` · `POST /api/invoices/{id}/payments` · `POST /api/invoices/{id}/cancel` | esiste |
 
 ## Contratti esistenti (sintesi)
@@ -114,6 +115,10 @@ Risposta: `{ items: [utente], totalCount, page, pageSize }` con utente = `{ id, 
 - Autorizzazione: policy `UsageReporter` (ruoli `UsageReporter` o `systemadministrator`). È l'unico endpoint fuori dalla policy `Administrator`: un service account con il solo `UsageReporter` riceve `403` sul resto dell'API.
 - Aggregazione giornaliera per cliente, modulo e metrica: i contatori si sommano, le misure tengono l'ultimo valore del giorno.
 - `GET /api/tenants/{id}/usage?days=30` (1–365) → `{ days, users, maxUsers, activeUsers, productiveUnits, maxProductiveUnits, metrics: [{ moduleId, moduleName, metric, kind, total, points: [{ day, value }] }] }` · `404`. `users`/`activeUsers` `null` se Keycloak non risponde; attivo = accesso negli ultimi 30 giorni.
+
+### UC33 – Eventi di Stripe
+- `POST /api/stripe/webhook`: corpo = evento Stripe così come arriva, header `Stripe-Signature`. Nessun token Keycloak (unica eccezione insieme a `/health`). → `200` (registrato o già ricevuto) · `400` firma assente, sbagliata o più vecchia di 5 minuti · `503` segreto `Stripe:WebhookSecret` non configurato.
+- `GET /api/stripe/events?take=50` (1–200) → `[{ id, type, createdAt, receivedAt }]` dal più recente · `400` `take` `InvalidValue`.
 
 ### UC26 – Stato dei servizi
 - `GET /api/system/services` → `{ status, checkedAt, services: [{ key, status: Up|Degraded|Down|NotConfigured, latencyMs, detail }] }`. Chiavi: `database`, `keycloak` (documento di discovery usato per validare i token), `keycloak-admin` (conteggio su un profilo inesistente), `city-list`, `module-hooks` (`detail` = moduli in errore), `invoice-transmission` (oggi `NotConfigured`).

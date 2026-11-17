@@ -192,6 +192,47 @@ namespace FinHorizon.MySync.Infrastructure.Data.Migrations
                     b.ToTable("Debts", (string)null);
                 });
 
+            modelBuilder.Entity("FinHorizon.MySync.Domain.Memberships.Membership", b =>
+                {
+                    b.Property<string>("OwnerId")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<bool>("CancelAtPeriodEnd")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset?>("CurrentPeriodEnd")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CustomerId")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("PayUrl")
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("SubscriptionId")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("OwnerId");
+
+                    b.HasIndex("CustomerId")
+                        .IsUnique();
+
+                    b.ToTable("Memberships", (string)null);
+                });
+
             modelBuilder.Entity("FinHorizon.MySync.Domain.Preferences.UserPreferences", b =>
                 {
                     b.Property<Guid>("Id")
@@ -414,6 +455,68 @@ namespace FinHorizon.MySync.Infrastructure.Data.Migrations
                         .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("FinHorizon.MySync.Domain.Memberships.Membership", b =>
+                {
+                    b.OwnsOne("FinHorizon.MySync.Domain.Memberships.PaymentCard", "Card", b1 =>
+                        {
+                            b1.Property<string>("MembershipOwnerId")
+                                .HasMaxLength(64)
+                                .HasColumnType("character varying(64)");
+
+                            b1.Property<string>("Brand")
+                                .IsRequired()
+                                .HasMaxLength(30)
+                                .HasColumnType("character varying(30)");
+
+                            b1.Property<int>("ExpMonth")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("ExpYear")
+                                .HasColumnType("integer");
+
+                            b1.Property<string>("Last4")
+                                .IsRequired()
+                                .HasMaxLength(4)
+                                .HasColumnType("character varying(4)");
+
+                            b1.HasKey("MembershipOwnerId");
+
+                            b1.ToTable("Memberships");
+
+                            b1.WithOwner()
+                                .HasForeignKey("MembershipOwnerId");
+                        });
+
+                    b.OwnsOne("FinHorizon.MySync.Domain.Memberships.PaymentFailure", "LastFailure", b1 =>
+                        {
+                            b1.Property<string>("MembershipOwnerId")
+                                .HasMaxLength(64)
+                                .HasColumnType("character varying(64)");
+
+                            b1.Property<string>("Code")
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)");
+
+                            b1.Property<DateTimeOffset>("FailedAt")
+                                .HasColumnType("timestamp with time zone");
+
+                            b1.Property<string>("Message")
+                                .HasMaxLength(500)
+                                .HasColumnType("character varying(500)");
+
+                            b1.HasKey("MembershipOwnerId");
+
+                            b1.ToTable("Memberships");
+
+                            b1.WithOwner()
+                                .HasForeignKey("MembershipOwnerId");
+                        });
+
+                    b.Navigation("Card");
+
+                    b.Navigation("LastFailure");
                 });
 
             modelBuilder.Entity("FinHorizon.MySync.Domain.Projection.ProjectionSettings", b =>

@@ -39,6 +39,7 @@ public static class DependencyInjection
         services.AddScoped<UserManagementService>();
         services.AddScoped<UserModuleService>();
         services.AddScoped<UserImportService>();
+        services.AddScoped<Services.Payments.PaymentEventService>();
 
         return services;
     }

@@ -34,6 +34,8 @@ public sealed class AdminPortalDbContext(DbContextOptions<AdminPortalDbContext> 
 
     public DbSet<Communications.CommunicationDbModel> Communications => Set<Communications.CommunicationDbModel>();
 
+    public DbSet<Payments.PaymentEventDbModel> PaymentEvents => Set<Payments.PaymentEventDbModel>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<TenantDbModel>(entityBuilder =>
@@ -216,6 +218,16 @@ public sealed class AdminPortalDbContext(DbContextOptions<AdminPortalDbContext> 
         });
 
         // UC25: daily usage per tenant, module and metric.
+        // UC33: Stripe events, keyed by their id (evt_…, at most 255 characters per Stripe).
+        modelBuilder.Entity<Payments.PaymentEventDbModel>(entityBuilder =>
+        {
+            entityBuilder.ToTable("PaymentEvents");
+            entityBuilder.HasKey(e => e.Id);
+            entityBuilder.Property(e => e.Id).HasMaxLength(255);
+            entityBuilder.Property(e => e.Type).IsRequired().HasMaxLength(100);
+            entityBuilder.HasIndex(e => e.ReceivedAt);
+        });
+
         modelBuilder.Entity<Usage.UsageDailyDbModel>(entityBuilder =>
         {
             entityBuilder.ToTable("UsageDaily");

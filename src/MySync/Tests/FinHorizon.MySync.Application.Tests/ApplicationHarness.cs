@@ -43,6 +43,9 @@ internal sealed class ApplicationHarness : IDisposable
         services.AddSingleton<IProjectionRepository>(Projections);
         services.AddSingleton<Abstractions.Currencies.ICurrencyCatalog>(Currencies);
         services.AddSingleton<Abstractions.Currencies.IExchangeRates>(Currencies);
+        services.AddSingleton<IMembershipRepository>(Memberships);
+        services.AddSingleton<Abstractions.Payments.IPaymentProvider>(Payments);
+        services.Configure<Application.Features.Memberships.MembershipOptions>(options => options.FrontendUrl = new Uri("http://mysync.test"));
         _provider = services.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true, ValidateScopes = true });
         _scope = _provider.CreateScope();
     }
@@ -56,6 +59,14 @@ internal sealed class ApplicationHarness : IDisposable
     public FakeProjectionReader ProjectionReader { get; } = new();
 
     public FakeProjections Projections { get; } = new();
+
+    public FakeMemberships Memberships { get; } = new();
+
+    public FakePaymentProvider Payments { get; } = new();
+
+    /// <summary>A service of the composition that is not a handler (e.g. MembershipSync).</summary>
+    public T Get<T>()
+        where T : notnull => _scope.ServiceProvider.GetRequiredService<T>();
 
     public IRequestHandler<TRequest, TResponse> Handler<TRequest, TResponse>()
         where TRequest : notnull =>

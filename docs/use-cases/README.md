@@ -22,6 +22,7 @@ Nell'interfaccia la voce "Clienti" si chiama **Organizzazioni**; negli use case 
 | Amministratore | Il gestore della piattaforma o un suo collaboratore. Ruolo di realm Keycloak `systemadministrator`, assegnato dal gruppo `Service Administrators`. Oggi è l'unico ruolo del portale; in futuro potranno esserci ruoli con permessi ridotti. |
 | Keycloak | Sistema esterno di identità: autentica l'amministratore e custodisce gli utenti dei clienti. |
 | Lista comuni | Sistema esterno con i comuni italiani e i loro CAP. |
+| Stripe | Sistema esterno di pagamento: sottoscrizioni, incassi, fatture ed email ai clienti ([STRIPE.md](../admin-portal/STRIPE.md)). |
 
 ## Glossario
 
@@ -58,8 +59,8 @@ Nell'interfaccia la voce "Clienti" si chiama **Organizzazioni**; negli use case 
 | [UC20](UC20-importare-utenti.md) | Importare utenti da CSV (EXP-06) | in ambito |
 | [UC21](UC21-elenco-clienti.md) | Filtrare, ordinare ed esportare i clienti (mock 1c) | in ambito |
 | [UC22](UC22-viste-salvate.md) | Salvare le viste dell'elenco (mock 1c) | in ambito |
-| [UC23](UC23-fatturazione.md) | Fatturare i periodi delle sottoscrizioni (EXP-08) | in ambito |
-| [UC24](UC24-incassi-solleciti.md) | Seguire incassi, solleciti e morosità (EXP-08) | in ambito |
+| [UC23](UC23-fatturazione.md) | Fatturare i periodi delle sottoscrizioni (EXP-08) | da sostituire con Stripe ([STRIPE.md](../admin-portal/STRIPE.md), fase 3) |
+| [UC24](UC24-incassi-solleciti.md) | Seguire incassi, solleciti e morosità (EXP-08) | da sostituire con Stripe ([STRIPE.md](../admin-portal/STRIPE.md), fase 3) |
 | [UC25](UC25-uso-cliente.md) | Misurare l'uso di un cliente (EXP-09) | in ambito |
 | [UC26](UC26-stato-servizi.md) | Controllare lo stato dei servizi collegati (EXP-09) | in ambito |
 | [UC27](UC27-comunicazioni.md) | Inviare una comunicazione ai clienti (EXP-11) | in ambito |
@@ -68,10 +69,11 @@ Nell'interfaccia la voce "Clienti" si chiama **Organizzazioni**; negli use case 
 | [UC30](UC30-ricerca-globale.md) | Cercare in tutta la console (⌘K) | in ambito |
 | [UC31](UC31-impersonificazione.md) | Entrare nella piattaforma come un utente (EXP-12) | in ambito |
 | [UC32](UC32-moduli-utente.md) | Assegnare o togliere un modulo (MySync) a un utente | in ambito |
+| [UC33](UC33-eventi-stripe.md) | Ricevere gli eventi di Stripe (EXP-08) | in ambito |
 
 Contratto HTTP: [API.md](API.md) (collection Postman: [FinHorizon.AdminPortal.postman_collection.json](../postman/FinHorizon.AdminPortal.postman_collection.json)). Test unitari derivati dagli scenari: [TEST-UNITARI.md](TEST-UNITARI.md).
 
-Regola comune a tutti gli use case: l'amministratore deve essere autenticato su Keycloak e avere il ruolo `systemadministrator`; altrimenti nessuna operazione è consentita.
+Regola comune a tutti gli use case (tranne UC33, dove l'attore è Stripe e l'autenticazione è la firma dell'evento): l'amministratore deve essere autenticato su Keycloak e avere il ruolo `systemadministrator`; altrimenti nessuna operazione è consentita.
 
 ## Fuori ambito per ora
 

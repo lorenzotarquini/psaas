@@ -89,6 +89,11 @@ namespace FinHorizon.MySync.Infrastructure.Data.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
+                    b.Property<bool>("Fixed")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
                     b.Property<string>("Kind")
                         .IsRequired()
                         .HasMaxLength(16)
@@ -141,6 +146,10 @@ namespace FinHorizon.MySync.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
+
+                    b.Property<decimal?>("MonthlyPayment")
+                        .HasPrecision(28, 8)
+                        .HasColumnType("numeric(28,8)");
 
                     b.Property<string>("NormalizedName")
                         .IsRequired()
@@ -204,6 +213,58 @@ namespace FinHorizon.MySync.Infrastructure.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("Preferences", (string)null);
+                });
+
+            modelBuilder.Entity("FinHorizon.MySync.Domain.Projection.ProjectionSettings", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("AnnualReturn")
+                        .HasPrecision(6, 3)
+                        .HasColumnType("numeric(6,3)");
+
+                    b.Property<decimal>("FixedExpenses")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<decimal?>("Goal")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<int>("HorizonMonths")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("Income")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<decimal>("Inflation")
+                        .HasPrecision(6, 3)
+                        .HasColumnType("numeric(6,3)");
+
+                    b.Property<bool>("InflationOn")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<decimal>("Saving")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<decimal>("VariableExpenses")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerId")
+                        .IsUnique();
+
+                    b.ToTable("ProjectionSettings", (string)null);
                 });
 
             modelBuilder.Entity("FinHorizon.MySync.Domain.Transactions.Transaction", b =>
@@ -273,6 +334,63 @@ namespace FinHorizon.MySync.Infrastructure.Data.Migrations
                         .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("FinHorizon.MySync.Domain.Projection.ProjectionSettings", b =>
+                {
+                    b.OwnsMany("FinHorizon.MySync.Domain.Projection.ProjectionEvent", "Events", b1 =>
+                        {
+                            b1.Property<Guid>("ProjectionSettingsId");
+
+                            b1.Property<int>("__synthesizedOrdinal")
+                                .ValueGeneratedOnAdd();
+
+                            b1.Property<decimal>("Amount");
+
+                            b1.Property<int>("Month");
+
+                            b1.Property<string>("Note")
+                                .IsRequired()
+                                .HasMaxLength(40);
+
+                            b1.HasKey("ProjectionSettingsId", "__synthesizedOrdinal");
+
+                            b1.ToTable("ProjectionSettings");
+
+                            b1
+                                .ToJson("Events")
+                                .HasColumnType("jsonb");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ProjectionSettingsId");
+                        });
+
+                    b.OwnsMany("FinHorizon.MySync.Domain.Projection.ProjectionPayment", "Payments", b1 =>
+                        {
+                            b1.Property<Guid>("ProjectionSettingsId");
+
+                            b1.Property<int>("__synthesizedOrdinal")
+                                .ValueGeneratedOnAdd();
+
+                            b1.Property<decimal>("Amount");
+
+                            b1.Property<Guid>("DebtId");
+
+                            b1.HasKey("ProjectionSettingsId", "__synthesizedOrdinal");
+
+                            b1.ToTable("ProjectionSettings");
+
+                            b1
+                                .ToJson("Payments")
+                                .HasColumnType("jsonb");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ProjectionSettingsId");
+                        });
+
+                    b.Navigation("Events");
+
+                    b.Navigation("Payments");
                 });
 
             modelBuilder.Entity("FinHorizon.MySync.Domain.Transactions.Transaction", b =>

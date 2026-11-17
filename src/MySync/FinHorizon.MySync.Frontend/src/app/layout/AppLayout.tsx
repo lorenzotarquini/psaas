@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { NavLink, Outlet } from 'react-router'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faChartLine, faGear, faHouse, faRightLeft, faSeedling, faTableColumns, faWallet } from '@fortawesome/free-solid-svg-icons'
+import { faChartLine, faGear, faWandMagicSparkles, faHouse, faRightLeft, faSeedling, faTableColumns, faWallet } from '@fortawesome/free-solid-svg-icons'
 import { CalculatorButton } from '@/features/calculator'
 import { LanguageSwitcher } from '@/features/preferences'
 import { storageKeys, useSessionState } from '@/shared/lib/session-state'
@@ -12,6 +12,7 @@ const navigation = [
   { to: '/transactions', icon: faRightLeft, label: 'nav.transactions', end: false },
   { to: '/portfolio', icon: faWallet, label: 'nav.portfolio', end: false },
   { to: '/net-worth', icon: faChartLine, label: 'nav.netWorth', end: false },
+  { to: '/projection', icon: faWandMagicSparkles, label: 'nav.projection', end: false },
   { to: '/settings', icon: faGear, label: 'nav.settings', end: false },
 ] as const
 

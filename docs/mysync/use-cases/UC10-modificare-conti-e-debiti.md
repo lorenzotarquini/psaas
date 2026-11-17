@@ -7,7 +7,7 @@
 1. Dal menu l'utente apre **Conti e debiti**.
 2. Il sistema mostra due elenchi:
    - **conti**, con tipo, tag, data di apertura, saldo iniziale e saldo attuale;
-   - **debiti**, con tipo, tag, conto collegato, residuo iniziale e residuo attuale (o "Estinto").
+   - **debiti**, con tipo, tag, conto collegato, residuo iniziale, residuo attuale (o "Estinto") e rata mensile.
 3. Per modificare un conto l'utente preme la matita, cambia i campi e preme "Salva".
 4. Il sistema avverte che **il patrimonio attuale e il suo andamento verranno ricalcolati** e chiede se procedere.
 5. L'utente conferma; il sistema salva e aggiorna saldi, patrimonio e andamento.
@@ -25,7 +25,7 @@
 ## Regole
 - R1. Di un conto si modificano tipo, nome, descrizione, tag e saldo iniziale; la data di apertura no, perché i movimenti dipendono da lei (D3).
 - R2. Modificare un conto chiede conferma, perché saldo, patrimonio netto e andamento si ricalcolano dal nuovo saldo iniziale, anche nel passato.
-- R3. Di un debito si modificano tipo, nome, descrizione, tag, conto collegato e residuo iniziale; la data di creazione no.
+- R3. Di un debito si modificano tipo, nome, descrizione, tag, conto collegato, residuo iniziale e rata mensile (UC3-R8, che si può anche togliere); la data di creazione no.
 - R4. Il residuo iniziale di un debito non può scendere sotto quanto già pagato con le rate, altrimenti il residuo diventerebbe negativo. Se è uguale, il debito risulta estinto.
 - R5. Nomi unici per utente come alla creazione (UC2-R2, UC3-R2), escluso il record che si sta modificando.
 - R6. I pulsanti di aggiunta sono disabilitati quando il numero di conti (o debiti) ha raggiunto `MySync:MaxAccounts` (o `MySync:MaxDebts`); il backend rifiuta comunque oltre il limite (`LimitReached`).
@@ -143,4 +143,20 @@ Scenario: Aggiunta disabilitata oltre il limite
   Quando apre "Conti e debiti"
   Allora "Nuovo conto" è disabilitato con il messaggio "Hai raggiunto il numero massimo di conti."
   E "Nuovo debito" è attivo
+```
+
+### UC10-S8
+
+Test: `UC10_ModificareContiEDebiti.S8_ModificareLaRataMensile`
+
+```gherkin
+# language: it
+Funzionalità: Modificare conti e debiti
+
+Scenario: Cambiare e togliere la rata mensile
+  Dato che "Mario" ha il finanziamento "Auto" con rata mensile 250,00 €
+  Quando cambia la rata mensile in 300,00 €
+  Allora "Auto" ha rata mensile 300,00 € e il residuo non è cambiato
+  Quando toglie la rata mensile
+  Allora "Auto" non ha rata mensile
 ```

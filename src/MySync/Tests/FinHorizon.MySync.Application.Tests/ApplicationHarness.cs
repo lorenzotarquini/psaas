@@ -37,6 +37,8 @@ internal sealed class ApplicationHarness : IDisposable
         services.AddSingleton<ILedgerReader>(ledger);
         services.AddSingleton<ITransactionReader>(ledger);
         services.AddSingleton<IPreferencesRepository>(Preferences);
+        services.AddSingleton<IProjectionReader>(ProjectionReader);
+        services.AddSingleton<IProjectionRepository>(Projections);
         services.AddSingleton<Abstractions.Currencies.ICurrencyCatalog>(Currencies);
         services.AddSingleton<Abstractions.Currencies.IExchangeRates>(Currencies);
         _provider = services.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true, ValidateScopes = true });
@@ -48,6 +50,10 @@ internal sealed class ApplicationHarness : IDisposable
     public FakePreferences Preferences { get; } = new();
 
     public FakeCurrencies Currencies { get; } = new();
+
+    public FakeProjectionReader ProjectionReader { get; } = new();
+
+    public FakeProjections Projections { get; } = new();
 
     public IRequestHandler<TRequest, TResponse> Handler<TRequest, TResponse>()
         where TRequest : notnull =>

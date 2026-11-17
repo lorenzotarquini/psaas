@@ -10,7 +10,8 @@
     "portfolio": "Conti e debiti",
     "settings": "Impostazioni",
     "expand": "Espandi il menu",
-    "collapse": "Riduci il menu"
+    "collapse": "Riduci il menu",
+    "projection": "Proiezione"
   },
   "actions": {
     "title": "Azioni",
@@ -35,7 +36,9 @@
     "shortDate": "{{value, datetime(day: numeric; month: short; timeZone: UTC)}}",
     "percent": "{{value, number(style: percent; signDisplay: exceptZero; maximumFractionDigits: 1)}}",
     "number": "{{value, number}}",
-    "signedNumber": "{{value, number(signDisplay: exceptZero)}}"
+    "signedNumber": "{{value, number(signDisplay: exceptZero)}}",
+    "month": "{{value, datetime(month: long; year: numeric; timeZone: UTC)}}",
+    "shortMonth": "{{value, datetime(month: short; year: 2-digit; timeZone: UTC)}}"
   },
   "errors": {
     "loadFailed": "Caricamento non riuscito.",
@@ -107,7 +110,8 @@
       "account": "Conto collegato",
       "residual": "Residuo da pagare",
       "initialResidual": "Residuo iniziale",
-      "currency": "Valuta"
+      "currency": "Valuta",
+      "monthlyPayment": "Rata mensile"
     },
     "kinds": {
       "Loan": "Finanziamento",
@@ -116,7 +120,8 @@
       "Other": "Altro"
     },
     "stableHidden_one": "{{count}} debito a lungo termine nascosto",
-    "stableHidden_other": "{{count}} debiti a lungo termine nascosti"
+    "stableHidden_other": "{{count}} debiti a lungo termine nascosti",
+    "monthlyPaymentHint": "Facoltativa: serve alla proiezione."
   },
   "categories": {
     "placeholder": "Cerca o crea una categoria",
@@ -196,7 +201,9 @@
     "hideAmounts": "Nascondi gli importi",
     "showAmounts": "Mostra gli importi",
     "show": "Mostra",
-    "hide": "Nascondi"
+    "hide": "Nascondi",
+    "projectionKpi": "Tra 12 mesi",
+    "projectionKpiTotal": "Tra 12 mesi (patrimonio totale)"
   },
   "netWorth": {
     "title": "Andamento del patrimonio",
@@ -285,5 +292,80 @@
     "open": "Apri una calcolatrice",
     "copy": "Copia il risultato",
     "copied": "Copiato"
+  },
+  "projection": {
+    "title": "Proiezione",
+    "subtitle": "Dove sarà il tuo patrimonio tra qualche mese, partendo da oggi. È una stima: cambia i parametri e guarda come cambia.",
+    "start": {
+      "title": "Punto di partenza (oggi)",
+      "liquidity": "Liquidità",
+      "investments": "Investimenti e depositi",
+      "stable": "Patrimonio stabile",
+      "debts": "Debiti"
+    },
+    "parameters": {
+      "title": "Parametri",
+      "horizon": "Orizzonte (mesi)",
+      "income": "Entrate al mese",
+      "fixedExpenses": "Spese fisse al mese",
+      "variableExpenses": "Spese variabili al mese",
+      "saving": "Messo da parte al mese",
+      "savingHint": "Quanto passa dalla liquidità agli investimenti.",
+      "annualReturn": "Rendimento annuo degli investimenti (%)",
+      "inflation": "Inflazione annua (%)",
+      "inflationOn": "In potere d'acquisto di oggi",
+      "payment": "Rata di {{name}}",
+      "goal": "Obiettivo",
+      "goalHint": "Facoltativo: una cifra di patrimonio da raggiungere.",
+      "horizonShortcuts": "Scorciatoie per l'orizzonte"
+    },
+    "horizons": {
+      "6": "6 mesi",
+      "12": "1 anno",
+      "60": "5 anni",
+      "120": "10 anni",
+      "360": "30 anni"
+    },
+    "events": {
+      "title": "Eventi una tantum",
+      "hint": "Entrate o uscite in un mese preciso: tredicesima, acquisto di un'auto…",
+      "add": "Aggiungi evento",
+      "remove": "Rimuovi l'evento",
+      "month": "Mese",
+      "amount": "Importo (− per un'uscita)",
+      "note": "Descrizione",
+      "max": "Al massimo 10 eventi."
+    },
+    "save": "Salva",
+    "saved": "Proiezione salvata.",
+    "reset": "Riparti dai miei dati",
+    "summary": {
+      "title": "Riepilogo",
+      "final": "Patrimonio a {{month}}",
+      "change": "Variazione rispetto a oggi",
+      "payoff": "{{name}} si estingue a {{month}}",
+      "notPaidOff": "{{name}} non si estingue entro l'orizzonte",
+      "withoutPayment": "{{name}} è senza rata: il residuo non scende",
+      "goalReached": "Obiettivo raggiunto a {{month}}",
+      "goalNotReached": "Obiettivo non raggiunto entro {{count}} mesi: prova ad allungare l'orizzonte.",
+      "goalAlready": "Obiettivo già raggiunto",
+      "negativeLiquidity": "La liquidità va sotto zero a {{month}}."
+    },
+    "fewData": "La stima si basa su {{count}} mesi di dati: controlla i parametri.",
+    "noData": "Non ci sono ancora mesi completi di movimenti: inserisci i parametri a mano.",
+    "chartLabel": "Grafico della proiezione del patrimonio",
+    "tableTitle": "Tabella dei dati",
+    "today": "Oggi",
+    "month": "Mese",
+    "netWorth": "Patrimonio netto",
+    "investments": "Investimenti",
+    "debts": "Debiti residui",
+    "goal": "Obiettivo",
+    "fixed": {
+      "title": "Quali spese sono fisse?",
+      "hint": "Le categorie fisse (affitto, bollette…) contano come spese fisse; le altre restano variabili.",
+      "none": "Non hai ancora categorie di spesa: nascono registrando le spese.",
+      "label": "Fissa"
+    }
   }
 }

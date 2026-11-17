@@ -8,7 +8,7 @@
 
 ## Flusso principale
 1. L'utente sceglie il tipo di debito: Finanziamento, Mutuo, Fido, Altro.
-2. Inserisce nome, descrizione, tag, il conto collegato (tra i propri) e il residuo da pagare oggi.
+2. Inserisce nome, descrizione, tag, il conto collegato (tra i propri), il residuo da pagare oggi e, se vuole, la rata mensile.
 3. Il sistema verifica i dati e il limite di debiti, poi crea il debito.
 4. Il sistema mostra il debito con il suo residuo; i debiti residui della dashboard aumentano del residuo, il patrimonio netto non cambia (D9).
 
@@ -27,6 +27,7 @@
 - R4. Il conto collegato è quello da cui l'utente paga le rate: in UC5 è proposto come conto della rata, ma l'utente può cambiarlo (D6).
 - R5. Il limite `MySync:MaxDebts` è un intero ≥ 0 letto all'avvio; se manca vale 1 (D2). Con 0 i debiti sono disattivati e il frontend non li mostra.
 - R6. Contano nel limite anche i debiti estinti (residuo 0).
+- R8. La **rata mensile** è facoltativa: nella valuta del debito, con al massimo 2 decimali, maggiore di 0. Può superare il residuo (l'ultima rata sarà più piccola). Serve alla proiezione (UC14) e non registra nessun movimento: le rate pagate restano spese collegate al debito (UC5).
 
 ## Scenari di accettazione
 
@@ -119,4 +120,37 @@ Scenario: Limite di debiti raggiunto
   E "Mario" ha già il debito "Mutuo casa"
   Quando "Mario" crea il finanziamento "Auto"
   Allora la richiesta è rifiutata con "LimitReached"
+```
+
+### UC3-S8
+
+Test: `UC3_CreareDebito.S8_DebitoConRataMensile`
+
+```gherkin
+# language: it
+Funzionalità: Creare un debito
+
+Scenario: Debito con rata mensile
+  Quando "Mario" crea il finanziamento "Auto" collegato a "Conto Intesa", residuo 4.000,00 €, rata mensile 250,00 €
+  Allora il debito "Auto" è creato con rata mensile 250,00 €
+  E il residuo resta 4.000,00 € finché non registra una rata
+```
+
+### UC3-S9
+
+Test: `UC3_CreareDebito.S9_RataNonValida`
+
+```gherkin
+# language: it
+Funzionalità: Creare un debito
+
+Schema dello scenario: Rata mensile non valida
+  Quando "Mario" crea un debito con rata mensile <rata>
+  Allora la richiesta è rifiutata con "<codice>" sulla rata
+
+  Esempi:
+    | rata     | codice        |
+    | 0        | InvalidValue  |
+    | -50,00   | InvalidValue  |
+    | 10,001   | InvalidFormat |
 ```

@@ -25,10 +25,13 @@ public interface IDebtInput
 
     /// <summary>UC13, D12: a traditional currency, the display currency when missing.</summary>
     string? Currency { get; }
+
+    /// <summary>UC3-R8: optional, what the user pays every month.</summary>
+    decimal? MonthlyPayment { get; }
 }
 
 /// <summary>UC3: what the user enters for a new debt.</summary>
-public sealed record CreateDebtCommand(string? Kind, string? Name, string? Description, string? Tag, Guid? AccountId, decimal? Residual, string? Currency = null) : IDebtInput;
+public sealed record CreateDebtCommand(string? Kind, string? Name, string? Description, string? Tag, Guid? AccountId, decimal? Residual, string? Currency = null, decimal? MonthlyPayment = null) : IDebtInput;
 
 /// <summary>UC3-R1..R3: the fields on their own.</summary>
 public abstract class DebtInputValidator<T> : AbstractValidator<T>
@@ -45,6 +48,7 @@ public abstract class DebtInputValidator<T> : AbstractValidator<T>
         RuleFor(command => command.Tag).OptionalText(Descriptor.MaxTagLength);
         RuleFor(command => command.AccountId).Required();
         RuleFor(command => command.Residual).RequiredPositiveCents();
+        RuleFor(command => command.MonthlyPayment).OptionalPositiveCents();
     }
 }
 

@@ -4,7 +4,7 @@ Applicazione FinHorizon per le finanze personali (fase 1: solo privati). Stessa 
 
 ## Requisiti e use case
 
-MVP (conti, debiti, movimenti, categorie, dashboard e andamento del patrimonio): [use-cases/README.md](use-cases/README.md), contratto HTTP in [use-cases/API.md](use-cases/API.md).
+MVP (conti, debiti, movimenti, categorie, dashboard, andamento e proiezione del patrimonio): [use-cases/README.md](use-cases/README.md), contratto HTTP in [use-cases/API.md](use-cases/API.md).
 
 ## Stato
 
@@ -48,7 +48,7 @@ Scelte che rendono il codice estensibile per le prossime fasi:
 
 ## Frontend
 
-Feature-Sliced Design (controllato da Steiger): `app` (shell, rotte), `pages` (setup, dashboard, movimenti, andamento), `widgets` (grafico, tabella movimenti, schede conti e debiti), `features` (creazione di conti, debiti e movimenti, eliminazione, preferenze), `entities` (tipi e query per area, selettore di categoria), `shared` (API, login, formattazione, tema, UI di base).
+Feature-Sliced Design (controllato da Steiger): `app` (shell, rotte), `pages` (setup, dashboard, movimenti, andamento, proiezione con i suoi parametri, il grafico e le spese fisse), `widgets` (grafico, tabella movimenti, schede conti e debiti), `features` (creazione di conti, debiti e movimenti, eliminazione, preferenze), `entities` (tipi e query per area, selettore di categoria, calcolo della proiezione), `shared` (API, login, formattazione, tema, UI di base).
 
 - **Internazionalizzazione**: i18next + react-i18next, traduzioni in `public/locales/<lingua>/common.json` caricate con i18next-http-backend, lingua rilevata e ricordata da i18next-browser-languagedetector; importi, date e percentuali con i formattatori Intl integrati in i18next (definiti nei file di traduzione, chiavi `format.*`); plurali CLDR (`_one`, `_other`, `_zero`).
 - **Icone**: solo Font Awesome (`@fortawesome/react-fontawesome`).

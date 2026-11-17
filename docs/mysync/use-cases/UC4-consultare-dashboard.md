@@ -13,7 +13,8 @@
    - i **conti**, ognuno con tipo, nome, tag e saldo di oggi;
    - i **debiti**, ognuno con tipo, nome, conto collegato e residuo; gli estinti in fondo, segnati come tali;
    - gli **ultimi movimenti** (i 10 più recenti per data, poi per inserimento), con data, importo con segno, conto, categoria ed eventuale debito;
-   - l'**andamento del patrimonio** degli ultimi 30 giorni (UC7).
+   - l'**andamento del patrimonio** degli ultimi 30 giorni (UC7);
+   - la **proiezione**: "Tra 12 mesi" con il patrimonio netto totale previsto, calcolato con i parametri salvati o, se non ce ne sono, con quelli proposti (UC14). Un clic apre la proiezione.
 3. Dalla dashboard l'utente può registrare una spesa o un ricavo (UC5), aggiungere un conto (UC2) o un debito (UC3) finché non ha raggiunto i limiti, e aprire l'andamento su altri periodi (UC7).
 
 ## Flussi alternativi
@@ -27,6 +28,7 @@
 - R3. Patrimonio netto = Σ saldi dei conti; debiti residui = Σ residui dei debiti. I debiti non si sottraggono dal patrimonio (D9).
 - R4. I conti sono ordinati per data di apertura, i debiti attivi per residuo decrescente.
 - R5. Tutti i valori sono calcolati dai movimenti al momento della richiesta: nessun saldo salvato che possa divergere *(shortcut accettabile per i volumi di una persona; da rivedere solo se le risposte diventano lente)*.
+- R6. Il riquadro della proiezione usa sempre 12 mesi e tutti i conti (UC14-R1): con gli switch di UC12 spenti dice "patrimonio totale" per non confondersi con il patrimonio di tutti i giorni. Con gli importi nascosti mostra `••••`.
 
 ## Scenari di accettazione
 
@@ -92,4 +94,20 @@ Scenario: La dashboard mostra solo i dati dell'utente
   Quando "Anna" apre la dashboard
   Allora vede solo i suoi conti, debiti e movimenti
   E il patrimonio netto è calcolato solo sui suoi dati
+```
+
+### UC4-S6
+
+Test: [`UC4_ConsultareDashboard.S6_RiquadroProiezione`](../../../src/MySync/FinHorizon.MySync.Frontend/src/pages/dashboard/ui/UC4_RiquadroProiezione.test.tsx) (frontend, Vitest)
+
+```gherkin
+# language: it
+Funzionalità: Consultare la dashboard
+
+Scenario: Il riquadro della proiezione
+  Dato che "Mario" ha una liquidità di 1.000,00 € e i parametri proposti di UC14-S2
+  Quando apre la dashboard e preme "Mostra"
+  Allora il riquadro della proiezione dice "Tra 12 mesi: 9.400,00 €"
+  Quando preme il riquadro
+  Allora si apre la proiezione
 ```

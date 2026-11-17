@@ -15,6 +15,8 @@ export interface Debt {
   accountId: string
   initialResidual: number
   residual: number
+  /** UC3-R8: what the user pays every month, when given; only the projection reads it (UC14). */
+  monthlyPayment?: number | null
   createdOn: string
   paidOff: boolean
   /** Day-to-day or long-term (mortgages): what the UC12 stable switch shows or hides. */
@@ -36,6 +38,7 @@ export interface NewDebt {
   tag?: string
   accountId: string
   residual: number
+  monthlyPayment?: number
   currency: string
 }
 

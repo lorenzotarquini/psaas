@@ -52,7 +52,8 @@ public sealed class CreateDebtHandler(
             account.Id,
             request.Currency ?? display,
             new Money(request.Residual!.Value),
-            calendar.Today);
+            calendar.Today,
+            request.MonthlyPayment is { } payment ? new Money(payment) : null);
         debts.Add(debt);
         try
         {

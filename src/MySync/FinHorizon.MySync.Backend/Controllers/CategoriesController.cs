@@ -1,11 +1,12 @@
 using FinHorizon.MySync.Application.Common;
 using FinHorizon.MySync.Application.Features.Categories;
+using FinHorizon.MySync.Backend.Contracts;
 using FinHorizon.MySync.Backend.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FinHorizon.MySync.Backend.Controllers;
 
-/// <summary>UC6: categories searched and created while entering a movement.</summary>
+/// <summary>UC6: categories searched and created while entering a movement; UC15: fixed or variable.</summary>
 [ApiController]
 [Route("api/categories")]
 public sealed class CategoriesController : ControllerBase
@@ -25,4 +26,16 @@ public sealed class CategoriesController : ControllerBase
         [FromServices] IRequestHandler<CreateCategoryCommand, CategoryView> handler,
         CancellationToken cancellationToken) =>
         (await handler.HandleAsync(command, cancellationToken)).ToActionResult(this);
+
+    /// <summary>UC15: an expense category becomes fixed or variable.</summary>
+    [HttpPut("{id:guid}/fixed")]
+    public async Task<ActionResult<CategoryView>> SetFixed(
+        Guid id,
+        CategoryFixedBody body,
+        [FromServices] IRequestHandler<SetCategoryFixedCommand, CategoryView> handler,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(body);
+        return (await handler.HandleAsync(new SetCategoryFixedCommand(id, body.Fixed), cancellationToken)).ToActionResult(this);
+    }
 }

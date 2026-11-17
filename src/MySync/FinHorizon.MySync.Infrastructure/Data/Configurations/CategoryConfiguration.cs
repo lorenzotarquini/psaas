@@ -15,6 +15,8 @@ internal sealed class CategoryConfiguration : IEntityTypeConfiguration<Category>
         builder.Property(category => category.Kind).HasConversion<string>().HasMaxLength(16);
         builder.Property(category => category.Name).HasMaxLength(Category.MaxNameLength).IsRequired();
         builder.Property(category => category.NormalizedName).HasMaxLength(Category.MaxNameLength).IsRequired();
+        // UC15-R1: existing categories are variable.
+        builder.Property(category => category.Fixed).HasDefaultValue(false);
         // UC6-R2, R4: the guard that makes creation idempotent under concurrency.
         builder.HasIndex(category => new { category.OwnerId, category.Kind, category.NormalizedName }).IsUnique();
     }

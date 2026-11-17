@@ -88,4 +88,23 @@ public sealed class UC10_ModificareContiEDebiti(PostgresFixture database) : Acce
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         Assert.Equal(("Credem", "Auto"), ((await AccountAsync(credem.Id)).Name, (await DebtAsync(debt.Id)).Name));
     }
+
+    [Fact, Trait("Scenario", "UC10-S8")]
+    public async Task S8_ModificareLaRataMensile()
+    {
+        var credem = await GivenAccountAsync("Credem", 6000m);
+        var car = await ReadAsync<DebtView>(
+            await Mario.PostAsJsonAsync("/api/debts", new { kind = "Loan", name = "Auto", accountId = credem.Id, residual = 4000m, monthlyPayment = 250m }),
+            HttpStatusCode.Created);
+
+        var changed = await ReadAsync<DebtView>(
+            await Mario.PutAsJsonAsync($"/api/debts/{car.Id}", new { kind = "Loan", name = "Auto", accountId = credem.Id, residual = 4000m, monthlyPayment = 300m }),
+            HttpStatusCode.OK);
+        Assert.Equal((300m, 4000m), (changed.MonthlyPayment, changed.Residual));
+
+        var removed = await ReadAsync<DebtView>(
+            await Mario.PutAsJsonAsync($"/api/debts/{car.Id}", DebtBody("Auto", credem.Id, 4000m)),
+            HttpStatusCode.OK);
+        Assert.Null(removed.MonthlyPayment);
+    }
 }

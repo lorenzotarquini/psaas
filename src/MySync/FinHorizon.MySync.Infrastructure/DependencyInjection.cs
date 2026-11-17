@@ -33,6 +33,8 @@ public static class DependencyInjection
         services.AddScoped<ILedgerReader, LedgerReader>();
         services.AddScoped<ITransactionReader, TransactionReader>();
         services.AddScoped<IPreferencesRepository, PreferencesRepository>();
+        services.AddScoped<IProjectionRepository, ProjectionRepository>();
+        services.AddScoped<IProjectionReader, ProjectionReader>();
 
         // UC13, D10: catalog and rates from Frankfurter, kept in memory (R9).
         services.AddMemoryCache();

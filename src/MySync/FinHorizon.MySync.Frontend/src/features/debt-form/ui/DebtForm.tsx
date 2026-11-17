@@ -20,10 +20,12 @@ const schema = z.object({
   accountId: z.string().min(1, 'Required'),
   currency: z.string().min(1, 'Required'),
   residual: amountField({ positive: true }),
+  // UC3-R8: optional; when given, a positive amount in cents.
+  monthlyPayment: z.union([z.literal(''), amountField({ positive: true })]),
 })
 
 type Values = z.infer<typeof schema>
-const fields = sameFields<Values>('kind', 'name', 'description', 'tag', 'accountId', 'currency', 'residual')
+const fields = sameFields<Values>('kind', 'name', 'description', 'tag', 'accountId', 'currency', 'residual', 'monthlyPayment')
 
 interface DebtFormProps {
   /** The debt to edit (UC10); a new one when missing (UC3). */
@@ -51,8 +53,9 @@ export function DebtForm({ debt, onSaved }: DebtFormProps) {
           accountId: debt.accountId,
           currency: debt.currency,
           residual: amountText(debt.initialResidual),
+          monthlyPayment: debt.monthlyPayment ? amountText(debt.monthlyPayment) : '',
         }
-      : { kind: 'Loan', name: '', description: '', tag: '', accountId: '', currency: displayCurrency, residual: '' },
+      : { kind: 'Loan', name: '', description: '', tag: '', accountId: '', currency: displayCurrency, residual: '', monthlyPayment: '' },
   })
   const { errors } = form.formState
   const accountId = form.watch('accountId')
@@ -73,6 +76,7 @@ export function DebtForm({ debt, onSaved }: DebtFormProps) {
         accountId: values.accountId,
         currency: values.currency,
         residual: parseAmount(values.residual),
+        monthlyPayment: values.monthlyPayment ? parseAmount(values.monthlyPayment) : undefined,
       }
       return debt ? updateDebt(debt.id, input) : createDebt(input)
     },
@@ -121,6 +125,12 @@ export function DebtForm({ debt, onSaved }: DebtFormProps) {
         <label className="input w-full">
           <span className="muted">{form.watch('currency')}</span>
           <input id="debt-residual" inputMode="decimal" autoComplete="off" aria-invalid={!!errors.residual} {...form.register('residual')} />
+        </label>
+      </Field>
+      <Field label={t('debts.fields.monthlyPayment')} htmlFor="debt-monthly-payment" hint={t('debts.monthlyPaymentHint')} error={errorText(errors.monthlyPayment?.message)}>
+        <label className="input w-full">
+          <span className="muted">{form.watch('currency')}</span>
+          <input id="debt-monthly-payment" inputMode="decimal" autoComplete="off" aria-invalid={!!errors.monthlyPayment} {...form.register('monthlyPayment')} />
         </label>
       </Field>
       <Field label={t('fields.description')} htmlFor="debt-description" error={errorText(errors.description?.message)}>

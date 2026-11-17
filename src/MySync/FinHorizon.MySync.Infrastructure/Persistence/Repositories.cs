@@ -4,6 +4,7 @@ using FinHorizon.MySync.Domain.Categories;
 using FinHorizon.MySync.Domain.Common;
 using FinHorizon.MySync.Domain.Debts;
 using FinHorizon.MySync.Domain.Preferences;
+using FinHorizon.MySync.Domain.Projection;
 using FinHorizon.MySync.Domain.Transactions;
 using FinHorizon.MySync.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -61,6 +62,16 @@ internal sealed class PreferencesRepository(MySyncDbContext db) : IPreferencesRe
         db.Preferences.SingleOrDefaultAsync(preferences => preferences.OwnerId == owner, cancellationToken);
 
     public void Add(UserPreferences preferences) => db.Preferences.Add(preferences);
+}
+
+internal sealed class ProjectionRepository(MySyncDbContext db) : IProjectionRepository
+{
+    public Task<ProjectionSettings?> GetAsync(OwnerId owner, CancellationToken cancellationToken = default) =>
+        db.Projections.SingleOrDefaultAsync(settings => settings.OwnerId == owner, cancellationToken);
+
+    public void Add(ProjectionSettings settings) => db.Projections.Add(settings);
+
+    public void Remove(ProjectionSettings settings) => db.Projections.Remove(settings);
 }
 
 internal sealed class TransactionRepository(MySyncDbContext db) : OwnedRepository<Transaction>(db), ITransactionRepository

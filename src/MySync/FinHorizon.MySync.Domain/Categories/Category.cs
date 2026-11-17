@@ -31,6 +31,9 @@ public sealed class Category : Entity
     /// <summary>Unique per user and kind (UC6-R2).</summary>
     public string NormalizedName { get; private set; }
 
+    /// <summary>UC15: a fixed expense (rent, bills) rather than a variable one. Every category is born variable (UC15-R1).</summary>
+    public bool Fixed { get; private set; }
+
     public static Category Create(OwnerId ownerId, TransactionKind kind, string name)
     {
         var cleaned = TextNormalizer.Clean(name) ?? throw new ArgumentException("A name is required.", nameof(name));
@@ -45,5 +48,16 @@ public sealed class Category : Entity
         }
 
         return new Category(Guid.NewGuid(), ownerId, kind, cleaned);
+    }
+
+    /// <summary>UC15: only expenses are fixed or variable; an income category is never fixed.</summary>
+    public void SetFixed(bool isFixed)
+    {
+        if (isFixed && Kind != TransactionKind.Expense)
+        {
+            throw new InvalidOperationException("Only an expense category can be fixed.");
+        }
+
+        Fixed = isFixed;
     }
 }

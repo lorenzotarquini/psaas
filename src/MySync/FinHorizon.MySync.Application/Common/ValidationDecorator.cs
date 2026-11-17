@@ -20,11 +20,15 @@ public sealed class ValidationDecorator<TRequest, TResponse>(
         {
             var validation = await validator.ValidateAsync(request, cancellationToken).ConfigureAwait(false);
             errors.AddRange(validation.Errors.Select(failure =>
-                new FieldError(JsonNamingPolicy.CamelCase.ConvertName(failure.PropertyName), failure.ErrorCode)));
+                new FieldError(FieldName(failure.PropertyName), failure.ErrorCode)));
         }
 
         return errors.Count == 0
             ? await inner.HandleAsync(request, cancellationToken).ConfigureAwait(false)
             : Result<TResponse>.Invalid(errors.DistinctBy(error => error.Field).ToList());
     }
+
+    /// <summary>"Events[0].Month" becomes "events[0].month": every segment of a nested field in camel case.</summary>
+    private static string FieldName(string propertyName) =>
+        string.Join('.', propertyName.Split('.').Select(JsonNamingPolicy.CamelCase.ConvertName));
 }

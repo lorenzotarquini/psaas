@@ -98,4 +98,30 @@ public sealed class UC3_CreareDebito(PostgresFixture database) : AcceptanceTest(
         Assert.Equal("LimitReached", errors["limit"]);
         Assert.Equal(0, (await GetOkAsync<DebtList>("/api/debts")).Max);
     }
+
+    [Fact, Trait("Scenario", "UC3-S8")]
+    public async Task S8_DebitoConRataMensile()
+    {
+        var account = await GivenAccountAsync("Conto Intesa", 2500m);
+
+        var debt = await ReadAsync<DebtView>(
+            await Mario.PostAsJsonAsync("/api/debts", new { kind = "Loan", name = "Auto", accountId = account.Id, residual = 4000m, monthlyPayment = 250m }),
+            HttpStatusCode.Created);
+
+        Assert.Equal((250m, 4000m), (debt.MonthlyPayment, debt.Residual));
+        Assert.Equal((250m, 4000m), ((await DebtAsync(debt.Id)).MonthlyPayment, (await DebtAsync(debt.Id)).Residual));
+    }
+
+    [Theory, Trait("Scenario", "UC3-S9")]
+    [InlineData(0, "InvalidValue")]
+    [InlineData(-50, "InvalidValue")]
+    [InlineData(10.001, "InvalidFormat")]
+    public async Task S9_RataNonValida(decimal payment, string code)
+    {
+        var account = await GivenAccountAsync("Conto Intesa", 2500m);
+
+        var errors = await ErrorsAsync(await Mario.PostAsJsonAsync("/api/debts", new { kind = "Loan", name = "Auto", accountId = account.Id, residual = 4000m, monthlyPayment = payment }));
+
+        Assert.Equal(code, errors["monthlyPayment"]);
+    }
 }

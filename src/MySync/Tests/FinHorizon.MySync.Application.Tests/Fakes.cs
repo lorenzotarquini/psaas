@@ -254,3 +254,24 @@ internal sealed class FakeCurrencies : ICurrencyCatalog, IExchangeRates
         }
     }
 }
+
+/// <summary>The flows of the projection, set by the test as they would come out of the database.</summary>
+internal sealed class FakeProjectionReader : IProjectionReader
+{
+    public List<ProjectionFlow> Flows { get; } = [];
+
+    public Task<IReadOnlyList<ProjectionFlow>> FlowsAsync(OwnerId owner, DateOnly from, DateOnly to, CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyList<ProjectionFlow>>(Flows.Where(flow => flow.Date >= from && flow.Date <= to).ToList());
+}
+
+internal sealed class FakeProjections : IProjectionRepository
+{
+    public List<Domain.Projection.ProjectionSettings> Items { get; } = [];
+
+    public Task<Domain.Projection.ProjectionSettings?> GetAsync(OwnerId owner, CancellationToken cancellationToken = default) =>
+        Task.FromResult(Items.SingleOrDefault(item => item.OwnerId == owner));
+
+    public void Add(Domain.Projection.ProjectionSettings settings) => Items.Add(settings);
+
+    public void Remove(Domain.Projection.ProjectionSettings settings) => Items.Remove(settings);
+}

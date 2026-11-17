@@ -10,7 +10,8 @@
     "portfolio": "Accounts and debts",
     "settings": "Settings",
     "expand": "Expand the menu",
-    "collapse": "Collapse the menu"
+    "collapse": "Collapse the menu",
+    "projection": "Projection"
   },
   "actions": {
     "title": "Actions",
@@ -35,7 +36,9 @@
     "shortDate": "{{value, datetime(day: numeric; month: short; timeZone: UTC)}}",
     "percent": "{{value, number(style: percent; signDisplay: exceptZero; maximumFractionDigits: 1)}}",
     "number": "{{value, number}}",
-    "signedNumber": "{{value, number(signDisplay: exceptZero)}}"
+    "signedNumber": "{{value, number(signDisplay: exceptZero)}}",
+    "month": "{{value, datetime(month: long; year: numeric; timeZone: UTC)}}",
+    "shortMonth": "{{value, datetime(month: short; year: 2-digit; timeZone: UTC)}}"
   },
   "errors": {
     "loadFailed": "Could not load the data.",
@@ -107,7 +110,8 @@
       "account": "Linked account",
       "residual": "Amount still due",
       "initialResidual": "Initial amount due",
-      "currency": "Currency"
+      "currency": "Currency",
+      "monthlyPayment": "Monthly payment"
     },
     "kinds": {
       "Loan": "Loan",
@@ -116,7 +120,8 @@
       "Other": "Other"
     },
     "stableHidden_one": "{{count}} long-term debt hidden",
-    "stableHidden_other": "{{count}} long-term debts hidden"
+    "stableHidden_other": "{{count}} long-term debts hidden",
+    "monthlyPaymentHint": "Optional: used by the projection."
   },
   "categories": {
     "placeholder": "Search or create a category",
@@ -196,7 +201,9 @@
     "hideAmounts": "Hide amounts",
     "showAmounts": "Show amounts",
     "show": "Show",
-    "hide": "Hide"
+    "hide": "Hide",
+    "projectionKpi": "In 12 months",
+    "projectionKpiTotal": "In 12 months (total net worth)"
   },
   "netWorth": {
     "title": "Net worth trend",
@@ -285,5 +292,80 @@
     "open": "Open a calculator",
     "copy": "Copy the result",
     "copied": "Copied"
+  },
+  "projection": {
+    "title": "Projection",
+    "subtitle": "Where your net worth will be in a few months, starting from today. It is an estimate: change the parameters and see how it changes.",
+    "start": {
+      "title": "Starting point (today)",
+      "liquidity": "Liquidity",
+      "investments": "Investments and deposits",
+      "stable": "Stable assets",
+      "debts": "Debts"
+    },
+    "parameters": {
+      "title": "Parameters",
+      "horizon": "Horizon (months)",
+      "income": "Monthly income",
+      "fixedExpenses": "Monthly fixed expenses",
+      "variableExpenses": "Monthly variable expenses",
+      "saving": "Monthly savings",
+      "savingHint": "What moves from liquidity to investments.",
+      "annualReturn": "Annual return on investments (%)",
+      "inflation": "Annual inflation (%)",
+      "inflationOn": "In today's purchasing power",
+      "payment": "Payment of {{name}}",
+      "goal": "Goal",
+      "goalHint": "Optional: a net worth to reach.",
+      "horizonShortcuts": "Horizon shortcuts"
+    },
+    "horizons": {
+      "6": "6 months",
+      "12": "1 year",
+      "60": "5 years",
+      "120": "10 years",
+      "360": "30 years"
+    },
+    "events": {
+      "title": "One-off events",
+      "hint": "Income or expenses in a given month: a bonus, buying a car…",
+      "add": "Add event",
+      "remove": "Remove the event",
+      "month": "Month",
+      "amount": "Amount (− for an expense)",
+      "note": "Description",
+      "max": "At most 10 events."
+    },
+    "save": "Save",
+    "saved": "Projection saved.",
+    "reset": "Start again from my data",
+    "summary": {
+      "title": "Summary",
+      "final": "Net worth in {{month}}",
+      "change": "Change from today",
+      "payoff": "{{name}} is paid off in {{month}}",
+      "notPaidOff": "{{name}} is not paid off within the horizon",
+      "withoutPayment": "{{name}} has no payment: its residual does not go down",
+      "goalReached": "Goal reached in {{month}}",
+      "goalNotReached": "Goal not reached within {{count}} months: try a longer horizon.",
+      "goalAlready": "Goal already reached",
+      "negativeLiquidity": "Liquidity goes below zero in {{month}}."
+    },
+    "fewData": "The estimate is based on {{count}} months of data: check the parameters.",
+    "noData": "There are no whole months of movements yet: enter the parameters by hand.",
+    "chartLabel": "Chart of the net worth projection",
+    "tableTitle": "Data table",
+    "today": "Today",
+    "month": "Month",
+    "netWorth": "Net worth",
+    "investments": "Investments",
+    "debts": "Debts left",
+    "goal": "Goal",
+    "fixed": {
+      "title": "Which expenses are fixed?",
+      "hint": "Fixed categories (rent, bills…) count as fixed expenses; the others stay variable.",
+      "none": "You have no expense categories yet: they appear as you record expenses.",
+      "label": "Fixed"
+    }
   }
 }

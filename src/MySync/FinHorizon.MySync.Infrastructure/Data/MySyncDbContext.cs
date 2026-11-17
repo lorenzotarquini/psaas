@@ -20,6 +20,8 @@ public sealed class MySyncDbContext(DbContextOptions<MySyncDbContext> options) :
 
     public DbSet<UserPreferences> Preferences => Set<UserPreferences>();
 
+    public DbSet<Domain.Projection.ProjectionSettings> Projections => Set<Domain.Projection.ProjectionSettings>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ArgumentNullException.ThrowIfNull(modelBuilder);

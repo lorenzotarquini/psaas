@@ -33,7 +33,7 @@ public sealed class DebtsController : ControllerBase
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(body);
-        var command = new UpdateDebtCommand(id, body.Kind, body.Name, body.Description, body.Tag, body.AccountId, body.Residual, body.Currency);
+        var command = new UpdateDebtCommand(id, body.Kind, body.Name, body.Description, body.Tag, body.AccountId, body.Residual, body.Currency, body.MonthlyPayment);
         return (await handler.HandleAsync(command, cancellationToken)).ToActionResult(this);
     }
 }

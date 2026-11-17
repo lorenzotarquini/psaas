@@ -43,6 +43,12 @@ public static class ValidationExtensions
             .RequiredCents()
             .Must(value => value is null || value.Value > 0).WithErrorCode(ErrorCodes.InvalidValue);
 
+    /// <summary>Missing is fine; when given, a positive amount in cents.</summary>
+    public static IRuleBuilderOptions<T, decimal?> OptionalPositiveCents<T>(this IRuleBuilder<T, decimal?> rule) =>
+        rule
+            .Must(value => value is null || Money.HasValidPrecision(value.Value)).WithErrorCode(ErrorCodes.InvalidFormat)
+            .Must(value => value is null || value.Value > 0).WithErrorCode(ErrorCodes.InvalidValue);
+
     public static IRuleBuilderOptions<T, TValue?> Required<T, TValue>(this IRuleBuilder<T, TValue?> rule)
         where TValue : struct =>
         rule.NotNull().WithErrorCode(ErrorCodes.Required);

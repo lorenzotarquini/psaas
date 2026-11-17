@@ -11,7 +11,7 @@ using FinHorizon.MySync.Domain.Debts;
 namespace FinHorizon.MySync.Application.Features.Debts;
 
 /// <summary>UC10: the new state of a debt; <see cref="Residual"/> is the initial residual, the creation day does not change.</summary>
-public sealed record UpdateDebtCommand(Guid Id, string? Kind, string? Name, string? Description, string? Tag, Guid? AccountId, decimal? Residual, string? Currency = null) : IDebtInput;
+public sealed record UpdateDebtCommand(Guid Id, string? Kind, string? Name, string? Description, string? Tag, Guid? AccountId, decimal? Residual, string? Currency = null, decimal? MonthlyPayment = null) : IDebtInput;
 
 public sealed class UpdateDebtValidator(ICurrencyCatalog catalog) : DebtInputValidator<UpdateDebtCommand>(catalog);
 
@@ -61,7 +61,7 @@ public sealed class UpdateDebtHandler(
             return Result<DebtView>.Invalid("currency", ErrorCodes.InvalidValue);
         }
 
-        debt.Update(EnumNames.Parse<DebtKind>(request.Kind), descriptor, request.AccountId.Value, currency, residual, paid);
+        debt.Update(EnumNames.Parse<DebtKind>(request.Kind), descriptor, request.AccountId.Value, currency, residual, paid, request.MonthlyPayment is { } payment ? new Money(payment) : null);
         try
         {
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

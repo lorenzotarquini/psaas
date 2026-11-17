@@ -23,6 +23,9 @@ export function useFormat() {
       hasIntlCode(currency) ? t('format.signedMoney', { value, ...moneyParams(currency) }) : withCode('signedNumber', value, currency),
     /** API dates are calendar dates (yyyy-MM-dd): formatted in UTC so no time zone shifts the day. */
     date: (isoDate: string) => t('format.date', { value: new Date(`${isoDate}T00:00:00Z`) }),
+    /** A calendar month, yyyy-MM: "dicembre 2026". */
+    month: (isoMonth: string) => t('format.month', { value: new Date(`${isoMonth}-01T00:00:00Z`) }),
+    shortMonth: (isoMonth: string) => t('format.shortMonth', { value: new Date(`${isoMonth}-01T00:00:00Z`) }),
     shortDate: (isoDate: string) => t('format.shortDate', { value: new Date(`${isoDate}T00:00:00Z`) }),
     percent: (value: number) => t('format.percent', { value: value / 100 }),
   }

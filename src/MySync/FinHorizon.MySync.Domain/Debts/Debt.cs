@@ -6,7 +6,7 @@ namespace FinHorizon.MySync.Domain.Debts;
 /// <summary>Money the user still has to pay back (UC3). Installments are expenses linked to it.</summary>
 public sealed class Debt : Entity
 {
-    private Debt(Guid id, OwnerId ownerId, DebtKind kind, Descriptor descriptor, Guid accountId, string currency, Money initialResidual, DateOnly createdOn)
+    private Debt(Guid id, OwnerId ownerId, DebtKind kind, Descriptor descriptor, Guid accountId, string currency, Money initialResidual, Money? monthlyPayment, DateOnly createdOn)
         : base(id, ownerId)
     {
         Kind = kind;
@@ -15,6 +15,7 @@ public sealed class Debt : Entity
         NormalizedName = descriptor.NormalizedName;
         AccountId = accountId;
         InitialResidual = initialResidual;
+        MonthlyPayment = monthlyPayment;
         CreatedOn = createdOn;
     }
 
@@ -41,26 +42,29 @@ public sealed class Debt : Entity
 
     public Money InitialResidual { get; private set; }
 
+    /// <summary>UC3-R8: what the user pays every month, when given. Only the projection (UC14) reads it: installments stay expenses.</summary>
+    public Money? MonthlyPayment { get; private set; }
+
     public DateOnly CreatedOn { get; private set; }
 
-    public static Debt Take(OwnerId ownerId, DebtKind kind, Descriptor descriptor, Guid accountId, string currency, Money initialResidual, DateOnly today)
+    public static Debt Take(OwnerId ownerId, DebtKind kind, Descriptor descriptor, Guid accountId, string currency, Money initialResidual, DateOnly today, Money? monthlyPayment = null)
     {
-        Check(kind, descriptor, currency);
+        Check(kind, descriptor, currency, monthlyPayment);
         if (!initialResidual.IsPositive || !Money.HasValidPrecision(initialResidual.Amount))
         {
             throw new ArgumentException("The residual must be a positive amount in cents.", nameof(initialResidual));
         }
 
-        return new Debt(Guid.NewGuid(), ownerId, kind, descriptor, accountId, currency, initialResidual, today);
+        return new Debt(Guid.NewGuid(), ownerId, kind, descriptor, accountId, currency, initialResidual, monthlyPayment, today);
     }
 
     /// <summary>
     /// UC10: everything but the creation day can change. The new initial residual cannot be below what was already paid,
     /// or the residual would turn negative (UC10-R4); the currency changes only while nothing was paid (UC13-R6).
     /// </summary>
-    public void Update(DebtKind kind, Descriptor descriptor, Guid accountId, string currency, Money initialResidual, Money paidInstallments)
+    public void Update(DebtKind kind, Descriptor descriptor, Guid accountId, string currency, Money initialResidual, Money paidInstallments, Money? monthlyPayment = null)
     {
-        Check(kind, descriptor, currency);
+        Check(kind, descriptor, currency, monthlyPayment);
         if (currency != Currency && paidInstallments != Money.Zero)
         {
             throw new InvalidOperationException("The currency of a debt with installments cannot change.");
@@ -77,14 +81,20 @@ public sealed class Debt : Entity
         AccountId = accountId;
         Currency = currency;
         InitialResidual = initialResidual;
+        MonthlyPayment = monthlyPayment;
     }
 
     /// <summary>What is left to pay after the given installments (UC4-R2).</summary>
     public Money ResidualAfter(Money paidInstallments) => InitialResidual - paidInstallments;
 
-    private static void Check(DebtKind kind, Descriptor descriptor, string currency)
+    private static void Check(DebtKind kind, Descriptor descriptor, string currency, Money? monthlyPayment)
     {
         ArgumentNullException.ThrowIfNull(descriptor);
+        if (monthlyPayment is { } payment && (!payment.IsPositive || !Money.HasValidPrecision(payment.Amount)))
+        {
+            throw new ArgumentException("The monthly payment must be a positive amount in cents.", nameof(monthlyPayment));
+        }
+
         if (!Enum.IsDefined(kind))
         {
             throw new ArgumentOutOfRangeException(nameof(kind));

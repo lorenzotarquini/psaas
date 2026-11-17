@@ -1,6 +1,7 @@
 import type { Account } from '@/entities/account'
 import type { Category } from '@/entities/category'
 import type { Debt } from '@/entities/debt'
+import type { ProjectionData, ProjectionParameters } from '@/entities/projection'
 import type { Transaction } from '@/entities/transaction'
 import { inScope, type PortfolioGroup } from '@/shared/lib/portfolio-scope'
 
@@ -27,6 +28,14 @@ export class FakeApi {
   limits = { maxAccounts: 2, maxDebts: 1 }
   /** UC13-R4: the euro until chosen. */
   preferences = { displayCurrency: 'EUR', chosen: false }
+  /** UC14: what GET /api/projection answers beyond the starting point, which comes from the accounts. */
+  projection: Omit<ProjectionData, 'start' | 'currency'> = {
+    today: '2026-11-17',
+    debts: [],
+    suggested: { income: 0, fixedExpenses: 0, variableExpenses: 0, saving: 0, annualReturn: 2, inflation: 2, payments: [] },
+    monthsOfData: 6,
+    saved: null,
+  }
   requests: { method: string; path: string; body?: Json }[] = []
   /** Path and query of every call, in order. */
   urls: string[] = []
@@ -99,8 +108,25 @@ export class FakeApi {
       const kind = url.searchParams.get('kind')
       return ok(this.categories.filter((c) => (!kind || c.kind === kind) && c.name.toLowerCase().includes(term)))
     }
+    if (method === 'GET' && path === '/api/projection') {
+      const sum = (group: PortfolioGroup) => this.accounts.filter((a) => a.group === group).reduce((total, a) => total + a.balance, 0)
+      return ok({ ...this.projection, start: { liquidity: sum('Everyday'), investments: sum('Investments'), stable: sum('Stable') }, currency: this.preferences.displayCurrency })
+    }
+    if (method === 'PUT' && path === '/api/projection') {
+      this.projection.saved = body as unknown as ProjectionParameters
+      return ok(body)
+    }
+    if (method === 'DELETE' && path === '/api/projection') {
+      this.projection.saved = null
+      return new Response(null, { status: 204 })
+    }
+    if (method === 'PUT' && path.startsWith('/api/categories/') && path.endsWith('/fixed')) {
+      const category = this.categories.find((c) => c.id === path.split('/')[3])!
+      category.fixed = Boolean(body!.fixed)
+      return ok(category)
+    }
     if (method === 'POST' && path === '/api/categories') {
-      const category: Category = { id: this.id(), kind: body!.kind as Category['kind'], name: String(body!.name) }
+      const category: Category = { id: this.id(), kind: body!.kind as Category['kind'], name: String(body!.name), fixed: false }
       this.categories.push(category)
       return ok(category, 201)
     }
@@ -131,6 +157,7 @@ export class FakeApi {
         accountId: String(body!.accountId),
         initialResidual: Number(body!.residual),
         residual: Number(body!.residual),
+        monthlyPayment: body!.monthlyPayment === undefined ? null : Number(body!.monthlyPayment),
         createdOn: '2026-11-15',
         paidOff: false,
         group: body!.kind === 'Mortgage' ? 'Stable' : 'Everyday',

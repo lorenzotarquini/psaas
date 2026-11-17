@@ -14,6 +14,7 @@ import { NetWorthChart } from '@/widgets/net-worth-chart'
 import { AccountsCard, DebtsCard } from '@/widgets/portfolio-lists'
 import { TransactionTable } from '@/widgets/transaction-table'
 import { KpiCard } from './KpiCard'
+import { ProjectionKpi } from './ProjectionKpi'
 
 /** UC4: net worth today, accounts, debts, the latest movements and the 30-day trend. */
 export function DashboardPage() {
@@ -66,7 +67,7 @@ export function DashboardPage() {
           </div>
         </header>
 
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <KpiCard icon={faScaleBalanced} label={t('netWorth.netWorth')} highlight>
             <Amount value={netWorth} currency={currency} highlightNegative />
           </KpiCard>
@@ -87,6 +88,7 @@ export function DashboardPage() {
               <span className="loading loading-dots loading-sm" />
             )}
           </KpiCard>
+          <ProjectionKpi scope={scope} />
         </div>
 
         <div className="grid gap-6 xl:grid-cols-3">

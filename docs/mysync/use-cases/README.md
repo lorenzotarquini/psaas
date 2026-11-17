@@ -49,6 +49,9 @@ Da questi dati MySync calcola il **patrimonio netto** e ne mostra l'andamento ne
 | Patrimonio stabile e debiti a lungo termine | Conti di tipo Preziosi (beni che restano lì e cambiano poco, come i gioielli) e debiti di tipo Mutuo; nascosti finché il loro switch è spento (UC12). |
 | Investimenti e depositi | Conti di tipo Conto deposito, Investimenti, PAC e Moneta virtuale; nascosti finché il loro switch è spento (UC12). |
 | Debiti residui | Somma dei residui di tutti i debiti, a una certa data. |
+| Rata mensile | Quanto l'utente paga ogni mese per un debito; facoltativa, serve alla proiezione (UC3-R8). |
+| Spesa fissa / variabile | Una categoria di spesa è fissa (affitto, bollette) o variabile (tutto il resto, di default) (UC15). |
+| Proiezione | Stima mese per mese del patrimonio futuro, partendo da oggi e da parametri proposti dalle medie degli ultimi mesi (UC14). |
 
 ## Requisiti
 
@@ -74,6 +77,10 @@ Da questi dati MySync calcola il **patrimonio netto** e ne mostra l'andamento ne
 | RF16 | Ogni conto e debito ha una valuta; il tipo di conto "Moneta virtuale" usa le criptovalute. Il catalogo delle valute viene da un servizio esterno. | UC13 |
 | RF17 | Patrimonio, debiti residui e andamento si vedono nella valuta di visualizzazione dell'utente, convertendo con il tasso di cambio di ogni giorno. | UC13 |
 | RF18 | L'utente sceglie la valuta di visualizzazione alla configurazione e la cambia nelle Impostazioni. | UC1, UC11, UC13 |
+| RF19 | L'utente proietta il patrimonio da 1 a 360 mesi, con parametri proposti dai suoi movimenti che può cambiare, eventi una tantum, obiettivo e inflazione; la proiezione si aggiorna mentre cambia i parametri e si può salvare. | UC14 |
+| RF20 | L'utente indica quali categorie di spesa sono fisse. | UC15 |
+| RF21 | Un debito può avere una rata mensile. | UC3, UC10 |
+| RF22 | La dashboard mostra il patrimonio previsto tra 12 mesi. | UC4, UC14 |
 
 ### Non funzionali
 
@@ -104,17 +111,20 @@ Da questi dati MySync calcola il **patrimonio netto** e ne mostra l'andamento ne
 | [UC11](UC11-gestire-il-proprio-profilo.md) | Gestire il proprio profilo (dati, password, preferenze) | in ambito |
 | [UC12](UC12-vista-leggera-e-importi-nascosti.md) | Vista leggera e importi nascosti | in ambito |
 | [UC13](UC13-valute-e-moneta-virtuale.md) | Valute e moneta virtuale | in ambito |
+| [UC14](UC14-proiettare-il-patrimonio.md) | Proiettare il patrimonio | in ambito |
+| [UC15](UC15-spese-fisse-e-variabili.md) | Indicare le spese fisse (di supporto a UC14) | in ambito |
 
 Contratto HTTP: [API.md](API.md).
 
 ## Fuori ambito per l'MVP
 
 - Finanze aziendali: conti, debiti e movimenti di un'organizzazione B2B (fase 2, D8).
-- Eliminazione di conti e debiti; modifica ed eliminazione delle categorie. Conti e debiti si modificano (UC10), i movimenti hanno il CRUD completo (D1).
+- Eliminazione di conti e debiti; modifica ed eliminazione delle categorie, tranne il tipo fissa/variabile (UC15). Conti e debiti si modificano (UC10), i movimenti hanno il CRUD completo (D1).
 - Rivalutazione dei preziosi; prezzi di azioni e fondi dei conti Investimenti e PAC.
 - Movimenti ricorrenti, piani di ammortamento, separazione tra quota capitale e interessi di una rata.
 - Import da estratto conto o collegamento alle banche (open banking).
-- Budget, obiettivi di risparmio, notifiche.
+- Budget, notifiche. L'obiettivo esiste solo nella proiezione (UC14), senza avvisi.
+- Più scenari di proiezione e confronto tra proiezione e realtà (fase 2 di UC14).
 - Condivisione dei conti con altri utenti (famiglia).
 
 ## Decisioni
@@ -138,6 +148,10 @@ Prese il 2026-11-15.
 | D12 | I debiti hanno una valuta? | Sì, tradizionale; la rata esce da un conto nella stessa valuta. |
 | D13 | Trasferimento tra valute diverse? | L'utente indica l'importo che esce e quello che entra; il cambio applicato è il suo. |
 | D14 | Si può cambiare la valuta di un conto? | Solo finché non ha movimenti (di un debito: finché non ha rate), perché gli importi già registrati sono in quella valuta. |
+| D15 | La proiezione rispetta gli switch di UC12? | No: proietta sempre tutti i conti e i debiti, perché una proiezione senza investimenti o preziosi sarebbe fuorviante. Decisa il 2026-11-17. |
+| D16 | Dove si calcola la proiezione? | Nel browser: il backend dà punto di partenza, parametri proposti e parametri salvati; così ogni modifica aggiorna il grafico subito. Il calcolo sta in un solo modulo del frontend con i suoi test. Decisa il 2026-11-17. |
+| D17 | Come si separano spese fisse e variabili? | Con il tipo della categoria di spesa (UC15), variabile di default; le rate dei debiti non sono né l'una né l'altra, perché la proiezione le gestisce debito per debito. Decisa il 2026-11-17. |
+| D18 | Mettere soldi da parte cambia il patrimonio? | No, è un trasferimento (UC9). Nella proiezione la quota messa da parte passa dalla liquidità agli investimenti, e conta solo per il rendimento. Decisa il 2026-11-17. |
 
 Non ci sono domande aperte.
 
@@ -174,6 +188,10 @@ Schema dello scenario: Ogni operazione richiede un utente autenticato
     | DELETE /api/transactions/{id} |
     | GET /api/dashboard         |
     | GET /api/net-worth         |
+    | GET /api/projection        |
+    | PUT /api/projection        |
+    | DELETE /api/projection     |
+    | PUT /api/categories/{id}/fixed |
 ```
 
 ### GEN-S2

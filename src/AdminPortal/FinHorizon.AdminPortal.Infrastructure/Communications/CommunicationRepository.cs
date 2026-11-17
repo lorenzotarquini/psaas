@@ -145,7 +145,8 @@ public sealed class SmtpEmailSender(IConfiguration configuration) : IEmailSender
         try
         {
             await client.SendMailAsync(mail, cancellationToken).ConfigureAwait(false);
-            Logger.Info("Email \"{Subject}\" sent to {To}", message.Subject, message.To);
+            // Neither the address nor the subject: they are personal data. The audit trail says who received what.
+            Logger.Info("Email sent through {Channel}", string.IsNullOrWhiteSpace(Host) ? "pickup" : "smtp");
         }
         catch (Exception exception) when (exception is SmtpException or InvalidOperationException or IOException)
         {

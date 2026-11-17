@@ -19,7 +19,8 @@ export const keycloakSession: AuthSession = {
   async init() {
     // checkLoginIframe relies on third-party cookies, blocked by modern browsers.
     await keycloak.init({ onLoad: 'login-required', pkceMethod: 'S256', checkLoginIframe: false })
-    logger.info({ user: keycloak.tokenParsed?.preferred_username }, 'User authenticated')
+    // The subject, a pseudonymous id: never the username or the email.
+    logger.info({ userId: keycloak.tokenParsed?.sub }, 'User authenticated')
   },
 
   async headers() {

@@ -11,11 +11,48 @@ var postgres = builder.AddPostgres("postgres", postgresUsername, postgresPasswor
 var adminPortalDb = postgres.AddDatabase("adminportal-db", "adminportal-db");
 var mySyncDb = postgres.AddDatabase("mysync-db", "mysync-db");
 
+// Logs: every backend writes JSON lines to its own file in this directory (NLog target jsonFile, Development),
+// Alloy reads them and sends them to Loki, Grafana shows them in one dashboard per service. Configuration in Observability/.
+var logsDirectory = Path.GetFullPath(Path.Combine(builder.AppHostDirectory, "../logs"));
+Directory.CreateDirectory(logsDirectory);
+
+var loki = builder.AddContainer("loki", "grafana/loki", "3.5.3")
+    .WithBindMount("Observability/loki/loki.yaml", "/etc/loki/loki.yaml", isReadOnly: true)
+    .WithVolume("finhorizon-loki-data", "/loki")
+    .WithArgs("-config.file=/etc/loki/loki.yaml")
+    .WithHttpEndpoint(targetPort: 3100, name: "http")
+    .WithHttpHealthCheck("/ready");
+
+builder.AddContainer("alloy", "grafana/alloy", "v1.10.2")
+    .WithBindMount("Observability/alloy/config.alloy", "/etc/alloy/config.alloy", isReadOnly: true)
+    .WithBindMount(logsDirectory, "/var/log/finhorizon", isReadOnly: true)
+    // Where Alloy remembers how far it read each file, so a restart sends nothing twice.
+    .WithVolume("finhorizon-alloy-data", "/var/lib/alloy/data")
+    .WithArgs("run", "--server.http.listen-addr=0.0.0.0:12345", "--storage.path=/var/lib/alloy/data", "/etc/alloy/config.alloy")
+    .WithHttpEndpoint(targetPort: 12345, name: "http")
+    .WaitFor(loki);
+
+// Fixed port and anonymous access: local development only, nothing to sign in to. Viewers may use Explore;
+// the dashboards are provisioned from files and cannot be changed from the UI.
+builder.AddContainer("grafana", "grafana/grafana", "12.1.1")
+    .WithBindMount("Observability/grafana/provisioning", "/etc/grafana/provisioning", isReadOnly: true)
+    .WithBindMount("Observability/grafana/dashboards", "/var/lib/grafana/dashboards", isReadOnly: true)
+    .WithEnvironment("GF_AUTH_ANONYMOUS_ENABLED", "true")
+    .WithEnvironment("GF_AUTH_ANONYMOUS_ORG_ROLE", "Viewer")
+    .WithEnvironment("GF_USERS_VIEWERS_CAN_EDIT", "true")
+    .WithEnvironment("GF_AUTH_DISABLE_LOGIN_FORM", "true")
+    .WithEnvironment("GF_ANALYTICS_REPORTING_ENABLED", "false")
+    .WithEnvironment("GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH", "/var/lib/grafana/dashboards/finhorizon-overview.json")
+    .WithHttpEndpoint(port: 3000, targetPort: 3000, name: "http")
+    .WithExternalHttpEndpoints()
+    .WaitFor(loki);
+
 // Secret of the confidential client adminportal-api: its service account manages users, reads login events
 // and exchanges tokens for impersonation. Set it with: dotnet user-secrets set "Parameters:admin-portal-client-secret" "<value>"
 var keycloakClientSecret = builder.AddParameter("admin-portal-client-secret", secret: true);
 
 var adminPortalBackend = builder.AddProject<Projects.FinHorizon_AdminPortal_Backend>("adminportal-backend")
+    .WithEnvironment("Logs__Directory", logsDirectory)
     .WithReference(adminPortalDb)
     .WaitFor(adminPortalDb)
     .WithEnvironment("Keycloak__ClientSecret", keycloakClientSecret)
@@ -41,6 +78,7 @@ var mySyncTimeZone = builder.AddParameter("mysync-time-zone");
 var mySyncRatesUrl = builder.AddParameter("mysync-rates-url");
 
 var mySyncBackend = builder.AddProject<Projects.FinHorizon_MySync_Backend>("mysync-backend")
+    .WithEnvironment("Logs__Directory", logsDirectory)
     .WithReference(mySyncDb)
     .WaitFor(mySyncDb)
     .WithEnvironment("MySync__MaxAccounts", mySyncMaxAccounts)

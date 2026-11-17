@@ -9,3 +9,4 @@
 /src/mail_pickup/
 # Local AppHost settings with secrets
 src/FinHorizon.AppHost/appsettings.Development.json
+/src/logs/

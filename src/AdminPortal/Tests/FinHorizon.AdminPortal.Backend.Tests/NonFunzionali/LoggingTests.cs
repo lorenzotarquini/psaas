@@ -26,8 +26,9 @@ public sealed class LoggingTests(PostgresFixture database) : AcceptanceTest(data
             log.StartsWith("FinHorizon.AdminPortal.Infrastructure.Repositories.Tenants.TenantWriteRepository|Debug|", StringComparison.Ordinal));
         Assert.Contains(memory.Logs, log =>
             log.StartsWith("FinHorizon.AdminPortal.Backend.Controllers.TenantsController|Info|Returned tenant", StringComparison.Ordinal));
+        // One line per request from the shared request logging, with the route template (FinHorizon.Observability).
         Assert.Contains(memory.Logs, log =>
-            log.StartsWith("Microsoft.AspNetCore.Hosting.Diagnostics|Info|Request finished HTTP/1.1 POST", StringComparison.Ordinal));
+            log.StartsWith("FinHorizon.Http|Info|HTTP POST /api/tenants responded 201", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -36,7 +37,10 @@ public sealed class LoggingTests(PostgresFixture database) : AcceptanceTest(data
         await Admin.GetAsync("/health");
 
         Assert.True(LogManager.GetLogger("FinHorizon.AdminPortal.Infrastructure.Repositories.Tenants.TenantReadRepository").IsDebugEnabled);
-        Assert.True(LogManager.GetLogger("Microsoft.AspNetCore.Hosting.Diagnostics").IsInfoEnabled);
+        // ASP.NET Core's request log only when something is wrong: the request line is FinHorizon.Http's.
+        Assert.False(LogManager.GetLogger("Microsoft.AspNetCore.Hosting.Diagnostics").IsInfoEnabled);
+        Assert.True(LogManager.GetLogger("Microsoft.AspNetCore.Hosting.Diagnostics").IsWarnEnabled);
+        Assert.True(LogManager.GetLogger("FinHorizon.Http").IsInfoEnabled);
         Assert.False(LogManager.GetLogger("Microsoft.AspNetCore.Routing.EndpointMiddleware").IsInfoEnabled);
         Assert.True(LogManager.GetLogger("Microsoft.AspNetCore.Routing.EndpointMiddleware").IsWarnEnabled);
     }

@@ -97,7 +97,7 @@ Da questi dati MySync calcola il **patrimonio netto** e ne mostra l'andamento ne
 | RNF4 | Le date dei movimenti sono date di calendario (senza ora né fuso). |
 | RNF5 | Stessi codici d'errore per campo dell'Admin Portal (`Required`, `InvalidFormat`, `MaxLengthExceeded`, `NotUnique`, `InvalidValue`) più `LimitReached` per i limiti di RF2, RF4 e RF23; il frontend li traduce. |
 | RNF6 | Interfaccia in italiano e inglese, tema chiaro e scuro, utilizzabile da telefono (la registrazione di una spesa si fa spesso in mobilità). |
-| RNF7 | Log NLog strutturati in JSON in ogni strato, senza importi né descrizioni nei messaggi (sono dati personali). |
+| RNF7 | Log NLog strutturati in JSON in ogni strato, senza importi né descrizioni nei messaggi (sono dati personali); l'utente compare solo come id pseudonimo (`UserId`, il `sub` di Keycloak). I log sono raccolti da Alloy in Loki e consultati in Grafana ([osservabilita.md](../../osservabilita.md)). |
 
 ## Use case
 

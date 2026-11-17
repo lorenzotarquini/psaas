@@ -7,6 +7,7 @@ using FinHorizon.MySync.Application;
 using FinHorizon.MySync.Application.Abstractions;
 using FinHorizon.MySync.Backend.Infrastructure;
 using FinHorizon.MySync.Infrastructure;
+using FinHorizon.Observability;
 
 var logger = LogManager.Setup()
     .LoadConfigurationFromAppSettings()
@@ -54,6 +55,8 @@ try
     app.UseHttpsRedirection();
     app.UseCors();
     app.UseAuthentication();
+    // One line per request and the pseudonymous user on every line (after authentication, before authorization).
+    app.UseRequestLogging();
     app.UseAuthorization();
 
     app.MapHealthChecks("/health");

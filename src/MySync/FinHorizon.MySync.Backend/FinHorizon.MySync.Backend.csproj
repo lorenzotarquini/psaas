@@ -13,6 +13,7 @@
     <ProjectReference Include="..\FinHorizon.MySync.Application\FinHorizon.MySync.Application.csproj" />
     <ProjectReference Include="..\FinHorizon.MySync.Infrastructure\FinHorizon.MySync.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Shared\FinHorizon.Auth\FinHorizon.Auth.csproj" />
+    <ProjectReference Include="..\..\Shared\FinHorizon.Observability\FinHorizon.Observability.csproj" />
   </ItemGroup>
 
 </Project>

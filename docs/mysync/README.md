@@ -58,7 +58,7 @@ Feature-Sliced Design (controllato da Steiger): `app` (shell, rotte), `pages` (s
 
 ## Avvio
 
-Con Aspire (`src/FinHorizon.AppHost`): Postgres crea `mysync-db`, poi partono `mysync-backend` e `mysync-frontend` su `http://localhost:5174` (porta fissa per Keycloak). Le migrazioni di `mysync-db` si applicano da sole a ogni avvio del backend, se ce ne sono di nuove. La configurazione (limiti di conti, debiti e abbonamenti, fuso orario, valute) sta nei parametri dell'AppHost: vedi [use-cases/API.md](use-cases/API.md#configurazione-del-backend).
+Con Aspire (`src/FinHorizon.AppHost`): Postgres crea `mysync-db`, poi partono `mysync-backend` e `mysync-frontend` su `http://localhost:5174` (porta fissa per Keycloak). Le migrazioni di `mysync-db` si applicano da sole a ogni avvio del backend, se ce ne sono di nuove. Con l'AppHost partono anche Loki, Alloy e Grafana (http://localhost:3000): log centralizzati e dashboard per servizio, vedi [osservabilita.md](../osservabilita.md). La configurazione (limiti di conti, debiti e abbonamenti, fuso orario, valute) sta nei parametri dell'AppHost: vedi [use-cases/API.md](use-cases/API.md#configurazione-del-backend).
 
 ## Keycloak (realm `PSAAS`)
 

@@ -1,0 +1,58 @@
+// Alloy collects the logs of every FinHorizon backend and sends them to Loki.
+//
+// Locally the backends run as processes under Aspire and write one JSON file each (NLog target jsonFile)
+// in the directory mounted on /var/log/finhorizon. In a container deployment the same JSON lines are on stdout:
+// replace the two file components with discovery.docker (or discovery.kubernetes) and loki.source.docker.
+
+local.file_match "backends" {
+  // Only the current files: the archives NLog rotates (<service>.<n>.log) were read before.
+  path_targets = [{"__path__" = "/var/log/finhorizon/*-backend.log", "env" = "development"}]
+}
+
+loki.source.file "backends" {
+  targets    = local.file_match.backends.targets
+  forward_to = [loki.process.backends.receiver]
+}
+
+loki.process "backends" {
+  stage.json {
+    expressions = {
+      timestamp = "timestamp",
+      level     = "level",
+      service   = "service",
+      event     = "Event",
+    }
+  }
+
+  // Labels only for the few values a query starts from; everything else stays in the JSON line.
+  stage.labels {
+    values = {
+      service = "",
+      level   = "",
+    }
+  }
+
+  // The event kind (http_request, use_case) as structured metadata: filterable, not an index.
+  stage.structured_metadata {
+    values = {
+      event = "",
+    }
+  }
+
+  stage.timestamp {
+    source = "timestamp"
+    format = "RFC3339Nano"
+  }
+
+  stage.label_drop {
+    values = ["filename"]
+  }
+
+  forward_to = [loki.write.local.receiver]
+}
+
+loki.write "local" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}

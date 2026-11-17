@@ -15,6 +15,7 @@
     <ProjectReference Include="..\FinHorizon.AdminPortal.Application\FinHorizon.AdminPortal.Application.csproj" />
     <ProjectReference Include="..\FinHorizon.AdminPortal.Infrastructure\FinHorizon.AdminPortal.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Shared\FinHorizon.Auth\FinHorizon.Auth.csproj" />
+    <ProjectReference Include="..\..\Shared\FinHorizon.Observability\FinHorizon.Observability.csproj" />
   </ItemGroup>
 
 </Project>

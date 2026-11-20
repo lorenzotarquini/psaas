@@ -229,3 +229,38 @@ public sealed class FakeImpersonation : IImpersonationGateway
     public Task<string> CreateSessionUrlAsync(string userId, TimeSpan duration, CancellationToken cancellationToken = default) =>
         Task.FromResult($"https://platform.test/impersonate#access_token=token-of-{userId}&expires_in={(int)duration.TotalSeconds}");
 }
+
+/// <summary>UC16: Stripe for the plans. Keeps what was published; "down" answers like an unreachable Stripe.</summary>
+public sealed class FakeStripePlans : FinHorizon.AdminPortal.Application.Abstractions.Payments.IPlanPublisher
+{
+    private int _prices;
+
+    public bool IsConfigured => true;
+
+    public bool Down { get; set; }
+
+    /// <summary>Every price ever created, by id: amount and whether still on sale.</summary>
+    public Dictionary<string, (decimal Amount, string Interval, bool IncludesVat, bool OnSale)> Prices { get; } = [];
+
+    public Dictionary<string, FinHorizon.AdminPortal.Application.Abstractions.Payments.PlanPublication> Products { get; } = [];
+
+    public Task<FinHorizon.AdminPortal.Application.Contracts.Catalog.PlanStripeLink> PublishAsync(
+        FinHorizon.AdminPortal.Application.Abstractions.Payments.PlanPublication plan,
+        FinHorizon.AdminPortal.Application.Contracts.Catalog.PlanStripeLink? current,
+        CancellationToken cancellationToken = default)
+    {
+        if (Down) throw new FinHorizon.AdminPortal.Application.Abstractions.Payments.PaymentProviderUnavailableException("Stripe down");
+        var productId = current?.ProductId ?? $"prod_{plan.Code}";
+        Products[productId] = plan;
+        var interval = plan.BillingPeriod == "Yearly" ? "year" : "month";
+        var priceId = current?.PriceId;
+        if (priceId is null || Prices[priceId] != (plan.Price, interval, plan.PriceIncludesVat, true))
+        {
+            if (priceId is not null) Prices[priceId] = Prices[priceId] with { OnSale = false };
+            priceId = $"price_{++_prices}";
+            Prices[priceId] = (plan.Price, interval, plan.PriceIncludesVat, true);
+        }
+
+        return Task.FromResult(new FinHorizon.AdminPortal.Application.Contracts.Catalog.PlanStripeLink(productId, priceId, $"txr_{plan.VatRate:0.##}_{plan.PriceIncludesVat}"));
+    }
+}

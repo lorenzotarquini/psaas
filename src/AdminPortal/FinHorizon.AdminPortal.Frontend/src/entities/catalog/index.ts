@@ -8,6 +8,7 @@ export {
   useSubscribe,
   useSubscriptions,
   useTenantSubscription,
+  vatRates,
   type BillingPeriod,
   type Module,
   type ModuleManifest,

@@ -86,7 +86,7 @@ Da questi dati MySync calcola il **patrimonio netto** e ne mostra l'andamento ne
 | RF22 | La dashboard mostra il patrimonio previsto tra 12 mesi. | UC4, UC14 |
 | RF23 | L'utente crea, modifica, annulla, riattiva ed elimina i propri abbonamenti mensili. Il numero massimo di abbonamenti non annullati è dato dalla configurazione `MySync:MaxSubscriptions` (variabile d'ambiente `MySync__MaxSubscriptions`). | UC16 |
 | RF24 | La dashboard mostra gli abbonamenti da registrare; un clic apre la spesa già compilata. Una spesa può essere collegata a un abbonamento. | UC4, UC16 |
-| RF26 | L'utente paga MySync da solo su Stripe (4,99 € al mese), vede nelle Impostazioni stato, rinnovo, metodo di pagamento ed errore dell'ultimo pagamento, e rinnova; con l'abbonamento scaduto MySync è in sola lettura. | UC17 |
+| RF26 | L'utente sceglie uno dei piani di MySync definiti nell'Admin Portal e lo paga da solo su Stripe, vede nelle Impostazioni stato, rinnovo, metodo di pagamento ed errore dell'ultimo pagamento, e rinnova; con l'abbonamento scaduto MySync è in sola lettura. | UC17 |
 | RF25 | La proiezione considera gli abbonamenti uno per uno, con la loro data di fine, e permette di toglierne uno per vedere cosa cambia. | UC14, UC16 |
 
 ### Non funzionali

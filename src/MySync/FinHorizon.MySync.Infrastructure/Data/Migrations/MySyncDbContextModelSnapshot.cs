@@ -514,9 +514,44 @@ namespace FinHorizon.MySync.Infrastructure.Data.Migrations
                                 .HasForeignKey("MembershipOwnerId");
                         });
 
+                    b.OwnsOne("FinHorizon.MySync.Domain.Memberships.SubscribedPlan", "Plan", b1 =>
+                        {
+                            b1.Property<string>("MembershipOwnerId")
+                                .HasMaxLength(64)
+                                .HasColumnType("character varying(64)");
+
+                            b1.Property<decimal>("Amount")
+                                .HasPrecision(12, 2)
+                                .HasColumnType("numeric(12,2)");
+
+                            b1.Property<string>("Currency")
+                                .IsRequired()
+                                .HasMaxLength(3)
+                                .HasColumnType("character varying(3)");
+
+                            b1.Property<string>("Interval")
+                                .IsRequired()
+                                .HasMaxLength(5)
+                                .HasColumnType("character varying(5)");
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(250)
+                                .HasColumnType("character varying(250)");
+
+                            b1.HasKey("MembershipOwnerId");
+
+                            b1.ToTable("Memberships");
+
+                            b1.WithOwner()
+                                .HasForeignKey("MembershipOwnerId");
+                        });
+
                     b.Navigation("Card");
 
                     b.Navigation("LastFailure");
+
+                    b.Navigation("Plan");
                 });
 
             modelBuilder.Entity("FinHorizon.MySync.Domain.Projection.ProjectionSettings", b =>

@@ -9,9 +9,8 @@ export interface Membership {
   status: MembershipStatus
   /** UC17-R4: false = MySync is read-only. */
   canWrite: boolean
-  price: number
-  currency: string
-  interval: 'Month'
+  /** The plan of the current or last subscription, as when the user subscribed. */
+  plan: { name: string; amount: number; currency: string; interval: 'Month' | 'Year' } | null
   currentPeriodEnd: string | null
   cancelAtPeriodEnd: boolean
   card: { brand: string; last4: string; expMonth: number; expYear: number } | null
@@ -23,12 +22,28 @@ export interface Membership {
   hasCustomer: boolean
 }
 
+/** UC17 step 2: a plan of the MySync module, defined in the Admin Portal (UC16). */
+export interface MembershipPlan {
+  code: string
+  name: string
+  description: string | null
+  price: number
+  currency: string
+  interval: 'Month' | 'Year'
+  priceIncludesVat: boolean
+  vatRate: number | null
+  trialDays: number
+}
+
 export const membershipQueryKey = ['membership'] as const
 
 export const useMembership = () => useQuery({ queryKey: membershipQueryKey, queryFn: ({ signal }) => apiGet<Membership>('/api/membership', signal) })
 
-/** UC17 step 2: Stripe's payment page. */
-export const startCheckout = () => apiPost<{ url: string }>('/api/membership/checkout', {})
+export const useMembershipPlans = (enabled: boolean) =>
+  useQuery({ queryKey: ['membership', 'plans'], queryFn: ({ signal }) => apiGet<MembershipPlan[]>('/api/membership/plans', signal), enabled })
+
+/** UC17 step 2: Stripe's payment page for the chosen plan. */
+export const startCheckout = (planCode: string) => apiPost<{ url: string }>('/api/membership/checkout', { planCode })
 
 /** UC17 flow 1a: Stripe's customer portal. */
 export const openBillingPortal = () => apiPost<{ url: string }>('/api/membership/portal', {})

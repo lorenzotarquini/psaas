@@ -7,8 +7,8 @@
 Non va confuso con gli abbonamenti dell'utente (UC16), che sono spese che MySync gli aiuta a tenere sotto controllo: questo è l'abbonamento **a** MySync.
 
 ## Flusso principale
-1. L'utente apre Impostazioni › Abbonamento: vede lo stato (attivo, pagamento non riuscito, scaduto), il prezzo, il prossimo rinnovo e il metodo di pagamento.
-2. Con l'abbonamento scaduto preme "Rinnova": MySync lo porta sulla pagina di pagamento di Stripe (Checkout).
+1. L'utente apre Impostazioni › Abbonamento: vede lo stato (attivo, pagamento non riuscito, scaduto), il piano con il suo prezzo, il prossimo rinnovo e il metodo di pagamento.
+2. Con l'abbonamento scaduto sceglie uno dei piani in vendita (prezzo, periodicità, IVA, eventuale prova) e preme "Abbonati" ("Rinnova" se era già cliente): MySync lo porta sulla pagina di pagamento di Stripe (Checkout).
 3. L'utente paga; Stripe lo riporta alle Impostazioni e gli manda l'email con la fattura.
 4. MySync legge da Stripe il nuovo stato (subito al ritorno e a ogni evento di Stripe): l'abbonamento è attivo e l'utente torna a modificare i suoi dati.
 5. Ogni mese Stripe rinnova e addebita da solo, con l'email della fattura.
@@ -21,13 +21,14 @@ Non va confuso con gli abbonamenti dell'utente (UC16), che sono spese che MySync
 - **2b. L'abbonamento è già attivo o in attesa di pagamento:** non si apre un secondo pagamento; si usa "Gestisci" o "Paga ora".
 
 ## Regole
-- R1. Prezzo: 4,99 € al mese, IVA inclusa, da configurazione (`Membership:Price`, `Membership:Currency`). Cambiare il prezzo crea un nuovo prezzo in Stripe: chi è già abbonato resta su quello vecchio.
+- R1. I piani in vendita sono quelli del modulo `mysync` definiti nell'Admin Portal (UC16 dell'Admin Portal), letti da Stripe: nome, prezzo, periodicità, aliquota IVA, prova. Cambiare il prezzo di un piano non tocca chi è già abbonato. Si sceglie solo un piano in vendita (`Required`/`InvalidValue` su `planCode`).
 - R2. Ogni utente del gruppo `end_users` è un cliente Stripe, creato da MySync al primo pagamento con l'email e il nome del token; il cliente è legato all'utente (`sub`), mai a un'organizzazione.
 - R3. Stati: **Attivo** (Stripe `active`, `trialing`), **Pagamento non riuscito** (`past_due`), **Scaduto** (nessun abbonamento, oppure `canceled`, `unpaid`, `incomplete`, `incomplete_expired`, `paused`). Chi non ha mai pagato, compresi gli utenti che usavano MySync prima di Stripe, è Scaduto.
 - R4. **Sola lettura:** con l'abbonamento Scaduto ogni modifica (`POST`, `PUT`, `DELETE` sotto `/api`, tranne `/api/membership`) risponde `402`; la lettura resta libera. Con Pagamento non riuscito l'utente modifica ancora, finché Stripe riprova.
 - R5. Lo stato lo decide Stripe: MySync ne tiene una copia, riletta da Stripe a ogni evento e al ritorno dal pagamento, quindi un evento arrivato due volte o fuori ordine non lo sbaglia.
 - R6. Da Stripe si torna sempre a Impostazioni di MySync: l'indirizzo lo costruisce il backend da `Membership:FrontendUrl`, il browser non lo sceglie.
 - R7. Email, solleciti, tentativi e fatture sono di Stripe (Dashboard › Settings › Billing); MySync non manda email.
+- R8. La prova gratuita del piano vale solo per chi non è mai stato cliente Stripe di MySync.
 
 ## Scenari di accettazione
 
@@ -44,7 +45,7 @@ Funzionalità: Abbonamento a MySync
 Scenario: Chi usava MySync prima di Stripe ha l'abbonamento scaduto
   Dato che Luca usa MySync e non ha mai pagato
   Quando apre l'abbonamento
-  Allora l'abbonamento è "Expired" a 4,99 EUR al mese
+  Allora l'abbonamento è "Expired" e i piani in vendita sono "mysync-mensile" a 4,99 EUR al mese con IVA 22% inclusa e "mysync-annuale"
   E Luca vede i suoi conti ma non può crearne uno nuovo (402)
 ```
 
@@ -58,10 +59,10 @@ Funzionalità: Abbonamento a MySync
 
 Scenario: Rinnovare con il pagamento di Stripe
   Dato che l'abbonamento di Luca è scaduto
-  Quando Luca preme "Rinnova"
-  Allora riceve l'indirizzo della pagina di pagamento di Stripe ed è diventato cliente Stripe con la sua email
+  Quando Luca sceglie "mysync-annuale" e preme "Abbonati"
+  Allora riceve l'indirizzo della pagina di pagamento di Stripe per quel piano ed è diventato cliente Stripe con la sua email
   Quando paga e torna in MySync
-  Allora l'abbonamento è "Active" con la carta usata e il prossimo rinnovo
+  Allora l'abbonamento è "Active" con il piano annuale, la carta usata e il prossimo rinnovo
   E Luca può di nuovo creare un conto
 ```
 
@@ -161,4 +162,31 @@ Funzionalità: Abbonamento a MySync
 Scenario: Evento di un cliente che non è di MySync
   Quando arriva un evento firmato per un cliente Stripe che MySync non conosce (es. un'organizzazione dell'Admin Portal)
   Allora la risposta è 200 e MySync non chiede nulla a Stripe
+```
+
+### UC17-S10
+
+Test: `UC17_AbbonamentoMySync.S10_SoloPianiInVendita`
+
+```gherkin
+# language: it
+Funzionalità: Abbonamento a MySync
+
+Scenario: Solo un piano in vendita
+  Quando Luca chiede il pagamento di un piano archiviato, oppure senza piano
+  Allora la richiesta è rifiutata con "InvalidValue", oppure "Required", su "planCode"
+```
+
+### UC17-S11
+
+Test: `UC17_AbbonamentoMySync.S11_ProvaSoloLaPrimaVolta`
+
+```gherkin
+# language: it
+Funzionalità: Abbonamento a MySync
+
+Scenario: La prova vale una volta
+  Dato il piano "mysync-mensile" con 14 giorni di prova
+  Quando Luca apre il pagamento due volte
+  Allora solo la prima volta il pagamento ha la prova
 ```

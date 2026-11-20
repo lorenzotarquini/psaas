@@ -64,7 +64,10 @@ var adminPortalBackend = builder.AddProject<Projects.FinHorizon_AdminPortal_Back
 // (whsec_…), both in appsettings.Development.json or user secrets, never in git.
 var stripeSecretKey = builder.AddParameter("stripe-secret-key", secret: true);
 var stripeWebhookSecret = builder.AddParameter("stripe-webhook-secret", secret: true);
-adminPortalBackend.WithEnvironment("Stripe__WebhookSecret", stripeWebhookSecret);
+// UC16: the Admin Portal publishes the plans on Stripe (products, prices, VAT rates).
+adminPortalBackend
+    .WithEnvironment("Stripe__SecretKey", stripeSecretKey)
+    .WithEnvironment("Stripe__WebhookSecret", stripeWebhookSecret);
 
 // UC33 locally: the Stripe CLI receives the events of the sandbox and forwards them to the backend webhook.
 // --skip-verify because the backend uses the development certificate.
@@ -108,9 +111,8 @@ var mySyncBackend = builder.AddProject<Projects.FinHorizon_MySync_Backend>("mysy
 
 // UC17 of MySync: the subscription of each user to MySync is paid on Stripe (same sandbox). MySync keeps its own copy
 // of the state, so it has its own Stripe CLI forwarding the events to its webhook; Stripe returns to the frontend.
-var mySyncMembershipPrice = builder.AddParameter("mysync-membership-price");
+// The plans on sale are the Admin Portal's plans of the module mysync (UC16), read from Stripe.
 mySyncBackend
-    .WithEnvironment("Membership__Price", mySyncMembershipPrice)
     .WithEnvironment("Stripe__SecretKey", stripeSecretKey)
     .WithEnvironment("Stripe__WebhookSecret", stripeWebhookSecret)
     .WithEnvironment("Membership__FrontendUrl", "http://localhost:5174");

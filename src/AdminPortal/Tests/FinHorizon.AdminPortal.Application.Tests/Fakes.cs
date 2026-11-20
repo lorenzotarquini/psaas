@@ -379,12 +379,31 @@ public sealed class FakeCatalogRepository : ICatalogRepository
     public Task<bool> IsPlanCodeTakenAsync(string code, Guid? exceptPlanId, CancellationToken cancellationToken = default) =>
         Task.FromResult(Plans.Any(p => p.Code == code && p.Id != exceptPlanId));
 
-    public Task<Guid> SavePlanAsync(Guid? planId, PlanRequest plan, CancellationToken cancellationToken = default)
+    public Task<Guid> SavePlanAsync(Guid? planId, PlanRequest plan, PlanStripeLink? stripe, CancellationToken cancellationToken = default)
     {
         var id = planId ?? Guid.NewGuid();
         Plans.RemoveAll(p => p.Id == id);
-        Plans.Add(new(id, plan.Code!, plan.Name!, plan.Description, plan.Price!.Value, plan.BillingPeriod!, plan.TrialDays ?? 0, plan.MaxUsers, plan.MaxProductiveUnits, plan.ModuleIds ?? [], plan.Active, 0));
+        Plans.Add(new(
+            id, plan.Code!, plan.Name!, plan.Description, plan.Price!.Value, plan.BillingPeriod!, plan.TrialDays ?? 0, plan.MaxUsers, plan.MaxProductiveUnits,
+            plan.ModuleIds ?? [], plan.Active, 0, plan.VatRate ?? 22, plan.VatNature, plan.PriceIncludesVat, stripe));
         return Task.FromResult(id);
+    }
+}
+
+/// <summary>UC16: Stripe as seen by the catalog; every publication is kept, a new price when the amount changes.</summary>
+public sealed class FakePlanPublisher : FinHorizon.AdminPortal.Application.Abstractions.Payments.IPlanPublisher
+{
+    public bool IsConfigured { get; set; } = true;
+
+    public bool Unavailable { get; set; }
+
+    public List<FinHorizon.AdminPortal.Application.Abstractions.Payments.PlanPublication> Published { get; } = [];
+
+    public Task<PlanStripeLink> PublishAsync(FinHorizon.AdminPortal.Application.Abstractions.Payments.PlanPublication plan, PlanStripeLink? current, CancellationToken cancellationToken = default)
+    {
+        if (Unavailable) throw new FinHorizon.AdminPortal.Application.Abstractions.Payments.PaymentProviderUnavailableException("down");
+        Published.Add(plan);
+        return Task.FromResult(new PlanStripeLink(current?.ProductId ?? $"prod_{plan.Code}", $"price_{plan.Code}_{plan.Price}", $"txr_{plan.VatRate}"));
     }
 }
 

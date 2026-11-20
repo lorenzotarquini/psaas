@@ -24,7 +24,8 @@ public sealed class UC29_Panoramica(PostgresFixture database) : AcceptanceTest(d
 
         var kpis = await GetOkAsync<OverviewView>("/api/overview");
 
-        Assert.Equal((2, 2, 1, 1, 3, 3, 1), (kpis.ActiveTenants, kpis.ActiveTenantsThisMonth, kpis.TrialTenants, kpis.TrialsEndingSoon, kpis.Users, kpis.Modules, kpis.ModulesInBeta));
+        // Modules: mysync, warehouse, the beta one and "base" of the plans without a module of their own (UC16-R2).
+        Assert.Equal((2, 2, 1, 1, 3, 4, 1), (kpis.ActiveTenants, kpis.ActiveTenantsThisMonth, kpis.TrialTenants, kpis.TrialsEndingSoon, kpis.Users, kpis.Modules, kpis.ModulesInBeta));
     }
 
     [Fact, Trait("Scenario", "UC29-S2")]

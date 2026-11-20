@@ -118,10 +118,18 @@ public abstract class AcceptanceTest(PostgresFixture database) : IAsyncLifetime
             await Admin.PostAsJsonAsync("/api/modules", new { id, name = id, version, requires, permissions = new[] { $"{id}.read" } }),
             HttpStatusCode.OK);
 
-    protected async Task<PlanView> GivenPlanAsync(string code, decimal price = 99, int? maxUsers = null, int trialDays = 0, params string[] moduleIds) =>
-        await ReadAsync<PlanView>(
+    /// <summary>UC16-R2: a plan opens one module; without one given, a module "base" with no hook.</summary>
+    protected async Task<PlanView> GivenPlanAsync(string code, decimal price = 99, int? maxUsers = null, int trialDays = 0, params string[] moduleIds)
+    {
+        if (moduleIds.Length == 0)
+        {
+            moduleIds = [(await GivenModuleAsync("base")).Id];
+        }
+
+        return await ReadAsync<PlanView>(
             await Admin.PostAsJsonAsync("/api/plans", new { code, name = code.ToUpperInvariant(), price, billingPeriod = "Monthly", trialDays, maxUsers, moduleIds }),
             HttpStatusCode.Created);
+    }
 
     protected Task<HttpResponseMessage> SubscribeAsync(Guid tenantId, Guid planId, bool trial = false) =>
         Admin.PutAsJsonAsync($"/api/tenants/{tenantId}/subscription", new { planId, trial });

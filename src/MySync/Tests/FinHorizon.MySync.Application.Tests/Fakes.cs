@@ -330,8 +330,19 @@ internal sealed class FakePaymentProvider : Abstractions.Payments.IPaymentProvid
         return Task.FromResult($"cus_{ownerId.Value}");
     }
 
-    public Task<Uri> CreateCheckoutAsync(string customerId, OwnerId ownerId, Uri returnUrl, CancellationToken cancellationToken = default) =>
-        Task.FromResult(new Uri($"https://checkout.test/{customerId}"));
+    public List<Abstractions.Payments.MembershipPlan> Plans { get; } =
+        [new("mysync-mensile", "MySync mensile", null, 4.99m, "EUR", "Month", true, 22m, 14, "price_1", "txr_22")];
+
+    public List<(string PlanCode, bool WithTrial)> Checkouts { get; } = [];
+
+    public Task<IReadOnlyList<Abstractions.Payments.MembershipPlan>> GetPlansAsync(CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyList<Abstractions.Payments.MembershipPlan>>(Plans);
+
+    public Task<Uri> CreateCheckoutAsync(string customerId, OwnerId ownerId, Abstractions.Payments.MembershipPlan plan, bool withTrial, Uri returnUrl, CancellationToken cancellationToken = default)
+    {
+        Checkouts.Add((plan.Code, withTrial));
+        return Task.FromResult(new Uri($"https://checkout.test/{customerId}"));
+    }
 
     public Task<Uri> CreatePortalAsync(string customerId, Uri returnUrl, CancellationToken cancellationToken = default) =>
         Task.FromResult(new Uri($"https://portal.test/{customerId}"));

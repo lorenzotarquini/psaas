@@ -50,7 +50,9 @@ export function PlansPage() {
                   <th>{t('catalog.trial')}</th>
                   <th>{t('catalog.maxUsers')}</th>
                   <th>{t('catalog.maxProductiveUnits')}</th>
-                  <th>{t('catalog.modules')}</th>
+                  <th>{t('catalog.module')}</th>
+                  <th>{t('catalog.vat')}</th>
+                  <th>{t('catalog.stripe')}</th>
                   <th className="text-right">{t('catalog.subscribers')}</th>
                   <th />
                 </tr>
@@ -72,6 +74,14 @@ export function PlansPage() {
                     <td className="data">{plan.maxUsers ?? '∞'}</td>
                     <td className="data">{plan.maxProductiveUnits ?? '∞'}</td>
                     <td className="data text-[12px]">{plan.moduleIds.join(', ')}</td>
+                    <td className="data text-[12px]">
+                      {plan.vatRate ? t(plan.priceIncludesVat ? 'catalog.vatIncluded' : 'catalog.vatExcluded', { rate: plan.vatRate }) : plan.vatNature}
+                    </td>
+                    <td>
+                      <span className={`badge badge-sm ${plan.published ? 'badge-success' : 'badge-warning'}`}>
+                        {t(plan.published ? 'catalog.published' : 'catalog.unpublished')}
+                      </span>
+                    </td>
                     <td className="data text-right">{plan.subscriberCount}</td>
                     <td className="text-right">
                       <button type="button" className="btn btn-ghost btn-xs" onClick={() => setEditing(plan)} aria-label={t('catalog.editPlan', { name: plan.name })}>

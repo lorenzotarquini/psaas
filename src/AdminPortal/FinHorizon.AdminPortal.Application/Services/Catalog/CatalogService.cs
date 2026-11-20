@@ -16,9 +16,9 @@ public sealed record CatalogSaveResult(string? Id, IReadOnlyDictionary<string, s
 }
 
 /// <summary>
-/// UC15 (EXP-01): modules registered from their manifest; UC16 (EXP-02): plans as bundles of modules with limits.
+/// UC15 (EXP-01): modules registered from their manifest; UC16 (EXP-02): plans of one module, with VAT, on sale on Stripe.
 /// </summary>
-public sealed partial class CatalogService(ICatalogRepository catalog, IAuditLog audit)
+public sealed partial class CatalogService(ICatalogRepository catalog, IAuditLog audit, Abstractions.Payments.IPlanPublisher publisher)
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -93,10 +93,14 @@ public sealed partial class CatalogService(ICatalogRepository catalog, IAuditLog
         return new CatalogSaveResult(moduleId, new Dictionary<string, string>());
     }
 
+    /// <summary>UC16-R4: the Italian VAT rates.</summary>
+    public static readonly decimal[] VatRates = [22m, 10m, 5m, 4m, 0m];
+
     public async Task<CatalogSaveResult?> SavePlanAsync(Guid? planId, PlanRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
-        if (planId is { } existing && await catalog.GetPlanAsync(existing, cancellationToken) is null)
+        PlanReadModel? current = null;
+        if (planId is { } existing && (current = await catalog.GetPlanAsync(existing, cancellationToken)) is null)
         {
             return null;
         }
@@ -108,17 +112,25 @@ public sealed partial class CatalogService(ICatalogRepository catalog, IAuditLog
         else if (await catalog.IsPlanCodeTakenAsync(code, planId, cancellationToken)) errors["code"] = TenantFieldValidationErrorCodes.NotUnique;
         if (string.IsNullOrWhiteSpace(request.Name)) errors["name"] = TenantFieldValidationErrorCodes.Required;
         if (request.Price is null) errors["price"] = TenantFieldValidationErrorCodes.Required;
-        else if (request.Price < 0) errors["price"] = TenantFieldValidationErrorCodes.InvalidValue;
+        else if (request.Price < 0 || decimal.Round(request.Price.Value, 2) != request.Price) errors["price"] = TenantFieldValidationErrorCodes.InvalidValue;
         if (!BillingPeriods.All.Contains(request.BillingPeriod ?? string.Empty)) errors["billingPeriod"] = TenantFieldValidationErrorCodes.InvalidValue;
         if (request.TrialDays is < 0 or > 90) errors["trialDays"] = TenantFieldValidationErrorCodes.InvalidValue;
         if (request.MaxUsers is < 1) errors["maxUsers"] = TenantFieldValidationErrorCodes.InvalidValue;
         if (request.MaxProductiveUnits is < 1) errors["maxProductiveUnits"] = TenantFieldValidationErrorCodes.InvalidValue;
-        var known = (await catalog.GetModulesAsync(cancellationToken)).Select(m => m.Id).ToHashSet();
-        var modules = request.ModuleIds ?? [];
-        for (var i = 0; i < modules.Count; i++)
-        {
-            if (!known.Contains(modules[i])) errors[$"moduleIds[{i}]"] = TenantFieldValidationErrorCodes.InvalidValue;
-        }
+
+        // R4: 22% unless told otherwise; the nature only, and always, with 0%.
+        var vatRate = request.VatRate ?? 22m;
+        var vatNature = string.IsNullOrWhiteSpace(request.VatNature) ? null : request.VatNature.Trim().ToUpperInvariant();
+        if (!VatRates.Contains(vatRate)) errors["vatRate"] = TenantFieldValidationErrorCodes.InvalidValue;
+        else if (vatRate == 0 && vatNature is null) errors["vatNature"] = TenantFieldValidationErrorCodes.Required;
+        else if (vatNature is not null && (vatRate != 0 || !VatNatureRegex().IsMatch(vatNature))) errors["vatNature"] = TenantFieldValidationErrorCodes.InvalidValue;
+
+        // R2: one module per plan.
+        var modules = (await catalog.GetModulesAsync(cancellationToken)).ToDictionary(m => m.Id);
+        var moduleIds = (request.ModuleIds ?? []).Distinct().ToArray();
+        if (moduleIds.Length == 0) errors["moduleIds"] = TenantFieldValidationErrorCodes.Required;
+        else if (moduleIds.Length > 1) errors["moduleIds"] = TenantFieldValidationErrorCodes.InvalidValue;
+        else if (!modules.ContainsKey(moduleIds[0])) errors["moduleIds[0]"] = TenantFieldValidationErrorCodes.InvalidValue;
 
         if (errors.Count > 0)
         {
@@ -126,21 +138,41 @@ public sealed partial class CatalogService(ICatalogRepository catalog, IAuditLog
             return new CatalogSaveResult(null, errors);
         }
 
-        var id = await catalog.SavePlanAsync(
-            planId,
-            request with
-            {
-                Code = code,
-                Name = request.Name!.Trim(),
-                TrialDays = request.TrialDays ?? 0,
-                ModuleIds = modules.Distinct().ToArray(),
-            },
-            cancellationToken);
+        var plan = request with
+        {
+            Code = current?.Code ?? code,
+            Name = request.Name!.Trim(),
+            Description = string.IsNullOrWhiteSpace(request.Description) ? null : request.Description.Trim(),
+            TrialDays = request.TrialDays ?? 0,
+            ModuleIds = moduleIds,
+            VatRate = vatRate,
+            VatNature = vatNature,
+        };
+
+        // Stripe first: if it does not answer, nothing is saved (2b); without a key the plan is saved unpublished (2c).
+        var stripe = current?.Stripe;
+        if (publisher.IsConfigured)
+        {
+            var module = modules[moduleIds[0]];
+            stripe = await publisher.PublishAsync(
+                new Abstractions.Payments.PlanPublication(
+                    plan.Code!, plan.Name!, plan.Description, module.Id, module.Name, plan.Price!.Value, plan.BillingPeriod!,
+                    vatRate, vatNature, plan.PriceIncludesVat, plan.TrialDays!.Value, plan.Active),
+                stripe,
+                cancellationToken);
+        }
+
+        var id = await catalog.SavePlanAsync(planId, plan, stripe, cancellationToken);
         await audit.RecordAsync(
-            new AuditRecord(planId is null ? AuditActions.PlanCreated : AuditActions.PlanUpdated, AuditTargets.Plan, id.ToString(), request.Name.Trim(), null, new { price = request.Price, request.BillingPeriod }),
+            new AuditRecord(
+                planId is null ? AuditActions.PlanCreated : AuditActions.PlanUpdated, AuditTargets.Plan, id.ToString(), plan.Name!, null,
+                new { price = plan.Price, plan.BillingPeriod, module = moduleIds[0], vatRate, vatNature, stripePrice = stripe?.PriceId }),
             cancellationToken);
         return new CatalogSaveResult(id.ToString(), errors);
     }
+
+    [GeneratedRegex(@"^N[1-7](\.[1-9])?$")]
+    private static partial Regex VatNatureRegex();
 
     [GeneratedRegex("^[a-z][a-z0-9-]{1,39}$")]
     private static partial Regex ModuleIdRegex();

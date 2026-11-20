@@ -1,23 +1,21 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { FormProvider, useForm, useWatch } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import { ModuleIcon, useModules, useSavePlan, type Plan } from '@/entities/catalog'
+import { useModules, useSavePlan, vatRates, type Plan } from '@/entities/catalog'
 import { ApiError } from '@/shared/api'
 import { submitWithServerErrors } from '@/shared/lib/form'
 import { ErrorAlert } from '@/shared/ui/error-alert'
 import { FieldError, TextField } from '@/shared/ui/form-field'
 import { emptyPlan, planSchema, planToValues, toPlanRequest } from '../model/planForm'
 
-// UC16: a plan, its limits and the modules it includes.
+// UC16: a plan for one module, with its price and VAT, published on Stripe when saved.
 export function PlanForm({ plan, onClose }: { plan: Plan | null; onClose: () => void }) {
   const { t } = useTranslation()
   const { data: modules = [] } = useModules()
   const save = useSavePlan()
   const form = useForm({ resolver: zodResolver(planSchema), defaultValues: plan ? planToValues(plan) : emptyPlan })
   const chosen = useWatch({ control: form.control, name: 'moduleIds' }) ?? []
-
-  const toggle = (id: string) =>
-    form.setValue('moduleIds', chosen.includes(id) ? chosen.filter((x) => x !== id) : [...chosen, id], { shouldDirty: true })
+  const vatRate = useWatch({ control: form.control, name: 'vatRate' })
 
   const onSubmit = form.handleSubmit(async (values) => {
     const saved = await submitWithServerErrors(() => save.mutateAsync({ id: plan?.id ?? null, plan: toPlanRequest(values) }), form.setError)
@@ -42,6 +40,47 @@ export function PlanForm({ plan, onClose }: { plan: Plan | null; onClose: () => 
               <option value="Yearly">{t('catalog.period.Yearly')}</option>
             </select>
           </div>
+          <div className="fieldset py-1.5">
+            <label htmlFor="plan-module" className="fieldset-legend py-1 text-[12px] font-medium text-base-content/80">
+              {t('catalog.module')}
+            </label>
+            <select
+              id="plan-module"
+              className="select w-full"
+              value={chosen[0] ?? ''}
+              onChange={(event) => form.setValue('moduleIds', event.target.value ? [event.target.value] : [], { shouldDirty: true, shouldValidate: true })}
+            >
+              <option value="">{t('catalog.chooseModule')}</option>
+              {modules.map((module) => (
+                <option key={module.id} value={module.id}>
+                  {module.name}
+                </option>
+              ))}
+            </select>
+            <FieldError name="moduleIds" />
+            <FieldError name="moduleIds[0]" />
+          </div>
+          <div className="fieldset py-1.5">
+            <label htmlFor="plan-vat" className="fieldset-legend py-1 text-[12px] font-medium text-base-content/80">
+              {t('catalog.vatRate')}
+            </label>
+            <select id="plan-vat" className="select w-full" {...form.register('vatRate')}>
+              {vatRates.map((rate) => (
+                <option key={rate} value={String(rate)}>
+                  {t('catalog.vatRateOption', { rate })}
+                </option>
+              ))}
+            </select>
+            <FieldError name="vatRate" />
+          </div>
+          {vatRate === '0' ? (
+            <TextField name="vatNature" label={t('catalog.vatNature')} maxLength={5} placeholder="N2.1" />
+          ) : (
+            <label className="flex items-center gap-2 pt-7">
+              <input type="checkbox" className="checkbox checkbox-sm" {...form.register('priceIncludesVat')} />
+              {t('catalog.priceIncludesVat')}
+            </label>
+          )}
           <TextField name="trialDays" label={t('catalog.trialDaysLabel')} inputMode="numeric" />
           <TextField name="description" label={t('organizationEditor.description')} />
           <TextField name="maxUsers" label={t('catalog.maxUsers')} inputMode="numeric" placeholder={t('catalog.unlimited')} />
@@ -51,26 +90,7 @@ export function PlanForm({ plan, onClose }: { plan: Plan | null; onClose: () => 
             {t('catalog.sellable')}
           </label>
         </div>
-        <div>
-          <div className="eyebrow pb-1.5 text-base-content/55">{t('catalog.includedModules')}</div>
-          <ul className="grid gap-2 md:grid-cols-3">
-            {modules.map((module) => (
-              <li key={module.id}>
-                <label className="flex items-center gap-2.5 rounded-box border border-base-300 px-3 py-2">
-                  <input
-                    type="checkbox"
-                    className="checkbox checkbox-sm"
-                    checked={chosen.includes(module.id)}
-                    onChange={() => toggle(module.id)}
-                  />
-                  <ModuleIcon icon={module.icon} />
-                  <span className="flex-1">{module.name}</span>
-                </label>
-              </li>
-            ))}
-          </ul>
-          <FieldError name="moduleIds" />
-        </div>
+        {plan && !plan.published && <p className="text-[12px] text-warning">{t('catalog.notPublished')}</p>}
         <div className="flex justify-end gap-2 pt-2">
           <button type="button" className="btn btn-ghost btn-sm" onClick={onClose}>
             {t('unsaved.discard')}

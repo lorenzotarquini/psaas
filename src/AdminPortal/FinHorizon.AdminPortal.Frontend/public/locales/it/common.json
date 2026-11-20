@@ -572,7 +572,7 @@
   },
   "catalog": {
     "modulesSubtitle": "Moduli installabili sulla piattaforma, con versione, dipendenze e permessi",
-    "plansSubtitle": "Pacchetti in vendita: moduli inclusi, limiti e prezzo",
+    "plansSubtitle": "Piani in vendita su Stripe: un modulo, prezzo e IVA",
     "subscriptionsSubtitle": "Il piano di ogni organizzazione e lo stato dei suoi moduli",
     "registerModule": "Registra modulo",
     "register": "Registra",
@@ -670,7 +670,19 @@
     "usersUnlimited": "utenti illimitati",
     "units_one": "{{count}} unità",
     "units_other": "{{count}} unità",
-    "unitsUnlimited": "unità illimitate"
+    "unitsUnlimited": "unità illimitate",
+    "chooseModule": "Scegli il modulo…",
+    "vatRate": "Aliquota IVA",
+    "vatRateOption": "{{rate}}%",
+    "vatNature": "Natura IVA (N1–N7)",
+    "priceIncludesVat": "Prezzo IVA inclusa",
+    "vat": "IVA",
+    "vatIncluded": "{{rate}}% inclusa",
+    "vatExcluded": "{{rate}}% esclusa",
+    "stripe": "Stripe",
+    "published": "Pubblicato",
+    "unpublished": "Non pubblicato",
+    "notPublished": "Questo piano non è ancora su Stripe: salvalo per pubblicarlo (serve la chiave Stripe del backend)."
   },
   "billing": {
     "subtitle": "Fatture dei periodi delle sottoscrizioni, incassi e solleciti",

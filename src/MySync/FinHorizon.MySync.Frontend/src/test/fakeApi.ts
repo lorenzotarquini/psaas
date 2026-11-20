@@ -1,7 +1,7 @@
 import type { Account } from '@/entities/account'
 import type { Category } from '@/entities/category'
 import type { Debt } from '@/entities/debt'
-import type { Membership } from '@/entities/membership'
+import type { Membership, MembershipPlan } from '@/entities/membership'
 import type { ProjectionData, ProjectionParameters } from '@/entities/projection'
 import type { Subscription } from '@/entities/subscription'
 import type { Transaction } from '@/entities/transaction'
@@ -46,9 +46,7 @@ export class FakeApi {
   membership: Membership = {
     status: 'Active',
     canWrite: true,
-    price: 4.99,
-    currency: 'EUR',
-    interval: 'Month',
+    plan: { name: 'MySync mensile', amount: 4.99, currency: 'EUR', interval: 'Month' },
     currentPeriodEnd: '2026-12-15T09:00:00+00:00',
     cancelAtPeriodEnd: false,
     card: { brand: 'visa', last4: '4242', expMonth: 12, expYear: 2030 },
@@ -56,6 +54,11 @@ export class FakeApi {
     payUrl: null,
     hasCustomer: true,
   }
+  /** UC17 step 2: the plans of the MySync module (UC16 of the Admin Portal). */
+  membershipPlans: MembershipPlan[] = [
+    { code: 'mysync-mensile', name: 'MySync mensile', description: null, price: 4.99, currency: 'EUR', interval: 'Month', priceIncludesVat: true, vatRate: 22, trialDays: 14 },
+    { code: 'mysync-annuale', name: 'MySync annuale', description: 'Due mesi gratis', price: 49, currency: 'EUR', interval: 'Year', priceIncludesVat: true, vatRate: 22, trialDays: 0 },
+  ]
   /** UC17 step 4: what Stripe says when MySync reads the state again. */
   membershipAfterRefresh: Membership | null = null
   requests: { method: string; path: string; body?: Json }[] = []
@@ -162,6 +165,7 @@ export class FakeApi {
       return ok(subscription)
     }
     if (method === 'GET' && path === '/api/membership') return ok(this.membership)
+    if (method === 'GET' && path === '/api/membership/plans') return ok(this.membershipPlans)
     if (method === 'POST' && path === '/api/membership/checkout') return ok({ url: 'https://checkout.stripe.test/session' })
     if (method === 'POST' && path === '/api/membership/portal') return ok({ url: 'https://billing.stripe.test/session' })
     if (method === 'POST' && path === '/api/membership/refresh') {

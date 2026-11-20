@@ -51,10 +51,13 @@ describe('UC17_AbbonamentoMySync', () => {
     const api = apiWith(expired())
     renderWithApi(<MembershipSettings />, api)
 
-    await userEvent.click(await screen.findByRole('button', { name: /Rinnova/ }))
+    expect(await screen.findByText('MySync mensile · 4,99 € al mese')).toBeTruthy()
+    expect(await screen.findByText(/IVA 22% inclusa · 14 giorni di prova gratuita/)).toBeTruthy()
+    await userEvent.click(screen.getByRole('radio', { name: /MySync annuale/ }))
+    await userEvent.click(screen.getByRole('button', { name: /Abbonati/ }))
 
     await waitFor(() => expect(assign).toHaveBeenCalledWith('https://checkout.stripe.test/session'))
-    expect(screen.getByText('4,99 € al mese')).toBeTruthy()
+    expect(api.requests.find((request) => request.path === '/api/membership/checkout')?.body).toEqual({ planCode: 'mysync-annuale' })
   })
 
   it('S2_RitornoDaStripeRileggeLoStato', async () => {
@@ -64,6 +67,7 @@ describe('UC17_AbbonamentoMySync', () => {
     renderWithApi(<MembershipSettings />, api)
 
     expect(await screen.findByText('Attivo')).toBeTruthy()
+    expect(screen.getByText('MySync mensile · 4,99 € al mese')).toBeTruthy()
     expect(screen.getByText('VISA •••• 4242, scade 12/2030')).toBeTruthy()
     expect(window.location.search).toBe('')
   })

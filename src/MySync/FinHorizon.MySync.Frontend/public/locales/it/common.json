@@ -429,7 +429,6 @@
       "PastDue": "Pagamento non riuscito",
       "Expired": "Scaduto"
     },
-    "price": "Prezzo",
     "perMonth": "{{amount}} al mese",
     "renewsOn": "Prossimo rinnovo",
     "endsOn": "Termina il",
@@ -458,6 +457,15 @@
     "manage": "Gestisci abbonamento",
     "fix": "Sistema il pagamento",
     "bannerExpired": "Abbonamento scaduto: MySync è in sola lettura.",
-    "bannerPastDue": "L'ultimo pagamento non è riuscito: aggiorna il metodo di pagamento per non perdere l'accesso."
+    "bannerPastDue": "L'ultimo pagamento non è riuscito: aggiorna il metodo di pagamento per non perdere l'accesso.",
+    "plan": "Piano",
+    "perYear": "{{amount}} all'anno",
+    "choosePlan": "Scegli il piano",
+    "noPlans": "Nessun piano in vendita al momento.",
+    "subscribe": "Abbonati",
+    "vatIncluded": "IVA {{rate}}% inclusa",
+    "vatExcluded": "IVA {{rate}}% esclusa",
+    "trial_one": "{{count}} giorno di prova gratuita",
+    "trial_other": "{{count}} giorni di prova gratuita"
   }
 }

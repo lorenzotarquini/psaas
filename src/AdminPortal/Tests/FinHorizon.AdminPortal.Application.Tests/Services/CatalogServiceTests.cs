@@ -11,13 +11,19 @@ public sealed class CatalogServiceTests
     private readonly FakeCatalogRepository _catalog = new();
     private readonly FakeAuditLog _audit = new();
 
-    private CatalogService Service => new(_catalog, _audit);
+    private readonly FakePlanPublisher _stripe = new();
+
+    public CatalogServiceTests() => _catalog.Modules.Add(FakeCatalogRepository.Module("mysync"));
+
+    private CatalogService Service => new(_catalog, _audit, _stripe);
 
     private static ModuleManifest Manifest(string id, string version = "1.0.0", string[]? requires = null, string? provisionUrl = null) =>
         new(id, id, null, version, null, null, requires, null, provisionUrl, null);
 
-    private static PlanRequest Plan(string code, decimal? price = 10, string? period = "Monthly", int? trialDays = 0, int? maxUsers = null, string[]? modules = null) =>
-        new(code, code, null, price, period, trialDays, maxUsers, null, modules);
+    private static PlanRequest Plan(
+        string code, decimal? price = 10, string? period = "Monthly", int? trialDays = 0, int? maxUsers = null, string[]? modules = null,
+        decimal? vatRate = null, string? vatNature = null) =>
+        new(code, code, null, price, period, trialDays, maxUsers, null, modules ?? ["mysync"], VatRate: vatRate, VatNature: vatNature);
 
     [Fact]
     public async Task UC15_S2_ValidManifest_IsSavedAvailableAndAudited()
@@ -59,11 +65,70 @@ public sealed class CatalogServiceTests
     }
 
     [Fact]
-    public async Task UC16_S1_PlanHasOnlyTheChosenModules()
+    public async Task UC16_S1_PlanHasItsModule_PublishedWithDefaultVat()
     {
         var result = await Service.SavePlanAsync(null, Plan("pro"));
 
-        Assert.Empty(_catalog.Plans.Single(p => p.Id == Guid.Parse(result!.Id!)).ModuleIds);
+        var plan = _catalog.Plans.Single(p => p.Id == Guid.Parse(result!.Id!));
+        Assert.Equal(["mysync"], plan.ModuleIds);
+        Assert.Equal((22m, true, true), (plan.VatRate, plan.PriceIncludesVat, plan.Published));
+        Assert.Equal(("mysync", 10m), (_stripe.Published.Single().ModuleId, _stripe.Published.Single().Price));
+    }
+
+    [Theory]
+    [InlineData(new string[0], "moduleIds", "Required")]
+    [InlineData(new[] { "mysync", "other" }, "moduleIds", "InvalidValue")]
+    public async Task UC16_R2_OneModulePerPlan(string[] modules, string field, string code)
+    {
+        _catalog.Modules.Add(FakeCatalogRepository.Module("other"));
+
+        var result = await Service.SavePlanAsync(null, Plan("pro", modules: modules));
+
+        Assert.Equal(code, result!.Errors[field]);
+        Assert.Empty(_stripe.Published);
+    }
+
+    [Theory]
+    [InlineData(0, null, "vatNature", "Required")]
+    [InlineData(0, "N9", "vatNature", "InvalidValue")]
+    [InlineData(22, "N2.1", "vatNature", "InvalidValue")]
+    [InlineData(7, null, "vatRate", "InvalidValue")]
+    public async Task UC16_R4_VatRateAndNature(int rate, string? nature, string field, string code)
+    {
+        var result = await Service.SavePlanAsync(null, Plan("pro", vatRate: rate, vatNature: nature));
+
+        Assert.Equal(code, result!.Errors[field]);
+    }
+
+    [Fact]
+    public async Task UC16_R4_ZeroVatWithNature_IsAccepted()
+    {
+        var result = await Service.SavePlanAsync(null, Plan("pro", vatRate: 0, vatNature: "n2.1"));
+
+        Assert.True(result!.Succeeded);
+        Assert.Equal("N2.1", _stripe.Published.Single().VatNature);
+    }
+
+    [Fact]
+    public async Task UC16_2b_StripeDown_NothingSaved()
+    {
+        _stripe.Unavailable = true;
+
+        await Assert.ThrowsAsync<FinHorizon.AdminPortal.Application.Abstractions.Payments.PaymentProviderUnavailableException>(() => Service.SavePlanAsync(null, Plan("pro")));
+
+        Assert.Empty(_catalog.Plans);
+        Assert.Empty(_audit.Records);
+    }
+
+    [Fact]
+    public async Task UC16_2c_WithoutStripe_SavedUnpublished()
+    {
+        _stripe.IsConfigured = false;
+
+        var result = await Service.SavePlanAsync(null, Plan("pro"));
+
+        Assert.False(_catalog.Plans.Single(p => p.Id == Guid.Parse(result!.Id!)).Published);
+        Assert.Empty(_stripe.Published);
     }
 
     [Fact]

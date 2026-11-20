@@ -28,6 +28,12 @@ public sealed class PlanDbModel
     public int? MaxProductiveUnits { get; set; }
     public string[] ModuleIds { get; set; } = [];
     public bool Active { get; set; } = true;
+    public decimal VatRate { get; set; } = 22;
+    public string? VatNature { get; set; }
+    public bool PriceIncludesVat { get; set; } = true;
+    public string? StripeProductId { get; set; }
+    public string? StripePriceId { get; set; }
+    public string? StripeTaxRateId { get; set; }
 }
 
 /// <summary>One per tenant; plan values are copied in (grandfathering).</summary>

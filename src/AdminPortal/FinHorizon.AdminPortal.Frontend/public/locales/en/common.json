@@ -572,7 +572,7 @@
   },
   "catalog": {
     "modulesSubtitle": "Modules installable on the platform, with version, dependencies and permissions",
-    "plansSubtitle": "What is sold: included modules, limits and price",
+    "plansSubtitle": "Plans on sale on Stripe: one module, price and VAT",
     "subscriptionsSubtitle": "The plan of every organization and the status of its modules",
     "registerModule": "Register module",
     "register": "Register",
@@ -670,7 +670,19 @@
     "usersUnlimited": "unlimited users",
     "units_one": "{{count}} unit",
     "units_other": "{{count}} units",
-    "unitsUnlimited": "unlimited units"
+    "unitsUnlimited": "unlimited units",
+    "chooseModule": "Choose the module…",
+    "vatRate": "VAT rate",
+    "vatRateOption": "{{rate}}%",
+    "vatNature": "VAT nature (N1–N7)",
+    "priceIncludesVat": "Price includes VAT",
+    "vat": "VAT",
+    "vatIncluded": "{{rate}}% included",
+    "vatExcluded": "{{rate}}% excluded",
+    "stripe": "Stripe",
+    "published": "Published",
+    "unpublished": "Not published",
+    "notPublished": "This plan is not on Stripe yet: save it to publish it (the backend needs the Stripe key)."
   },
   "billing": {
     "subtitle": "Invoices of subscription periods, payments and reminders",

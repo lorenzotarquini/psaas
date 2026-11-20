@@ -10,12 +10,13 @@ Obiettivo: nessun intervento manuale.
 
 ## MySync
 
-L'abbonamento a MySync (4,99 € al mese, per utente) è gestito dal backend di MySync direttamente con Stripe: [UC17 di MySync](../mysync/use-cases/UC17-abbonamento-mysync.md), decisione D21. Cliente Stripe = utente Keycloak del gruppo `end_users`; copia dello stato in `mysync-db`; con l'abbonamento scaduto MySync è in sola lettura. Gli utenti che usavano MySync prima di Stripe risultano scaduti e rinnovano dalle Impostazioni. Prodotto, prezzo (lookup key `mysync-month-499-eur`) e configurazione del portale clienti li crea MySync al primo uso. L'AppHost avvia un secondo container `stripe-cli-mysync` che inoltra gli eventi a `POST /api/membership/webhook` (stesso segreto `whsec_…`). Gli eventi delle organizzazioni (Admin Portal) e quelli di MySync arrivano a entrambi i webhook: ognuno ignora i clienti che non sono suoi.
+L'abbonamento a MySync (per utente) è gestito dal backend di MySync direttamente con Stripe: [UC17 di MySync](../mysync/use-cases/UC17-abbonamento-mysync.md), decisione D21. Cliente Stripe = utente Keycloak del gruppo `end_users`; copia dello stato in `mysync-db`; con l'abbonamento scaduto MySync è in sola lettura. Gli utenti che usavano MySync prima di Stripe risultano scaduti e rinnovano dalle Impostazioni. I piani in vendita sono quelli del modulo `mysync` creati nell'Admin Portal (UC16): prodotto con `metadata.module = mysync`, prezzo predefinito (lookup key `plan-<codice>`) e aliquota IVA (`metadata.tax_rate`), applicata alla riga dell'abbonamento al pagamento. La configurazione del portale clienti la crea MySync al primo uso. L'AppHost avvia un secondo container `stripe-cli-mysync` che inoltra gli eventi a `POST /api/membership/webhook` (stesso segreto `whsec_…`). Gli eventi delle organizzazioni (Admin Portal) e quelli di MySync arrivano a entrambi i webhook: ognuno ignora i clienti che non sono suoi.
 
 Prova contro la sandbox vera dell'adattatore (cliente, Checkout, portale, abbonamento pagato e carta rifiutata, poi cancella il cliente):
 
 ```bash
 STRIPE_SANDBOX_KEY=sk_test_… dotnet test src/MySync/Tests/FinHorizon.MySync.Infrastructure.Tests --filter StripeSandbox
+STRIPE_SANDBOX_KEY=sk_test_… dotnet test src/AdminPortal/Tests/FinHorizon.AdminPortal.Infrastructure.Tests --filter StripeSandbox
 ```
 
 ## Chi fa cosa
@@ -43,7 +44,7 @@ Il prezzo bloccato di UC16-R3 / UC17-R1 resta vero anche con Stripe: un Price no
 |---|---|---|
 | 0 | Questo documento, use case dei webhook (UC33) | ✅ |
 | 1 | Fondamenta: Stripe.net, chiavi come parametri Aspire, Stripe CLI in Aspire, endpoint webhook con firma e idempotenza | ✅ codice e test · prova con la sandbox da fare |
-| 2 | Piani → Product/Price (UC16 riscritto) | da fare |
+| 2 | Piani → Product/Price/Tax Rate (UC16 riscritto): un piano per modulo, IVA, pubblicati dall'Admin Portal; MySync vende i piani del modulo `mysync` | ✅ |
 | 3 | Organizzazione → Customer, sottoscrizione → Stripe Subscription; eventi → stato e moduli; configurazione Dashboard (email, retry, IVA); UC17, UC23, UC24 riscritti | da fare |
 | 4 | Iscrizione self-service con Checkout e Customer Portal (nuovo use case) | da decidere: dove sta la pagina pubblica |
 | 5 | Fattura elettronica SDI tramite intermediario | da decidere: quale intermediario |
@@ -55,6 +56,7 @@ Il prezzo bloccato di UC16-R3 / UC17-R1 resta vero anche con Stripe: un Price no
 | AppHost (`appsettings.Development.json` o user secrets, mai in git) | `Parameters:stripe-secret-key` | `sk_test_…` della sandbox; la usa la Stripe CLI, dalla fase 2 anche il backend |
 | AppHost (idem) | `Parameters:stripe-webhook-secret` | `whsec_…` della Stripe CLI, vedi sotto |
 | Backend | `Stripe:WebhookSecret` | arriva dall'AppHost; vuoto = webhook rifiutati con `503` |
+| Backend | `Stripe:SecretKey` | arriva dall'AppHost; vuoto = i piani si salvano "non pubblicati" |
 
 ### Webhook in locale
 

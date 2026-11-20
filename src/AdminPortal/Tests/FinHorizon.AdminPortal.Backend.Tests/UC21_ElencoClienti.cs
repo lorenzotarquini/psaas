@@ -61,7 +61,7 @@ public sealed class UC21_ElencoClienti(PostgresFixture database) : AcceptanceTes
     {
         var monthly = await GivenPlanAsync("mensile");
         var yearly = await ReadAsync<PlanView>(
-            await Admin.PostAsJsonAsync("/api/plans", new { code = "annuale", name = "Annuale", price = 900, billingPeriod = "Yearly" }), HttpStatusCode.Created);
+            await Admin.PostAsJsonAsync("/api/plans", new { code = "annuale", name = "Annuale", price = 900, billingPeriod = "Yearly", moduleIds = monthly.ModuleIds }), HttpStatusCode.Created);
         await SubscribeAsync((await GivenTenantAsync("Alfa Srl")).Id, monthly.Id);
         await SubscribeAsync((await GivenTenantAsync("Beta Snc")).Id, yearly.Id);
 
@@ -83,7 +83,8 @@ public sealed class UC21_ElencoClienti(PostgresFixture database) : AcceptanceTes
         var row = (await TenantsAsync()).Items.Single();
 
         Assert.Equal((2, 50), (row.UserCount, row.MaxUsers));
-        Assert.Empty(row.Modules!);
+        // UC16-R2: the plan brings its one module.
+        Assert.Equal(["base"], row.Modules!.Select(m => m.Id));
     }
 
     [Fact, Trait("Scenario", "UC21-S6")]

@@ -45,8 +45,9 @@ Tutte le rotte sono sotto `/api`, richiedono un token Keycloak con audience `mys
 
 | Metodo e rotta | Richiesta | Risposta |
 |---|---|---|
-| `GET /api/membership` | — | `{ status: Active\|PastDue\|Expired, canWrite, price, currency, interval, currentPeriodEnd, cancelAtPeriodEnd, card: { brand, last4, expMonth, expYear }?, lastFailure: { code, message, failedAt }?, payUrl?, hasCustomer }`; senza abbonamento `Expired` |
-| `POST /api/membership/checkout` | — (email e nome dal token) | `{ url }` della pagina di pagamento di Stripe · `400` `AlreadyActive` su `membership` · `403` senza ruolo `enduser` |
+| `GET /api/membership/plans` | — | `[{ code, name, description, price, currency, interval: Month\|Year, priceIncludesVat, vatRate, trialDays }]`: i piani del modulo `mysync` in vendita (UC16 dell'Admin Portal), letti da Stripe |
+| `GET /api/membership` | — | `{ status: Active\|PastDue\|Expired, canWrite, plan: { name, amount, currency, interval }?, currentPeriodEnd, cancelAtPeriodEnd, card: { brand, last4, expMonth, expYear }?, lastFailure: { code, message, failedAt }?, payUrl?, hasCustomer }`; senza abbonamento `Expired` |
+| `POST /api/membership/checkout` | `{ planCode }` (email e nome dal token) | `{ url }` della pagina di pagamento di Stripe · `400` `Required`/`InvalidValue` su `planCode` (piano non in vendita), `AlreadyActive` su `membership` · `403` senza ruolo `enduser` |
 | `POST /api/membership/portal` | — | `{ url }` del portale clienti di Stripe · `400` `NoCustomer` su `membership` |
 | `POST /api/membership/refresh` | — | Stato riletto da Stripe, come `GET` |
 | `POST /api/membership/webhook` | evento Stripe, header `Stripe-Signature`, senza token | `200` · `400` firma non valida · `503` segreto non configurato |
@@ -64,7 +65,6 @@ Tutta la configurazione sta nell'AppHost di Aspire: parametri in `src/FinHorizon
 | `mysync-max-subscriptions` | `MySync__MaxSubscriptions` | 10 | 0–1000; 0 disattiva gli abbonamenti (UC16-R4) |
 | `mysync-time-zone` | `Calendar__TimeZone` | `Europe/Rome` | Decide cos'è "oggi" (RNF4) |
 | `mysync-rates-url` | `Currencies__Url` | `https://api.frankfurter.dev/` | Catalogo delle valute e tassi di cambio (UC13, D10); obbligatorio |
-| `mysync-membership-price` | `Membership__Price` | 4.99 | Euro al mese, IVA inclusa (UC17-R1); cambiarlo crea un nuovo prezzo in Stripe |
 | `stripe-secret-key` (segreto) | `Stripe__SecretKey` | `sk_test_…` | In `appsettings.Development.json` dell'AppHost o negli user secrets; vuoto = pagamenti `503` |
 | `stripe-webhook-secret` (segreto) | `Stripe__WebhookSecret` | `whsec_…` | Della Stripe CLI in locale (container `stripe-cli-mysync`), dell'endpoint in produzione |
 | — | `Membership__FrontendUrl` | `http://localhost:5174` | Dove Stripe riporta l'utente (UC17-R6), fisso in `AppHost.cs` |

@@ -40,6 +40,7 @@ public sealed class GEN_Sicurezza(PostgresFixture database) : AcceptanceTest(dat
         { "POST", $"/api/subscriptions/{Guid.Empty}/skip" },
         { "DELETE", $"/api/subscriptions/{Guid.Empty}" },
         { "GET", "/api/membership" },
+        { "GET", "/api/membership/plans" },
         { "POST", "/api/membership/checkout" },
         { "POST", "/api/membership/portal" },
         { "POST", "/api/membership/refresh" }

@@ -37,7 +37,10 @@ export interface ModuleManifest {
   deprovisionUrl?: string | null
 }
 
-/** UC16: maxUsers/maxProductiveUnits null = unlimited. */
+/** UC16-R4: the Italian VAT rates. */
+export const vatRates = [22, 10, 5, 4, 0] as const
+
+/** UC16: one module per plan (R2); maxUsers/maxProductiveUnits null = unlimited; published = on sale on Stripe (R5). */
 export interface Plan {
   id: string
   code: string
@@ -51,9 +54,15 @@ export interface Plan {
   moduleIds: string[]
   active: boolean
   subscriberCount: number
+  vatRate: number
+  /** N1–N7, only with 0% VAT. */
+  vatNature: string | null
+  priceIncludesVat: boolean
+  stripe: { productId: string; priceId: string; taxRateId: string } | null
+  published: boolean
 }
 
-export type PlanRequest = Omit<Plan, 'id' | 'subscriberCount'>
+export type PlanRequest = Omit<Plan, 'id' | 'subscriberCount' | 'stripe' | 'published'>
 
 export interface TenantModule {
   moduleId: string

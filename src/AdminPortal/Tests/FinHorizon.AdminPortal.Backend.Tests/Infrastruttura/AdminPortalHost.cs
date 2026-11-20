@@ -28,6 +28,9 @@ public sealed class AdminPortalHost(string connectionString) : WebApplicationFac
 
     public FakeImpersonation Impersonation { get; } = new();
 
+    /// <summary>UC16: plans published on Stripe.</summary>
+    public FakeStripePlans StripePlans { get; } = new();
+
     /// <summary>Secret of the Stripe webhook (UC33); empty = not configured.</summary>
     public string StripeWebhookSecret { get; init; } = StripeEvents.Secret;
 
@@ -59,6 +62,7 @@ public sealed class AdminPortalHost(string connectionString) : WebApplicationFac
             services.AddSingleton<IModuleProvisioner>(ModuleHooks);
             services.AddSingleton<IEmailSender>(Mailbox);
             services.AddSingleton<IImpersonationGateway>(Impersonation);
+            services.AddSingleton<FinHorizon.AdminPortal.Application.Abstractions.Payments.IPlanPublisher>(StripePlans);
         });
     }
 }

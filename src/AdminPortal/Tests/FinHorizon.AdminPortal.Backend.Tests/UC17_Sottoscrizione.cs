@@ -58,7 +58,7 @@ public sealed class UC17_Sottoscrizione(PostgresFixture database) : AcceptanceTe
         var alfa = await GivenTenantAsync("Alfa Srl");
         await SubscribeAsync(alfa.Id, pro.Id);
 
-        await Admin.PutAsJsonAsync($"/api/plans/{pro.Id}", new { code = "pro", name = "PRO", price = 129, billingPeriod = "Monthly" });
+        await Admin.PutAsJsonAsync($"/api/plans/{pro.Id}", new { code = "pro", name = "PRO", price = 129, billingPeriod = "Monthly", moduleIds = pro.ModuleIds });
 
         Assert.Equal(99m, (await GetOkAsync<SubscriptionView>($"/api/tenants/{alfa.Id}/subscription")).Price);
     }
@@ -74,7 +74,8 @@ public sealed class UC17_Sottoscrizione(PostgresFixture database) : AcceptanceTe
 
         var subscription = await ReadAsync<SubscriptionView>(await SubscribeAsync(alfa.Id, basePlan.Id), HttpStatusCode.OK);
 
-        Assert.Empty(subscription.Modules);
+        // Only the module of the new plan (UC16-R2) is left.
+        Assert.Equal(["base"], subscription.Modules.Select(m => m.ModuleId));
     }
 
     [Fact, Trait("Scenario", "UC17-S6")]

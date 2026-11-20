@@ -47,6 +47,9 @@ public static class DependencyInjection
         services.AddSingleton<FinHorizon.AdminPortal.Application.Abstractions.Payments.IPaymentWebhookVerifier>(
             new Payments.StripeWebhookVerifier(configuration["Stripe:WebhookSecret"]));
         services.AddScoped<FinHorizon.AdminPortal.Application.Abstractions.Payments.IPaymentEventStore, Payments.PaymentEventStore>();
+        // UC16: plans on sale on Stripe; without Stripe:SecretKey they are saved unpublished.
+        services.AddSingleton<FinHorizon.AdminPortal.Application.Abstractions.Payments.IPlanPublisher>(
+            new Payments.StripePlanPublisher(configuration["Stripe:SecretKey"]));
         services.AddScoped<ITenantWriteRepository, TenantWriteRepository>();
         services.AddScoped<ITenantUniquenessChecker, TenantUniquenessChecker>();
         services.AddScoped<IProfileReadRepository, ProfileReadRepository>();

@@ -82,7 +82,7 @@ public sealed class CatalogRepository(AdminPortalDbContext dbContext, TimeProvid
     public Task<bool> IsPlanCodeTakenAsync(string code, Guid? exceptPlanId, CancellationToken cancellationToken = default) =>
         dbContext.Plans.AnyAsync(p => p.Code == code && p.Id != exceptPlanId, cancellationToken);
 
-    public async Task<Guid> SavePlanAsync(Guid? planId, PlanRequest request, CancellationToken cancellationToken = default)
+    public async Task<Guid> SavePlanAsync(Guid? planId, PlanRequest request, PlanStripeLink? stripe, CancellationToken cancellationToken = default)
     {
         var plan = planId is null ? null : await dbContext.Plans.SingleOrDefaultAsync(p => p.Id == planId, cancellationToken).ConfigureAwait(false);
         if (plan is null)
@@ -101,6 +101,12 @@ public sealed class CatalogRepository(AdminPortalDbContext dbContext, TimeProvid
         plan.MaxProductiveUnits = request.MaxProductiveUnits;
         plan.ModuleIds = request.ModuleIds?.ToArray() ?? [];
         plan.Active = request.Active;
+        plan.VatRate = request.VatRate ?? 22;
+        plan.VatNature = request.VatNature;
+        plan.PriceIncludesVat = request.PriceIncludesVat;
+        plan.StripeProductId = stripe?.ProductId;
+        plan.StripePriceId = stripe?.PriceId;
+        plan.StripeTaxRateId = stripe?.TaxRateId;
         await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return plan.Id;
     }
@@ -203,5 +209,7 @@ public sealed class CatalogRepository(AdminPortalDbContext dbContext, TimeProvid
         new(m.Id, m.Name, m.Description, m.Icon, m.Status, m.Version, m.Requires, m.Permissions, m.ProvisionUrl, m.UpdatedAt, tenantCount);
 
     private static PlanReadModel ToReadModel(PlanDbModel p, int subscribers) =>
-        new(p.Id, p.Code, p.Name, p.Description, p.Price, p.BillingPeriod, p.TrialDays, p.MaxUsers, p.MaxProductiveUnits, p.ModuleIds, p.Active, subscribers);
+        new(p.Id, p.Code, p.Name, p.Description, p.Price, p.BillingPeriod, p.TrialDays, p.MaxUsers, p.MaxProductiveUnits, p.ModuleIds, p.Active, subscribers,
+            p.VatRate, p.VatNature, p.PriceIncludesVat,
+            p.StripeProductId is { } product && p.StripePriceId is { } price && p.StripeTaxRateId is { } tax ? new PlanStripeLink(product, price, tax) : null);
 }

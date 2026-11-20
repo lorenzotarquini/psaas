@@ -21,7 +21,7 @@ public interface ICatalogRepository
 
     Task<bool> IsPlanCodeTakenAsync(string code, Guid? exceptPlanId, CancellationToken cancellationToken = default);
 
-    Task<Guid> SavePlanAsync(Guid? planId, PlanRequest plan, CancellationToken cancellationToken = default);
+    Task<Guid> SavePlanAsync(Guid? planId, PlanRequest plan, PlanStripeLink? stripe, CancellationToken cancellationToken = default);
 }
 
 /// <summary>Subscriptions and the modules of each tenant (EXP-03).</summary>

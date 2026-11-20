@@ -74,7 +74,11 @@ public sealed record LifecycleView(string Status, string? Reason, DateTimeOffset
 
 public sealed record ModuleView(string Id, string Name, string Status, string Version, List<string> Requires, List<string> Permissions, int TenantCount);
 
-public sealed record PlanView(Guid Id, string Code, string Name, decimal Price, string BillingPeriod, int TrialDays, int? MaxUsers, List<string> ModuleIds, bool Active);
+public sealed record PlanStripeView(string ProductId, string PriceId, string TaxRateId);
+
+public sealed record PlanView(
+    Guid Id, string Code, string Name, decimal Price, string BillingPeriod, int TrialDays, int? MaxUsers, List<string> ModuleIds, bool Active,
+    decimal VatRate = 22, string? VatNature = null, bool PriceIncludesVat = true, PlanStripeView? Stripe = null, bool Published = false);
 
 public sealed record SubscriptionView(
     Guid TenantId, Guid PlanId, string PlanName, string Status, decimal Price, int? MaxUsers,

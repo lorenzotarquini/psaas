@@ -21,18 +21,27 @@ public sealed class MembershipController : ControllerBase
         CancellationToken cancellationToken) =>
         (await handler.HandleAsync(new GetMembershipQuery(), cancellationToken)).ToActionResult(this);
 
+    /// <summary>UC17 step 2: the plans of the MySync module on sale (UC16 of the Admin Portal).</summary>
+    [HttpGet("plans")]
+    public async Task<ActionResult<IReadOnlyList<MembershipPlanView>>> Plans(
+        [FromServices] IRequestHandler<ListMembershipPlansQuery, IReadOnlyList<MembershipPlanView>> handler,
+        CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new ListMembershipPlansQuery(), cancellationToken)).ToActionResult(this);
+
     [HttpPost("checkout")]
     public async Task<ActionResult<RedirectView>> Checkout(
+        CheckoutBody body,
         [FromServices] IRequestHandler<StartCheckoutCommand, RedirectView> handler,
         CancellationToken cancellationToken)
     {
+        ArgumentNullException.ThrowIfNull(body);
         if (!User.IsInRole(EndUserRole))
         {
             return Forbid();
         }
 
         var name = User.FindFirst("name")?.Value ?? User.FindFirst("preferred_username")?.Value;
-        return (await handler.HandleAsync(new StartCheckoutCommand(User.FindFirst("email")?.Value, name), cancellationToken)).ToActionResult(this);
+        return (await handler.HandleAsync(new StartCheckoutCommand(body.PlanCode, User.FindFirst("email")?.Value, name), cancellationToken)).ToActionResult(this);
     }
 
     [HttpPost("portal")]
@@ -74,3 +83,6 @@ public sealed class MembershipController : ControllerBase
         return Ok();
     }
 }
+
+/// <summary>UC17 step 2: the plan chosen by the user.</summary>
+public sealed record CheckoutBody(string? PlanCode);

@@ -160,6 +160,12 @@ public sealed class AdminPortalDbContext(DbContextOptions<AdminPortalDbContext> 
 
         modelBuilder.Entity<PlanDbModel>(entityBuilder =>
         {
+            // No HasDefaultValue: EF would take 0% or "excluded" for "not set" and write the default; the migration sets it for old rows.
+            entityBuilder.Property(p => p.VatRate).HasPrecision(5, 2);
+            entityBuilder.Property(p => p.VatNature).HasMaxLength(5);
+            entityBuilder.Property(p => p.StripeProductId).HasMaxLength(255);
+            entityBuilder.Property(p => p.StripePriceId).HasMaxLength(255);
+            entityBuilder.Property(p => p.StripeTaxRateId).HasMaxLength(255);
             entityBuilder.ToTable("Plans");
             entityBuilder.HasKey(plan => plan.Id);
             entityBuilder.HasIndex(plan => plan.Code).IsUnique();

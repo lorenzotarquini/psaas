@@ -21,7 +21,7 @@ Errori di validazione: `400` `ValidationProblem` con un codice per campo in `err
 | UC13 | `POST /api/tenants/{id}/status` | esiste |
 | UC14 | `POST /api/tenants` con `draft: true` · `DELETE /api/tenants/{id}` | esiste |
 | UC15 | `GET /api/modules` · `POST /api/modules` · `PUT /api/modules/{id}/status` | esiste |
-| UC16 | `GET /api/plans` · `POST /api/plans` · `PUT /api/plans/{id}` | esiste |
+| UC16 | `GET /api/plans` · `POST /api/plans` · `PUT /api/plans/{id}`: un modulo (`moduleIds` di un elemento), `vatRate` (22/10/5/4/0, predefinito 22), `vatNature` (N1–N7, solo con 0%), `priceIncludesVat`; in risposta `stripe { productId, priceId, taxRateId }` e `published`; `503` se Stripe non risponde | esiste |
 | UC17 | `GET /api/subscriptions` · `GET/PUT /api/tenants/{id}/subscription` | esiste |
 | UC18 | `POST /api/tenants/{id}/modules/{moduleId}/retry` | esiste |
 | UC19 | `GET/PUT /api/users/{id}` · `POST /api/users/{id}/invite|reset-password|disable|enable` | esiste |

@@ -16,6 +16,9 @@ public sealed record PaymentCard(string Brand, string Last4, int ExpMonth, int E
 /// <summary>The last payment that did not go through: Stripe's code (e.g. card_declined) and message.</summary>
 public sealed record PaymentFailure(string? Code, string? Message, DateTimeOffset FailedAt);
 
+/// <summary>The plan a subscription pays (UC17-R1): its name and price as they were when the user subscribed.</summary>
+public sealed record SubscribedPlan(string Name, decimal Amount, string Currency, string Interval);
+
 /// <summary>What Stripe says now about a customer: the copy of <see cref="Membership"/> is replaced by it (UC17-R5).</summary>
 public sealed record MembershipSnapshot(
     MembershipStatus Status,
@@ -24,7 +27,8 @@ public sealed record MembershipSnapshot(
     bool CancelAtPeriodEnd,
     PaymentCard? Card,
     PaymentFailure? LastFailure,
-    Uri? PayUrl)
+    Uri? PayUrl,
+    SubscribedPlan? Plan = null)
 {
     public static readonly MembershipSnapshot None = new(MembershipStatus.Expired, null, null, false, null, null, null);
 }
@@ -66,6 +70,8 @@ public sealed class Membership
 
     public Uri? PayUrl { get; private set; }
 
+    public SubscribedPlan? Plan { get; private set; }
+
     public DateTimeOffset UpdatedAt { get; private set; }
 
     /// <summary>UC17-R4: read-only when expired; while Stripe retries (PastDue) the user still writes.</summary>
@@ -84,6 +90,7 @@ public sealed class Membership
         Card = snapshot.Card;
         LastFailure = snapshot.LastFailure;
         PayUrl = snapshot.PayUrl;
+        Plan = snapshot.Plan;
         UpdatedAt = now;
     }
 }

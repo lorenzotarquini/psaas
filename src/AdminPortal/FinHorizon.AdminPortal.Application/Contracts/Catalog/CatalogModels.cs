@@ -21,7 +21,10 @@ public static class BillingPeriods
     public static readonly string[] All = [Monthly, Yearly];
 }
 
-/// <summary>UC16: a commercial plan; MaxUsers/MaxProductiveUnits null = no limit.</summary>
+/// <summary>
+/// UC16: a commercial plan for one module (R2); MaxUsers/MaxProductiveUnits null = no limit. VAT: rate 22/10/5/4/0
+/// (default 22), the nature (N1–N7) only with 0% (R4).
+/// </summary>
 public sealed record PlanRequest(
     string? Code,
     string? Name,
@@ -32,7 +35,13 @@ public sealed record PlanRequest(
     int? MaxUsers,
     int? MaxProductiveUnits,
     IReadOnlyList<string>? ModuleIds,
-    bool Active = true);
+    bool Active = true,
+    decimal? VatRate = null,
+    string? VatNature = null,
+    bool PriceIncludesVat = true);
+
+/// <summary>UC16-R5: where a plan lives on Stripe; null on a plan not published yet.</summary>
+public sealed record PlanStripeLink(string ProductId, string PriceId, string TaxRateId);
 
 public sealed record PlanReadModel(
     Guid Id,
@@ -46,7 +55,15 @@ public sealed record PlanReadModel(
     int? MaxProductiveUnits,
     IReadOnlyList<string> ModuleIds,
     bool Active,
-    int SubscriberCount);
+    int SubscriberCount,
+    decimal VatRate = 22,
+    string? VatNature = null,
+    bool PriceIncludesVat = true,
+    PlanStripeLink? Stripe = null)
+{
+    /// <summary>UC16-2c: on sale on Stripe.</summary>
+    public bool Published => Stripe is not null;
+}
 
 public static class SubscriptionStatuses
 {

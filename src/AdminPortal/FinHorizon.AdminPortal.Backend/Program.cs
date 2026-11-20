@@ -77,6 +77,7 @@ try
             TenantUniquenessConflictException or ProductiveUnitNameConflictException => StatusCodes.Status409Conflict,
             UserDirectoryUnavailableException => StatusCodes.Status503ServiceUnavailable,
             ImpersonationUnavailableException => StatusCodes.Status503ServiceUnavailable,
+            FinHorizon.AdminPortal.Application.Abstractions.Payments.PaymentProviderUnavailableException => StatusCodes.Status503ServiceUnavailable,
             _ => StatusCodes.Status500InternalServerError
         }
     });

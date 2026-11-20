@@ -13,8 +13,17 @@ export const planSchema = z.object({
   trialDays: count,
   maxUsers: count,
   maxProductiveUnits: count,
-  moduleIds: z.array(z.string()),
+  // UC16-R2: one module, kept as a list of one for the API.
+  moduleIds: z.array(z.string()).length(1, 'Required'),
   active: z.boolean(),
+  vatRate: z.enum(['22', '10', '5', '4', '0']),
+  vatNature: z.string().trim(),
+  priceIncludesVat: z.boolean(),
+}).superRefine((plan, context) => {
+  // UC16-R4: the nature of the VAT only, and always, with 0%.
+  if (plan.vatRate === '0' && !/^N[1-7](\.[1-9])?$/i.test(plan.vatNature)) {
+    context.addIssue({ code: 'custom', path: ['vatNature'], message: plan.vatNature ? 'InvalidValue' : 'Required' })
+  }
 })
 
 export type PlanValues = z.input<typeof planSchema>
@@ -30,6 +39,9 @@ export const emptyPlan: PlanValues = {
   maxProductiveUnits: '',
   moduleIds: [],
   active: true,
+  vatRate: '22',
+  vatNature: '',
+  priceIncludesVat: true,
 }
 
 export const planToValues = (plan: Plan): PlanValues => ({
@@ -41,8 +53,11 @@ export const planToValues = (plan: Plan): PlanValues => ({
   trialDays: String(plan.trialDays),
   maxUsers: plan.maxUsers?.toString() ?? '',
   maxProductiveUnits: plan.maxProductiveUnits?.toString() ?? '',
-  moduleIds: [...plan.moduleIds],
+  moduleIds: plan.moduleIds.slice(0, 1),
   active: plan.active,
+  vatRate: String(plan.vatRate) as PlanValues['vatRate'],
+  vatNature: plan.vatNature ?? '',
+  priceIncludesVat: plan.priceIncludesVat,
 })
 
 const optionalNumber = (value: string) => (value.trim() ? Number(value) : null)
@@ -58,4 +73,7 @@ export const toPlanRequest = (values: z.output<typeof planSchema>): PlanRequest 
   maxProductiveUnits: optionalNumber(values.maxProductiveUnits),
   moduleIds: values.moduleIds,
   active: values.active,
+  vatRate: Number(values.vatRate),
+  vatNature: values.vatRate === '0' ? values.vatNature.toUpperCase() : null,
+  priceIncludesVat: values.priceIncludesVat,
 })

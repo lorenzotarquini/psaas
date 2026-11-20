@@ -1,9 +1,9 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCreditCard, faRotateRight, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons'
-import { goTo, membershipQueryKey, openBillingPortal, refreshMembership, startCheckout, useMembership, type Membership } from '@/entities/membership'
+import { goTo, membershipQueryKey, openBillingPortal, refreshMembership, startCheckout, useMembership, useMembershipPlans, type Membership, type MembershipPlan } from '@/entities/membership'
 import { useFormat } from '@/shared/lib/format'
 import { LoadError, Loading } from '@/shared/ui'
 
@@ -25,6 +25,9 @@ export function MembershipSettings() {
   const format = useFormat()
   const queryClient = useQueryClient()
   const membership = useMembership()
+  const expired = membership.data?.status === 'Expired'
+  const plans = useMembershipPlans(expired)
+  const [chosen, setChosen] = useState<string | null>(null)
   const day = (value: string) => format.date(value.slice(0, 10))
 
   const refresh = useMutation({
@@ -32,6 +35,8 @@ export function MembershipSettings() {
     onSuccess: (fresh) => queryClient.setQueryData(membershipQueryKey, fresh),
   })
   const checkout = useMutation({ mutationFn: startCheckout, onSuccess: ({ url }) => goTo.url(url) })
+  const price = (plan: { amount: number; currency: string; interval: 'Month' | 'Year' }) =>
+    t(plan.interval === 'Year' ? 'membership.perYear' : 'membership.perMonth', { amount: format.money(plan.amount, plan.currency) })
   const portal = useMutation({ mutationFn: openBillingPortal, onSuccess: ({ url }) => goTo.url(url) })
 
   const { mutate: refreshNow } = refresh
@@ -49,6 +54,8 @@ export function MembershipSettings() {
   const data = membership.data
   const failure = data.lastFailure
   const busy = checkout.isPending || portal.isPending
+  const available = plans.data ?? []
+  const selected = chosen ?? available[0]?.code ?? null
   const actionFailed = checkout.isError || portal.isError
 
   return (
@@ -62,8 +69,8 @@ export function MembershipSettings() {
 
       <dl className="grid gap-x-6 gap-y-3 sm:grid-cols-3">
         <div>
-          <dt className="muted text-xs">{t('membership.price')}</dt>
-          <dd className="font-medium">{t('membership.perMonth', { amount: format.money(data.price, data.currency) })}</dd>
+          <dt className="muted text-xs">{t('membership.plan')}</dt>
+          <dd className="font-medium">{data.plan ? `${data.plan.name} · ${price(data.plan)}` : '—'}</dd>
         </div>
         <div>
           <dt className="muted text-xs">{t(data.cancelAtPeriodEnd ? 'membership.endsOn' : 'membership.renewsOn')}</dt>
@@ -102,10 +109,38 @@ export function MembershipSettings() {
         </p>
       )}
 
+      {expired && (
+        <fieldset className="flex flex-col gap-2">
+          <legend className="muted pb-1 text-xs">{t('membership.choosePlan')}</legend>
+          {plans.isPending && <Loading />}
+          {plans.isError && <LoadError />}
+          {plans.isSuccess && available.length === 0 && <p className="muted">{t('membership.noPlans')}</p>}
+          {available.map((plan: MembershipPlan) => (
+            <label key={plan.code} className="flex cursor-pointer items-start gap-3 rounded-box border border-base-300 p-3 has-checked:border-primary">
+              <input type="radio" name="membership-plan" className="radio radio-sm radio-primary mt-1" checked={selected === plan.code} onChange={() => setChosen(plan.code)} />
+              <span className="flex flex-col">
+                <span className="font-medium">
+                  {plan.name} · {price({ amount: plan.price, currency: plan.currency, interval: plan.interval })}
+                </span>
+                <span className="muted text-xs">
+                  {[
+                    plan.vatRate !== null && t(plan.priceIncludesVat ? 'membership.vatIncluded' : 'membership.vatExcluded', { rate: plan.vatRate }),
+                    !data.hasCustomer && plan.trialDays > 0 && t('membership.trial', { count: plan.trialDays }),
+                    plan.description,
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
+                </span>
+              </span>
+            </label>
+          ))}
+        </fieldset>
+      )}
+
       <div className="flex flex-wrap gap-2">
-        {data.status === 'Expired' && (
-          <button type="button" className="btn btn-primary btn-sm" disabled={busy} onClick={() => checkout.mutate()}>
-            <FontAwesomeIcon icon={faRotateRight} /> {t('membership.renew')}
+        {expired && (
+          <button type="button" className="btn btn-primary btn-sm" disabled={busy || !selected} onClick={() => selected && checkout.mutate(selected)}>
+            <FontAwesomeIcon icon={faRotateRight} /> {t(data.hasCustomer ? 'membership.renew' : 'membership.subscribe')}
           </button>
         )}
         {data.status === 'PastDue' && data.payUrl && (

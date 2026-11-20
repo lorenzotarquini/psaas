@@ -21,6 +21,13 @@ internal sealed class MembershipConfiguration : IEntityTypeConfiguration<Members
             card.Property(item => item.Brand).HasMaxLength(30);
             card.Property(item => item.Last4).HasMaxLength(4);
         });
+        builder.OwnsOne(membership => membership.Plan, plan =>
+        {
+            plan.Property(item => item.Name).HasMaxLength(250);
+            plan.Property(item => item.Amount).HasPrecision(12, 2);
+            plan.Property(item => item.Currency).HasMaxLength(3);
+            plan.Property(item => item.Interval).HasMaxLength(5);
+        });
         builder.OwnsOne(membership => membership.LastFailure, failure =>
         {
             failure.Property(item => item.Code).HasMaxLength(100);

@@ -429,7 +429,6 @@
       "PastDue": "Payment failed",
       "Expired": "Expired"
     },
-    "price": "Price",
     "perMonth": "{{amount}} per month",
     "renewsOn": "Next renewal",
     "endsOn": "Ends on",
@@ -458,6 +457,15 @@
     "manage": "Manage subscription",
     "fix": "Fix the payment",
     "bannerExpired": "Subscription expired: MySync is read-only.",
-    "bannerPastDue": "The last payment failed: update your payment method to keep your access."
+    "bannerPastDue": "The last payment failed: update your payment method to keep your access.",
+    "plan": "Plan",
+    "perYear": "{{amount}} per year",
+    "choosePlan": "Choose your plan",
+    "noPlans": "No plan on sale right now.",
+    "subscribe": "Subscribe",
+    "vatIncluded": "VAT {{rate}}% included",
+    "vatExcluded": "VAT {{rate}}% excluded",
+    "trial_one": "{{count}} free trial day",
+    "trial_other": "{{count}} free trial days"
   }
 }

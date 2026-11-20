@@ -13,11 +13,24 @@ public sealed class MembershipTests : IDisposable
     [Fact]
     public async Task UC17_R2_CustomerCreatedOnceAndKept()
     {
-        await _app.SendAsync<StartCheckoutCommand, RedirectView>(new StartCheckoutCommand("mario@example.com", "Mario"));
-        await _app.SendAsync<StartCheckoutCommand, RedirectView>(new StartCheckoutCommand("mario@example.com", "Mario"));
+        await _app.SendAsync<StartCheckoutCommand, RedirectView>(new StartCheckoutCommand("mysync-mensile", "mario@example.com", "Mario"));
+        await _app.SendAsync<StartCheckoutCommand, RedirectView>(new StartCheckoutCommand("mysync-mensile", "mario@example.com", "Mario"));
 
         Assert.Equal(1, _app.Payments.CustomersCreated);
         Assert.Equal("cus_kc-mario", Assert.Single(_app.Memberships.Items).CustomerId);
+        // UC17-R8: the trial only the first time.
+        Assert.Equal([("mysync-mensile", true), ("mysync-mensile", false)], _app.Payments.Checkouts);
+    }
+
+    [Theory]
+    [InlineData(null, "Required")]
+    [InlineData("archiviato", "InvalidValue")]
+    public async Task UC17_R1_OnlyAPlanOnSale(string? planCode, string code)
+    {
+        var result = await _app.SendAsync<StartCheckoutCommand, RedirectView>(new StartCheckoutCommand(planCode, null, null));
+
+        Assert.Equal((MembershipErrors.PlanField, code), (result.Errors.Single().Field, result.Errors.Single().Code));
+        Assert.Empty(_app.Memberships.Items);
     }
 
     [Fact]
@@ -25,7 +38,7 @@ public sealed class MembershipTests : IDisposable
     {
         _app.Memberships.Add(Open(MembershipStatus.PastDue));
 
-        var result = await _app.SendAsync<StartCheckoutCommand, RedirectView>(new StartCheckoutCommand(null, null));
+        var result = await _app.SendAsync<StartCheckoutCommand, RedirectView>(new StartCheckoutCommand("mysync-mensile", null, null));
 
         Assert.Equal((MembershipErrors.Field, MembershipErrors.AlreadyActive), (result.Errors.Single().Field, result.Errors.Single().Code));
     }

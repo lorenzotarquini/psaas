@@ -46,7 +46,8 @@ export class FakeApi {
   membership: Membership = {
     status: 'Active',
     canWrite: true,
-    plan: { name: 'MySync mensile', amount: 4.99, currency: 'EUR', interval: 'Month' },
+    plan: { name: 'MySync mensile', amount: 4.99, currency: 'EUR', interval: 'Month', tier: 2 },
+    tier: { level: 2, name: 'Plus', features: ['projection'], limits: { accounts: 10, debts: 10, subscriptions: 20 } },
     currentPeriodEnd: '2026-12-15T09:00:00+00:00',
     cancelAtPeriodEnd: false,
     card: { brand: 'visa', last4: '4242', expMonth: 12, expYear: 2030 },
@@ -56,11 +57,13 @@ export class FakeApi {
   }
   /** UC17 step 2: the plans of the MySync module (UC16 of the Admin Portal). */
   membershipPlans: MembershipPlan[] = [
-    { code: 'mysync-mensile', name: 'MySync mensile', description: null, price: 4.99, currency: 'EUR', interval: 'Month', priceIncludesVat: true, vatRate: 22, trialDays: 14 },
-    { code: 'mysync-annuale', name: 'MySync annuale', description: 'Due mesi gratis', price: 49, currency: 'EUR', interval: 'Year', priceIncludesVat: true, vatRate: 22, trialDays: 0 },
+    { code: 'mysync-mensile', name: 'MySync mensile', description: null, tier: { level: 2, name: 'Plus', features: ['projection'], limits: { accounts: 10, debts: 10, subscriptions: 20 } }, price: 4.99, currency: 'EUR', interval: 'Month', priceIncludesVat: true, vatRate: 22, trialDays: 14, canUpgradeTo: false },
+    { code: 'mysync-annuale', name: 'MySync annuale', description: 'Due mesi gratis', tier: { level: 3, name: 'Pro', features: ['projection'], limits: { accounts: 100, debts: 50, subscriptions: 100 } }, price: 49, currency: 'EUR', interval: 'Year', priceIncludesVat: true, vatRate: 22, trialDays: 0, canUpgradeTo: true },
   ]
   /** UC17 step 4: what Stripe says when MySync reads the state again. */
   membershipAfterRefresh: Membership | null = null
+  /** UC17 flow 1b-a: the decline code Stripe answers to the payment of the difference; null = paid. */
+  planChangeDeclined: string | null = null
   requests: { method: string; path: string; body?: Json }[] = []
   /** Path and query of every call, in order. */
   urls: string[] = []
@@ -167,6 +170,16 @@ export class FakeApi {
     if (method === 'GET' && path === '/api/membership') return ok(this.membership)
     if (method === 'GET' && path === '/api/membership/plans') return ok(this.membershipPlans)
     if (method === 'POST' && path === '/api/membership/checkout') return ok({ url: 'https://checkout.stripe.test/session' })
+    if (method === 'POST' && path === '/api/membership/change') {
+      if (this.planChangeDeclined) {
+        this.membership = { ...this.membership, lastFailure: { code: this.planChangeDeclined, message: null, failedAt: '2026-11-21T10:00:00+00:00' } }
+        return ok({ errors: { membership: ['PaymentFailed'] } }, 400)
+      }
+      const plan = this.membershipPlans.find((p) => p.code === body!.planCode)!
+      this.membership = { ...this.membership, plan: { name: plan.name, amount: plan.price, currency: plan.currency, interval: plan.interval, tier: plan.tier?.level ?? null }, tier: plan.tier }
+      this.membershipPlans = this.membershipPlans.map((p) => ({ ...p, canUpgradeTo: (p.tier?.level ?? 0) > (plan.tier?.level ?? 0) }))
+      return ok(this.membership)
+    }
     if (method === 'POST' && path === '/api/membership/portal') return ok({ url: 'https://billing.stripe.test/session' })
     if (method === 'POST' && path === '/api/membership/refresh') {
       if (this.membershipAfterRefresh) this.membership = this.membershipAfterRefresh
@@ -182,6 +195,10 @@ export class FakeApi {
       const term = (url.searchParams.get('term') ?? '').toLowerCase()
       const kind = url.searchParams.get('kind')
       return ok(this.categories.filter((c) => (!kind || c.kind === kind) && c.name.toLowerCase().includes(term)))
+    }
+    // Contract C5: the projection outside the paid tier.
+    if (path === '/api/projection' && !this.membership.tier?.features.includes('projection') && this.membership.status !== 'Expired') {
+      return ok({ type: 'feature-not-in-tier', feature: 'projection' }, 403)
     }
     if (method === 'GET' && path === '/api/projection') {
       const sum = (group: PortfolioGroup) => this.accounts.filter((a) => a.group === group).reduce((total, a) => total + a.balance, 0)

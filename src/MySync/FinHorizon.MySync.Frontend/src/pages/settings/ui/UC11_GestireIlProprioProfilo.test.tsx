@@ -43,4 +43,16 @@ describe('UC11_GestireIlProprioProfilo', () => {
 
     expect(session.changePassword).toHaveBeenCalledOnce()
   })
+
+  it('S4_AccountEFatturazioneInSchedeSeparate', async () => {
+    renderWithApi(<SettingsPage />)
+
+    expect(screen.getByRole('tab', { name: /Account/ }).getAttribute('aria-selected')).toBe('true')
+    expect(screen.queryByText('Abbonamento a MySync')).toBeNull()
+    await userEvent.click(screen.getByRole('tab', { name: /Abbonamento e fatturazione/ }))
+
+    expect(await screen.findByText('Abbonamento a MySync')).toBeTruthy()
+    expect(screen.getByText('Pagamento e fatture')).toBeTruthy()
+    expect(screen.queryByText('I tuoi dati')).toBeNull()
+  })
 })

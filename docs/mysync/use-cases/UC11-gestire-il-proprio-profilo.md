@@ -5,7 +5,7 @@
 **Obiettivo:** vedere e correggere i propri dati, reimpostare la password, scegliere lingua e tema.
 
 ## Flusso principale
-1. Dal menu (ingranaggio) o cliccando il proprio nome in alto, l'utente apre **Impostazioni**.
+1. Dal menu (ingranaggio) o cliccando il proprio nome in alto, l'utente apre **Impostazioni**. La pagina ha due schede: **Account** (dati, password, lingua, tema e valuta; si apre per prima) e **Abbonamento e fatturazione** (UC17, `?tab=billing`).
 2. Il sistema mostra nome, cognome, email e nome utente, letti dal token di Keycloak.
 3. **Modificare i dati:** l'utente preme "Modifica i tuoi dati". MySync lo porta alla pagina di Keycloak per aggiornare il profilo; dopo il salvataggio Keycloak lo riporta in Impostazioni con i dati aggiornati.
 4. **Reimpostare la password:** l'utente preme "Reimposta la password". MySync lo porta alla pagina di Keycloak per impostare la nuova password; poi torna in Impostazioni.
@@ -65,4 +65,19 @@ Funzionalità: Gestire il proprio profilo
 Scenario: Reimpostare la password
   Quando "Mario" preme "Reimposta la password"
   Allora viene portato alla pagina di Keycloak per impostare la nuova password
+```
+
+### UC11-S4
+
+Test: `UC11_GestireIlProprioProfilo.S4_AccountEFatturazioneInSchedeSeparate`
+
+```gherkin
+# language: it
+Funzionalità: Gestire il proprio profilo
+
+Scenario: Account e fatturazione in schede separate
+  Quando "Mario" apre le Impostazioni
+  Allora vede la scheda "Account" con i suoi dati, senza l'abbonamento
+  Quando apre la scheda "Abbonamento e fatturazione"
+  Allora vede l'abbonamento a MySync e il riquadro "Pagamento e fatture", senza i suoi dati
 ```

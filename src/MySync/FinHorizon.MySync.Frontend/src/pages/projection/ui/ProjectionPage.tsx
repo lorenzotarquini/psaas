@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { initialParameters, project, useProjection, type ProjectionData, type ProjectionResult } from '@/entities/projection'
+import { isFeatureLocked, TierLocked } from '@/features/tier-lock'
 import { useFormat } from '@/shared/lib/format'
 import { Amount, LoadError, Loading } from '@/shared/ui'
 import { parse, toValues, type ParameterValues } from '../model/form'
@@ -17,7 +18,18 @@ export function ProjectionPage() {
   const [generation, setGeneration] = useState(0)
 
   if (projection.isPending) return <Loading />
-  if (projection.isError) return <LoadError />
+  if (projection.isError) {
+    if (!isFeatureLocked(projection.error)) return <LoadError />
+    return (
+      <div className="flex flex-col gap-6">
+        <header>
+          <h1 className="text-2xl font-semibold">{t('projection.title')}</h1>
+          <p className="muted">{t('projection.subtitle')}</p>
+        </header>
+        <TierLocked />
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-6">

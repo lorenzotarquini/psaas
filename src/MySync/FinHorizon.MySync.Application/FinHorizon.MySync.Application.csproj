@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FinHorizon.MySync.Domain\FinHorizon.MySync.Domain.csproj" />
+    <ProjectReference Include="..\..\Shared\FinHorizon.Modules.Sdk\FinHorizon.Modules.Sdk.csproj" />
   </ItemGroup>
 
   <ItemGroup>

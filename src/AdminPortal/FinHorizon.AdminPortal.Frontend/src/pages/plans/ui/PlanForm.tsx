@@ -16,6 +16,8 @@ export function PlanForm({ plan, onClose }: { plan: Plan | null; onClose: () => 
   const form = useForm({ resolver: zodResolver(planSchema), defaultValues: plan ? planToValues(plan) : emptyPlan })
   const chosen = useWatch({ control: form.control, name: 'moduleIds' }) ?? []
   const vatRate = useWatch({ control: form.control, name: 'vatRate' })
+  // Contract C2: the levels the chosen module declares; a module without tiers is sold as a whole.
+  const tiers = modules.find((module) => module.id === chosen[0])?.tiers ?? []
 
   const onSubmit = form.handleSubmit(async (values) => {
     const saved = await submitWithServerErrors(() => save.mutateAsync({ id: plan?.id ?? null, plan: toPlanRequest(values) }), form.setError)
@@ -48,7 +50,10 @@ export function PlanForm({ plan, onClose }: { plan: Plan | null; onClose: () => 
               id="plan-module"
               className="select w-full"
               value={chosen[0] ?? ''}
-              onChange={(event) => form.setValue('moduleIds', event.target.value ? [event.target.value] : [], { shouldDirty: true, shouldValidate: true })}
+              onChange={(event) => {
+                form.setValue('moduleIds', event.target.value ? [event.target.value] : [], { shouldDirty: true, shouldValidate: true })
+                form.setValue('tier', '', { shouldDirty: true })
+              }}
             >
               <option value="">{t('catalog.chooseModule')}</option>
               {modules.map((module) => (
@@ -60,6 +65,22 @@ export function PlanForm({ plan, onClose }: { plan: Plan | null; onClose: () => 
             <FieldError name="moduleIds" />
             <FieldError name="moduleIds[0]" />
           </div>
+          {tiers.length > 0 && (
+            <div className="fieldset py-1.5">
+              <label htmlFor="plan-tier" className="fieldset-legend py-1 text-[12px] font-medium text-base-content/80">
+                {t('catalog.tier')}
+              </label>
+              <select id="plan-tier" className="select w-full" {...form.register('tier')}>
+                <option value="">{t('catalog.chooseTier')}</option>
+                {tiers.map((tier) => (
+                  <option key={tier.level} value={String(tier.level)}>
+                    {t('catalog.tierOption', { level: tier.level, name: tier.name })}
+                  </option>
+                ))}
+              </select>
+              <FieldError name="tier" />
+            </div>
+          )}
           <div className="fieldset py-1.5">
             <label htmlFor="plan-vat" className="fieldset-legend py-1 text-[12px] font-medium text-base-content/80">
               {t('catalog.vatRate')}

@@ -209,6 +209,9 @@ namespace FinHorizon.AdminPortal.Infrastructure.Data.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 
+                    b.Property<string>("Tiers")
+                        .HasColumnType("jsonb");
+
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -273,6 +276,9 @@ namespace FinHorizon.AdminPortal.Infrastructure.Data.Migrations
                     b.Property<string>("StripeTaxRateId")
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
+
+                    b.Property<int?>("Tier")
+                        .HasColumnType("integer");
 
                     b.Property<int>("TrialDays")
                         .HasColumnType("integer");

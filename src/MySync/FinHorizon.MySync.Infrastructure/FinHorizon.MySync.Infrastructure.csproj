@@ -7,6 +7,7 @@
   <ItemGroup>
     <ProjectReference Include="..\FinHorizon.MySync.Application\FinHorizon.MySync.Application.csproj" />
     <ProjectReference Include="..\FinHorizon.MySync.Domain\FinHorizon.MySync.Domain.csproj" />
+    <ProjectReference Include="..\..\Shared\FinHorizon.Modules.Billing\FinHorizon.Modules.Billing.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,7 +24,6 @@
     </PackageReference>
     <PackageReference Include="NLog" Version="6.2.1" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
-    <PackageReference Include="Stripe.net" Version="53.1.0" />
   </ItemGroup>
 
   <ItemGroup>

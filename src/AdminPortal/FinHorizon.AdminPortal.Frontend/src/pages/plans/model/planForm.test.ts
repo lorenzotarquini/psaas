@@ -14,6 +14,7 @@ describe('plan form', () => {
       vatRate: 22,
       vatNature: null,
       priceIncludesVat: true,
+      tier: null,
     })
   })
 
@@ -34,5 +35,6 @@ describe('plan form', () => {
     ])
     const exempt = planSchema.parse({ ...emptyPlan, code: 'pro', name: 'Pro', price: '10', moduleIds: ['mysync'], vatRate: '0', vatNature: 'n2.1' })
     expect(toPlanRequest(exempt)).toMatchObject({ vatRate: 0, vatNature: 'N2.1' })
+    expect(toPlanRequest({ ...exempt, tier: '2' })).toMatchObject({ tier: 2 })
   })
 })

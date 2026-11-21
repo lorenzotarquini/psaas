@@ -1,3 +1,4 @@
+using FinHorizon.MySync.Application.Abstractions.Limits;
 using FinHorizon.MySync.Application.Abstractions.Payments;
 using FinHorizon.MySync.Application.Features.Memberships;
 using FinHorizon.MySync.Domain.Memberships;
@@ -9,6 +10,24 @@ namespace FinHorizon.MySync.Application.Tests.Features;
 public sealed class MembershipTests : IDisposable
 {
     private readonly ApplicationHarness _app = new();
+
+    [Theory]
+    [InlineData(MembershipStatus.Active, 2, 3, true)]
+    [InlineData(MembershipStatus.Active, 2, 2, false)]
+    [InlineData(MembershipStatus.Active, 3, 2, false)]
+    [InlineData(MembershipStatus.Active, null, 1, true)]
+    [InlineData(MembershipStatus.PastDue, 1, 3, false)]
+    [InlineData(MembershipStatus.Expired, 1, 3, false)]
+    public void UC17_R10_UpgradeIsAHigherTierOfARunningSubscription(MembershipStatus status, int? currentTier, int targetTier, bool upgrade)
+    {
+        var membership = new Membership(new Domain.Common.OwnerId("kc-mario"), "cus_1", DateTimeOffset.UtcNow);
+        membership.Apply(
+            new MembershipSnapshot(status, "sub_1", null, false, null, null, null, new SubscribedPlan("Attuale", 4.99m, "EUR", "Month", currentTier)),
+            DateTimeOffset.UtcNow);
+        var target = new MembershipPlan("nuovo", "Nuovo", null, targetTier, 9.99m, "EUR", "Month", true, 22m, 0, "price_2", "txr_22");
+
+        Assert.Equal(upgrade, PlanUpgrade.IsUpgrade(membership, target));
+    }
 
     [Fact]
     public async Task UC17_R2_CustomerCreatedOnceAndKept()
@@ -74,10 +93,44 @@ public sealed class MembershipTests : IDisposable
         Assert.Equal(MembershipStatus.PastDue, _app.Memberships.Items.Single().Status);
     }
 
-    private static Membership Open(MembershipStatus status)
+    [Theory]
+    [InlineData(1, 2, 1, 5)]
+    [InlineData(2, 10, 10, 20)]
+    [InlineData(3, 100, 50, 100)]
+    public async Task C2_C6_LimitsOfTheTierPaid(int tier, int accounts, int debts, int subscriptions)
+    {
+        var membership = Open(MembershipStatus.Active, tier);
+        _app.Memberships.Add(membership);
+
+        var limits = await Limits().ForAsync(FakeStore.Mario);
+
+        Assert.Equal(new UserLimits(accounts, debts, subscriptions), limits);
+    }
+
+    [Fact]
+    public async Task C4_WithoutATier_TheLowestLimitsAreShownAndNothingCanBeWritten()
+    {
+        var limits = await Limits().ForAsync(FakeStore.Mario);
+
+        Assert.Equal(new UserLimits(2, 1, 5), limits);
+        Assert.False(await _app.Get<MembershipSync>().CanWriteAsync(FakeStore.Mario));
+    }
+
+    [Fact]
+    public async Task C3_PaidButForALevelMySyncDoesNotDeclare_IsNoTier()
+    {
+        _app.Memberships.Add(Open(MembershipStatus.Active, 4));
+
+        Assert.False((await _app.Get<MembershipSync>().EntitlementAsync(FakeStore.Mario)).CanWrite);
+    }
+
+    private TierResourceLimits Limits() =>
+        new(_app.Get<MembershipSync>(), new DeclaredModuleTiers(), Microsoft.Extensions.Options.Options.Create(new LimitsOptions()));
+
+    private static Membership Open(MembershipStatus status, int tier = 2)
     {
         var membership = new Membership(FakeStore.Mario, "cus_kc-mario", DateTimeOffset.UnixEpoch);
-        membership.Apply(MembershipSnapshot.None with { Status = status }, DateTimeOffset.UnixEpoch);
+        membership.Apply(MembershipSnapshot.None with { Status = status, Plan = new SubscribedPlan("MySync", 4.99m, "EUR", "Month", tier) }, DateTimeOffset.UnixEpoch);
         return membership;
     }
 

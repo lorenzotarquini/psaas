@@ -25,7 +25,7 @@ export function MembershipBanner() {
   return (
     <div role="status" className={`alert alert-soft mx-4 mt-4 md:mx-6 ${status === 'Expired' ? 'alert-error' : 'alert-warning'}`}>
       <span>{t(status === 'Expired' ? 'membership.bannerExpired' : 'membership.bannerPastDue')}</span>
-      <Link to="/settings" className="btn btn-sm">
+      <Link to="/settings?tab=billing" className="btn btn-sm">
         {t(status === 'Expired' ? 'membership.renew' : 'membership.fix')}
       </Link>
     </div>

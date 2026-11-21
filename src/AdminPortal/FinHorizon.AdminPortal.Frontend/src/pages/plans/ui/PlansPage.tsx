@@ -73,7 +73,10 @@ export function PlansPage() {
                     <td>{plan.trialDays ? t('catalog.trialDays', { count: plan.trialDays }) : '–'}</td>
                     <td className="data">{plan.maxUsers ?? '∞'}</td>
                     <td className="data">{plan.maxProductiveUnits ?? '∞'}</td>
-                    <td className="data text-[12px]">{plan.moduleIds.join(', ')}</td>
+                    <td className="data text-[12px]">
+                      {plan.moduleIds.join(', ')}
+                      {plan.tier !== null && <span className="block text-base-content/60">{t('catalog.tierShort', { level: plan.tier })}</span>}
+                    </td>
                     <td className="data text-[12px]">
                       {plan.vatRate ? t(plan.priceIncludesVat ? 'catalog.vatIncluded' : 'catalog.vatExcluded', { rate: plan.vatRate }) : plan.vatNature}
                     </td>

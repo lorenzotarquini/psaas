@@ -44,6 +44,22 @@ public sealed class MembershipController : ControllerBase
         return (await handler.HandleAsync(new StartCheckoutCommand(body.PlanCode, User.FindFirst("email")?.Value, name), cancellationToken)).ToActionResult(this);
     }
 
+    /// <summary>UC17 flow 1b: the user moves to a plan of a higher tier; the difference is charged at once.</summary>
+    [HttpPost("change")]
+    public async Task<ActionResult<MembershipView>> Change(
+        CheckoutBody body,
+        [FromServices] IRequestHandler<ChangePlanCommand, MembershipView> handler,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(body);
+        if (!User.IsInRole(EndUserRole))
+        {
+            return Forbid();
+        }
+
+        return (await handler.HandleAsync(new ChangePlanCommand(body.PlanCode), cancellationToken)).ToActionResult(this);
+    }
+
     [HttpPost("portal")]
     public async Task<ActionResult<RedirectView>> Portal(
         [FromServices] IRequestHandler<OpenBillingPortalCommand, RedirectView> handler,
@@ -84,5 +100,5 @@ public sealed class MembershipController : ControllerBase
     }
 }
 
-/// <summary>UC17 step 2: the plan chosen by the user.</summary>
+/// <summary>UC17 step 2 and flow 1b: the plan chosen by the user.</summary>
 public sealed record CheckoutBody(string? PlanCode);

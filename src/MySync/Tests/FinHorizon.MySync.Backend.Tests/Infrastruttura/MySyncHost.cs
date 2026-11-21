@@ -46,6 +46,24 @@ public sealed class MySyncHost(string connectionString, IReadOnlyDictionary<stri
             services.AddSingleton<Application.Abstractions.Currencies.ICurrencyCatalog>(Currencies);
             services.AddSingleton<Application.Abstractions.Currencies.IExchangeRates>(Currencies);
             services.AddSingleton<Application.Abstractions.Payments.IPaymentProvider>(Payments);
+            // Contract tiers without limits, so the scenarios of the other use cases keep the configured ones (MySync:Max*).
+            services.AddSingleton<Application.Features.Memberships.IModuleTiers>(TestTiers.Instance);
         });
     }
+}
+
+/// <summary>
+/// The tiers of the acceptance tests: the same levels and features as MySync, no limits (configuration applies).
+/// Tier 1 has no projection; users subscribed by default are on tier 2.
+/// </summary>
+public sealed class TestTiers : Application.Features.Memberships.IModuleTiers
+{
+    public static readonly TestTiers Instance = new();
+
+    public IReadOnlyList<FinHorizon.Modules.Sdk.ModuleTier> Tiers { get; } =
+    [
+        new(1, "Base", []),
+        new(2, "Plus", [Application.Features.Memberships.MySyncModule.Projection]),
+        new(3, "Pro", [Application.Features.Memberships.MySyncModule.Projection]),
+    ];
 }

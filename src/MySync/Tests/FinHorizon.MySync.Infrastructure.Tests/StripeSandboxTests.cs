@@ -36,7 +36,7 @@ public sealed class StripeSandboxTests
         try
         {
             var plan = Assert.Single(await provider.GetPlansAsync());
-            Assert.Equal(("sandbox-mensile", 4.99m, "EUR", "Month", true, 22m, 14), (plan.Code, plan.Price, plan.Currency, plan.Interval, plan.PriceIncludesVat, plan.VatRate, plan.TrialDays));
+            Assert.Equal(("sandbox-mensile", 2, 4.99m, "EUR", "Month", true, 22m, 14), (plan.Code, plan.Tier, plan.Price, plan.Currency, plan.Interval, plan.PriceIncludesVat, plan.VatRate, plan.TrialDays));
 
             var checkout = await provider.CreateCheckoutAsync(customerId, owner, plan, withTrial: true, membership.ReturnUrl("paid"));
             var portal = await provider.CreatePortalAsync(customerId, membership.ReturnUrl("portal"));
@@ -44,16 +44,16 @@ public sealed class StripeSandboxTests
             Assert.Equal(MembershipStatus.Expired, (await provider.GetSnapshotAsync(customerId)).Status);
 
             // Paid with the test Visa: Active, with the card, the plan and the next renewal.
-            await SubscribeWithAsync(client, customerId, plan, "pm_card_visa");
+            await SubscribeWithAsync(client, module, customerId, plan, "pm_card_visa");
             var active = await provider.GetSnapshotAsync(customerId);
             Assert.Equal((MembershipStatus.Active, "visa", "4242"), (active.Status, active.Card?.Brand, active.Card?.Last4));
-            Assert.Equal(new SubscribedPlan("MySync sandbox", 4.99m, "EUR", "Month"), active.Plan);
+            Assert.Equal(new SubscribedPlan("MySync sandbox", 4.99m, "EUR", "Month", 2), active.Plan);
             Assert.True(active.CurrentPeriodEnd > DateTimeOffset.UtcNow.AddDays(25));
             Assert.Null(active.LastFailure);
 
             // A card that is declined: the subscription does not start and the failure is read with its code.
             await new SubscriptionService(client).CancelAsync(active.SubscriptionId!);
-            await SubscribeWithAsync(client, customerId, plan, "pm_card_chargeCustomerFail");
+            await SubscribeWithAsync(client, module, customerId, plan, "pm_card_chargeCustomerFail");
             var failed = await provider.GetSnapshotAsync(customerId);
             Assert.Equal(MembershipStatus.Expired, failed.Status);
             // The decline code when Stripe gives one (generic_decline for this test card), otherwise the error code.
@@ -67,27 +67,98 @@ public sealed class StripeSandboxTests
         }
     }
 
+    /// <summary>
+    /// UC17 flow 1b against the sandbox: an upgrade is charged at once and applies; when the card refuses the difference,
+    /// the subscription stays on its plan and the failure is returned.
+    /// </summary>
+    [Fact]
+    public async Task UC17_Sandbox_UpgradePaidAndRefused()
+    {
+        if (string.IsNullOrWhiteSpace(Key) || !Key.StartsWith("sk_test_", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        var module = $"sandbox-test-{Guid.NewGuid():N}";
+        var membership = new MembershipOptions { ModuleId = module, FrontendUrl = new Uri("http://localhost:5174") };
+        using var provider = new StripePaymentProvider(Options.Create(new StripeOptions { SecretKey = Key }), Options.Create(membership));
+        var client = new StripeClient(Key);
+        var taxRate = await CreateTaxRateAsync(client);
+        var products = new List<string>
+        {
+            await PublishProductAsync(client, module, taxRate, "sandbox-plus", "MySync Plus", tier: 2, cents: 499),
+            await PublishProductAsync(client, module, taxRate, "sandbox-pro", "MySync Pro", tier: 3, cents: 999),
+            await PublishProductAsync(client, module, taxRate, "sandbox-top", "MySync Top", tier: 4, cents: 1999),
+        };
+        var owner = new OwnerId(module);
+        var customerId = await provider.CreateCustomerAsync(owner, email: null, name: "MySync sandbox test");
+        try
+        {
+            var plans = (await provider.GetPlansAsync()).ToDictionary(plan => plan.Code);
+            await SubscribeWithAsync(client, module, customerId, plans["sandbox-plus"], "pm_card_visa");
+            var subscriptionId = (await provider.GetSnapshotAsync(customerId)).SubscriptionId!;
+
+            var upgraded = await provider.ChangePlanAsync(customerId, subscriptionId, plans["sandbox-pro"]);
+            var pro = await provider.GetSnapshotAsync(customerId);
+            Assert.True(upgraded.Applied);
+            Assert.Equal((MembershipStatus.Active, 3, 9.99m), (pro.Status, pro.Plan?.Tier, pro.Plan?.Amount));
+            var subscription = await new SubscriptionService(client).GetAsync(subscriptionId);
+            Assert.Equal([taxRate], subscription.Items.Data.Single().TaxRates.Select(rate => rate.Id));
+            Assert.Equal("sandbox-pro", subscription.Metadata["plan_code"]);
+
+            // The card now refuses: the difference is not paid, the plan stays Pro.
+            var declining = await new PaymentMethodService(client).AttachAsync("pm_card_chargeCustomerFail", new PaymentMethodAttachOptions { Customer = customerId });
+            await new SubscriptionService(client).UpdateAsync(subscriptionId, new SubscriptionUpdateOptions { DefaultPaymentMethod = declining.Id });
+            var refused = await provider.ChangePlanAsync(customerId, subscriptionId, plans["sandbox-top"]);
+            var still = await provider.GetSnapshotAsync(customerId);
+            Assert.False(refused.Applied);
+            Assert.NotNull(refused.Failure?.Code);
+            Assert.Equal((MembershipStatus.Active, 3), (still.Status, still.Plan?.Tier));
+        }
+        finally
+        {
+            await new CustomerService(client).DeleteAsync(customerId);
+            foreach (var product in products)
+            {
+                await new ProductService(client).UpdateAsync(product, new ProductUpdateOptions { Active = false });
+            }
+
+            await new TaxRateService(client).UpdateAsync(taxRate, new TaxRateUpdateOptions { Active = false });
+        }
+    }
+
     /// <summary>A plan as the Admin Portal publishes it (UC16-R5): product of the module, default price, VAT 22% included.</summary>
     private static async Task<(string Product, string TaxRate)> PublishPlanAsync(StripeClient client, string module)
     {
-        var taxRate = await new TaxRateService(client).CreateAsync(new TaxRateCreateOptions
+        var taxRate = await CreateTaxRateAsync(client);
+        var product = await PublishProductAsync(client, module, taxRate, "sandbox-mensile", "MySync sandbox", tier: 2, cents: 499, trialDays: 14);
+        return (product, taxRate);
+    }
+
+    private static async Task<string> CreateTaxRateAsync(StripeClient client) =>
+        (await new TaxRateService(client).CreateAsync(new TaxRateCreateOptions
         {
             DisplayName = "IVA", Percentage = 22, Inclusive = true, Country = "IT", Jurisdiction = "IT", TaxType = "vat",
             Metadata = new Dictionary<string, string> { ["app"] = "finhorizon-sandbox-test" },
-        });
-        var product = await new ProductService(client).CreateAsync(new ProductCreateOptions
+        })).Id;
+
+    private static async Task<string> PublishProductAsync(StripeClient client, string module, string taxRate, string code, string name, int tier, long cents, int trialDays = 0) =>
+        (await new ProductService(client).CreateAsync(new ProductCreateOptions
         {
-            Name = "MySync sandbox",
-            Metadata = new Dictionary<string, string> { ["module"] = module, ["plan_code"] = "sandbox-mensile", ["tax_rate"] = taxRate.Id, ["trial_days"] = "14" },
+            Name = name,
+            Metadata = new Dictionary<string, string>
+            {
+                ["module"] = module, ["plan_code"] = code, ["tax_rate"] = taxRate,
+                ["trial_days"] = trialDays.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                ["tier"] = tier.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            },
             DefaultPriceData = new ProductDefaultPriceDataOptions
             {
-                Currency = "eur", UnitAmount = 499, TaxBehavior = "inclusive", Recurring = new ProductDefaultPriceDataRecurringOptions { Interval = "month" },
+                Currency = "eur", UnitAmount = cents, TaxBehavior = "inclusive", Recurring = new ProductDefaultPriceDataRecurringOptions { Interval = "month" },
             },
-        });
-        return (product.Id, taxRate.Id);
-    }
+        })).Id;
 
-    private static async Task SubscribeWithAsync(StripeClient client, string customerId, Application.Abstractions.Payments.MembershipPlan plan, string testPaymentMethod)
+    private static async Task SubscribeWithAsync(StripeClient client, string module, string customerId, Application.Abstractions.Payments.MembershipPlan plan, string testPaymentMethod)
     {
         var method = await new PaymentMethodService(client).AttachAsync(testPaymentMethod, new PaymentMethodAttachOptions { Customer = customerId });
         await new CustomerService(client).UpdateAsync(customerId, new CustomerUpdateOptions
@@ -101,7 +172,8 @@ public sealed class StripeSandboxTests
                 Customer = customerId,
                 Items = [new SubscriptionItemOptions { Price = plan.PriceId, TaxRates = plan.TaxRateId is null ? null : [plan.TaxRateId] }],
                 DefaultPaymentMethod = method.Id,
-                Metadata = new Dictionary<string, string> { ["app"] = "mysync" },
+                // As Checkout does: the subscription belongs to the module (FinHorizon.Modules.Billing).
+                Metadata = new Dictionary<string, string> { ["module"] = module },
             });
         }
         catch (StripeException exception) when (exception.StripeError?.Code == "card_declined")

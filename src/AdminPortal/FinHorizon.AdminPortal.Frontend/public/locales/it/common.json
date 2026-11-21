@@ -682,7 +682,15 @@
     "stripe": "Stripe",
     "published": "Pubblicato",
     "unpublished": "Non pubblicato",
-    "notPublished": "Questo piano non è ancora su Stripe: salvalo per pubblicarlo (serve la chiave Stripe del backend)."
+    "notPublished": "Questo piano non è ancora su Stripe: salvalo per pubblicarlo (serve la chiave Stripe del backend).",
+    "tier": "Livello (tier)",
+    "chooseTier": "Scegli il livello…",
+    "tierOption": "Tier {{level}} · {{name}}",
+    "tierShort": "Tier {{level}}",
+    "editModule": "Modifica {{name}}",
+    "edit": "Modifica",
+    "save": "Salva",
+    "editHint": "Il manifest attuale del modulo, tier compresi. Cambialo e salva: l'id resta lo stesso; i piani già pubblicati su Stripe tengono il loro tier."
   },
   "billing": {
     "subtitle": "Fatture dei periodi delle sottoscrizioni, incassi e solleciti",

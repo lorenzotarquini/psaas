@@ -13,6 +13,9 @@ public sealed class ModuleDbModel
     public string? ProvisionUrl { get; set; }
     public string? DeprovisionUrl { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
+
+    /// <summary>The tiers of the manifest (contract C1–C2), as JSON; null when the module declares none.</summary>
+    public string? Tiers { get; set; }
 }
 
 public sealed class PlanDbModel
@@ -34,6 +37,7 @@ public sealed class PlanDbModel
     public string? StripeProductId { get; set; }
     public string? StripePriceId { get; set; }
     public string? StripeTaxRateId { get; set; }
+    public int? Tier { get; set; }
 }
 
 /// <summary>One per tenant; plan values are copied in (grandfathering).</summary>

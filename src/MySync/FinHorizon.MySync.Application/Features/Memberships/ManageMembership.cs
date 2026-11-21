@@ -19,6 +19,9 @@ public sealed record StartCheckoutCommand(string? PlanCode, string? Email, strin
 /// <summary>UC17 flow 1a.</summary>
 public sealed record OpenBillingPortalCommand;
 
+/// <summary>UC17 flow 1b: the plan of a higher tier the running subscription moves to.</summary>
+public sealed record ChangePlanCommand(string? PlanCode);
+
 /// <summary>UC17 step 4: back from Stripe, the state is read at once instead of waiting for the event.</summary>
 public sealed record RefreshMembershipCommand;
 
@@ -33,21 +36,53 @@ public static class MembershipErrors
     public const string NoCustomer = "NoCustomer";
 
     public const string PlanField = "planCode";
+
+    /// <summary>UC17 flow 1b: only a running, paid subscription changes plan (expired: subscribe; past due: pay first).</summary>
+    public const string NotActive = "NotActive";
+
+    /// <summary>UC17-R10: the plan is not of a higher tier than the one paid now.</summary>
+    public const string NotAnUpgrade = "NotAnUpgrade";
+
+    /// <summary>UC17 flow 1b-a: the payment of the difference was refused; the plan stays as it was.</summary>
+    public const string PaymentFailed = "PaymentFailed";
 }
 
-public sealed class ListMembershipPlansHandler(IPaymentProvider payments) : IRequestHandler<ListMembershipPlansQuery, IReadOnlyList<MembershipPlanView>>
+/// <summary>UC17-R10: an upgrade is a plan of a higher tier than the one paid now; a plan without a tier can move to any.</summary>
+public static class PlanUpgrade
 {
-    public async Task<Result<IReadOnlyList<MembershipPlanView>>> HandleAsync(ListMembershipPlansQuery request, CancellationToken cancellationToken = default) =>
-        Result<IReadOnlyList<MembershipPlanView>>.Ok((await payments.GetPlansAsync(cancellationToken).ConfigureAwait(false))
-            .Select(plan => new MembershipPlanView(plan.Code, plan.Name, plan.Description, plan.Price, plan.Currency, plan.Interval, plan.PriceIncludesVat, plan.VatRate, plan.TrialDays))
-            .ToList());
+    public static bool IsUpgrade(Membership? membership, MembershipPlan plan)
+    {
+        ArgumentNullException.ThrowIfNull(plan);
+        return membership is { Status: MembershipStatus.Active, SubscriptionId: not null } && plan.Tier is { } level && level > (membership.Plan?.Tier ?? 0);
+    }
 }
 
-public sealed class GetMembershipHandler(ICurrentUser user, IMembershipRepository memberships)
+/// <summary>Contract C3: only plans for a tier MySync declares can be sold here.</summary>
+/// <summary>UC17-R10: each plan says whether the user's running subscription can move to it.</summary>
+public sealed class ListMembershipPlansHandler(ICurrentUser user, IMembershipRepository memberships, IPaymentProvider payments, IModuleTiers tiers)
+    : IRequestHandler<ListMembershipPlansQuery, IReadOnlyList<MembershipPlanView>>
+{
+    public async Task<Result<IReadOnlyList<MembershipPlanView>>> HandleAsync(ListMembershipPlansQuery request, CancellationToken cancellationToken = default)
+    {
+        var membership = await memberships.GetAsync(user.Id, cancellationToken).ConfigureAwait(false);
+        return Result<IReadOnlyList<MembershipPlanView>>.Ok((await payments.GetPlansAsync(cancellationToken).ConfigureAwait(false))
+            .Select(plan => (Plan: plan, Tier: tiers.Tiers.FirstOrDefault(tier => tier.Level == plan.Tier)))
+            .Where(item => item.Tier is not null)
+            .Select(item => new MembershipPlanView(
+                item.Plan.Code, item.Plan.Name, item.Plan.Description, TierView.From(item.Tier), item.Plan.Price, item.Plan.Currency, item.Plan.Interval,
+                item.Plan.PriceIncludesVat, item.Plan.VatRate, item.Plan.TrialDays, PlanUpgrade.IsUpgrade(membership, item.Plan)))
+            .ToList());
+    }
+}
+
+public sealed class GetMembershipHandler(ICurrentUser user, IMembershipRepository memberships, MembershipSync sync)
     : IRequestHandler<GetMembershipQuery, MembershipView>
 {
-    public async Task<Result<MembershipView>> HandleAsync(GetMembershipQuery request, CancellationToken cancellationToken = default) =>
-        Result<MembershipView>.Ok(MembershipView.From(await memberships.GetAsync(user.Id, cancellationToken).ConfigureAwait(false)));
+    public async Task<Result<MembershipView>> HandleAsync(GetMembershipQuery request, CancellationToken cancellationToken = default)
+    {
+        var membership = await memberships.GetAsync(user.Id, cancellationToken).ConfigureAwait(false);
+        return Result<MembershipView>.Ok(MembershipView.From(membership, sync.EntitlementOf(membership)));
+    }
 }
 
 public sealed class StartCheckoutHandler(
@@ -56,7 +91,8 @@ public sealed class StartCheckoutHandler(
     IPaymentProvider payments,
     IUnitOfWork unitOfWork,
     TimeProvider clock,
-    IOptions<MembershipOptions> options) : IRequestHandler<StartCheckoutCommand, RedirectView>
+    IOptions<MembershipOptions> options,
+    IModuleTiers tiers) : IRequestHandler<StartCheckoutCommand, RedirectView>
 {
     public async Task<Result<RedirectView>> HandleAsync(StartCheckoutCommand request, CancellationToken cancellationToken = default)
     {
@@ -73,7 +109,8 @@ public sealed class StartCheckoutHandler(
         }
 
         // Only a plan on sale now: archived or unknown codes are refused.
-        var plan = (await payments.GetPlansAsync(cancellationToken).ConfigureAwait(false)).FirstOrDefault(item => item.Code == request.PlanCode);
+        var plan = (await payments.GetPlansAsync(cancellationToken).ConfigureAwait(false))
+            .FirstOrDefault(item => item.Code == request.PlanCode && tiers.Tiers.Any(tier => tier.Level == item.Tier));
         if (plan is null)
         {
             return Result<RedirectView>.Invalid(MembershipErrors.PlanField, ErrorCodes.InvalidValue);
@@ -92,6 +129,48 @@ public sealed class StartCheckoutHandler(
 
         var url = await payments.CreateCheckoutAsync(membership.CustomerId, user.Id, plan, firstTime && plan.TrialDays > 0, options.Value.ReturnUrl("paid"), cancellationToken).ConfigureAwait(false);
         return Result<RedirectView>.Ok(new RedirectView(url));
+    }
+}
+
+public sealed class ChangePlanHandler(
+    ICurrentUser user,
+    IMembershipRepository memberships,
+    IPaymentProvider payments,
+    MembershipSync sync,
+    IModuleTiers tiers) : IRequestHandler<ChangePlanCommand, MembershipView>
+{
+    public async Task<Result<MembershipView>> HandleAsync(ChangePlanCommand request, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        if (string.IsNullOrWhiteSpace(request.PlanCode))
+        {
+            return Result<MembershipView>.Invalid(MembershipErrors.PlanField, ErrorCodes.Required);
+        }
+
+        var membership = await memberships.GetAsync(user.Id, cancellationToken).ConfigureAwait(false);
+        if (membership is not { Status: MembershipStatus.Active, SubscriptionId: { } subscriptionId })
+        {
+            return Result<MembershipView>.Invalid(MembershipErrors.Field, MembershipErrors.NotActive);
+        }
+
+        var plan = (await payments.GetPlansAsync(cancellationToken).ConfigureAwait(false))
+            .FirstOrDefault(item => item.Code == request.PlanCode && tiers.Tiers.Any(tier => tier.Level == item.Tier));
+        if (plan is null)
+        {
+            return Result<MembershipView>.Invalid(MembershipErrors.PlanField, ErrorCodes.InvalidValue);
+        }
+
+        if (!PlanUpgrade.IsUpgrade(membership, plan))
+        {
+            return Result<MembershipView>.Invalid(MembershipErrors.PlanField, MembershipErrors.NotAnUpgrade);
+        }
+
+        var outcome = await payments.ChangePlanAsync(membership.CustomerId, subscriptionId, plan, cancellationToken).ConfigureAwait(false);
+        // R5: whatever happened, the copy is read again from Stripe (the refused payment shows as the last failure).
+        await sync.SyncAsync(membership, cancellationToken).ConfigureAwait(false);
+        return outcome.Applied
+            ? Result<MembershipView>.Ok(MembershipView.From(membership, sync.EntitlementOf(membership)))
+            : Result<MembershipView>.Invalid(MembershipErrors.Field, MembershipErrors.PaymentFailed);
     }
 }
 
@@ -126,6 +205,6 @@ public sealed class RefreshMembershipHandler(
             await sync.SyncAsync(membership, cancellationToken).ConfigureAwait(false);
         }
 
-        return Result<MembershipView>.Ok(MembershipView.From(membership));
+        return Result<MembershipView>.Ok(MembershipView.From(membership, sync.EntitlementOf(membership)));
     }
 }

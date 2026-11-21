@@ -9,6 +9,14 @@ export type SubscriptionStatus = 'Trial' | 'Active' | 'Expired' | 'Cancelled'
 export type ProvisioningStatus = 'Provisioning' | 'Active' | 'Failed'
 
 /** UC15: a module of the catalog; tenantCount = tenants that have it. */
+/** Contract C2 (docs/architettura-moduli.md): a subscription level a module declares. */
+export interface ModuleTier {
+  level: number
+  name: string
+  features: string[] | null
+  limits: Record<string, number> | null
+}
+
 export interface Module {
   id: string
   name: string
@@ -19,8 +27,11 @@ export interface Module {
   requires: string[]
   permissions: string[]
   provisionUrl: string | null
+  deprovisionUrl: string | null
   updatedAt: string
   tenantCount: number
+  /** Null when the module is sold as a whole (organizations). */
+  tiers: ModuleTier[] | null
 }
 
 /** The manifest a module ships with (§6.2 of ADMIN-PORTAL.md). */
@@ -35,6 +46,7 @@ export interface ModuleManifest {
   permissions?: string[]
   provisionUrl?: string | null
   deprovisionUrl?: string | null
+  tiers?: ModuleTier[] | null
 }
 
 /** UC16-R4: the Italian VAT rates. */
@@ -60,6 +72,8 @@ export interface Plan {
   priceIncludesVat: boolean
   stripe: { productId: string; priceId: string; taxRateId: string } | null
   published: boolean
+  /** UC16-R6: the level of the module the plan sells; null for a module without tiers. */
+  tier: number | null
 }
 
 export type PlanRequest = Omit<Plan, 'id' | 'subscriberCount' | 'stripe' | 'published'>
@@ -133,6 +147,16 @@ export function useRegisterModule() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (manifest: ModuleManifest) => apiPost<Module>('/api/modules', manifest),
+    onSuccess: () => onCatalogSaved(queryClient),
+  })
+}
+
+/** UC15-R7: edits a module of the catalog; the id stays. */
+export function useUpdateModule() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, manifest }: { id: string; manifest: ModuleManifest }) =>
+      apiPut<Module>(`/api/modules/${encodeURIComponent(id)}`, manifest),
     onSuccess: () => onCatalogSaved(queryClient),
   })
 }

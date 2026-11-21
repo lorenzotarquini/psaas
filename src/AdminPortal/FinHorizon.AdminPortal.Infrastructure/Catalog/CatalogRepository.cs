@@ -50,6 +50,7 @@ public sealed class CatalogRepository(AdminPortalDbContext dbContext, TimeProvid
         module.Permissions = manifest.Permissions?.ToArray() ?? [];
         module.ProvisionUrl = manifest.ProvisionUrl;
         module.DeprovisionUrl = manifest.DeprovisionUrl;
+        module.Tiers = manifest.Tiers is { Count: > 0 } tiers ? System.Text.Json.JsonSerializer.Serialize(tiers, TierJson) : null;
         module.UpdatedAt = clock.GetUtcNow();
         await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
@@ -104,6 +105,7 @@ public sealed class CatalogRepository(AdminPortalDbContext dbContext, TimeProvid
         plan.VatRate = request.VatRate ?? 22;
         plan.VatNature = request.VatNature;
         plan.PriceIncludesVat = request.PriceIncludesVat;
+        plan.Tier = request.Tier;
         plan.StripeProductId = stripe?.ProductId;
         plan.StripePriceId = stripe?.PriceId;
         plan.StripeTaxRateId = stripe?.TaxRateId;
@@ -206,10 +208,14 @@ public sealed class CatalogRepository(AdminPortalDbContext dbContext, TimeProvid
     }
 
     private static ModuleReadModel ToReadModel(ModuleDbModel m, int tenantCount) =>
-        new(m.Id, m.Name, m.Description, m.Icon, m.Status, m.Version, m.Requires, m.Permissions, m.ProvisionUrl, m.UpdatedAt, tenantCount);
+        new(m.Id, m.Name, m.Description, m.Icon, m.Status, m.Version, m.Requires, m.Permissions, m.ProvisionUrl, m.UpdatedAt, tenantCount,
+            m.Tiers is null ? null : System.Text.Json.JsonSerializer.Deserialize<List<ModuleTier>>(m.Tiers, TierJson), m.DeprovisionUrl);
+
+    private static readonly System.Text.Json.JsonSerializerOptions TierJson = new(System.Text.Json.JsonSerializerDefaults.Web);
 
     private static PlanReadModel ToReadModel(PlanDbModel p, int subscribers) =>
         new(p.Id, p.Code, p.Name, p.Description, p.Price, p.BillingPeriod, p.TrialDays, p.MaxUsers, p.MaxProductiveUnits, p.ModuleIds, p.Active, subscribers,
             p.VatRate, p.VatNature, p.PriceIncludesVat,
-            p.StripeProductId is { } product && p.StripePriceId is { } price && p.StripeTaxRateId is { } tax ? new PlanStripeLink(product, price, tax) : null);
+            p.StripeProductId is { } product && p.StripePriceId is { } price && p.StripeTaxRateId is { } tax ? new PlanStripeLink(product, price, tax) : null,
+            p.Tier);
 }

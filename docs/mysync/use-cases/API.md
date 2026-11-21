@@ -45,14 +45,17 @@ Tutte le rotte sono sotto `/api`, richiedono un token Keycloak con audience `mys
 
 | Metodo e rotta | Richiesta | Risposta |
 |---|---|---|
-| `GET /api/membership/plans` | — | `[{ code, name, description, price, currency, interval: Month\|Year, priceIncludesVat, vatRate, trialDays }]`: i piani del modulo `mysync` in vendita (UC16 dell'Admin Portal), letti da Stripe |
-| `GET /api/membership` | — | `{ status: Active\|PastDue\|Expired, canWrite, plan: { name, amount, currency, interval }?, currentPeriodEnd, cancelAtPeriodEnd, card: { brand, last4, expMonth, expYear }?, lastFailure: { code, message, failedAt }?, payUrl?, hasCustomer }`; senza abbonamento `Expired` |
+| `GET /api/membership/plans` | — | `[{ code, name, description, tier: { level, name, features, limits }, price, currency, interval: Month\|Year, priceIncludesVat, vatRate, trialDays, canUpgradeTo }]`: i piani del modulo `mysync` in vendita (`canUpgradeTo`: l'abbonamento attivo può passarci, R10) (UC16 dell'Admin Portal), letti da Stripe |
+| `GET /api/membership` | — | `{ status: Active\|PastDue\|Expired, canWrite, plan: { name, amount, currency, interval, tier }?, tier: { level, name, features, limits }?, currentPeriodEnd, cancelAtPeriodEnd, card: { brand, last4, expMonth, expYear }?, lastFailure: { code, message, failedAt }?, payUrl?, hasCustomer }`; senza abbonamento `Expired` |
 | `POST /api/membership/checkout` | `{ planCode }` (email e nome dal token) | `{ url }` della pagina di pagamento di Stripe · `400` `Required`/`InvalidValue` su `planCode` (piano non in vendita), `AlreadyActive` su `membership` · `403` senza ruolo `enduser` |
+| `POST /api/membership/change` | `{ planCode }` | Stato dopo il passaggio, come `GET` · `400` `Required`/`InvalidValue`/`NotAnUpgrade` su `planCode`, `NotActive`/`PaymentFailed` su `membership` · `403` senza ruolo `enduser` (UC17 flusso 1b, R10) |
 | `POST /api/membership/portal` | — | `{ url }` del portale clienti di Stripe · `400` `NoCustomer` su `membership` |
 | `POST /api/membership/refresh` | — | Stato riletto da Stripe, come `GET` |
 | `POST /api/membership/webhook` | evento Stripe, header `Stripe-Signature`, senza token | `200` · `400` firma non valida · `503` segreto non configurato |
 
-Con l'abbonamento `Expired` ogni `POST`, `PUT` e `DELETE` sotto `/api` (tranne `/api/membership`) risponde `402` con `type: "membership-expired"`. Stripe non raggiungibile o senza chiave: `503` con `type: "payment-provider-unavailable"`.
+`GET /api/module/manifest` (pubblico): il manifest di MySync con i suoi tier, da registrare nell'Admin Portal (UC15).
+
+Una feature fuori dal tier pagato (oggi `projection`, rotte `/api/projection`) risponde `403` con `type: "feature-not-in-tier"` e `feature`. Con l'abbonamento `Expired` ogni `POST`, `PUT` e `DELETE` sotto `/api` (tranne `/api/membership`) risponde `402` con `type: "membership-expired"`. Stripe non raggiungibile o senza chiave: `503` con `type: "payment-provider-unavailable"`.
 
 ## Configurazione del backend
 

@@ -1,3 +1,4 @@
+using FinHorizon.Modules.Sdk;
 namespace FinHorizon.AdminPortal.Application.Contracts.Catalog;
 
 public sealed record ModuleReadModel(
@@ -11,7 +12,9 @@ public sealed record ModuleReadModel(
     IReadOnlyList<string> Permissions,
     string? ProvisionUrl,
     DateTimeOffset UpdatedAt,
-    int TenantCount);
+    int TenantCount,
+    IReadOnlyList<ModuleTier>? Tiers = null,
+    string? DeprovisionUrl = null);
 
 public static class BillingPeriods
 {
@@ -38,7 +41,8 @@ public sealed record PlanRequest(
     bool Active = true,
     decimal? VatRate = null,
     string? VatNature = null,
-    bool PriceIncludesVat = true);
+    bool PriceIncludesVat = true,
+    int? Tier = null);
 
 /// <summary>UC16-R5: where a plan lives on Stripe; null on a plan not published yet.</summary>
 public sealed record PlanStripeLink(string ProductId, string PriceId, string TaxRateId);
@@ -59,7 +63,8 @@ public sealed record PlanReadModel(
     decimal VatRate = 22,
     string? VatNature = null,
     bool PriceIncludesVat = true,
-    PlanStripeLink? Stripe = null)
+    PlanStripeLink? Stripe = null,
+    int? Tier = null)
 {
     /// <summary>UC16-2c: on sale on Stripe.</summary>
     public bool Published => Stripe is not null;

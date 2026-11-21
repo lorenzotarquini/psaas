@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useRegisterModule, type ModuleManifest } from '@/entities/catalog'
+import { useRegisterModule, useUpdateModule, type Module, type ModuleManifest } from '@/entities/catalog'
 import { ApiError } from '@/shared/api'
 import { ErrorAlert } from '@/shared/ui/error-alert'
+import { toManifest } from '../model/manifest'
 
 const example: ModuleManifest = {
   id: 'warehouse',
@@ -16,10 +17,13 @@ const example: ModuleManifest = {
 }
 
 // UC15: the manifest is pasted as JSON, as the module team publishes it; the backend validates every field.
-export function ManifestForm({ onClose }: { onClose: () => void }) {
+// With a module (R7) it opens on that module's current manifest and saves it in place.
+export function ManifestForm({ module, onClose }: { module?: Module; onClose: () => void }) {
   const { t } = useTranslation()
-  const register = useRegisterModule()
-  const [text, setText] = useState(() => JSON.stringify(example, null, 2))
+  const registerModule = useRegisterModule()
+  const updateModule = useUpdateModule()
+  const register = module ? updateModule : registerModule
+  const [text, setText] = useState(() => JSON.stringify(module ? toManifest(module) : example, null, 2))
   const [parseError, setParseError] = useState(false)
   const fieldErrors = register.error instanceof ApiError ? Object.entries(register.error.fieldErrors) : []
 
@@ -33,7 +37,7 @@ export function ManifestForm({ onClose }: { onClose: () => void }) {
     }
     setParseError(false)
     try {
-      await register.mutateAsync(manifest)
+      await (module ? updateModule.mutateAsync({ id: module.id, manifest }) : registerModule.mutateAsync(manifest))
       onClose()
     } catch {
       // Shown below from register.error.
@@ -43,8 +47,8 @@ export function ManifestForm({ onClose }: { onClose: () => void }) {
   return (
     <form onSubmit={onSubmit} className="panel flex flex-col gap-3 px-5 py-4">
       <div>
-        <h2 className="panel-title">{t('catalog.registerModule')}</h2>
-        <p className="text-base-content/60">{t('catalog.manifestHint')}</p>
+        <h2 className="panel-title">{module ? t('catalog.editModule', { name: module.name }) : t('catalog.registerModule')}</h2>
+        <p className="text-base-content/60">{t(module ? 'catalog.editHint' : 'catalog.manifestHint')}</p>
       </div>
       <textarea
         className={`textarea data h-64 w-full text-[12.5px] ${parseError || fieldErrors.length ? 'textarea-error' : ''}`}
@@ -70,7 +74,7 @@ export function ManifestForm({ onClose }: { onClose: () => void }) {
         </button>
         <button type="submit" className="btn btn-primary btn-sm" disabled={register.isPending}>
           {register.isPending && <span className="loading loading-spinner loading-xs" />}
-          {t('catalog.register')}
+          {t(module ? 'catalog.save' : 'catalog.register')}
         </button>
       </div>
     </form>

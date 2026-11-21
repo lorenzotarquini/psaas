@@ -39,8 +39,8 @@ public sealed class UC16_Piani(PostgresFixture database) : AcceptanceTest(databa
         Assert.Equal("InvalidValue", errors["moduleIds[0]"]);
     }
 
-    private static object MySyncMonthly(decimal price = 4.99m, string name = "MySync mensile") =>
-        new { code = "mysync-mensile", name, price, billingPeriod = "Monthly", moduleIds = new[] { "mysync" }, vatRate = 22, priceIncludesVat = true };
+    private static object MySyncMonthly(decimal price = 4.99m, string name = "MySync mensile", int? tier = 2) =>
+        new { code = "mysync-mensile", name, price, billingPeriod = "Monthly", moduleIds = new[] { "mysync" }, vatRate = 22, priceIncludesVat = true, tier };
 
     [Fact, Trait("Scenario", "UC16-S4")]
     public async Task S4_PubblicatoSuStripe()
@@ -49,7 +49,7 @@ public sealed class UC16_Piani(PostgresFixture database) : AcceptanceTest(databa
 
         Assert.True(plan.Published);
         var product = Host.StripePlans.Products[plan.Stripe!.ProductId];
-        Assert.Equal(("mysync", "mysync-mensile", 22m, true), (product.ModuleId, product.Code, product.VatRate, product.PriceIncludesVat));
+        Assert.Equal(("mysync", "mysync-mensile", 22m, true, 2), (product.ModuleId, product.Code, product.VatRate, product.PriceIncludesVat, product.Tier));
         Assert.Equal((4.99m, "month", true, true), Host.StripePlans.Prices[plan.Stripe.PriceId]);
     }
 
@@ -74,7 +74,7 @@ public sealed class UC16_Piani(PostgresFixture database) : AcceptanceTest(databa
         await GivenModuleAsync("warehouse");
 
         var none = await ErrorsAsync(await Admin.PostAsJsonAsync("/api/plans", new { code = "x1", name = "X", price = 10, billingPeriod = "Monthly" }));
-        var two = await ErrorsAsync(await Admin.PostAsJsonAsync("/api/plans", new { code = "x2", name = "X", price = 10, billingPeriod = "Monthly", moduleIds = new[] { "mysync", "warehouse" } }));
+        var two = await ErrorsAsync(await Admin.PostAsJsonAsync("/api/plans", new { code = "x2", name = "X", price = 10, billingPeriod = "Monthly", moduleIds = new[] { "mysync", "warehouse" }, tier = 1 }));
 
         Assert.Equal(("Required", "InvalidValue"), (none["moduleIds"], two["moduleIds"]));
     }
@@ -82,10 +82,10 @@ public sealed class UC16_Piani(PostgresFixture database) : AcceptanceTest(databa
     [Fact, Trait("Scenario", "UC16-S7")]
     public async Task S7_NaturaIva()
     {
-        var noNature = await ErrorsAsync(await Admin.PostAsJsonAsync("/api/plans", new { code = "x1", name = "X", price = 10, billingPeriod = "Monthly", moduleIds = new[] { "mysync" }, vatRate = 0 }));
-        var wrongRate = await ErrorsAsync(await Admin.PostAsJsonAsync("/api/plans", new { code = "x2", name = "X", price = 10, billingPeriod = "Monthly", moduleIds = new[] { "mysync" }, vatRate = 7 }));
+        var noNature = await ErrorsAsync(await Admin.PostAsJsonAsync("/api/plans", new { code = "x1", name = "X", price = 10, billingPeriod = "Monthly", moduleIds = new[] { "mysync" }, vatRate = 0, tier = 1 }));
+        var wrongRate = await ErrorsAsync(await Admin.PostAsJsonAsync("/api/plans", new { code = "x2", name = "X", price = 10, billingPeriod = "Monthly", moduleIds = new[] { "mysync" }, vatRate = 7, tier = 1 }));
         var exempt = await ReadAsync<PlanView>(
-            await Admin.PostAsJsonAsync("/api/plans", new { code = "x3", name = "X", price = 10, billingPeriod = "Monthly", moduleIds = new[] { "mysync" }, vatRate = 0, vatNature = "N2.1" }),
+            await Admin.PostAsJsonAsync("/api/plans", new { code = "x3", name = "X", price = 10, billingPeriod = "Monthly", moduleIds = new[] { "mysync" }, vatRate = 0, vatNature = "N2.1", tier = 1 }),
             HttpStatusCode.Created);
 
         Assert.Equal(("Required", "InvalidValue"), (noNature["vatNature"], wrongRate["vatRate"]));
@@ -101,5 +101,19 @@ public sealed class UC16_Piani(PostgresFixture database) : AcceptanceTest(databa
 
         Assert.Equal(HttpStatusCode.ServiceUnavailable, response.StatusCode);
         Assert.Empty(await GetOkAsync<List<PlanView>>("/api/plans"));
+    }
+
+    [Fact, Trait("Scenario", "UC16-S9")]
+    public async Task S9_TierDelModulo()
+    {
+        await GivenModuleAsync("warehouse");
+
+        var noTier = await ErrorsAsync(await Admin.PostAsJsonAsync("/api/plans", MySyncMonthly(tier: null)));
+        var undeclared = await ErrorsAsync(await Admin.PostAsJsonAsync("/api/plans", MySyncMonthly(tier: 4)));
+        var tierOfAModuleWithout = await ErrorsAsync(await Admin.PostAsJsonAsync("/api/plans", new { code = "wh", name = "W", price = 10, billingPeriod = "Monthly", moduleIds = new[] { "warehouse" }, tier = 1 }));
+        var plus = await ReadAsync<PlanView>(await Admin.PostAsJsonAsync("/api/plans", MySyncMonthly(tier: 2)), HttpStatusCode.Created);
+
+        Assert.Equal(("Required", "InvalidValue", "InvalidValue"), (noTier["tier"], undeclared["tier"], tierOfAModuleWithout["tier"]));
+        Assert.Equal(2, plus.Tier);
     }
 }

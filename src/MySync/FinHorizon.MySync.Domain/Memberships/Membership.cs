@@ -16,8 +16,11 @@ public sealed record PaymentCard(string Brand, string Last4, int ExpMonth, int E
 /// <summary>The last payment that did not go through: Stripe's code (e.g. card_declined) and message.</summary>
 public sealed record PaymentFailure(string? Code, string? Message, DateTimeOffset FailedAt);
 
-/// <summary>The plan a subscription pays (UC17-R1): its name and price as they were when the user subscribed.</summary>
-public sealed record SubscribedPlan(string Name, decimal Amount, string Currency, string Interval);
+/// <summary>
+/// The plan a subscription pays (UC17-R1): its name, price and tier as they were when the user subscribed.
+/// The tier is the level of the module contract it gives (docs/architettura-moduli.md, C3).
+/// </summary>
+public sealed record SubscribedPlan(string Name, decimal Amount, string Currency, string Interval, int? Tier = null);
 
 /// <summary>What Stripe says now about a customer: the copy of <see cref="Membership"/> is replaced by it (UC17-R5).</summary>
 public sealed record MembershipSnapshot(

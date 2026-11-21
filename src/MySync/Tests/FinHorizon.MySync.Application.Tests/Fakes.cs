@@ -331,7 +331,7 @@ internal sealed class FakePaymentProvider : Abstractions.Payments.IPaymentProvid
     }
 
     public List<Abstractions.Payments.MembershipPlan> Plans { get; } =
-        [new("mysync-mensile", "MySync mensile", null, 4.99m, "EUR", "Month", true, 22m, 14, "price_1", "txr_22")];
+        [new("mysync-mensile", "MySync mensile", null, 2, 4.99m, "EUR", "Month", true, 22m, 14, "price_1", "txr_22")];
 
     public List<(string PlanCode, bool WithTrial)> Checkouts { get; } = [];
 
@@ -343,6 +343,9 @@ internal sealed class FakePaymentProvider : Abstractions.Payments.IPaymentProvid
         Checkouts.Add((plan.Code, withTrial));
         return Task.FromResult(new Uri($"https://checkout.test/{customerId}"));
     }
+
+    public Task<Abstractions.Payments.PlanChangeOutcome> ChangePlanAsync(string customerId, string subscriptionId, Abstractions.Payments.MembershipPlan plan, CancellationToken cancellationToken = default) =>
+        Task.FromResult(new Abstractions.Payments.PlanChangeOutcome(true, null));
 
     public Task<Uri> CreatePortalAsync(string customerId, Uri returnUrl, CancellationToken cancellationToken = default) =>
         Task.FromResult(new Uri($"https://portal.test/{customerId}"));

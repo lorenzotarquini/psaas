@@ -33,11 +33,13 @@
   </Folder>
   <Folder Name="/Shared/">
     <Project Path="Shared/FinHorizon.Auth/FinHorizon.Auth.csproj" />
+    <Project Path="Shared/FinHorizon.Modules.Billing/FinHorizon.Modules.Billing.csproj" />
     <Project Path="Shared/FinHorizon.Modules.Sdk/FinHorizon.Modules.Sdk.csproj" />
     <Project Path="Shared/FinHorizon.Observability/FinHorizon.Observability.csproj" />
   </Folder>
   <Folder Name="/Shared/Tests/">
     <Project Path="Shared/Tests/FinHorizon.Auth.Tests/FinHorizon.Auth.Tests.csproj" />
+    <Project Path="Shared/Tests/FinHorizon.Modules.Sdk.Tests/FinHorizon.Modules.Sdk.Tests.csproj" />
     <Project Path="Shared/Tests/FinHorizon.Observability.Tests/FinHorizon.Observability.Tests.csproj" />
   </Folder>
   <Folder Name="/Orchestration/">

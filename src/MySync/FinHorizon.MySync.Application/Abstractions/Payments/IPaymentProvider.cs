@@ -20,6 +20,12 @@ public interface IPaymentProvider
     /// <summary>Stripe's payment page (Checkout) for the plan, with its VAT and, when asked, its trial; back to <paramref name="returnUrl"/>.</summary>
     Task<Uri> CreateCheckoutAsync(string customerId, OwnerId ownerId, MembershipPlan plan, bool withTrial, Uri returnUrl, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// UC17 flow 1b: moves the running subscription to a plan of a higher tier; the difference is charged at once and the
+    /// new plan applies only if that payment succeeds.
+    /// </summary>
+    Task<PlanChangeOutcome> ChangePlanAsync(string customerId, string subscriptionId, MembershipPlan plan, CancellationToken cancellationToken = default);
+
     /// <summary>Stripe's customer portal: payment method, invoices, cancellation (UC17 flow 1a).</summary>
     Task<Uri> CreatePortalAsync(string customerId, Uri returnUrl, CancellationToken cancellationToken = default);
 
@@ -32,6 +38,7 @@ public sealed record MembershipPlan(
     string Code,
     string Name,
     string? Description,
+    int? Tier,
     decimal Price,
     string Currency,
     string Interval,
@@ -40,6 +47,9 @@ public sealed record MembershipPlan(
     int TrialDays,
     string PriceId,
     string? TaxRateId);
+
+/// <summary>UC17 flow 1b: whether the new plan applies; when not, the payment that was refused.</summary>
+public sealed record PlanChangeOutcome(bool Applied, PaymentFailure? Failure);
 
 /// <summary>A verified event of Stripe: only which customer it concerns, the rest is read again from Stripe (R5).</summary>
 public sealed record PaymentNotification(string EventId, string Type, string? CustomerId);

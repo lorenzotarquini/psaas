@@ -44,7 +44,9 @@ public static class DependencyInjection
         services.AddOptions<Features.Memberships.MembershipOptions>();
         // Defaults here; the infrastructure binds and validates the configuration section.
         services.AddOptions<LimitsOptions>();
-        services.AddScoped<IResourceLimits, ConfiguredResourceLimits>();
+        // Contract C2/C6 (docs/architettura-moduli.md): the limits of the tier paid, configuration as fallback.
+        services.AddSingleton<Features.Memberships.IModuleTiers, Features.Memberships.DeclaredModuleTiers>();
+        services.AddScoped<IResourceLimits, Features.Memberships.TierResourceLimits>();
         return services;
     }
 }

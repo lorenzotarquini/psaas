@@ -250,7 +250,7 @@
   },
   "settings": {
     "title": "Settings",
-    "subtitle": "Your data, password and preferences.",
+    "subtitle": "Your account and your MySync subscription.",
     "profileTitle": "Your data",
     "editProfile": "Edit your data",
     "firstName": "First name",
@@ -260,7 +260,9 @@
     "passwordTitle": "Password",
     "passwordHelp": "You set it on the secure sign-in page: MySync never sees it.",
     "changePassword": "Reset your password",
-    "preferencesTitle": "Language and theme"
+    "preferencesTitle": "Language and theme",
+    "accountTab": "Account",
+    "billingTab": "Subscription and billing"
   },
   "amounts": {
     "hidden": "Hidden amount"
@@ -466,6 +468,31 @@
     "vatIncluded": "VAT {{rate}}% included",
     "vatExcluded": "VAT {{rate}}% excluded",
     "trial_one": "{{count}} free trial day",
-    "trial_other": "{{count}} free trial days"
+    "trial_other": "{{count}} free trial days",
+    "tier": "Level",
+    "features": {
+      "projection": "net worth projection"
+    },
+    "limits": {
+      "accounts_one": "{{count}} account",
+      "accounts_other": "{{count}} accounts",
+      "debts_one": "{{count}} debt",
+      "debts_other": "{{count}} debts",
+      "subscriptions_one": "{{count}} subscription",
+      "subscriptions_other": "{{count}} subscriptions"
+    },
+    "upgradeTitle": "Move to a higher plan",
+    "upgradeHelp": "The new level applies at once. The difference for the rest of the period is charged now on the subscription's card; then it renews at the new price.",
+    "upgrade": "Switch to this plan",
+    "upgradeRefused": "The payment of the difference did not go through ({{reason}}): your plan stays the same. Update your payment method and try again.",
+    "includes": "Your plan includes",
+    "paymentTitle": "Payment and invoices",
+    "paymentHelp": "Card, invoices and cancellation live on Stripe's secure portal."
+  },
+  "tierLock": {
+    "title": "Not included in your plan",
+    "help": "The net worth projection comes with the Plus level and above. Change plan from Settings to use it.",
+    "choosePlan": "See the plans",
+    "short": "With the Plus level"
   }
 }

@@ -32,6 +32,8 @@ public sealed class StripePlanPublisher(string? secretKey) : IPlanPublisher
                 ["plan_code"] = plan.Code,
                 ["tax_rate"] = taxRateId,
                 ["trial_days"] = plan.TrialDays.ToString(CultureInfo.InvariantCulture),
+                // Contract C3: the module gives the features of this level to whoever pays the plan.
+                ["tier"] = plan.Tier?.ToString(CultureInfo.InvariantCulture) ?? string.Empty,
             };
             var products = new ProductService(client);
             var productId = current?.ProductId;

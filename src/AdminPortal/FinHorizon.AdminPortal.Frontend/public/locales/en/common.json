@@ -682,7 +682,15 @@
     "stripe": "Stripe",
     "published": "Published",
     "unpublished": "Not published",
-    "notPublished": "This plan is not on Stripe yet: save it to publish it (the backend needs the Stripe key)."
+    "notPublished": "This plan is not on Stripe yet: save it to publish it (the backend needs the Stripe key).",
+    "tier": "Level (tier)",
+    "chooseTier": "Choose the level…",
+    "tierOption": "Tier {{level}} · {{name}}",
+    "tierShort": "Tier {{level}}",
+    "editModule": "Edit {{name}}",
+    "edit": "Edit",
+    "save": "Save",
+    "editHint": "The module's current manifest, tiers included. Change it and save: the id stays the same; plans already on Stripe keep their tier."
   },
   "billing": {
     "subtitle": "Invoices of subscription periods, payments and reminders",

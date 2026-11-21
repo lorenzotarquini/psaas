@@ -539,6 +539,9 @@ namespace FinHorizon.MySync.Infrastructure.Data.Migrations
                                 .HasMaxLength(250)
                                 .HasColumnType("character varying(250)");
 
+                            b1.Property<int?>("Tier")
+                                .HasColumnType("integer");
+
                             b1.HasKey("MembershipOwnerId");
 
                             b1.ToTable("Memberships");

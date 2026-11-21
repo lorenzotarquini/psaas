@@ -11,7 +11,7 @@ public sealed class MembershipOptions
     /// <summary>The MySync frontend (e.g. http://localhost:5174): Stripe returns to its settings page.</summary>
     public Uri? FrontendUrl { get; set; }
 
-    /// <summary>Where Stripe returns after a payment or the portal: always the settings of MySync (R6).</summary>
+    /// <summary>Where Stripe returns after a payment or the portal: always the billing tab of the MySync settings (R6).</summary>
     public Uri ReturnUrl(string query) =>
-        new(FrontendUrl ?? throw new InvalidOperationException("Membership:FrontendUrl is not configured."), $"/settings?membership={query}");
+        new(FrontendUrl ?? throw new InvalidOperationException("Membership:FrontendUrl is not configured."), $"/settings?tab=billing&membership={query}");
 }

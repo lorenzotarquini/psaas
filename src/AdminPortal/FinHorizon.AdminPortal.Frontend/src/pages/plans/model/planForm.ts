@@ -19,6 +19,8 @@ export const planSchema = z.object({
   vatRate: z.enum(['22', '10', '5', '4', '0']),
   vatNature: z.string().trim(),
   priceIncludesVat: z.boolean(),
+  // UC16-R6: required by the backend when the module declares tiers.
+  tier: z.string(),
 }).superRefine((plan, context) => {
   // UC16-R4: the nature of the VAT only, and always, with 0%.
   if (plan.vatRate === '0' && !/^N[1-7](\.[1-9])?$/i.test(plan.vatNature)) {
@@ -42,6 +44,7 @@ export const emptyPlan: PlanValues = {
   vatRate: '22',
   vatNature: '',
   priceIncludesVat: true,
+  tier: '',
 }
 
 export const planToValues = (plan: Plan): PlanValues => ({
@@ -58,6 +61,7 @@ export const planToValues = (plan: Plan): PlanValues => ({
   vatRate: String(plan.vatRate) as PlanValues['vatRate'],
   vatNature: plan.vatNature ?? '',
   priceIncludesVat: plan.priceIncludesVat,
+  tier: plan.tier?.toString() ?? '',
 })
 
 const optionalNumber = (value: string) => (value.trim() ? Number(value) : null)
@@ -76,4 +80,5 @@ export const toPlanRequest = (values: z.output<typeof planSchema>): PlanRequest 
   vatRate: Number(values.vatRate),
   vatNature: values.vatRate === '0' ? values.vatNature.toUpperCase() : null,
   priceIncludesVat: values.priceIncludesVat,
+  tier: values.tier ? Number(values.tier) : null,
 })

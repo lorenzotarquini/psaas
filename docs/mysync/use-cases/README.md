@@ -167,6 +167,9 @@ Prese il 2026-11-15.
 | D21 | Chi incassa MySync e dove si decide la sola lettura? | Il backend di MySync, direttamente con Stripe: cliente Stripe = utente Keycloak del gruppo `end_users`, copia dello stato in `mysync-db` aggiornata dai webhook. Così il controllo su ogni modifica legge il database di MySync e non serve un client Keycloak fra MySync e Admin Portal. L'Admin Portal resta il punto di Stripe per le organizzazioni ([STRIPE.md](../../admin-portal/STRIPE.md)). Decisa il 2026-11-17. |
 | D22 | Cosa succede a chi usava MySync prima di Stripe? | Ha l'abbonamento scaduto: entra, vede i suoi dati e rinnova dalle Impostazioni. Nessuna migrazione. Decisa il 2026-11-17. |
 
+| D23 | Cosa cambia fra un piano e l'altro? | Il tier: MySync implementa il contratto dei moduli ([architettura-moduli.md](../../architettura-moduli.md)) con tre tier (Base, Plus, Pro) che decidono limiti e feature; i valori iniziali sono nel manifest (`MySyncModule`). Decisa il 2026-11-20. |
+| D24 | L'utente può cambiare piano da MySync? | Solo verso un tier più alto, con l'abbonamento attivo: la differenza del periodo si paga subito e il nuovo tier vale solo a pagamento riuscito (UC17 flusso 1b, R10). Per scendere si disdice e ci si riabbona alla scadenza. Decisa il 2026-11-21. |
+
 Non ci sono domande aperte.
 
 ## Scenari comuni

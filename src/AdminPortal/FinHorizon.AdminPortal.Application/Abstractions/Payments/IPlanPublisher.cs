@@ -15,7 +15,8 @@ public sealed record PlanPublication(
     string? VatNature,
     bool PriceIncludesVat,
     int TrialDays,
-    bool Active);
+    bool Active,
+    int? Tier = null);
 
 /// <summary>UC16 step 2: puts a plan on sale on Stripe (product, price, VAT rate) and keeps it up to date.</summary>
 public interface IPlanPublisher

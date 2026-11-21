@@ -15,12 +15,15 @@ public sealed class UC17_AbbonamentoMySync(PostgresFixture database) : Acceptanc
 
     public sealed record FailureView(string? Code, string? Message, DateTimeOffset FailedAt);
 
-    public sealed record PlanView(string Code, string Name, string? Description, decimal Price, string Currency, string Interval, bool PriceIncludesVat, decimal? VatRate, int TrialDays);
+    public sealed record TierView(int Level, string Name, List<string> Features, Dictionary<string, int> Limits);
+
+    public sealed record PlanView(string Code, string Name, string? Description, TierView? Tier, decimal Price, string Currency, string Interval, bool PriceIncludesVat, decimal? VatRate, int TrialDays, bool CanUpgradeTo = false);
 
     public sealed record MembershipView(
         string Status,
         bool CanWrite,
         SubscribedPlan? Plan,
+        TierView? Tier,
         DateTimeOffset? CurrentPeriodEnd,
         bool CancelAtPeriodEnd,
         PaymentCard? Card,
@@ -34,6 +37,9 @@ public sealed class UC17_AbbonamentoMySync(PostgresFixture database) : Acceptanc
 
     private static Task<HttpResponseMessage> CheckoutAsync(HttpClient user, string? planCode = "mysync-mensile") =>
         user.PostAsJsonAsync("/api/membership/checkout", new { planCode });
+
+    private static Task<HttpResponseMessage> ChangePlanAsync(HttpClient user, string? planCode) =>
+        user.PostAsJsonAsync("/api/membership/change", new { planCode });
 
     private static Task<HttpResponseMessage> CreateAccountAsync(HttpClient user) =>
         user.PostAsJsonAsync("/api/accounts", AccountBody("Conto corrente", 100m));
@@ -59,7 +65,8 @@ public sealed class UC17_AbbonamentoMySync(PostgresFixture database) : Acceptanc
         false,
         Visa,
         new PaymentFailure("insufficient_funds", "Your card has insufficient funds.", new DateTimeOffset(2026, 11, 15, 9, 0, 0, TimeSpan.Zero)),
-        new Uri("https://invoice.stripe.test/in_1"));
+        new Uri("https://invoice.stripe.test/in_1"),
+        new SubscribedPlan("MySync mensile", 4.99m, "EUR", "Month", 2));
 
     [Fact, Trait("Scenario", "UC17-S1")]
     public async Task S1_UtenteEsistenteScaduto()
@@ -71,6 +78,9 @@ public sealed class UC17_AbbonamentoMySync(PostgresFixture database) : Acceptanc
 
         Assert.Equal(("Expired", false, null), (membership.Status, membership.CanWrite, membership.Plan));
         Assert.Equal(("mysync-mensile", 4.99m, "EUR", "Month", true, 22m), (plans[0].Code, plans[0].Price, plans[0].Currency, plans[0].Interval, plans[0].PriceIncludesVat, plans[0].VatRate));
+        Assert.Equal(["mysync-mensile", "mysync-annuale"], plans.Select(plan => plan.Code));
+        Assert.Equal("Plus", plans[0].Tier!.Name);
+        Assert.Equal(["projection"], plans[0].Tier!.Features);
         Assert.Equal(HttpStatusCode.OK, (await luca.GetAsync("/api/accounts")).StatusCode);
         Assert.Equal(HttpStatusCode.PaymentRequired, (await CreateAccountAsync(luca)).StatusCode);
     }
@@ -88,7 +98,7 @@ public sealed class UC17_AbbonamentoMySync(PostgresFixture database) : Acceptanc
         Assert.Equal(new Uri($"https://checkout.stripe.test/{customer.CustomerId}"), checkout.Url);
 
         // Paid on Stripe's page: back in MySync the state is read at once.
-        var yearly = new SubscribedPlan("MySync annuale", 49m, "EUR", "Year");
+        var yearly = new SubscribedPlan("MySync annuale", 49m, "EUR", "Year", 3);
         Host.Payments.Snapshots[customer.CustomerId] = new MembershipSnapshot(MembershipStatus.Active, "sub_1", Renewal, false, Visa, null, null, yearly);
         var membership = await ReadAsync<MembershipView>(await luca.PostAsync("/api/membership/refresh", null), HttpStatusCode.OK);
 
@@ -139,8 +149,8 @@ public sealed class UC17_AbbonamentoMySync(PostgresFixture database) : Acceptanc
         await ReadAsync<RedirectView>(await CheckoutAsync(luca), HttpStatusCode.OK);
         await ReadAsync<RedirectView>(await luca.PostAsync("/api/membership/portal", null), HttpStatusCode.OK);
 
-        Assert.Equal(new Uri($"{MySyncHost.FrontendUrl}/settings?membership=paid"), Assert.Single(Host.Payments.Checkouts).ReturnUrl);
-        Assert.Equal(new Uri($"{MySyncHost.FrontendUrl}/settings?membership=portal"), Assert.Single(Host.Payments.Portals).ReturnUrl);
+        Assert.Equal(new Uri($"{MySyncHost.FrontendUrl}/settings?tab=billing&membership=paid"), Assert.Single(Host.Payments.Checkouts).ReturnUrl);
+        Assert.Equal(new Uri($"{MySyncHost.FrontendUrl}/settings?tab=billing&membership=portal"), Assert.Single(Host.Payments.Portals).ReturnUrl);
     }
 
     [Fact, Trait("Scenario", "UC17-S7")]
@@ -199,5 +209,85 @@ public sealed class UC17_AbbonamentoMySync(PostgresFixture database) : Acceptanc
         await CheckoutAsync(luca);
 
         Assert.Equal([true, false], Host.Payments.Checkouts.Select(checkout => checkout.WithTrial));
+    }
+
+    [Fact, Trait("Scenario", "UC17-S12")]
+    public async Task S12_FeatureFuoriDalTier()
+    {
+        var anna = UserClient("Anna", tier: 1);
+
+        var base1 = await anna.GetAsync("/api/projection");
+        var plus = await Mario.GetAsync("/api/projection");
+
+        Assert.Equal((HttpStatusCode.Forbidden, HttpStatusCode.OK), (base1.StatusCode, plus.StatusCode));
+        var problem = await base1.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>();
+        Assert.Equal(("feature-not-in-tier", "projection"), (problem.GetProperty("type").GetString(), problem.GetProperty("feature").GetString()));
+        Assert.Equal("Base", (await MembershipAsync(anna)).Tier!.Name);
+    }
+
+    [Fact, Trait("Scenario", "UC17-S13")]
+    public async Task S13_PianoDiUnLivelloSconosciuto()
+    {
+        var luca = UserClient("Luca", subscribed: false);
+
+        var errors = await ErrorsAsync(await CheckoutAsync(luca, "mysync-ignoto"));
+
+        Assert.Equal("InvalidValue", errors["planCode"]);
+    }
+
+    [Fact, Trait("Scenario", "UC17-S14")]
+    public async Task S14_ManifestPubblico()
+    {
+        var manifest = await ReadAsync<System.Text.Json.JsonElement>(await Anonymous().GetAsync("/api/module/manifest"), HttpStatusCode.OK);
+
+        Assert.Equal("mysync", manifest.GetProperty("id").GetString());
+        Assert.Equal(["Base", "Plus", "Pro"], manifest.GetProperty("tiers").EnumerateArray().Select(tier => tier.GetProperty("name").GetString()));
+    }
+
+    [Fact, Trait("Scenario", "UC17-S15")]
+    public async Task S15_PassareAUnTierSuperiore()
+    {
+        var plans = await GetOkAsync<List<PlanView>>("/api/membership/plans", Mario);
+
+        Assert.False(plans.Single(plan => plan.Code == "mysync-mensile").CanUpgradeTo);
+        Assert.True(plans.Single(plan => plan.Code == "mysync-annuale").CanUpgradeTo);
+
+        var changed = await ReadAsync<MembershipView>(await ChangePlanAsync(Mario, "mysync-annuale"), HttpStatusCode.OK);
+
+        Assert.Equal((CustomerOf("Mario"), SubscriptionOf("Mario"), "mysync-annuale"), Assert.Single(Host.Payments.PlanChanges));
+        Assert.Equal("Active", changed.Status);
+        Assert.Equal("Pro", changed.Tier!.Name);
+        Assert.Equal(3, changed.Plan!.Tier);
+        Assert.Equal("Year", changed.Plan.Interval);
+        Assert.Equal("Pro", (await MembershipAsync(Mario)).Tier!.Name);
+    }
+
+    [Fact, Trait("Scenario", "UC17-S16")]
+    public async Task S16_SoloVersoUnTierSuperiore()
+    {
+        var luca = UserClient("Luca", subscribed: false);
+
+        var sameTier = await ErrorsAsync(await ChangePlanAsync(Mario, "mysync-mensile"));
+        var expired = await ErrorsAsync(await ChangePlanAsync(luca, "mysync-annuale"));
+        var missing = await ErrorsAsync(await ChangePlanAsync(Mario, null));
+
+        Assert.Equal("NotAnUpgrade", sameTier["planCode"]);
+        Assert.Equal("NotActive", expired["membership"]);
+        Assert.Equal("Required", missing["planCode"]);
+        Assert.Empty(Host.Payments.PlanChanges);
+    }
+
+    [Fact, Trait("Scenario", "UC17-S17")]
+    public async Task S17_DifferenzaRifiutata()
+    {
+        Host.Payments.DeclinePlanChange = "card_declined";
+
+        var errors = await ErrorsAsync(await ChangePlanAsync(Mario, "mysync-annuale"));
+        var membership = await MembershipAsync(Mario);
+
+        Assert.Equal("PaymentFailed", errors["membership"]);
+        Assert.Equal("Plus", membership.Tier!.Name);
+        Assert.Equal("card_declined", membership.LastFailure!.Code);
+        Assert.Equal("Active", membership.Status);
     }
 }

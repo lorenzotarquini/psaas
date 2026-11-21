@@ -1,4 +1,5 @@
 using FinHorizon.MySync.Application.Common;
+using FinHorizon.MySync.Application.Features.Memberships;
 using FinHorizon.MySync.Application.Features.Projection;
 using FinHorizon.MySync.Backend.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +9,7 @@ namespace FinHorizon.MySync.Backend.Controllers;
 /// <summary>UC14: what the frontend needs to project the net worth, and the one projection the user saves.</summary>
 [ApiController]
 [Route("api/projection")]
+[RequiresFeature(MySyncModule.Projection)]
 public sealed class ProjectionController : ControllerBase
 {
     [HttpGet]

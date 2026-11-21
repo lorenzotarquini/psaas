@@ -43,7 +43,7 @@ describe('UC17_AbbonamentoMySync', () => {
     renderApp('/', apiWith(expired()))
 
     expect(await screen.findByText('Abbonamento scaduto: MySync è in sola lettura.')).toBeTruthy()
-    expect(screen.getByRole('link', { name: 'Rinnova' }).getAttribute('href')).toBe('/settings')
+    expect(screen.getByRole('link', { name: 'Rinnova' }).getAttribute('href')).toBe('/settings?tab=billing')
   })
 
   it('S2_RinnovaApreStripeEAlRitornoEAttivo', async () => {
@@ -61,7 +61,7 @@ describe('UC17_AbbonamentoMySync', () => {
   })
 
   it('S2_RitornoDaStripeRileggeLoStato', async () => {
-    window.history.replaceState(null, '', '/settings?membership=paid')
+    window.history.replaceState(null, '', '/settings?tab=billing&membership=paid')
     const api = apiWith(expired())
     api.membershipAfterRefresh = { ...new FakeApi().membership }
     renderWithApi(<MembershipSettings />, api)
@@ -69,7 +69,7 @@ describe('UC17_AbbonamentoMySync', () => {
     expect(await screen.findByText('Attivo')).toBeTruthy()
     expect(screen.getByText('MySync mensile · 4,99 € al mese')).toBeTruthy()
     expect(screen.getByText('VISA •••• 4242, scade 12/2030')).toBeTruthy()
-    expect(window.location.search).toBe('')
+    expect(window.location.search).toBe('?tab=billing')
   })
 
   it('S3_PagamentoNonRiuscitoMostraLErrore', async () => {
@@ -103,5 +103,45 @@ describe('UC17_AbbonamentoMySync', () => {
 
     await waitFor(() => expect(assign).toHaveBeenCalledWith('https://billing.stripe.test/session'))
     expect(screen.queryByRole('button', { name: /Rinnova/ })).toBeNull()
+  })
+
+  it('S12_IlLivelloDiceCosaIncludeLaProiezioneFuoriDalPianoSiBlocca', async () => {
+    const api = new FakeApi()
+    renderWithApi(<MembershipSettings />, api)
+    expect(await screen.findByText('Plus')).toBeTruthy()
+    expect(screen.getByText('proiezione del patrimonio · 10 conti · 10 debiti · 20 abbonamenti')).toBeTruthy()
+  })
+
+  it('S12_ProiezioneNonInclusaNelLivello', async () => {
+    const api = new FakeApi()
+    api.membership = { ...api.membership, tier: { level: 1, name: 'Base', features: [], limits: { accounts: 2, debts: 1, subscriptions: 5 } } }
+    renderApp('/projection', api)
+
+    expect(await screen.findByText('Non incluso nel tuo piano')).toBeTruthy()
+    expect(screen.getByRole('link', { name: 'Vedi i piani' }).getAttribute('href')).toBe('/settings?tab=billing')
+  })
+
+  it('S15_PassaAUnTierSuperiore', async () => {
+    const api = new FakeApi()
+    renderWithApi(<MembershipSettings />, api)
+
+    expect(await screen.findByText('Passa a un piano superiore')).toBeTruthy()
+    expect(screen.queryByRole('radio', { name: /MySync mensile/ })).toBeNull()
+    await userEvent.click(screen.getByRole('button', { name: /Passa a questo piano/ }))
+
+    await waitFor(() => expect(api.requests.find((request) => request.path === '/api/membership/change')?.body).toEqual({ planCode: 'mysync-annuale' }))
+    expect(await screen.findByText("MySync annuale · 49,00 € all'anno")).toBeTruthy()
+    await waitFor(() => expect(screen.queryByText('Passa a un piano superiore')).toBeNull())
+  })
+
+  it('S17_DifferenzaRifiutataIlPianoResta', async () => {
+    const api = new FakeApi()
+    api.planChangeDeclined = 'insufficient_funds'
+    renderWithApi(<MembershipSettings />, api)
+
+    await userEvent.click(await screen.findByRole('button', { name: /Passa a questo piano/ }))
+
+    expect(await screen.findByText(/Il pagamento della differenza non è riuscito/)).toBeTruthy()
+    expect(screen.getByText('MySync mensile · 4,99 € al mese')).toBeTruthy()
   })
 })

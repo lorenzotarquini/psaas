@@ -31,6 +31,16 @@ public sealed class ModulesController(ICatalogRepository catalog, CatalogService
         return Ok(await catalog.GetModuleAsync(result.Id!, cancellationToken));
     }
 
+    /// <summary>UC15-R7: edits a module from the admin portal (name, version, tiers…); the id stays.</summary>
+    [HttpPut("{id}")]
+    public async Task<ActionResult<ModuleReadModel>> Update(string id, ModuleManifest manifest, CancellationToken cancellationToken)
+    {
+        var result = await service.UpdateModuleAsync(id, manifest, cancellationToken);
+        if (result is null) return NotFound();
+        if (!result.Succeeded) return Problem(result);
+        return Ok(await catalog.GetModuleAsync(id, cancellationToken));
+    }
+
     [HttpPut("{id}/status")]
     public async Task<ActionResult<ModuleReadModel>> SetStatus(string id, ModuleStatusRequest request, CancellationToken cancellationToken)
     {

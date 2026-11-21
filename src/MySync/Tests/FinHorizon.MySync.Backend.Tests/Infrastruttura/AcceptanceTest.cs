@@ -56,11 +56,11 @@ public abstract class AcceptanceTest(PostgresFixture database) : IAsyncLifetime
     /// A MySync user. Subscribed unless told otherwise: the scenarios of the other use cases write freely,
     /// UC17 builds the expired and failing users it needs.
     /// </summary>
-    protected HttpClient UserClient(string name, bool subscribed = true)
+    protected HttpClient UserClient(string name, bool subscribed = true, int tier = 2)
     {
         if (subscribed)
         {
-            GivenActiveMembership(name);
+            GivenActiveMembership(name, tier);
         }
 
         return ClientWith(KeycloakTokens.EndUser(name));
@@ -69,19 +69,25 @@ public abstract class AcceptanceTest(PostgresFixture database) : IAsyncLifetime
     /// <summary>The Stripe customer of a user subscribed by <see cref="UserClient"/>.</summary>
     protected static string CustomerOf(string name) => $"cus_seed_{name.ToLowerInvariant()}";
 
+    /// <summary>The Stripe subscription of a user subscribed by <see cref="UserClient"/>.</summary>
+    protected static string SubscriptionOf(string name) => $"sub_seed_{name.ToLowerInvariant()}";
+
     /// <summary>"Dato che ... è abbonato": the copy of an active subscription, as the webhook would have left it.</summary>
-    private void GivenActiveMembership(string name)
+    private void GivenActiveMembership(string name, int tier)
     {
         using var connection = new Npgsql.NpgsqlConnection(database.ConnectionString);
         connection.Open();
         using var command = new Npgsql.NpgsqlCommand(
             """
-            INSERT INTO "Memberships" ("OwnerId", "CustomerId", "Status", "CancelAtPeriodEnd", "UpdatedAt")
-            VALUES (@owner, @customer, 'Active', false, now()) ON CONFLICT DO NOTHING
+            INSERT INTO "Memberships" ("OwnerId", "CustomerId", "SubscriptionId", "Status", "CancelAtPeriodEnd", "UpdatedAt",
+                                       "Plan_Name", "Plan_Amount", "Plan_Currency", "Plan_Interval", "Plan_Tier")
+            VALUES (@owner, @customer, @subscription, 'Active', false, now(), 'MySync test', 4.99, 'EUR', 'Month', @tier) ON CONFLICT DO NOTHING
             """,
             connection);
         command.Parameters.AddWithValue("owner", $"kc-{name.ToLowerInvariant()}");
         command.Parameters.AddWithValue("customer", CustomerOf(name));
+        command.Parameters.AddWithValue("subscription", SubscriptionOf(name));
+        command.Parameters.AddWithValue("tier", tier);
         command.ExecuteNonQuery();
     }
 

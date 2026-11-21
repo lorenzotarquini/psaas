@@ -15,6 +15,7 @@ public static class ModuleStatuses
 /// <param name="Version">Semantic version, e.g. "1.4.0".</param>
 /// <param name="Requires">Modules it needs (core is always there).</param>
 /// <param name="ProvisionUrl">Called when the module is activated for a tenant; none means nothing to prepare.</param>
+/// <param name="Tiers">What each subscription level gives (contract C1–C2, docs/architettura-moduli.md); none = not sellable.</param>
 public sealed record ModuleManifest(
     string? Id,
     string? Name,
@@ -25,4 +26,5 @@ public sealed record ModuleManifest(
     IReadOnlyList<string>? Requires,
     IReadOnlyList<string>? Permissions,
     string? ProvisionUrl,
-    string? DeprovisionUrl);
+    string? DeprovisionUrl,
+    IReadOnlyList<ModuleTier>? Tiers = null);

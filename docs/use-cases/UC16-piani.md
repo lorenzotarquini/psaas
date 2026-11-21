@@ -19,7 +19,8 @@
 - R2. **Un piano dà accesso a un solo modulo**, che deve esistere nel catalogo (`Required` se manca, `InvalidValue` se sono più di uno o sconosciuto).
 - R3. Modificare un piano non cambia le sottoscrizioni già in corso, che conservano prezzo e limiti di quando sono state fatte (UC17). Su Stripe: cambiare prezzo, periodicità, IVA inclusa/esclusa crea un **nuovo prezzo** che diventa quello in vendita; chi è già abbonato resta sul vecchio. Nome e descrizione aggiornano il prodotto.
 - R4. IVA: aliquota tra 22, 10, 5, 4 e 0 (predefinita 22); con 0 serve la **natura** (`N1`–`N7`, anche con sottocodice come `N2.1`), con un'aliquota maggiore di 0 la natura non va indicata. In Stripe diventa un'aliquota IVA (Tax Rate) italiana, creata una volta e riusata.
-- R5. Su Stripe un piano è un prodotto (`metadata.module` = il modulo, `metadata.plan_code` = il codice) con il suo prezzo predefinito (lookup key `plan-<codice>`): così i moduli (es. MySync) trovano i propri piani su Stripe senza chiamare l'Admin Portal.
+- R6. Se il modulo dichiara dei tier (UC15-R6) il piano vende **un tier** di quel modulo (`Required` se manca, `InvalidValue` se il modulo non lo dichiara); un modulo senza tier si vende senza (`InvalidValue` se indicato). Chi paga il piano ha le feature e i limiti di quel tier ([architettura-moduli.md](../architettura-moduli.md), C3).
+- R5. Su Stripe un piano è un prodotto (`metadata.module` = il modulo, `metadata.plan_code` = il codice, `metadata.tier` = il tier) con il suo prezzo predefinito (lookup key `plan-<codice>`): così i moduli (es. MySync) trovano i propri piani su Stripe senza chiamare l'Admin Portal.
 
 ## Scenari di accettazione
 
@@ -134,3 +135,18 @@ Scenario: Stripe non risponde
   Quando l'amministratore crea un piano
   Allora la risposta è 503 e il piano non c'è
 ```
+
+### UC16-S9
+
+Test: `UC16_Piani.S9_TierDelModulo`
+
+```gherkin
+# language: it
+Funzionalità: Piani commerciali
+
+Scenario: Il piano vende un tier del modulo
+  Quando l'amministratore crea un piano di MySync senza tier, con il tier 4, oppure un piano di "warehouse" (senza tier) con il tier 1
+  Allora la richiesta è rifiutata con "Required", "InvalidValue", "InvalidValue" sul tier
+  E un piano di MySync con il tier 2 si salva con il tier 2
+```
+

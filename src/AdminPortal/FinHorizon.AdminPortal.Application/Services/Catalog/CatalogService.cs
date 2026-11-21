@@ -43,6 +43,9 @@ public sealed partial class CatalogService(ICatalogRepository catalog, IAuditLog
             }
         }
 
+        // Contract C1–C2 (docs/architettura-moduli.md): the subscription levels the module sells.
+        foreach (var (field, code) in TierLevels.Validate(manifest.Tiers)) errors[field] = code;
+
         var known = (await catalog.GetModulesAsync(cancellationToken)).Select(m => m.Id).ToHashSet();
         var requires = (manifest.Requires ?? []).Select(r => r.Trim().ToLowerInvariant()).ToArray();
         for (var i = 0; i < requires.Length; i++)
@@ -69,6 +72,7 @@ public sealed partial class CatalogService(ICatalogRepository catalog, IAuditLog
                 Status = status,
                 Requires = requires.Distinct().ToArray(),
                 Permissions = (manifest.Permissions ?? []).Select(p => p.Trim()).Where(p => p.Length > 0).Distinct().ToArray(),
+                Tiers = manifest.Tiers?.OrderBy(t => t.Level).Select(t => t with { Name = t.Name!.Trim() }).ToArray(),
             },
             cancellationToken);
         await audit.RecordAsync(
@@ -76,6 +80,19 @@ public sealed partial class CatalogService(ICatalogRepository catalog, IAuditLog
             cancellationToken);
         Logger.Info("Module {ModuleId} {Change} at version {Version}", id, isNew ? "registered" : "updated", version);
         return new CatalogSaveResult(id, errors);
+    }
+
+    /// <summary>UC15-R7: edits a module already in the catalog; the id never changes. Null when the module does not exist.</summary>
+    public async Task<CatalogSaveResult?> UpdateModuleAsync(string moduleId, ModuleManifest manifest, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(manifest);
+        if (await catalog.GetModuleAsync(moduleId, cancellationToken) is null) return null;
+        if (!string.IsNullOrWhiteSpace(manifest.Id) && !string.Equals(manifest.Id.Trim(), moduleId, StringComparison.OrdinalIgnoreCase))
+        {
+            return new CatalogSaveResult(null, new Dictionary<string, string> { ["id"] = TenantFieldValidationErrorCodes.InvalidValue });
+        }
+
+        return await RegisterModuleAsync(manifest with { Id = moduleId }, cancellationToken);
     }
 
     /// <summary>Beta, Available or Deprecated.</summary>
@@ -131,6 +148,13 @@ public sealed partial class CatalogService(ICatalogRepository catalog, IAuditLog
         if (moduleIds.Length == 0) errors["moduleIds"] = TenantFieldValidationErrorCodes.Required;
         else if (moduleIds.Length > 1) errors["moduleIds"] = TenantFieldValidationErrorCodes.InvalidValue;
         else if (!modules.ContainsKey(moduleIds[0])) errors["moduleIds[0]"] = TenantFieldValidationErrorCodes.InvalidValue;
+        // R6: a module that declares tiers is sold by tier; one without (organizations, B2B) is sold as a whole.
+        else if (modules[moduleIds[0]].Tiers is { Count: > 0 } tiers)
+        {
+            if (request.Tier is null) errors["tier"] = TenantFieldValidationErrorCodes.Required;
+            else if (tiers.All(t => t.Level != request.Tier)) errors["tier"] = TenantFieldValidationErrorCodes.InvalidValue;
+        }
+        else if (request.Tier is not null) errors["tier"] = TenantFieldValidationErrorCodes.InvalidValue;
 
         if (errors.Count > 0)
         {
@@ -157,7 +181,7 @@ public sealed partial class CatalogService(ICatalogRepository catalog, IAuditLog
             stripe = await publisher.PublishAsync(
                 new Abstractions.Payments.PlanPublication(
                     plan.Code!, plan.Name!, plan.Description, module.Id, module.Name, plan.Price!.Value, plan.BillingPeriod!,
-                    vatRate, vatNature, plan.PriceIncludesVat, plan.TrialDays!.Value, plan.Active),
+                    vatRate, vatNature, plan.PriceIncludesVat, plan.TrialDays!.Value, plan.Active, plan.Tier),
                 stripe,
                 cancellationToken);
         }
@@ -166,7 +190,7 @@ public sealed partial class CatalogService(ICatalogRepository catalog, IAuditLog
         await audit.RecordAsync(
             new AuditRecord(
                 planId is null ? AuditActions.PlanCreated : AuditActions.PlanUpdated, AuditTargets.Plan, id.ToString(), plan.Name!, null,
-                new { price = plan.Price, plan.BillingPeriod, module = moduleIds[0], vatRate, vatNature, stripePrice = stripe?.PriceId }),
+                new { price = plan.Price, plan.BillingPeriod, module = moduleIds[0], tier = plan.Tier, vatRate, vatNature, stripePrice = stripe?.PriceId }),
             cancellationToken);
         return new CatalogSaveResult(id.ToString(), errors);
     }

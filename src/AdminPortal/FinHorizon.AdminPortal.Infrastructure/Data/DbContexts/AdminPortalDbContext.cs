@@ -156,6 +156,7 @@ public sealed class AdminPortalDbContext(DbContextOptions<AdminPortalDbContext> 
             entityBuilder.Property(module => module.Name).IsRequired();
             entityBuilder.Property(module => module.Version).IsRequired();
             entityBuilder.Property(module => module.Status).IsRequired().HasMaxLength(20);
+            entityBuilder.Property(module => module.Tiers).HasColumnType("jsonb");
         });
 
         modelBuilder.Entity<PlanDbModel>(entityBuilder =>

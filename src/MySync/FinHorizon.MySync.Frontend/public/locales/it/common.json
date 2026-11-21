@@ -250,7 +250,7 @@
   },
   "settings": {
     "title": "Impostazioni",
-    "subtitle": "I tuoi dati, la password e le preferenze.",
+    "subtitle": "Il tuo account e l'abbonamento a MySync.",
     "profileTitle": "I tuoi dati",
     "editProfile": "Modifica i tuoi dati",
     "firstName": "Nome",
@@ -260,7 +260,9 @@
     "passwordTitle": "Password",
     "passwordHelp": "La imposti sulla pagina sicura di accesso: MySync non la vede mai.",
     "changePassword": "Reimposta la password",
-    "preferencesTitle": "Lingua e tema"
+    "preferencesTitle": "Lingua e tema",
+    "accountTab": "Account",
+    "billingTab": "Abbonamento e fatturazione"
   },
   "amounts": {
     "hidden": "Importo nascosto"
@@ -466,6 +468,31 @@
     "vatIncluded": "IVA {{rate}}% inclusa",
     "vatExcluded": "IVA {{rate}}% esclusa",
     "trial_one": "{{count}} giorno di prova gratuita",
-    "trial_other": "{{count}} giorni di prova gratuita"
+    "trial_other": "{{count}} giorni di prova gratuita",
+    "tier": "Livello",
+    "features": {
+      "projection": "proiezione del patrimonio"
+    },
+    "limits": {
+      "accounts_one": "{{count}} conto",
+      "accounts_other": "{{count}} conti",
+      "debts_one": "{{count}} debito",
+      "debts_other": "{{count}} debiti",
+      "subscriptions_one": "{{count}} abbonamento",
+      "subscriptions_other": "{{count}} abbonamenti"
+    },
+    "upgradeTitle": "Passa a un piano superiore",
+    "upgradeHelp": "Il nuovo livello vale subito. Sulla carta dell'abbonamento viene addebitata ora la differenza per il resto del periodo; poi si rinnova al nuovo prezzo.",
+    "upgrade": "Passa a questo piano",
+    "upgradeRefused": "Il pagamento della differenza non è riuscito ({{reason}}): il piano resta quello attuale. Aggiorna il metodo di pagamento e riprova.",
+    "includes": "Il tuo piano include",
+    "paymentTitle": "Pagamento e fatture",
+    "paymentHelp": "Carta, fatture e disdetta sono sul portale sicuro di Stripe."
+  },
+  "tierLock": {
+    "title": "Non incluso nel tuo piano",
+    "help": "La proiezione del patrimonio è inclusa dai piani di livello Plus in su. Cambia piano dalle Impostazioni per usarla.",
+    "choosePlan": "Vedi i piani",
+    "short": "Con il livello Plus"
   }
 }

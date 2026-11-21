@@ -1,3 +1,4 @@
+using FinHorizon.Modules.Sdk;
 using FinHorizon.MySync.Application.Abstractions.Payments;
 using FinHorizon.MySync.Application.Abstractions.Persistence;
 using FinHorizon.MySync.Domain.Common;
@@ -10,7 +11,7 @@ namespace FinHorizon.MySync.Application.Features.Memberships;
 /// UC17-R5: the copy of a subscription is always replaced by what Stripe says now, never patched from the event,
 /// so repeated or out-of-order events cannot leave it wrong.
 /// </summary>
-public sealed class MembershipSync(IMembershipRepository memberships, IPaymentProvider payments, IUnitOfWork unitOfWork, TimeProvider clock)
+public sealed class MembershipSync(IMembershipRepository memberships, IPaymentProvider payments, IUnitOfWork unitOfWork, TimeProvider clock, IModuleTiers tiers)
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -42,7 +43,22 @@ public sealed class MembershipSync(IMembershipRepository memberships, IPaymentPr
         return true;
     }
 
-    /// <summary>UC17-R4: the write gate of the API.</summary>
+    /// <summary>Contract C3: what the user may do in MySync, from the tier of the plan paid.</summary>
+    public async Task<ModuleEntitlement> EntitlementAsync(OwnerId ownerId, CancellationToken cancellationToken = default) =>
+        EntitlementOf(await memberships.GetAsync(ownerId, cancellationToken).ConfigureAwait(false));
+
+    public ModuleEntitlement EntitlementOf(Membership? membership)
+    {
+        var status = membership?.Status switch
+        {
+            MembershipStatus.Active => EntitlementStatus.Active,
+            MembershipStatus.PastDue => EntitlementStatus.PastDue,
+            _ => EntitlementStatus.None,
+        };
+        return ModuleEntitlement.For(status, membership?.Plan?.Tier, tiers.Tiers);
+    }
+
+    /// <summary>UC17-R4, contract C4: the write gate of the API.</summary>
     public async Task<bool> CanWriteAsync(OwnerId ownerId, CancellationToken cancellationToken = default) =>
-        (await memberships.GetAsync(ownerId, cancellationToken).ConfigureAwait(false))?.CanWrite == true;
+        (await EntitlementAsync(ownerId, cancellationToken).ConfigureAwait(false)).CanWrite;
 }
